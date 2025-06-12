@@ -20,6 +20,9 @@
                 <li><a href="#hesap-ozeti" class="nav-link">📊 Cari Hesap Özeti</a></li>
                 <li><a href="#sut-alim-raporu" class="nav-link">🗓️ Aylık Süt Raporu</a></li>
                 <li><a href="#ayarlar" class="nav-link">⚙️ Ayarlar</a></li>
+                <li class="logout-link">
+                    <a href="#" id="logoutButton">🚪 Çıkış Yap</a>
+                </li>
             </ul>
         </nav>
     </div>
@@ -210,6 +213,7 @@
         const sidebarNav = document.getElementById('sidebarNav');
         const moduleSections = document.querySelectorAll('.main-content .module-section');
         const bodyElement = document.body;
+        const logoutButton = document.getElementById('logoutButton');
         const cariForm = document.getElementById('cariForm'), cariKaydetBtn = document.getElementById('cariKaydetBtn'), cariFormBaslik = document.getElementById('cariFormBaslik'), cariFormTemizleBtn = document.getElementById('cariFormTemizleBtn'), cariSearchInput = document.getElementById('cariSearchInput');
         const yemTanimForm = document.getElementById('yemTanimForm'), yemTanimKaydetBtn = document.getElementById('yemTanimKaydetBtn'), yemTanimFormBaslik = document.getElementById('yemTanimFormBaslik'), yemTanimFormTemizleBtn = document.getElementById('yemTanimFormTemizleBtn');
         const yemAlisForm = document.getElementById('yemAlisForm'), yemAlisKaydetBtn = document.getElementById('yemAlisKaydetBtn'), yemAlisFormBaslik = document.getElementById('yemAlisFormBaslik'), yemAlisFormTemizleBtn = document.getElementById('yemAlisFormTemizleBtn');
@@ -259,6 +263,12 @@
             }
         }
         
+        function handleLogout(event) {
+            event.preventDefault();
+            sessionStorage.removeItem('userRole');
+            window.location.href = 'login.html';
+        }
+
         function renderSutAlimGecmisi() {
             const tarih = document.getElementById('topluGirisTarih').value;
             const gecmisTarihSpan = document.getElementById('gecmisTarihSpan');
@@ -313,6 +323,7 @@
                 const link = event.target.closest('a.nav-link');
                 if (!link) return;
                 event.preventDefault();
+                if (link.id === 'logoutButton') return;
                 sidebarNav.querySelectorAll('a.nav-link').forEach(lnk => lnk.classList.remove('active'));
                 link.classList.add('active');
                 const targetId = link.getAttribute('href').substring(1);
@@ -333,6 +344,7 @@
             renderAllLists();
             document.querySelector('a.nav-link[href="#dashboard"]').click();
             
+            logoutButton.addEventListener('click', handleLogout);
             cariFormTemizleBtn.addEventListener('click', resetCariForm);
             yemTanimFormTemizleBtn.addEventListener('click', resetYemTanimForm);
             yemAlisFormTemizleBtn.addEventListener('click', resetYemAlisForm);
