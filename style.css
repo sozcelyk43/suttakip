@@ -40,8 +40,8 @@ td .btn:not(.btn-sm) { margin-top: 0; margin-right: 5px; padding: 6px 10px; font
 .alert-info strong { font-weight: 600; }
 .calculation-example { background-color: #f0f0f0; padding: 15px; border-radius: 5px; border: 1px solid #ccc; margin-top: 10px; font-family: monospace; }
 .calculation-example p { margin: 5px 0; } .calculation-example .credit { color: green; } .calculation-example .debit { color: red; } .calculation-example .balance { font-weight: bold; }
-.totals-summary-container { margin-top: 25px; padding: 20px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; }
-.totals-summary-container h4 { margin-top: 0; }
+.totals-summary-container { margin-top: 25px; padding: 20px; background-color: #f0f8ff; border: 1px solid #b8daff; border-radius: 5px; }
+.totals-summary-container h4 { margin-top: 0; color: #0056b3; }
 .totals-summary-container p { margin: 5px 0; font-size: 1.1em; }
 .hidden-section { display: none; }
 .print-only { display: none !important; } 
@@ -55,46 +55,26 @@ td .btn:not(.btn-sm) { margin-top: 0; margin-right: 5px; padding: 6px 10px; font
 
 @media print {
     body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    body.print-a5-active > *, body.print-a4-active > * { visibility: hidden; display: none !important; }
-    body.print-a5-active #sutAlimRaporAlani,
-    body.print-a5-active #report-content-to-print,
-    body.print-a4-active #cari-list-printable-area,
-    body.print-a4-active #yemRaporuAlani {
-        visibility: visible !important;
-        display: block !important;
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        padding: 0;
-        margin: 0;
-    }
-    .print-only { display: block !important; }
     .dont-print { display: none !important; }
-    table { font-size: 8pt; margin-top: 10px !important; width:100% !important; border-collapse: collapse !important;} 
-    th, td { padding: 4px 6px !important; border: 1px solid #333 !important;} 
+    .print-only { display: block !important; }
+    
+    body.print-active > * { display: none !important; }
+    body.print-active .main-content { display: block !important; margin: 0 !important; padding: 0 !important; }
+    body.print-active .main-content > .module-section { display: none !important; }
+    body.print-active .main-content > .print-section-active { display: block !important; }
+    
+    .print-section-active { border: none !important; box-shadow: none !important; }
+    .print-section-active .module-header, .print-section-active .form-section { display: none !important; }
+    
+    table { font-size: 9pt; margin-top: 10px !important; width:100% !important; border-collapse: collapse !important;} 
+    th, td { padding: 5px 8px !important; border: 1px solid #333 !important;} 
     th { background-color: #f0f0f0 !important; }
     h1.print-title, h3.print-title, h4.print-title, h5.print-title { font-size: 14pt; text-align: center; margin-bottom: 15px; color: #000; }
-    h5 { font-size: 10pt; margin-top: 15px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+    h5 { font-size: 11pt; margin-top: 15px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
     hr { display: none; }
 }
 
 @page {
+    size: A4 portrait;
     margin: 1.5cm;
-}
-
-@page :left {
-    margin-left: 2cm;
-}
-
-@page :right {
-    margin-right: 2cm;
-}
-
-body.print-a5-active {
-    font-size: 8pt;
-}
-
-body.print-a4-active {
-    font-size: 10pt;
 }
