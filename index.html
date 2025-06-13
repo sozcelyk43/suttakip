@@ -78,7 +78,6 @@
                             <tbody id="cariListesiBody"></tbody>
                             <tfoot id="cariListesiFooter"></tfoot>
                         </table>
-                        <p class="dont-print" style="font-size:0.9em; color:#555; margin-top:10px;"><em>Bakiye: (+)Alacak, (-)Borç</em></p>
                     </div>
                 </div>
                 <button type="button" class="btn btn-print dont-print" id="cariListesiYazdirBtn" style="margin-top: 20px;">Listeyi Yazdır</button>
@@ -414,12 +413,12 @@
             cariKategoriForm.addEventListener('submit', handleCariKategoriEkle);
 
             raporOlusturBtn.addEventListener('click', handleHesapOzetiRaporuOlustur);
-            raporYazdirBtn.addEventListener('click', () => handleYazdir('report-content-to-print', 'print-a5-active'));
+            raporYazdirBtn.addEventListener('click', () => handleYazdir('report-content-to-print'));
             sutRaporuOlusturBtn.addEventListener('click', () => handleSutAlimRaporuOlustur(false));
             sutRaporuTumunuGosterBtn.addEventListener('click', () => handleSutAlimRaporuOlustur(true));
-            sutRaporuYazdirBtn.addEventListener('click', () => handleYazdir('sutAlimRaporAlani', 'print-a5-active'));
+            sutRaporuYazdirBtn.addEventListener('click', () => handleYazdir('sutAlimRaporAlani'));
             yemRaporuOlusturBtn.addEventListener('click', handleYemKarRaporuOlustur);
-            yemRaporuYazdirBtn.addEventListener('click', () => handleYazdir('yemRaporuAlani', 'print-a4-active'));
+            yemRaporuYazdirBtn.addEventListener('click', handleYemRaporuYazdir);
         });
 
         function loadInitialData() {
@@ -466,11 +465,12 @@
                 row.innerHTML = `<td>${c.kodu || ''}</td><td>${c.adiSoyadi || ''}</td><td>${c.kategori || ''}</td><td style="${durumStyle}">${durumText}</td><td>${c.telefon || ''}</td><td style="${bakiyeStyle}">${bakiyeText}</td><td class="dont-print"><button class="btn btn-edit btn-sm" onclick="editCari('${c.id}')">Düzenle</button><button class="btn btn-delete btn-sm" onclick="deleteCari('${c.id}')">Sil</button></td>`;
             });
 
-            if (kategori && filteredData.length > 0) {
+            if (filteredData.length > 0) {
                 const footerRow = cariListesiFooter.insertRow();
                 const toplamBakiye = toplamAlacak - toplamBorc;
                 const toplamBakiyeStyle = toplamBakiye >= 0 ? 'color:green;' : 'color:red;';
-                footerRow.innerHTML = `<td colspan="5"><strong>Kategori Toplamı ('${kategori}')</strong></td><td style="${toplamBakiyeStyle}"><strong>${formatCurrency(toplamBakiye)}</strong></td><td class="dont-print"></td>`;
+                const etiket = kategori ? `Kategori Toplamı ('${kategori}')` : 'Genel Toplam';
+                footerRow.innerHTML = `<td colspan="5"><strong>${etiket} | Toplam Alacak: ${formatCurrency(toplamAlacak)} | Toplam Borç: ${formatCurrency(toplamBorc)}</strong></td><td style="${toplamBakiyeStyle}"><strong>${formatCurrency(toplamBakiye)}</strong></td><td class="dont-print"></td>`;
             }
         }
         
@@ -599,24 +599,35 @@
         }
 
         function handleCariListeYazdir() {
-            const kategoriFiltre = cariKategoriFiltre;
-            const seciliKategoriText = kategoriFiltre.options[kategoriFiltre.selectedIndex].text;
+            const kategoriFiltreElement = cariKategoriFiltre;
+            const seciliKategoriText = kategoriFiltreElement.options[kategoriFiltreElement.selectedIndex].text;
             document.getElementById('cariListeRaporBaslik').textContent = `${seciliKategoriText} Cari Listesi`;
-            handleYazdir('cari-list-printable-area', 'print-a4-active');
+            handleYazdir('cari-list-printable-area');
         }
 
-        function handleYazdir(elementId, printClass) {
+        function handleYemRaporuYazdir() {
+            handleYazdir('yemRaporuAlani');
+        }
+
+        function handleYazdir(elementId) {
             const printSection = document.getElementById(elementId);
             if (!printSection || printSection.innerHTML.trim() === "") {
                 alert("Lütfen önce rapor oluşturun.");
                 return;
             }
-            bodyElement.classList.add(printClass);
+            const parentSection = printSection.closest('.module-section');
+            bodyElement.classList.add('print-active');
+            if (parentSection) {
+                parentSection.classList.add('print-section-active');
+            }
             window.print();
         }
 
         window.onafterprint = () => {
-            bodyElement.classList.remove('print-a5-active', 'print-a4-active');
+            bodyElement.classList.remove('print-active');
+            document.querySelectorAll('.print-section-active').forEach(el => {
+                el.classList.remove('print-section-active');
+            });
         };
 
     </script>
