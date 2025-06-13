@@ -68,11 +68,27 @@
                     <div class="form-group"><label for="cariVergiNo">Vergi No / T.C.:</label><input type="text" id="cariVergiNo"></div>
                     <div class="form-group" style="grid-column: span 2;"><label for="cariNotlar">Özel Notlar:</label><textarea id="cariNotlar"></textarea></div>
                 </div><button type="submit" class="btn dont-print" id="cariKaydetBtn">Kaydet</button><button type="button" class="btn btn-primary dont-print" id="cariFormTemizleBtn" style="display:none;">Yeni Kayıt</button></form></div>
+                
                 <div id="cari-list-printable-area">
                     <h3 class="print-only print-title" id="cariListeRaporBaslik">Cari Listesi Raporu</h3>
-                    <div class="list-section"><h3>Cari Listesi</h3><table><thead><tr><th>Kod</th><th>Ad/Firma</th><th>Kategori</th><th>Durum</th><th>Telefon</th><th>Bakiye</th><th>İşlemler</th></tr></thead><tbody id="cariListesiBody"></tbody><tfoot id="cariListesiFooter"></tfoot></table><p style="font-size:0.9em; color:#555; margin-top:10px;"><em>Bakiye: (+)Alacak, (-)Borç</em></p></div>
+                    <div class="list-section">
+                        <h3>Cari Listesi</h3>
+                        <table>
+                            <thead><tr><th>Kod</th><th>Ad/Firma</th><th>Kategori</th><th>Durum</th><th>Telefon</th><th>Bakiye</th><th class="dont-print">İşlemler</th></tr></thead>
+                            <tbody id="cariListesiBody"></tbody>
+                            <tfoot id="cariListesiFooter"></tfoot>
+                        </table>
+                        <p class="dont-print" style="font-size:0.9em; color:#555; margin-top:10px;"><em>Bakiye: (+)Alacak, (-)Borç</em></p>
+                    </div>
                 </div>
                 <button type="button" class="btn btn-print dont-print" id="cariListesiYazdirBtn" style="margin-top: 20px;">Listeyi Yazdır</button>
+                
+                <div class="totals-summary-container dont-print">
+                    <h4>Genel Bakiye Özeti (Tüm Cariler)</h4>
+                    <p>Toplam Alacak: <span id="genelToplamAlacak">0.00 TL</span></p>
+                    <p>Toplam Borç: <span id="genelToplamBorc">0.00 TL</span></p>
+                    <p>Genel Bakiye: <span id="genelToplamBakiye">0.00 TL</span></p>
+                </div>
             </div>
         </section>
 
@@ -113,17 +129,17 @@
                     <div class="form-group"><label for="yemAlisFiyati">Alış Fiyatı:</label><input type="number" id="yemAlisFiyati" step="0.01"></div>
                     <div class="form-group"><label for="yemSatisFiyati">Satış Fiyatı:</label><input type="number" id="yemSatisFiyati" step="0.01"></div>
                 </div><button type="submit" class="btn dont-print" id="yemTanimKaydetBtn">Kaydet</button><button type="button" class="btn btn-primary dont-print" id="yemTanimFormTemizleBtn" style="display:none;">Yeni</button></form></div>
-                <div class="list-section"><h3>Tanımlı Yemler & Stok</h3><table><thead><tr><th>Kod</th><th>Ad</th><th>Kategori</th><th>Birim</th><th>Alış F.</th><th>Satış F.</th><th>Stok</th><th>İşlemler</th></tr></thead><tbody id="yemStokListesiBody"></tbody></table></div>
+                <div class="list-section"><h3>Tanımlı Yemler & Stok</h3><table><thead><tr><th>Kod</th><th>Ad</th><th>Kategori</th><th>Birim</th><th>Alış F.</th><th>Satış F.</th><th>Stok</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemStokListesiBody"></tbody></table></div>
                 <hr>
                 <div class="form-section"><h3><span id="yemAlisFormBaslik">Yeni Yem Alışı</span></h3><form id="yemAlisForm" action="#"><input type="hidden" id="yemAlisEditId"><div class="form-grid">
                     <div class="form-group"><label for="yemAlisTarih">Tarih:</label><input type="date" id="yemAlisTarih" required></div>
                     <div class="form-group"><label for="yemSecimiAlis">Yem:</label><select id="yemSecimiAlis" required><option value="">Seçiniz...</option></select></div>
                     <div class="form-group"><label for="yemAlisMiktar">Miktar:</label><input type="number" id="yemAlisMiktar" step="1" required></div>
-                    <div class="form-group"><label for="yemAlisTedarikci">Tedarikçi:</label><select id="yemAlisTedarikci"><option value="">Seçiniz...</option></select></div>
+                    <div class="form-group"><label for="yemAlisTedarikci">Cari:</label><select id="yemAlisTedarikci"><option value="">Seçiniz...</option></select></div>
                     <div class="form-group"><label for="yemAlisBirimFiyati">Alış Fiyatı:</label><input type="number" id="yemAlisBirimFiyati" step="0.01" required></div>
                     <div class="form-group"><label>Toplam Tutar:</label><input type="text" id="yemAlisToplamTutar" readonly></div>
                 </div><button type="submit" class="btn dont-print" id="yemAlisKaydetBtn">Alışı Kaydet</button><button type="button" class="btn btn-primary dont-print" id="yemAlisFormTemizleBtn" style="display:none;">Yeni</button></form></div>
-                <div class="list-section"><h3>Yem Alış Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Yem</th><th>Miktar</th><th>Tedarikçi</th><th>Alış F.</th><th>Tutar</th><th>İşlemler</th></tr></thead><tbody id="yemAlisHareketListesiBody"></tbody></table></div>
+                <div class="list-section"><h3>Yem Alış Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Yem</th><th>Miktar</th><th>Cari</th><th>Alış F.</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemAlisHareketListesiBody"></tbody></table></div>
              </div>
         </section>
         <section id="yem-satisi" class="module-section hidden-section">
@@ -137,7 +153,7 @@
                     <div class="form-group"><label for="yemSatisBirimFiyati">Satış Fiyatı:</label><input type="number" id="yemSatisBirimFiyati" step="0.01" required></div>
                     <div class="form-group"><label>Toplam Tutar:</label><input type="text" id="yemSatisToplamTutar" readonly></div>
                 </div><button type="submit" class="btn dont-print" id="yemSatisKaydetBtn">Satışı Kaydet</button><button type="button" class="btn btn-primary dont-print" id="yemSatisFormTemizleBtn" style="display:none;">Yeni</button></form></div>
-                <div class="list-section"><h3>Yem Satış Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Alan Cari</th><th>Yem</th><th>Miktar</th><th>Fiyat</th><th>Tutar</th><th>İşlemler</th></tr></thead><tbody id="yemSatisListesiBody"></tbody></table></div>
+                <div class="list-section"><h3>Yem Satış Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Alan Cari</th><th>Yem</th><th>Miktar</th><th>Fiyat</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemSatisListesiBody"></tbody></table></div>
              </div>
         </section>
         <section id="tedarikci-odemeleri" class="module-section hidden-section">
@@ -150,10 +166,10 @@
                     <div class="form-group"><label for="odemeTuru">Tür:</label><select id="odemeTuru" required><option value="BorcKapatma">Borç Kapatma</option><option value="Avans">Avans</option><option value="Diger">Diğer</option></select></div>
                     <div class="form-group" style="grid-column: span 2;"><label for="odemeAciklama">Açıklama:</label><textarea id="odemeAciklama" rows="2"></textarea></div>
                  </div><button type="submit" class="btn dont-print" id="tedarikciOdemeKaydetBtn">Kaydet</button><button type="button" class="btn btn-primary dont-print" id="tedarikciOdemeFormTemizleBtn" style="display:none;">Yeni</button></form></div>
-                 <div class="list-section"><h3>Yapılan Ödemeler</h3><table><thead><tr><th>Tarih</th><th>Cari</th><th>Tutar</th><th>Tür</th><th>Açıklama</th><th>İşlemler</th></tr></thead><tbody id="tedarikciOdemeListesiBody"></tbody></table></div>
+                 <div class="list-section"><h3>Yapılan Ödemeler</h3><table><thead><tr><th>Tarih</th><th>Cari</th><th>Tutar</th><th>Tür</th><th>Açıklama</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="tedarikciOdemeListesiBody"></tbody></table></div>
             </div>
         </section>
-        <section id="hesap-ozeti" class="module-section hidden-section printable-section">
+        <section id="hesap-ozeti" class="module-section hidden-section">
             <div class="module-header dont-print"><h2>📊 Cari Hesap Özeti</h2></div>
             <div class="container">
                 <div class="report-section">
@@ -172,7 +188,7 @@
                 </div>
             </div>
         </section>
-        <section id="sut-alim-raporu" class="module-section hidden-section printable-section">
+        <section id="sut-alim-raporu" class="module-section hidden-section">
              <div class="module-header dont-print"><h2>🗓️ Aylık Süt Alım Raporu</h2></div>
             <div class="container">
                  <div class="report-section">
@@ -236,11 +252,7 @@
         let db_tedarikciOdemeleri = [];
         let globalSettings = { defaultMilkPrice: 15.00 };
 
-        let editingCariId = null;
-        let editingYemTanimId = null;
-        let editingYemAlisId = null; 
-        let editingYemSatisId = null;
-        let editingTedarikciOdemeId = null;
+        let editingCariId = null, editingYemTanimId = null, editingYemAlisId = null, editingYemSatisId = null, editingTedarikciOdemeId = null;
 
         const sidebarNav = document.getElementById('sidebarNav');
         const moduleSections = document.querySelectorAll('.main-content .module-section');
@@ -324,7 +336,7 @@
                     <td>${sa.toplamLitre.toFixed(1)}</td>
                     <td>${formatCurrency(sa.birimFiyat)}</td>
                     <td>${formatCurrency(sa.toplamTutar)}</td>
-                    <td><button class="btn btn-delete dont-print" onclick="deleteSutAlim('${sa.id}')">Sil</button></td>`;
+                    <td class="dont-print"><button class="btn btn-delete btn-sm" onclick="deleteSutAlim('${sa.id}')">Sil</button></td>`;
                 
                 totalAksam += sa.aksamLitre;
                 totalSabah += sa.sabahLitre;
@@ -333,7 +345,7 @@
             });
             
             const headerRow = sutAlimGecmisiHeader.insertRow();
-            headerRow.innerHTML = `<th>Tedarikçi</th><th>Akşam (Lt)</th><th>Sabah (Lt)</th><th>Toplam (Lt)</th><th>Birim Fiyat</th><th>Toplam Tutar</th><th>İşlemler</th>`;
+            headerRow.innerHTML = `<th>Cari</th><th>Akşam (Lt)</th><th>Sabah (Lt)</th><th>Toplam (Lt)</th><th>Birim Fiyat</th><th>Toplam Tutar</th><th class="dont-print">İşlemler</th>`;
 
             if (filtrelenmisAlimlar.length > 0) {
                 const totalsRow = sutAlimGecmisiHeader.insertRow(0);
@@ -346,7 +358,7 @@
                     <td>${totalLitre.toFixed(1)}</td>
                     <td>-</td>
                     <td>${formatCurrency(totalTutar)}</td>
-                    <td>-</td>
+                    <td class="dont-print">-</td>
                 `;
             }
         }
@@ -366,7 +378,7 @@
                     section.style.display = section.id === targetId ? 'block' : 'none';
                 });
                 if (targetId === 'dashboard') { updateDashboardStats(); }
-                if (targetId === 'cari-yonetimi') { populateCariKategoriFiltre(); }
+                if (targetId === 'cari-yonetimi') { populateCariKategoriFiltre(); renderGenelBakiyeOzeti(); }
                 if (targetId === 'sut-alimi') { topluGirisTarihInput.value = getTodayForInput(); populateCariKategoriSelect(topluGirisKategori); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); }
                 if (targetId === 'yem-stok-yonetimi') { populateCariSelect(yemAlisTedarikci); populateYemSelect(yemSecimiAlis); }
                 if (targetId === 'yem-satisi') { populateCariSelect(yemAlanTedarikci); populateYemSelect(yemSecimiSatis); }
@@ -387,9 +399,9 @@
             yemAlisFormTemizleBtn.addEventListener('click', resetYemAlisForm);
             yemSatisFormTemizleBtn.addEventListener('click', resetYemSatisForm);
             tedarikciOdemeFormTemizleBtn.addEventListener('click', resetTedarikciOdemeForm);
-            cariSearchInput.addEventListener('input', () => renderCariListesi());
-            cariKategoriFiltre.addEventListener('change', () => renderCariListesi());
-            cariListesiYazdirBtn.addEventListener('click', () => handleYazdir('cari-list-printable-area', 'print-a4-active'));
+            cariSearchInput.addEventListener('input', renderCariListesi);
+            cariKategoriFiltre.addEventListener('change', renderCariListesi);
+            cariListesiYazdirBtn.addEventListener('click', handleCariListeYazdir);
             topluGirisTarihInput.addEventListener('change', () => { renderTopluSutGirisFormu(); renderSutAlimGecmisi(); });
             topluGirisKategoriSelect.addEventListener('change', renderTopluSutGirisFormu);
             
@@ -402,10 +414,10 @@
             cariKategoriForm.addEventListener('submit', handleCariKategoriEkle);
 
             raporOlusturBtn.addEventListener('click', handleHesapOzetiRaporuOlustur);
-            raporYazdirBtn.addEventListener('click', () => handleYazdir("report-content-to-print", "print-a5-active"));
+            raporYazdirBtn.addEventListener('click', () => handleYazdir('report-content-to-print', 'print-a5-active'));
             sutRaporuOlusturBtn.addEventListener('click', () => handleSutAlimRaporuOlustur(false));
             sutRaporuTumunuGosterBtn.addEventListener('click', () => handleSutAlimRaporuOlustur(true));
-            sutRaporuYazdirBtn.addEventListener('click', () => handleYazdir("sutAlimRaporAlani", "print-a5-active"));
+            sutRaporuYazdirBtn.addEventListener('click', () => handleYazdir('sutAlimRaporAlani', 'print-a5-active'));
             yemRaporuOlusturBtn.addEventListener('click', handleYemKarRaporuOlustur);
             yemRaporuYazdirBtn.addEventListener('click', () => handleYazdir('yemRaporuAlani', 'print-a4-active'));
         });
@@ -423,35 +435,29 @@
             db_yemAlimlari = [ {id:generateId(), tarih:today, cariId: c2_id, cariAdi:'B Marketleri Ltd.', yemId: y1_id, yemAdi:'Süt Yemi Standart', miktar:10, birimFiyat:580, toplamTutar:5800} ];
         }
 
-        function renderAllLists() { renderCariListesi(); populateCariKategoriFiltre(); populateCariKategoriSelect(topluGirisKategori); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); renderYemStokListesi(); renderYemAlisHareketListesi(); renderYemSatisListesi(); renderTedarikciOdemeListesi(); renderCariKategoriListesi(); updateDashboardStats(); }
+        function renderAllLists() { renderCariListesi(); populateCariKategoriFiltre(); populateCariKategoriSelect(topluGirisKategori); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); renderYemStokListesi(); renderYemAlisHareketListesi(); renderYemSatisListesi(); renderTedarikciOdemeListesi(); renderCariKategoriListesi(); updateDashboardStats(); renderGenelBakiyeOzeti(); }
         function updateDashboardStats() { totalCari.textContent = db_cariler.length; totalYemCesidi.textContent = db_yemler.length; const todayStr = getTodayForInput(); const todaySutAlimCount = db_sutAlimlari.filter(sa => sa.tarih === todayStr).length; todaySutAlim.textContent = todaySutAlimCount;}
         function handleCariKaydet(event) { event.preventDefault(); const formData = { id: editingCariId || generateId(), kodu: document.getElementById('cariKodu').value, adiSoyadi: document.getElementById('cariAdiSoyadi').value, kategori: document.getElementById('cariKategori').value, durum: document.getElementById('cariDurum').value, telefon: document.getElementById('cariTelefon').value, eposta: document.getElementById('cariEposta').value, adres: document.getElementById('cariAdres').value, bankaAdi: document.getElementById('cariBankaAdi').value, iban: document.getElementById('cariIban').value, vergiDairesi: document.getElementById('cariVergiDairesi').value, vergiNo: document.getElementById('cariVergiNo').value, notlar: document.getElementById('cariNotlar').value, }; if (editingCariId) { const index = db_cariler.findIndex(c => c.id === editingCariId); if (index > -1) db_cariler[index] = formData; } else { db_cariler.push(formData); } renderAllLists(); resetCariForm(); }
         
         function renderCariListesi() {
             const searchTerm = cariSearchInput.value.toLowerCase();
             const kategori = cariKategoriFiltre.value;
-
             let filteredData = db_cariler;
-
             if (kategori) {
                 filteredData = filteredData.filter(c => c.kategori === kategori);
             }
             if (searchTerm) {
                 filteredData = filteredData.filter(c => c.kodu?.toLowerCase().includes(searchTerm) || c.adiSoyadi?.toLowerCase().includes(searchTerm));
             }
-            
             cariListesiBody.innerHTML = '';
             cariListesiFooter.innerHTML = '';
-
             let toplamAlacak = 0;
             let toplamBorc = 0;
-
             filteredData.sort((a,b) => a.adiSoyadi.localeCompare(b.adiSoyadi)).forEach(c => {
                 const row = cariListesiBody.insertRow();
                 const bakiyeDetay = calculateCariBakiyeDetayli(c.id);
                 toplamAlacak += bakiyeDetay.alacak;
                 toplamBorc += bakiyeDetay.borc;
-
                 const bakiye = bakiyeDetay.bakiye;
                 const durumText = c.durum === 'aktif' ? 'Aktif' : 'Pasif';
                 const durumStyle = c.durum === 'aktif' ? 'color:green;' : 'color:red;';
@@ -464,63 +470,61 @@
                 const footerRow = cariListesiFooter.insertRow();
                 const toplamBakiye = toplamAlacak - toplamBorc;
                 const toplamBakiyeStyle = toplamBakiye >= 0 ? 'color:green;' : 'color:red;';
-                footerRow.innerHTML = `
-                    <td colspan="5"><strong>Kategori Toplamı ('${kategori}')</strong></td>
-                    <td style="${toplamBakiyeStyle}"><strong>${formatCurrency(toplamBakiye)}</strong></td>
-                    <td class="dont-print"></td>
-                `;
+                footerRow.innerHTML = `<td colspan="5"><strong>Kategori Toplamı ('${kategori}')</strong></td><td style="${toplamBakiyeStyle}"><strong>${formatCurrency(toplamBakiye)}</strong></td><td class="dont-print"></td>`;
             }
         }
         
+        function renderGenelBakiyeOzeti() {
+            let genelToplamAlacak = 0;
+            let genelToplamBorc = 0;
+            db_cariler.forEach(cari => {
+                const bakiyeDetay = calculateCariBakiyeDetayli(cari.id);
+                genelToplamAlacak += bakiyeDetay.alacak;
+                genelToplamBorc += bakiyeDetay.borc;
+            });
+            const genelBakiye = genelToplamAlacak - genelToplamBorc;
+            document.getElementById('genelToplamAlacak').textContent = formatCurrency(genelToplamAlacak);
+            document.getElementById('genelToplamBorc').textContent = formatCurrency(genelToplamBorc);
+            const genelBakiyeElement = document.getElementById('genelToplamBakiye');
+            genelBakiyeElement.textContent = formatCurrency(genelBakiye);
+            genelBakiyeElement.style.color = genelBakiye >= 0 ? 'green' : 'red';
+            genelBakiyeElement.style.fontWeight = 'bold';
+        }
+
         function editCari(id) { const cari = db_cariler.find(c => c.id === id); if (!cari) return; editingCariId = id; document.getElementById('cariEditId').value = id; document.getElementById('cariKodu').value = cari.kodu || ''; document.getElementById('cariAdiSoyadi').value = cari.adiSoyadi || ''; document.getElementById('cariKategori').value = cari.kategori || ''; document.getElementById('cariDurum').value = cari.durum || 'aktif'; document.getElementById('cariTelefon').value = cari.telefon || ''; document.getElementById('cariEposta').value = cari.eposta || ''; document.getElementById('cariAdres').value = cari.adres || ''; document.getElementById('cariBankaAdi').value = cari.bankaAdi || ''; document.getElementById('cariIban').value = cari.iban || ''; document.getElementById('cariVergiDairesi').value = cari.vergiDairesi || ''; document.getElementById('cariVergiNo').value = cari.vergiNo || ''; document.getElementById('cariNotlar').value = cari.notlar || ''; setEditingMode(cariFormBaslik, cariKaydetBtn, cariFormTemizleBtn, editingCariId, 'Cari Kart');}
         function deleteCari(id) { if (confirm('Bu cariyi silmek istediğinizden emin misiniz? İlgili tüm kayıtları silinecektir!')) { db_cariler = db_cariler.filter(c => c.id !== id); db_sutAlimlari = db_sutAlimlari.filter(sa => sa.cariId !== id); db_yemSatislari = db_yemSatislari.filter(ys => ys.cariId !== id); db_tedarikciOdemeleri = db_tedarikciOdemeleri.filter(o => o.cariId !== id); renderAllLists(); if (editingCariId === id) resetCariForm(); }}
         function resetCariForm(){ cariForm.reset(); editingCariId = null; document.getElementById('cariEditId').value = ''; setEditingMode(cariFormBaslik, cariKaydetBtn, cariFormTemizleBtn, null, 'Cari Kart');}
         function handleCariKategoriEkle(event) { event.preventDefault(); const yeniAd = yeniCariKategoriAdiInput.value.trim(); if (yeniAd === '') { alert('Kategori/Köy adı boş olamaz.'); return; } if (db_cariKategorileri.some(kat => kat.ad.toLowerCase() === yeniAd.toLowerCase())) { alert('Bu kategori/köy zaten mevcut.'); return; } db_cariKategorileri.push({ id: generateId(), ad: yeniAd }); renderCariKategoriListesi(); populateCariKategoriSelect(cariKategori); populateCariKategoriFiltre(); populateCariKategoriSelect(topluGirisKategori); yeniCariKategoriAdiInput.value = ''; }
         function renderCariKategoriListesi() { if(!cariKategoriListesiUl) return; cariKategoriListesiUl.innerHTML = ''; if (db_cariKategorileri.length === 0) { cariKategoriListesiUl.innerHTML = '<li>Tanımlı kategori/köy bulunmuyor.</li>'; return; } db_cariKategorileri.sort((a, b) => a.ad.localeCompare(b.ad)).forEach(kat => { const li = document.createElement('li'); li.textContent = kat.ad; const deleteBtn = document.createElement('button'); deleteBtn.textContent = 'Sil'; deleteBtn.classList.add('btn', 'btn-delete', 'btn-sm', 'dont-print'); deleteBtn.onclick = function() { deleteCariKategori(kat.id); }; li.appendChild(deleteBtn); cariKategoriListesiUl.appendChild(li); });}
         function deleteCariKategori(idToDelete) { if (confirm('Bu kategoriyi/köyü silmek istediğinizden emin misiniz?')) { db_cariKategorileri = db_cariKategorileri.filter(kat => kat.id !== idToDelete); renderCariKategoriListesi(); populateCariKategoriSelect(cariKategori); populateCariKategoriFiltre(); populateCariKategoriSelect(topluGirisKategori);}}
-        
-        function populateCariKategoriFiltre() {
-            const selectElement = cariKategoriFiltre;
-            const currentValue = selectElement.value;
-            selectElement.innerHTML = `<option value="">Tüm Kategoriler</option>`;
-            db_cariKategorileri.sort((a, b) => a.ad.localeCompare(b.ad)).forEach(kat => {
-                const option = document.createElement('option');
-                option.value = kat.ad;
-                option.textContent = kat.ad;
-                selectElement.appendChild(option);
-            });
-            selectElement.value = currentValue;
-        }
-
+        function populateCariKategoriFiltre() { const selectElement = cariKategoriFiltre; const currentValue = selectElement.value; selectElement.innerHTML = `<option value="">Tüm Kategoriler</option>`; db_cariKategorileri.sort((a, b) => a.ad.localeCompare(b.ad)).forEach(kat => { const option = document.createElement('option'); option.value = kat.ad; option.textContent = kat.ad; selectElement.appendChild(option); }); selectElement.value = currentValue; }
         function populateCariKategoriSelect(selectElement) { if(!selectElement) return; const currentValue = selectElement.value; selectElement.innerHTML = `<option value="">Seçiniz...</option>`; db_cariKategorileri.sort((a, b) => a.ad.localeCompare(b.ad)).forEach(kat => { const option = document.createElement('option'); option.value = kat.ad; option.textContent = kat.ad; selectElement.appendChild(option); }); if (db_cariKategorileri.some(kat => kat.ad === currentValue)) { selectElement.value = currentValue; } }
-        
         function populateCariSelect(selectElement, defaultText = "Seçiniz...") { if(!selectElement) return; const currentValue = selectElement.value; selectElement.innerHTML = ''; const firstOption = document.createElement('option'); firstOption.value = ""; firstOption.textContent = defaultText; selectElement.appendChild(firstOption); db_cariler.filter(c => c.durum === 'aktif').sort((a,b) => a.adiSoyadi.localeCompare(b.adiSoyadi)).forEach(c => { const option = document.createElement('option'); option.value = c.id; option.textContent = `${c.adiSoyadi} (${c.kodu || 'Kodsuz'})`; selectElement.appendChild(option); }); if (db_cariler.find(c => c.id === currentValue)) { selectElement.value = currentValue; }}
-        
         function renderTopluSutGirisFormu() { if (!db_cariler) return; const tarih = topluGirisTarihInput.value; const kategori = topluGirisKategoriSelect.value; const alan = document.getElementById('topluSutGirisTablosuAlani'); const yokMesaji = document.getElementById('topluGirisTedarikciYokMesaji'); const girisYapilmisCariIdleri = db_sutAlimlari.filter(sa => sa.tarih === tarih).map(sa => sa.cariId); let filtrelenmisCariler = db_cariler.filter(c => c.durum === 'aktif' && (kategori === "" || c.kategori === kategori) && !girisYapilmisCariIdleri.includes(c.id)); alan.innerHTML = ''; if (filtrelenmisCariler.length === 0) { yokMesaji.style.display = 'block'; return; } yokMesaji.style.display = 'none'; const tablo = document.createElement('table'); tablo.id = 'topluSutGirisTablosu'; tablo.innerHTML = `<thead><tr><th>Cari</th><th>Akşam (Lt)</th><th>Sabah (Lt)</th><th>Toplam Lt</th><th>Fiyat</th><th>Tutar</th><th>İşlem</th></tr></thead><tbody></tbody>`; const tbody = tablo.querySelector('tbody'); filtrelenmisCariler.sort((a,b) => a.adiSoyadi.localeCompare(b.adiSoyadi)).forEach(cari => { const row = tbody.insertRow(); row.dataset.cariId = cari.id; row.innerHTML = `<td>${cari.adiSoyadi}</td><td><input type="number" class="aksam-input" step="0.1" min="0" placeholder="0.0"></td><td><input type="number" class="sabah-input" step="0.1" min="0" placeholder="0.0"></td><td class="toplam-litre-hucre">0.0</td><td><input type="number" class="fiyat-input" value="${globalSettings.defaultMilkPrice.toFixed(2)}" step="0.01" min="0"></td><td class="tutar-hucre">0.00 TL</td><td><button class="btn btn-sm dont-print" onclick="handleTopluGirisKaydet('${cari.id}')">Kaydet</button></td>`; }); alan.appendChild(tablo); tablo.querySelectorAll('.sabah-input, .aksam-input, .fiyat-input').forEach(input => { input.addEventListener('input', handleTopluGirisHesaplama); });}
         function handleTopluGirisHesaplama(event) { const row = event.target.closest('tr'); if (!row) return; const sabahLt = parseFloat(row.querySelector('.sabah-input').value) || 0; const aksamLt = parseFloat(row.querySelector('.aksam-input').value) || 0; const fiyat = parseFloat(row.querySelector('.fiyat-input').value) || 0; const toplamLitre = sabahLt + aksamLt; const toplamTutar = toplamLitre * fiyat; row.querySelector('.toplam-litre-hucre').textContent = toplamLitre.toFixed(1); row.querySelector('.tutar-hucre').textContent = formatCurrency(toplamTutar); }
         function handleTopluGirisKaydet(cariId) { const row = document.querySelector(`#topluSutGirisTablosuAlani tr[data-cari-id='${cariId}']`); if (!row) return; const cari = db_cariler.find(c => c.id === cariId); const sabahLt = parseFloat(row.querySelector('.sabah-input').value) || 0; const aksamLt = parseFloat(row.querySelector('.aksam-input').value) || 0; const fiyat = parseFloat(row.querySelector('.fiyat-input').value) || 0; const tarih = document.getElementById('topluGirisTarih').value; if (sabahLt === 0 && aksamLt === 0) { alert("Lütfen en az bir süt miktarını giriniz."); return; } const yeniAlim = { id: generateId(), tarih: tarih, cariId: cariId, cariAdi: cari.adiSoyadi, sabahLitre: sabahLt, aksamLitre: aksamLt, toplamLitre: sabahLt + aksamLt, birimFiyat: fiyat, toplamTutar: (sabahLt + aksamLt) * fiyat }; db_sutAlimlari.push(yeniAlim); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); renderCariListesi(); updateDashboardStats();}
         function deleteSutAlim(id) { if(confirm('Bu süt alım kaydını silmek istediğinizden emin misiniz?')){ db_sutAlimlari = db_sutAlimlari.filter(sa => sa.id !== id); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); renderCariListesi(); updateDashboardStats();}}
         function handleYemTanimKaydet(event) { event.preventDefault(); const formData = { id: editingYemTanimId || generateId(), kod: document.getElementById('yemKodu').value.trim().toUpperCase(), ad: document.getElementById('yemAdi').value.trim(), kategori: document.getElementById('yemKategorisi').value, birim: document.getElementById('yemBirimi').value.trim() || 'Çuval', alisFiyati: parseFloat(document.getElementById('yemAlisFiyati').value) || 0, satisFiyati: parseFloat(document.getElementById('yemSatisFiyati').value) || 0, stokMiktari: editingYemTanimId ? (db_yemler.find(y=>y.id===editingYemTanimId)?.stokMiktari || 0) : 0 }; if (!formData.kod || !formData.ad) { alert('Yem Kodu ve Yem Adı boş bırakılamaz.'); return; } if (editingYemTanimId) { const existingYemWithSameCode = db_yemler.find(y => y.kod === formData.kod && y.id !== editingYemTanimId); if (existingYemWithSameCode) { alert('Bu yem kodu başka bir yem tarafından kullanılıyor.'); return; } const index = db_yemler.findIndex(y => y.id === editingYemTanimId); if (index > -1) db_yemler[index] = formData; } else { if (db_yemler.some(y => y.kod === formData.kod)) { alert('Bu yem kodu zaten kullanılıyor.'); return; } db_yemler.push(formData); } renderYemStokListesi(); populateYemSelect(yemSecimiAlis); populateYemSelect(yemSecimiSatis); resetYemTanimForm(); updateDashboardStats(); }
-        function renderYemStokListesi() { yemStokListesiBody.innerHTML = ''; db_yemler.sort((a,b) => a.ad.localeCompare(b.ad)).forEach(y => { const row = yemStokListesiBody.insertRow(); row.innerHTML = `<td>${y.kod}</td><td>${y.ad}</td><td>${y.kategori}</td><td>${y.birim}</td><td>${formatCurrency(y.alisFiyati)}</td><td>${formatCurrency(y.satisFiyati)}</td><td>${y.stokMiktari}</td><td><button class="btn btn-edit dont-print" onclick="editYemTanim('${y.id}')">Düzenle</button><button class="btn btn-delete dont-print" onclick="deleteYemTanim('${y.id}')">Sil</button></td>`; });}
+        function renderYemStokListesi() { yemStokListesiBody.innerHTML = ''; db_yemler.sort((a,b) => a.ad.localeCompare(b.ad)).forEach(y => { const row = yemStokListesiBody.insertRow(); row.innerHTML = `<td>${y.kod}</td><td>${y.ad}</td><td>${y.kategori}</td><td>${y.birim}</td><td>${formatCurrency(y.alisFiyati)}</td><td>${formatCurrency(y.satisFiyati)}</td><td>${y.stokMiktari}</td><td class="dont-print"><button class="btn btn-edit dont-print" onclick="editYemTanim('${y.id}')">Düzenle</button><button class="btn btn-delete dont-print" onclick="deleteYemTanim('${y.id}')">Sil</button></td>`; });}
         function editYemTanim(id) { const yem = db_yemler.find(y => y.id === id); if (!yem) return; editingYemTanimId = id; document.getElementById('yemKodu').value = yem.kod; document.getElementById('yemAdi').value = yem.ad; document.getElementById('yemKategorisi').value = yem.kategori; document.getElementById('yemBirimi').value = yem.birim; document.getElementById('yemAlisFiyati').value = yem.alisFiyati.toFixed(2); document.getElementById('yemSatisFiyati').value = yem.satisFiyati.toFixed(2); setEditingMode(yemTanimFormBaslik, yemTanimKaydetBtn, yemTanimFormTemizleBtn, editingYemTanimId, 'Yem Tanım');}
         function deleteYemTanim(id) { if (confirm('Bu yemi silmek istediğinizden emin misiniz? İlgili alış ve satış hareketleri de silinecektir!')) { db_yemler = db_yemler.filter(y => y.id !== id); db_yemAlimlari = db_yemAlimlari.filter(ya => ya.yemId !== id); db_yemSatislari = db_yemSatislari.filter(ys => ys.yemId !== id); renderAllLists(); if(editingYemTanimId === id) resetYemTanimForm(); }}
         function resetYemTanimForm() { yemTanimForm.reset(); editingYemTanimId = null; setEditingMode(yemTanimFormBaslik, yemTanimKaydetBtn, yemTanimFormTemizleBtn, null, 'Yem Tanım');}
         function handleYemAlisKaydet(event) { event.preventDefault(); const yemId = yemSecimiAlisSelect.value; const yem = db_yemler.find(y => y.id === yemId); if (!yem) { alert('Lütfen geçerli bir yem seçin.'); return; } const alinanMiktar = parseInt(document.getElementById('yemAlisMiktar').value) || 0; if (alinanMiktar <= 0) { alert('Alınan miktar pozitif olmalıdır.'); return; } const formData = { id: editingYemAlisId || generateId(), tarih: document.getElementById('yemAlisTarih').value, cariId: yemAlisTedarikciSelect.value, cariAdi: yemAlisTedarikciSelect.options[yemAlisTedarikciSelect.selectedIndex]?.text.split(' (')[0] || 'Bilinmiyor', yemId: yemId, yemAdi: yem.ad, miktar: alinanMiktar, birimFiyat: parseFloat(yemAlisBirimFiyatiInput.value) || 0, }; formData.toplamTutar = formData.miktar * formData.birimFiyat; if (editingYemAlisId) { const oldAlis = db_yemAlimlari.find(ya => ya.id === editingYemAlisId); if(oldAlis){ const eskiYemStok = db_yemler.find(y => y.id === oldAlis.yemId); if (eskiYemStok) eskiYemStok.stokMiktari -= oldAlis.miktar; } const index = db_yemAlimlari.findIndex(ya => ya.id === editingYemAlisId); if(index > -1) db_yemAlimlari[index] = formData; } else { db_yemAlimlari.push(formData); } yem.stokMiktari += formData.miktar; renderYemAlisHareketListesi(); renderYemStokListesi(); populateYemSelect(yemSecimiAlis); populateYemSelect(yemSecimiSatis); resetYemAlisForm(); }
-        function renderYemAlisHareketListesi() { yemAlisHareketListesiBody.innerHTML = ''; db_yemAlimlari.sort((a,b) => new Date(b.tarih) - new Date(a.tarih)).forEach(ya => { const row = yemAlisHareketListesiBody.insertRow(); row.innerHTML = `<td>${formatDate(ya.tarih)}</td><td>${ya.yemAdi}</td><td>${ya.miktar}</td><td>${ya.cariAdi}</td><td>${formatCurrency(ya.birimFiyat)}</td><td>${formatCurrency(ya.toplamTutar)}</td><td><button class="btn btn-edit dont-print" onclick="editYemAlis('${ya.id}')">Düzenle</button><button class="btn btn-delete dont-print" onclick="deleteYemAlis('${ya.id}')">Sil</button></td>`; });}
+        function renderYemAlisHareketListesi() { yemAlisHareketListesiBody.innerHTML = ''; db_yemAlimlari.sort((a,b) => new Date(b.tarih) - new Date(a.tarih)).forEach(ya => { const row = yemAlisHareketListesiBody.insertRow(); row.innerHTML = `<td>${formatDate(ya.tarih)}</td><td>${ya.yemAdi}</td><td>${ya.miktar}</td><td>${ya.cariAdi}</td><td>${formatCurrency(ya.birimFiyat)}</td><td>${formatCurrency(ya.toplamTutar)}</td><td class="dont-print"><button class="btn btn-edit dont-print" onclick="editYemAlis('${ya.id}')">Düzenle</button><button class="btn btn-delete dont-print" onclick="deleteYemAlis('${ya.id}')">Sil</button></td>`; });}
         function editYemAlis(id) { const yemAlis = db_yemAlimlari.find(ya => ya.id === id); if (!yemAlis) return; editingYemAlisId = id; document.getElementById('yemAlisTarih').value = yemAlis.tarih; yemAlisTedarikciSelect.value = yemAlis.cariId; yemSecimiAlisSelect.value = yemAlis.yemId; document.getElementById('yemAlisMiktar').value = yemAlis.miktar; yemAlisBirimFiyatiInput.value = yemAlis.birimFiyat.toFixed(2); handleYemAlisHesaplama(); setEditingMode(yemAlisFormBaslik, yemAlisKaydetBtn, yemAlisFormTemizleBtn, editingYemAlisId, 'Yem Alış');}
         function deleteYemAlis(id) { if (confirm('Bu yem alış kaydını silmek istediğinizden emin misiniz? Stok miktarı geri alınacaktır.')) { const index = db_yemAlimlari.findIndex(ya => ya.id === id); if (index > -1) { const yemAlisKaydi = db_yemAlimlari[index]; const yem = db_yemler.find(y => y.id === yemAlisKaydi.yemId); if (yem) yem.stokMiktari -= yemAlisKaydi.miktar; db_yemAlimlari.splice(index, 1); renderYemAlisHareketListesi(); renderYemStokListesi(); populateYemSelect(yemSecimiAlis); populateYemSelect(yemSecimiSatis); if (editingYemAlisId === id) resetYemAlisForm(); }}}
         function resetYemAlisForm() { yemAlisForm.reset(); editingYemAlisId = null; document.getElementById('yemAlisTarih').value = getTodayForInput(); handleYemAlisHesaplama(); setEditingMode(yemAlisFormBaslik, yemAlisKaydetBtn, yemAlisFormTemizleBtn, null, 'Yem Alış');}
         function handleYemAlisHesaplama() { const miktar = parseFloat(document.getElementById('yemAlisMiktar').value) || 0; const birimFiyat = parseFloat(document.getElementById('yemAlisBirimFiyati').value) || 0; document.getElementById('yemAlisToplamTutar').value = (miktar * birimFiyat > 0) ? formatCurrency(miktar * birimFiyat) : ''; } [document.getElementById('yemAlisMiktar'), document.getElementById('yemAlisBirimFiyati')].forEach(el => el?.addEventListener('input', handleYemAlisHesaplama));
         yemSecimiAlisSelect.addEventListener('change', function() { const yem = db_yemler.find(y => y.id === this.value); yemAlisBirimFiyatiInput.value = yem ? yem.alisFiyati.toFixed(2) : ''; handleYemAlisHesaplama(); });
         function handleYemSatisKaydet(event) { event.preventDefault(); const cariId = yemAlanTedarikciSelect.value; const yemId = yemSecimiSatisSelect.value; const yem = db_yemler.find(y => y.id === yemId); const cari = db_cariler.find(c => c.id === cariId); if (!yem) { alert('Lütfen geçerli bir yem seçin.'); return; } if (!cari) { alert('Lütfen geçerli bir cari seçin.'); return; } const satilanMiktar = parseInt(document.getElementById('yemSatisMiktar').value) || 0; if (satilanMiktar <= 0) { alert('Satılan miktar pozitif olmalıdır.'); return; } let izinVerilenSatisMiktari = yem.stokMiktari; if (editingYemSatisId) { const eskiSatis = db_yemSatislari.find(ys => ys.id === editingYemSatisId); if (eskiSatis?.yemId === yemId) { izinVerilenSatisMiktari += eskiSatis.miktar;} else if (eskiSatis?.yemId !== yemId) { const eskiYem = db_yemler.find(y_eski => y_eski.id === eskiSatis.yemId); if(eskiYem) eskiYem.stokMiktari += eskiSatis.miktar;}} if (satilanMiktar > izinVerilenSatisMiktari) { alert(`Yetersiz stok! ${yem.ad} için stok: ${yem.stokMiktari} ${yem.birim}.`); return; } const formData = { id: editingYemSatisId || generateId(), tarih: document.getElementById('yemSatisTarih').value, cariId: cariId, cariAdi: cari.adiSoyadi, yemId: yemId, yemAdi: yem.ad, miktar: satilanMiktar, birimFiyat: parseFloat(yemSatisBirimFiyatiInput.value) || 0, }; formData.toplamTutar = formData.miktar * formData.birimFiyat; if (editingYemSatisId) { const index = db_yemSatislari.findIndex(ys => ys.id === editingYemSatisId); if(index > -1) db_yemSatislari[index] = formData; } else { db_yemSatislari.push(formData); } yem.stokMiktari = izinVerilenSatisMiktari - formData.miktar; renderYemSatisListesi(); renderCariListesi(); renderYemStokListesi(); populateYemSelect(yemSecimiAlis); populateYemSelect(yemSecimiSatis); resetYemSatisForm(); }
-        function renderYemSatisListesi() { yemSatisListesiBody.innerHTML = ''; db_yemSatislari.sort((a,b) => new Date(b.tarih) - new Date(a.tarih)).forEach(ys => { const row = yemSatisListesiBody.insertRow(); row.innerHTML = `<td>${formatDate(ys.tarih)}</td><td>${ys.cariAdi}</td><td>${ys.yemAdi}</td><td>${ys.miktar}</td><td>${formatCurrency(ys.birimFiyat)}</td><td>${formatCurrency(ys.toplamTutar)}</td><td><button class="btn btn-edit dont-print" onclick="editYemSatis('${ys.id}')">Düzenle</button><button class="btn btn-delete dont-print" onclick="deleteYemSatis('${ys.id}')">Sil</button></td>`; });}
+        function renderYemSatisListesi() { yemSatisListesiBody.innerHTML = ''; db_yemSatislari.sort((a,b) => new Date(b.tarih) - new Date(a.tarih)).forEach(ys => { const row = yemSatisListesiBody.insertRow(); row.innerHTML = `<td>${formatDate(ys.tarih)}</td><td>${ys.cariAdi}</td><td>${ys.yemAdi}</td><td>${ys.miktar}</td><td>${formatCurrency(ys.birimFiyat)}</td><td>${formatCurrency(ys.toplamTutar)}</td><td class="dont-print"><button class="btn btn-edit dont-print" onclick="editYemSatis('${ys.id}')">Düzenle</button><button class="btn btn-delete dont-print" onclick="deleteYemSatis('${ys.id}')">Sil</button></td>`; });}
         function editYemSatis(id) { const yemSatis = db_yemSatislari.find(ys => ys.id === id); if (!yemSatis) return; editingYemSatisId = id; document.getElementById('yemSatisTarih').value = yemSatis.tarih; yemAlanTedarikciSelect.value = yemSatis.cariId; yemSecimiSatisSelect.value = yemSatis.yemId; document.getElementById('yemSatisMiktar').value = yemSatis.miktar; yemSatisBirimFiyatiInput.value = yemSatis.birimFiyat.toFixed(2); handleYemSatisHesaplama(); setEditingMode(yemSatisFormBaslik, yemSatisKaydetBtn, yemSatisFormTemizleBtn, editingYemSatisId, 'Yem Satış');}
         function deleteYemSatis(id) { if (confirm('Bu yem satış kaydını silmek istediğinizden emin misiniz? Stok miktarı geri eklenecektir.')) { const index = db_yemSatislari.findIndex(ys => ys.id === id); if (index > -1) { const yemSatisKaydi = db_yemSatislari[index]; const yem = db_yemler.find(y => y.id === yemSatisKaydi.yemId); if (yem) yem.stokMiktari += yemSatisKaydi.miktar; db_yemSatislari.splice(index, 1); renderYemSatisListesi(); renderCariListesi(); renderYemStokListesi(); populateYemSelect(yemSecimiAlis); populateYemSelect(yemSecimiSatis); if (editingYemSatisId === id) resetYemSatisForm(); }}}
         function resetYemSatisForm() { yemSatisForm.reset(); editingYemSatisId = null; document.getElementById('yemSatisTarih').value = getTodayForInput(); handleYemSatisHesaplama(); setEditingMode(yemSatisFormBaslik, yemSatisKaydetBtn, yemSatisFormTemizleBtn, null, 'Yem Satış');}
         function handleYemSatisHesaplama() { const miktar = parseFloat(document.getElementById('yemSatisMiktar').value) || 0; const birimFiyat = parseFloat(document.getElementById('yemSatisBirimFiyati').value) || 0; document.getElementById('yemSatisToplamTutar').value = (miktar * birimFiyat > 0) ? formatCurrency(miktar * birimFiyat) : ''; } [document.getElementById('yemSatisMiktar'), document.getElementById('yemSatisBirimFiyati')].forEach(el => el?.addEventListener('input', handleYemSatisHesaplama));
         yemSecimiSatisSelect.addEventListener('change', function() { const yem = db_yemler.find(y => y.id === this.value); yemSatisBirimFiyatiInput.value = yem ? yem.satisFiyati.toFixed(2) : ''; handleYemSatisHesaplama(); });
         function handleTedarikciOdemeKaydet(event) { event.preventDefault(); const cariId = odemeYapilanTedarikciSelect.value; const cari = db_cariler.find(c => c.id === cariId); if (!cari) { alert('Lütfen geçerli bir cari seçin.'); return; } const tutar = parseFloat(document.getElementById('odemeTutari').value); if (isNaN(tutar) || tutar <= 0) { alert('Lütfen geçerli bir ödeme tutarı girin.'); return; } const formData = { id: editingTedarikciOdemeId || generateId(), tarih: document.getElementById('odemeTarih').value, cariId: cariId, cariAdi: cari.adiSoyadi, tutar: tutar, odemeTuru: document.getElementById('odemeTuru').value, aciklama: document.getElementById('odemeAciklama').value.trim() }; if (editingTedarikciOdemeId) { const index = db_tedarikciOdemeleri.findIndex(o => o.id === editingTedarikciOdemeId); if (index > -1) db_tedarikciOdemeleri[index] = formData; } else { db_tedarikciOdemeleri.push(formData); } renderTedarikciOdemeListesi(); renderCariListesi(); resetTedarikciOdemeForm(); }
-        function renderTedarikciOdemeListesi() { tedarikciOdemeListesiBody.innerHTML = ''; db_tedarikciOdemeleri.sort((a,b) => new Date(b.tarih) - new Date(a.tarih)).forEach(o => { const row = tedarikciOdemeListesiBody.insertRow(); const odemeTuruSelect = document.getElementById('odemeTuru'); const odemeTuruText = odemeTuruSelect.options[ [...odemeTuruSelect.options].findIndex(opt => opt.value === o.odemeTuru) ]?.text || o.odemeTuru; row.innerHTML = `<td>${formatDate(o.tarih)}</td><td>${o.cariAdi}</td><td>${formatCurrency(o.tutar)}</td><td>${odemeTuruText}</td><td>${o.aciklama}</td><td><button class="btn btn-edit dont-print" onclick="editTedarikciOdeme('${o.id}')">Düzenle</button><button class="btn btn-delete dont-print" onclick="deleteTedarikciOdeme('${o.id}')">Sil</button></td>`; });}
+        function renderTedarikciOdemeListesi() { tedarikciOdemeListesiBody.innerHTML = ''; db_tedarikciOdemeleri.sort((a,b) => new Date(b.tarih) - new Date(a.tarih)).forEach(o => { const row = tedarikciOdemeListesiBody.insertRow(); const odemeTuruSelect = document.getElementById('odemeTuru'); const odemeTuruText = odemeTuruSelect.options[ [...odemeTuruSelect.options].findIndex(opt => opt.value === o.odemeTuru) ]?.text || o.odemeTuru; row.innerHTML = `<td>${formatDate(o.tarih)}</td><td>${o.cariAdi}</td><td>${formatCurrency(o.tutar)}</td><td>${odemeTuruText}</td><td>${o.aciklama}</td><td class="dont-print"><button class="btn btn-edit dont-print" onclick="editTedarikciOdeme('${o.id}')">Düzenle</button><button class="btn btn-delete dont-print" onclick="deleteTedarikciOdeme('${o.id}')">Sil</button></td>`; });}
         function editTedarikciOdeme(id) { const odeme = db_tedarikciOdemeleri.find(o => o.id === id); if (!odeme) return; editingTedarikciOdemeId = id; document.getElementById('odemeTarih').value = odeme.tarih; odemeYapilanTedarikciSelect.value = odeme.cariId; document.getElementById('odemeTutari').value = odeme.tutar.toFixed(2); document.getElementById('odemeTuru').value = odeme.odemeTuru; document.getElementById('odemeAciklama').value = odeme.aciklama; setEditingMode(tedarikciOdemeFormBaslik, tedarikciOdemeKaydetBtn, tedarikciOdemeFormTemizleBtn, editingTedarikciOdemeId, 'Cari Ödeme');}
         function deleteTedarikciOdeme(id) { if (confirm('Bu ödeme kaydını silmek istediğinizden emin misiniz?')) { db_tedarikciOdemeleri = db_tedarikciOdemeleri.filter(o => o.id !== id); renderTedarikciOdemeListesi(); renderCariListesi(); if (editingTedarikciOdemeId === id) resetTedarikciOdemeForm(); }}
         function resetTedarikciOdemeForm() { tedarikciOdemeForm.reset(); editingTedarikciOdemeId = null; document.getElementById('odemeTarih').value = getTodayForInput(); setEditingMode(tedarikciOdemeFormBaslik, tedarikciOdemeKaydetBtn, tedarikciOdemeFormTemizleBtn, null, 'Cari Ödeme');}
@@ -592,6 +596,13 @@
             }
             tableHTML += `</tbody><tfoot style="font-weight:bold; background-color:#e9ecef;"><tr><td>GENEL TOPLAM</td><td>${formatCurrency(genelToplamSatis)}</td><td>${formatCurrency(genelToplamMaliyet)}</td><td style="${genelNetKar >= 0 ? 'color:green;' : 'color:red;'}">${formatCurrency(genelNetKar)}</td></tr></tfoot></table>`;
             yemRaporuAlani.innerHTML = tableHTML;
+        }
+
+        function handleCariListeYazdir() {
+            const kategoriFiltre = cariKategoriFiltre;
+            const seciliKategoriText = kategoriFiltre.options[kategoriFiltre.selectedIndex].text;
+            document.getElementById('cariListeRaporBaslik').textContent = `${seciliKategoriText} Cari Listesi`;
+            handleYazdir('cari-list-printable-area', 'print-a4-active');
         }
 
         function handleYazdir(elementId, printClass) {
