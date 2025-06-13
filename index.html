@@ -43,7 +43,7 @@
             </div>
         </section>
         
-        <section id="cari-yonetimi" class="module-section hidden-section">
+        <section id="cari-yonetimi" class="module-section">
             <div class="module-header">
                 <h2>👥 Cari Yönetimi</h2>
                 <div class="search-container">
@@ -82,7 +82,7 @@
                 </div>
                 <button type="button" class="btn btn-print dont-print" id="cariListesiYazdirBtn" style="margin-top: 20px;">Listeyi Yazdır</button>
                 
-               
+             
             </div>
         </section>
 
@@ -173,12 +173,12 @@
                         <div class="form-group"><label for="raporTarihAraligi">Ay:</label><input type="month" id="raporTarihAraligi"></div>
                         <button type="button" class="btn btn-primary dont-print" id="raporOlusturBtn" style="height:45px;">Rapor Oluştur</button>
                     </div> <hr class="dont-print">
-                    <div id="report-content-to-print" class="printable-report">
+                    <div id="report-content-to-print" class="printable-content format-a5">
                         <h1 class="print-only print-title">Süt Takip Programı - Cari Hesap Özeti</h1>
                         <h4 id="raporBaslik" style="text-align:center;">Lütfen Rapor Kriterlerini Seçin</h4>
                         <div id="raporDetayAlani"></div>
                     </div>
-                    <button type="button" class="btn btn-print dont-print" id="raporYazdirBtn" style="margin-top:20px;">Özeti Yazdır (A5)</button>
+                    <button type="button" class="btn btn-print dont-print" id="raporYazdirBtn" style="margin-top:20px;">Özeti Yazdır</button>
                 </div>
             </div>
         </section>
@@ -193,12 +193,12 @@
                         <button type="button" class="btn btn-primary dont-print" id="sutRaporuOlusturBtn" style="height:45px;">Raporu Göster</button>
                         <button type="button" class="btn dont-print" id="sutRaporuTumunuGosterBtn" style="height:45px; background-color: #17a2b8;">Tümünü Göster</button>
                     </div> <hr class="dont-print">
-                    <div id="sutAlimRaporAlani" class="printable-report">
+                    <div id="sutAlimRaporAlani" class="printable-content format-a5">
                         <h1 class="print-only print-title">Süt Takip Programı - Aylık Süt Alım Detay Raporu</h1>
                         <h4 id="sutRaporuBaslik" style="text-align:center;">Lütfen Rapor Kriterlerini Seçin</h4>
                         <div id="sutRaporuDetayAlani"></div>
                     </div>
-                    <button type="button" class="btn btn-print dont-print" id="sutRaporuYazdirBtn" style="margin-top:20px;">Raporu Yazdır (A5)</button>
+                    <button type="button" class="btn btn-print dont-print" id="sutRaporuYazdirBtn" style="margin-top:20px;">Raporu Yazdır</button>
                  </div>
             </div>
         </section>
@@ -215,7 +215,7 @@
                         <button type="button" class="btn btn-primary dont-print" id="yemRaporuOlusturBtn" style="height:45px;">Raporu Göster</button>
                     </div>
                     <hr class="dont-print">
-                    <div id="yemRaporuAlani" class="printable-report-a4">
+                    <div id="yemRaporuAlani" class="printable-content format-a4">
                     </div>
                     <button type="button" class="btn btn-print dont-print" id="yemRaporuYazdirBtn" style="margin-top:20px;">Raporu Yazdır</button>
                  </div>
@@ -408,12 +408,12 @@
             cariKategoriForm.addEventListener('submit', handleCariKategoriEkle);
 
             raporOlusturBtn.addEventListener('click', handleHesapOzetiRaporuOlustur);
-            raporYazdirBtn.addEventListener('click', () => handleYazdir('report-content-to-print'));
+            raporYazdirBtn.addEventListener('click', () => handleYazdir('hesap-ozeti'));
             sutRaporuOlusturBtn.addEventListener('click', () => handleSutAlimRaporuOlustur(false));
             sutRaporuTumunuGosterBtn.addEventListener('click', () => handleSutAlimRaporuOlustur(true));
-            sutRaporuYazdirBtn.addEventListener('click', () => handleYazdir('sutAlimRaporAlani'));
+            sutRaporuYazdirBtn.addEventListener('click', () => handleYazdir('sut-alim-raporu'));
             yemRaporuOlusturBtn.addEventListener('click', handleYemKarRaporuOlustur);
-            yemRaporuYazdirBtn.addEventListener('click', handleYemRaporuYazdir);
+            yemRaporuYazdirBtn.addEventListener('click', () => handleYazdir('aylik-yem-raporu'));
         });
 
         function loadInitialData() {
@@ -524,9 +524,9 @@
         function deleteTedarikciOdeme(id) { if (confirm('Bu ödeme kaydını silmek istediğinizden emin misiniz?')) { db_tedarikciOdemeleri = db_tedarikciOdemeleri.filter(o => o.id !== id); renderTedarikciOdemeListesi(); renderCariListesi(); if (editingTedarikciOdemeId === id) resetTedarikciOdemeForm(); }}
         function resetTedarikciOdemeForm() { tedarikciOdemeForm.reset(); editingTedarikciOdemeId = null; document.getElementById('odemeTarih').value = getTodayForInput(); setEditingMode(tedarikciOdemeFormBaslik, tedarikciOdemeKaydetBtn, tedarikciOdemeFormTemizleBtn, null, 'Cari Ödeme');}
         function handleAyarlarKaydet(event) { event.preventDefault(); const yeniFiyat = parseFloat(varsayilanSutFiyatiInput.value); if (!isNaN(yeniFiyat) && yeniFiyat >= 0) { globalSettings.defaultMilkPrice = yeniFiyat; alert('Genel ayarlar kaydedildi.'); } else { alert('Lütfen geçerli bir süt fiyatı giriniz.'); }}
-        function calculateCariBakiye(cariId) { const detay = calculateCariBakiyeDetayli(cariId); return detay.bakiye; }
+        function calculateCariBakiye(cariId, endDateStr = null) { const detay = calculateCariBakiyeDetayli(cariId, endDateStr); return detay.bakiye; }
         function calculateCariBakiyeDetayli(cariId, endDateStr = null) { let endDate = null; if (endDateStr) { endDate = new Date(endDateStr); endDate.setHours(23, 59, 59, 999); } let alacak = 0; db_sutAlimlari.filter(sa => sa.cariId === cariId && (!endDate || new Date(sa.tarih) <= endDate)).forEach(sa => { alacak += sa.toplamTutar; }); let borc = 0; db_yemSatislari.filter(ys => ys.cariId === cariId && (!endDate || new Date(ys.tarih) <= endDate)).forEach(ys => { borc += ys.toplamTutar; }); db_tedarikciOdemeleri.filter(o => o.cariId === cariId && (!endDate || new Date(o.tarih) <= endDate)).forEach(o => { borc += o.tutar; }); return { alacak, borc, bakiye: alacak - borc }; }
-        function handleHesapOzetiRaporuOlustur() { const secilenCariId = raporCariSecimi.value; const secilenAyYil = raporTarihAraligi.value; if (!secilenAyYil || !secilenCariId) { alert("Lütfen bir cari ve ay seçiniz!"); return;} const [yil, ayStr] = secilenAyYil.split('-'); const ay = parseInt(ayStr); let raporHtml = ''; const cari = db_cariler.find(c => c.id === secilenCariId); raporBaslik.textContent = `${cari.adiSoyadi} - ${ayStr}/${yil} Hesap Özeti`; const prevMonthLastDay = new Date(parseInt(yil), ay-1, 0).toISOString().split('T')[0]; const devredenBakiye = calculateCariBakiye(secilenCariId, prevMonthLastDay); raporHtml += `<h5>Önceki Aydan Devreden Bakiye: <span class="${devredenBakiye >= 0 ? 'debit' : 'credit'}">${formatCurrency(devredenBakiye)} (${devredenBakiye >= 0 ? 'Alacaklı' : 'Borçlu'})</span></h5><hr>`; const ilgiliSutAlimlari = db_sutAlimlari.filter(sa => sa.cariId === secilenCariId && sa.tarih.startsWith(secilenAyYil)); let toplamSutAlimTutariAylik = 0; let toplamSutLitreAylik = 0; raporHtml += `<h5>Süt Alımları (Carinin Alacağı):</h5>`; if(ilgiliSutAlimlari.length > 0){ ilgiliSutAlimlari.forEach(sa => { toplamSutLitreAylik += sa.toplamLitre; toplamSutAlimTutariAylik += sa.toplamTutar; }); const ortalamaBirimFiyatAylik = toplamSutLitreAylik > 0 ? (toplamSutAlimTutariAylik / toplamSutLitreAylik) : 0; raporHtml += `<table border="1"><thead><tr><th>Aylık Toplam Süt Miktarı</th><th>Ortalama Birim Fiyat</th><th>Aylık Toplam Değer</th></tr></thead><tbody>`; raporHtml += `<tr><td>${toplamSutLitreAylik.toFixed(1)} Lt</td><td>${formatCurrency(ortalamaBirimFiyatAylik)}/Lt</td><td>${formatCurrency(toplamSutAlimTutariAylik)}</td></tr>`; raporHtml += `</tbody></table>`; } else { raporHtml += `<p>Bu ay için süt alım kaydı bulunamadı.</p>`; } raporHtml += `<strong>Aylık Toplam Süt Alım DEĞERİ: ${formatCurrency(toplamSutAlimTutariAylik)}</strong><hr>`; const ilgiliYemSatislari = db_yemSatislari.filter(ys => ys.cariId === secilenCariId && ys.tarih.startsWith(secilenAyYil)).sort((a,b) => new Date(a.tarih) - new Date(b.tarih)); let toplamYemSatisTutariAylik = 0; raporHtml += `<h5>Yem Satışları (Carinin Borcu):</h5>`; if(ilgiliYemSatislari.length > 0){ raporHtml += `<table border="1"><thead><tr><th>Tarih</th><th>Yem Adı</th><th>Miktar</th><th>Birim Fiyat</th><th>Tutar</th></tr></thead><tbody>`; ilgiliYemSatislari.forEach(ys => { const yem = db_yemler.find(y => y.id === ys.yemId); raporHtml += `<tr><td>${formatDate(ys.tarih)}</td><td>${ys.yemAdi}</td><td>${ys.miktar} ${yem?.birim || ''}</td><td>${formatCurrency(ys.birimFiyat)}</td><td>${formatCurrency(ys.toplamTutar)}</td></tr>`; toplamYemSatisTutariAylik += ys.toplamTutar; }); raporHtml += `</tbody></table>`; } else { raporHtml += `<p>Bu ay için yem satış kaydı bulunamadı.</p>`; } raporHtml += `<strong>Aylık Toplam Yem Satış Tutarı: ${formatCurrency(toplamYemSatisTutariAylik)}</strong><hr>`; const ilgiliOdemeler = db_tedarikciOdemeleri.filter(o => o.cariId === secilenCariId && o.tarih.startsWith(secilenAyYil)).sort((a,b) => new Date(a.tarih) - new Date(b.tarih)); let toplamOdemeTutariAylik = 0; raporHtml += `<h5>Yapılan Ödemeler (Carinin Alacağını Azaltan):</h5>`; if (ilgiliOdemeler.length > 0) { raporHtml += `<table border="1"><thead><tr><th>Tarih</th><th>Ödeme Türü</th><th>Açıklama</th><th>Tutar</th></tr></thead><tbody>`; const odemeTuruSelect = document.getElementById('odemeTuru'); ilgiliOdemeler.forEach(o => { const odemeTuruText = odemeTuruSelect.options[ [...odemeTuruSelect.options].findIndex(opt => opt.value === o.odemeTuru) ]?.text || o.odemeTuru; raporHtml += `<tr><td>${formatDate(o.tarih)}</td><td>${odemeTuruText}</td><td>${o.aciklama}</td><td>${formatCurrency(o.tutar)}</td></tr>`; toplamOdemeTutariAylik += o.tutar; }); raporHtml += `</tbody></table>`; } else { raporHtml += `<p>Bu ay için ödeme kaydı bulunamadı.</p>`; } raporHtml += `<strong>Aylık Toplam Ödeme Tutarı: ${formatCurrency(toplamOdemeTutariAylik)}</strong><hr>`; const cariAyNetDegisim = toplamSutAlimTutariAylik - toplamYemSatisTutariAylik - toplamOdemeTutariAylik; const donemSonuBakiye = devredenBakiye + cariAyNetDegisim; raporHtml += `<div class="calculation-example" style="margin-top:15px;"><p>Önceki Aydan Devir: <span class="${devredenBakiye >= 0 ? 'debit' : 'credit'}">${formatCurrency(devredenBakiye)}</span></p><p>+ Cari Ay Süt Alımları: <span class="debit">${formatCurrency(toplamSutAlimTutariAylik)}</span></p><p>- Cari Ay Yem Satışları: <span class="credit">${formatCurrency(toplamYemSatisTutariAylik)}</span></p><p>- Cari Ay Yapılan Ödemeler: <span class="credit">${formatCurrency(toplamOdemeTutariAylik)}</span></p><hr><p>DÖNEM SONU NET BAKİYE: <strong class="balance">${formatCurrency(donemSonuBakiye)} (${(donemSonuBakiye >= 0 ? 'Cari Alacaklı' : `Cari Borçlu`)})</strong></p></div>`; raporDetayAlani.innerHTML = raporHtml; }
+        function handleHesapOzetiRaporuOlustur() { const secilenCariId = raporCariSecimi.value; const secilenAyYil = raporTarihAraligi.value; if (!secilenAyYil || !secilenCariId) { alert("Lütfen bir cari ve ay seçiniz!"); return;} const [yil, ayStr] = secilenAyYil.split('-'); const ay = parseInt(ayStr); const cari = db_cariler.find(c => c.id === secilenCariId); if (!cari) { alert("Cari bulunamadı!"); return; } raporBaslik.textContent = `${cari.adiSoyadi} - ${ayStr}/${yil} Hesap Özeti`; const prevMonthLastDay = new Date(parseInt(yil), ay-1, 0).toISOString().split('T')[0]; const devredenBakiye = calculateCariBakiye(secilenCariId, prevMonthLastDay); let raporHtml = `<h5>Önceki Aydan Devreden Bakiye: <span class="${devredenBakiye >= 0 ? 'debit' : 'credit'}">${formatCurrency(devredenBakiye)} (${devredenBakiye >= 0 ? 'Alacaklı' : 'Borçlu'})</span></h5><hr>`; const ilgiliSutAlimlari = db_sutAlimlari.filter(sa => sa.cariId === secilenCariId && sa.tarih.startsWith(secilenAyYil)); let toplamSutAlimTutariAylik = 0; let toplamSutLitreAylik = 0; raporHtml += `<h5>Süt Alımları (Carinin Alacağı):</h5>`; if(ilgiliSutAlimlari.length > 0){ ilgiliSutAlimlari.forEach(sa => { toplamSutLitreAylik += sa.toplamLitre; toplamSutAlimTutariAylik += sa.toplamTutar; }); const ortalamaBirimFiyatAylik = toplamSutLitreAylik > 0 ? (toplamSutAlimTutariAylik / toplamSutLitreAylik) : 0; raporHtml += `<table border="1"><thead><tr><th>Aylık Toplam Süt Miktarı</th><th>Ortalama Birim Fiyat</th><th>Aylık Toplam Değer</th></tr></thead><tbody>`; raporHtml += `<tr><td>${toplamSutLitreAylik.toFixed(1)} Lt</td><td>${formatCurrency(ortalamaBirimFiyatAylik)}/Lt</td><td>${formatCurrency(toplamSutAlimTutariAylik)}</td></tr>`; raporHtml += `</tbody></table>`; } else { raporHtml += `<p>Bu ay için süt alım kaydı bulunamadı.</p>`; } raporHtml += `<strong>Aylık Toplam Süt Alım DEĞERİ: ${formatCurrency(toplamSutAlimTutariAylik)}</strong><hr>`; const ilgiliYemSatislari = db_yemSatislari.filter(ys => ys.cariId === secilenCariId && ys.tarih.startsWith(secilenAyYil)).sort((a,b) => new Date(a.tarih) - new Date(b.tarih)); let toplamYemSatisTutariAylik = 0; raporHtml += `<h5>Yem Satışları (Carinin Borcu):</h5>`; if(ilgiliYemSatislari.length > 0){ raporHtml += `<table border="1"><thead><tr><th>Tarih</th><th>Yem Adı</th><th>Miktar</th><th>Birim Fiyat</th><th>Tutar</th></tr></thead><tbody>`; ilgiliYemSatislari.forEach(ys => { const yem = db_yemler.find(y => y.id === ys.yemId); raporHtml += `<tr><td>${formatDate(ys.tarih)}</td><td>${ys.yemAdi}</td><td>${ys.miktar} ${yem?.birim || ''}</td><td>${formatCurrency(ys.birimFiyat)}</td><td>${formatCurrency(ys.toplamTutar)}</td></tr>`; toplamYemSatisTutariAylik += ys.toplamTutar; }); raporHtml += `</tbody></table>`; } else { raporHtml += `<p>Bu ay için yem satış kaydı bulunamadı.</p>`; } raporHtml += `<strong>Aylık Toplam Yem Satış Tutarı: ${formatCurrency(toplamYemSatisTutariAylik)}</strong><hr>`; const ilgiliOdemeler = db_tedarikciOdemeleri.filter(o => o.cariId === secilenCariId && o.tarih.startsWith(secilenAyYil)).sort((a,b) => new Date(a.tarih) - new Date(b.tarih)); let toplamOdemeTutariAylik = 0; raporHtml += `<h5>Yapılan Ödemeler (Carinin Alacağını Azaltan):</h5>`; if (ilgiliOdemeler.length > 0) { raporHtml += `<table border="1"><thead><tr><th>Tarih</th><th>Ödeme Türü</th><th>Açıklama</th><th>Tutar</th></tr></thead><tbody>`; const odemeTuruSelect = document.getElementById('odemeTuru'); ilgiliOdemeler.forEach(o => { const odemeTuruText = odemeTuruSelect.options[ [...odemeTuruSelect.options].findIndex(opt => opt.value === o.odemeTuru) ]?.text || o.odemeTuru; raporHtml += `<tr><td>${formatDate(o.tarih)}</td><td>${odemeTuruText}</td><td>${o.aciklama}</td><td>${formatCurrency(o.tutar)}</td></tr>`; toplamOdemeTutariAylik += o.tutar; }); raporHtml += `</tbody></table>`; } else { raporHtml += `<p>Bu ay için ödeme kaydı bulunamadı.</p>`; } raporHtml += `<strong>Aylık Toplam Ödeme Tutarı: ${formatCurrency(toplamOdemeTutariAylik)}</strong><hr>`; const cariAyNetDegisim = toplamSutAlimTutariAylik - toplamYemSatisTutariAylik - toplamOdemeTutariAylik; const donemSonuBakiye = devredenBakiye + cariAyNetDegisim; raporHtml += `<div class="calculation-example" style="margin-top:15px;"><p>Önceki Aydan Devir: <span class="${devredenBakiye >= 0 ? 'debit' : 'credit'}">${formatCurrency(devredenBakiye)}</span></p><p>+ Cari Ay Süt Alımları: <span class="debit">${formatCurrency(toplamSutAlimTutariAylik)}</span></p><p>- Cari Ay Yem Satışları: <span class="credit">${formatCurrency(toplamYemSatisTutariAylik)}</span></p><p>- Cari Ay Yapılan Ödemeler: <span class="credit">${formatCurrency(toplamOdemeTutariAylik)}</span></p><hr><p>DÖNEM SONU NET BAKİYE: <strong class="balance">${formatCurrency(donemSonuBakiye)} (${(donemSonuBakiye >= 0 ? 'Cari Alacaklı' : `Cari Borçlu`)})</strong></p></div>`; raporDetayAlani.innerHTML = raporHtml; }
         
         function handleSutAlimRaporuOlustur(tumu=false){
             const secilenAyYil = sutRaporuAySecimi.value;
@@ -541,8 +541,10 @@
             } else {
                 const secilenTedarikciId = sutRaporuTedarikciSecimi.value;
                 if (!secilenTedarikciId) { alert("Lütfen bir cari seçiniz!"); return; }
-                carilerToReport.push(db_cariler.find(c => c.id === secilenTedarikciId));
-                sutRaporuBaslik.textContent = `${carilerToReport[0].adiSoyadi} - ${secilenAyYil} Süt Alım Detayları`;
+                const cari = db_cariler.find(c => c.id === secilenTedarikciId);
+                if (!cari) { alert("Seçilen cari bulunamadı!"); return; }
+                carilerToReport.push(cari);
+                sutRaporuBaslik.textContent = `${cari.adiSoyadi} - ${secilenAyYil} Süt Alım Detayları`;
             }
 
             sutRaporuDetayAlani.innerHTML = '';
@@ -597,24 +599,21 @@
             const kategoriFiltreElement = cariKategoriFiltre;
             const seciliKategoriText = kategoriFiltreElement.options[kategoriFiltreElement.selectedIndex].text;
             document.getElementById('cariListeRaporBaslik').textContent = `${seciliKategoriText} Cari Listesi`;
-            handleYazdir('cari-list-printable-area');
+            handleYazdir('cari-yonetimi');
         }
 
-        function handleYemRaporuYazdir() {
-            handleYazdir('yemRaporuAlani');
-        }
+        function handleYazdir(sectionId) {
+            const sectionToPrint = document.getElementById(sectionId);
+            const reportContent = sectionToPrint.querySelector('.printable-content, #cari-list-printable-area');
 
-        function handleYazdir(elementId) {
-            const printSection = document.getElementById(elementId);
-            if (!printSection || printSection.innerHTML.trim() === "") {
-                alert("Lütfen önce rapor oluşturun.");
-                return;
+            if (!reportContent || reportContent.innerText.trim() === '' || reportContent.innerText.includes("Lütfen Rapor Kriterlerini Seçin")) {
+                 if (sectionId !== 'cari-yonetimi') {
+                    alert("Lütfen önce raporu oluşturun.");
+                    return;
+                }
             }
-            const parentSection = printSection.closest('.module-section');
             bodyElement.classList.add('print-active');
-            if (parentSection) {
-                parentSection.classList.add('print-section-active');
-            }
+            sectionToPrint.classList.add('print-section-active');
             window.print();
         }
 
