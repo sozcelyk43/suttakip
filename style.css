@@ -55,26 +55,32 @@ td .btn:not(.btn-sm) { margin-top: 0; margin-right: 5px; padding: 6px 10px; font
 
 @media print {
     body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    .dont-print { display: none !important; }
     .print-only { display: block !important; }
-    
+    .dont-print { display: none !important; }
+
     body.print-active > * { display: none !important; }
     body.print-active .main-content { display: block !important; margin: 0 !important; padding: 0 !important; }
+
     body.print-active .main-content > .module-section { display: none !important; }
     body.print-active .main-content > .print-section-active { display: block !important; }
     
     .print-section-active { border: none !important; box-shadow: none !important; }
-    .print-section-active .module-header, .print-section-active .form-section { display: none !important; }
+    .print-section-active > .container > .form-section,
+    .print-section-active > .container > .report-section > .form-grid,
+    .print-section-active .module-header,
+    .print-section-active hr { display: none !important; }
     
     table { font-size: 9pt; margin-top: 10px !important; width:100% !important; border-collapse: collapse !important;} 
     th, td { padding: 5px 8px !important; border: 1px solid #333 !important;} 
     th { background-color: #f0f0f0 !important; }
-    h1.print-title, h3.print-title, h4.print-title, h5.print-title { font-size: 14pt; text-align: center; margin-bottom: 15px; color: #000; }
+    h1.print-title, h3.print-title, h4.print-title { font-size: 14pt; text-align: center; margin-bottom: 15px; color: #000; }
     h5 { font-size: 11pt; margin-top: 15px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
-    hr { display: none; }
 }
 
 @page {
     size: A4 portrait;
     margin: 1.5cm;
+}
+.print-section-active .format-a5 {
+    @page { size: A5 portrait; margin: 1cm; }
 }
