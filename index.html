@@ -373,7 +373,7 @@
                     section.style.display = section.id === targetId ? 'block' : 'none';
                 });
                 if (targetId === 'dashboard') { updateDashboardStats(); }
-                if (targetId === 'cari-yonetimi') { populateCariKategoriFiltre(); renderGenelBakiyeOzeti(); }
+                if (targetId === 'cari-yonetimi') { populateCariKategoriFiltre();  }
                 if (targetId === 'sut-alimi') { topluGirisTarihInput.value = getTodayForInput(); populateCariKategoriSelect(topluGirisKategori); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); }
                 if (targetId === 'yem-stok-yonetimi') { populateCariSelect(yemAlisTedarikci); populateYemSelect(yemSecimiAlis); }
                 if (targetId === 'yem-satisi') { populateCariSelect(yemAlanTedarikci); populateYemSelect(yemSecimiSatis); }
@@ -430,7 +430,7 @@
             db_yemAlimlari = [ {id:generateId(), tarih:today, cariId: c2_id, cariAdi:'B Marketleri Ltd.', yemId: y1_id, yemAdi:'Süt Yemi Standart', miktar:10, birimFiyat:580, toplamTutar:5800} ];
         }
 
-        function renderAllLists() { renderCariListesi(); populateCariKategoriFiltre(); populateCariKategoriSelect(topluGirisKategori); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); renderYemStokListesi(); renderYemAlisHareketListesi(); renderYemSatisListesi(); renderTedarikciOdemeListesi(); renderCariKategoriListesi(); updateDashboardStats(); renderGenelBakiyeOzeti(); }
+        function renderAllLists() { renderCariListesi(); populateCariKategoriFiltre(); populateCariKategoriSelect(topluGirisKategori); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); renderYemStokListesi(); renderYemAlisHareketListesi(); renderYemSatisListesi(); renderTedarikciOdemeListesi(); renderCariKategoriListesi(); updateDashboardStats();  }
         function updateDashboardStats() { totalCari.textContent = db_cariler.length; totalYemCesidi.textContent = db_yemler.length; const todayStr = getTodayForInput(); const todaySutAlimCount = db_sutAlimlari.filter(sa => sa.tarih === todayStr).length; todaySutAlim.textContent = todaySutAlimCount;}
         function handleCariKaydet(event) { event.preventDefault(); const formData = { id: editingCariId || generateId(), kodu: document.getElementById('cariKodu').value, adiSoyadi: document.getElementById('cariAdiSoyadi').value, kategori: document.getElementById('cariKategori').value, durum: document.getElementById('cariDurum').value, telefon: document.getElementById('cariTelefon').value, eposta: document.getElementById('cariEposta').value, adres: document.getElementById('cariAdres').value, bankaAdi: document.getElementById('cariBankaAdi').value, iban: document.getElementById('cariIban').value, vergiDairesi: document.getElementById('cariVergiDairesi').value, vergiNo: document.getElementById('cariVergiNo').value, notlar: document.getElementById('cariNotlar').value, }; if (editingCariId) { const index = db_cariler.findIndex(c => c.id === editingCariId); if (index > -1) db_cariler[index] = formData; } else { db_cariler.push(formData); } renderAllLists(); resetCariForm(); }
         
@@ -470,22 +470,7 @@
             }
         }
         
-        function renderGenelBakiyeOzeti() {
-            let genelToplamAlacak = 0;
-            let genelToplamBorc = 0;
-            db_cariler.forEach(cari => {
-                const bakiyeDetay = calculateCariBakiyeDetayli(cari.id);
-                genelToplamAlacak += bakiyeDetay.alacak;
-                genelToplamBorc += bakiyeDetay.borc;
-            });
-            const genelBakiye = genelToplamAlacak - genelToplamBorc;
-            document.getElementById('genelToplamAlacak').textContent = formatCurrency(genelToplamAlacak);
-            document.getElementById('genelToplamBorc').textContent = formatCurrency(genelToplamBorc);
-            const genelBakiyeElement = document.getElementById('genelToplamBakiye');
-            genelBakiyeElement.textContent = formatCurrency(genelBakiye);
-            genelBakiyeElement.style.color = genelBakiye >= 0 ? 'green' : 'red';
-            genelBakiyeElement.style.fontWeight = 'bold';
-        }
+    
 
         function editCari(id) { const cari = db_cariler.find(c => c.id === id); if (!cari) return; editingCariId = id; document.getElementById('cariEditId').value = id; document.getElementById('cariKodu').value = cari.kodu || ''; document.getElementById('cariAdiSoyadi').value = cari.adiSoyadi || ''; document.getElementById('cariKategori').value = cari.kategori || ''; document.getElementById('cariDurum').value = cari.durum || 'aktif'; document.getElementById('cariTelefon').value = cari.telefon || ''; document.getElementById('cariEposta').value = cari.eposta || ''; document.getElementById('cariAdres').value = cari.adres || ''; document.getElementById('cariBankaAdi').value = cari.bankaAdi || ''; document.getElementById('cariIban').value = cari.iban || ''; document.getElementById('cariVergiDairesi').value = cari.vergiDairesi || ''; document.getElementById('cariVergiNo').value = cari.vergiNo || ''; document.getElementById('cariNotlar').value = cari.notlar || ''; setEditingMode(cariFormBaslik, cariKaydetBtn, cariFormTemizleBtn, editingCariId, 'Cari Kart');}
         function deleteCari(id) { if (confirm('Bu cariyi silmek istediğinizden emin misiniz? İlgili tüm kayıtları silinecektir!')) { db_cariler = db_cariler.filter(c => c.id !== id); db_sutAlimlari = db_sutAlimlari.filter(sa => sa.cariId !== id); db_yemSatislari = db_yemSatislari.filter(ys => ys.cariId !== id); db_tedarikciOdemeleri = db_tedarikciOdemeleri.filter(o => o.cariId !== id); renderAllLists(); if (editingCariId === id) resetCariForm(); }}
