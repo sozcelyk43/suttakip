@@ -168,7 +168,7 @@
                  <div class="list-section"><h3>Yapılan Ödemeler</h3><table><thead><tr><th>Tarih</th><th>Cari</th><th>Tutar</th><th>Tür</th><th>Açıklama</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="tedarikciOdemeListesiBody"></tbody></table></div>
             </div>
         </section>
-        <section id="hesap-ozeti" class="module-section hidden-section">
+        <section id="hesap-ozeti" class="module-section">
             <div class="module-header dont-print"><h2>📊 Cari Hesap Özeti</h2></div>
             <div class="container">
                 <div class="report-section">
@@ -187,7 +187,7 @@
                 </div>
             </div>
         </section>
-        <section id="sut-alim-raporu" class="module-section hidden-section">
+        <section id="sut-alim-raporu" class="module-section">
              <div class="module-header dont-print"><h2>🗓️ Aylık Süt Alım Raporu</h2></div>
             <div class="container">
                  <div class="report-section">
@@ -207,7 +207,7 @@
                  </div>
             </div>
         </section>
-        <section id="aylik-yem-raporu" class="module-section hidden-section">
+        <section id="aylik-yem-raporu" class="module-section">
              <div class="module-header"><h2>📈 Aylık Yem Raporu</h2></div>
              <div class="container">
                  <div class="report-section">
@@ -537,28 +537,41 @@
             const secilenAyYil = sutRaporuAySecimi.value;
             if (!secilenAyYil) { alert("Lütfen bir ay seçiniz!"); return; }
 
-            let carilerToReport = [];
+            sutRaporuDetayAlani.innerHTML = ''; 
+
             if(tumu) {
+                sutRaporuBaslik.textContent = `${secilenAyYil} Ayı Konsolide Süt Alım Raporu`;
                 const ilgiliAlimlar = db_sutAlimlari.filter(sa => sa.tarih.startsWith(secilenAyYil));
-                const cariIdler = [...new Set(ilgiliAlimlar.map(item => item.cariId))];
-                carilerToReport = db_cariler.filter(c => cariIdler.includes(c.id));
-                sutRaporuBaslik.textContent = `${secilenAyYil} Ayı Toplu Süt Alım Raporu`;
+                if (ilgiliAlimlar.length === 0) { sutRaporuDetayAlani.innerHTML = `<p>Seçili ay için süt alım kaydı bulunamadı.</p>`; return; }
+                
+                ilgiliAlimlar.sort((a, b) => {
+                    if (a.cariAdi < b.cariAdi) return -1;
+                    if (a.cariAdi > b.cariAdi) return 1;
+                    return new Date(a.tarih) - new Date(b.tarih);
+                });
+
+                let genelToplamAksam = 0, genelToplamSabah = 0, genelToplamLitre = 0, genelToplamTutar = 0;
+                let raporHtml = `<table><thead><tr><th>Cari Adı</th><th>Tarih</th><th>Akşam (Lt)</th><th>Sabah (Lt)</th><th>Günlük Toplam (Lt)</th><th>Birim Fiyat</th><th>Günlük Tutar</th></tr></thead><tbody>`;
+                
+                ilgiliAlimlar.forEach(sa => {
+                    raporHtml += `<tr><td>${sa.cariAdi}</td><td>${formatDate(sa.tarih)}</td><td>${sa.aksamLitre.toFixed(1)}</td><td>${sa.sabahLitre.toFixed(1)}</td><td>${sa.toplamLitre.toFixed(1)}</td><td>${formatCurrency(sa.birimFiyat)}</td><td>${formatCurrency(sa.toplamTutar)}</td></tr>`;
+                    genelToplamAksam += sa.aksamLitre;
+                    genelToplamSabah += sa.sabahLitre;
+                    genelToplamLitre += sa.toplamLitre;
+                    genelToplamTutar += sa.toplamTutar;
+                });
+                
+                const genelOrtalamaFiyat = genelToplamLitre > 0 ? (genelToplamTutar / genelToplamLitre) : 0;
+                raporHtml += `</tbody><tfoot style="font-weight:bold;"><tr><td colspan="2">GENEL TOPLAM</td><td>${genelToplamAksam.toFixed(1)}</td><td>${genelToplamSabah.toFixed(1)}</td><td>${genelToplamLitre.toFixed(1)}</td><td>${formatCurrency(genelOrtalamaFiyat)}</td><td>${formatCurrency(genelToplamTutar)}</td></tr></tfoot></table>`;
+                sutRaporuDetayAlani.innerHTML = raporHtml;
+
             } else {
                 const secilenTedarikciId = sutRaporuTedarikciSecimi.value;
                 if (!secilenTedarikciId) { alert("Lütfen bir cari seçiniz!"); return; }
                 const cari = db_cariler.find(c => c.id === secilenTedarikciId);
                 if (!cari) { alert("Seçilen cari bulunamadı!"); return; }
-                carilerToReport.push(cari);
+                
                 sutRaporuBaslik.textContent = `${cari.adiSoyadi} - ${secilenAyYil} Süt Alım Detayları`;
-            }
-
-            sutRaporuDetayAlani.innerHTML = '';
-            if(carilerToReport.length === 0) {
-                sutRaporuDetayAlani.innerHTML = `<p>Seçili kriterlere uygun rapor bulunamadı.</p>`;
-                return;
-            }
-
-            carilerToReport.forEach(cari => {
                 const ilgiliSutAlimlari = db_sutAlimlari.filter(sa => sa.cariId === cari.id && sa.tarih.startsWith(secilenAyYil)).sort((a,b) => new Date(a.tarih) - new Date(b.tarih));
                 if (ilgiliSutAlimlari.length > 0) {
                     let raporHtml = `<h5>${cari.adiSoyadi}</h5>`;
@@ -566,10 +579,12 @@
                     raporHtml += `<table><thead><tr><th>Tarih</th><th>Akşam (Lt)</th><th>Sabah (Lt)</th><th>Günlük Toplam (Lt)</th><th>Birim Fiyat</th><th>Günlük Tutar</th></tr></thead><tbody>`; 
                     ilgiliSutAlimlari.forEach(sa => { raporHtml += `<tr><td>${formatDate(sa.tarih)}</td><td>${sa.aksamLitre.toFixed(1)}</td><td>${sa.sabahLitre.toFixed(1)}</td><td>${sa.toplamLitre.toFixed(1)}</td><td>${formatCurrency(sa.birimFiyat)}</td><td>${formatCurrency(sa.toplamTutar)}</td></tr>`; genelToplamLitre += sa.toplamLitre; genelToplamTutar += sa.toplamTutar; }); 
                     const genelOrtalamaFiyat = genelToplamLitre > 0 ? (genelToplamTutar / genelToplamLitre) : 0; 
-                    raporHtml += `</tbody><tfoot><tr style="font-weight:bold;"><td>TOPLAM</td><td></td><td></td><td>${genelToplamLitre.toFixed(1)} Lt</td><td>${formatCurrency(genelOrtalamaFiyat)}</td><td>${formatCurrency(genelToplamTutar)}</td></tr></tfoot></table><hr>`;
-                    sutRaporuDetayAlani.innerHTML += raporHtml;
+                    raporHtml += `</tbody><tfoot><tr style="font-weight:bold;"><td>TOPLAM</td><td></td><td></td><td>${genelToplamLitre.toFixed(1)} Lt</td><td>${formatCurrency(genelOrtalamaFiyat)}</td><td>${formatCurrency(genelToplamTutar)}</td></tr></tfoot></table>`;
+                    sutRaporuDetayAlani.innerHTML = raporHtml;
+                } else {
+                    sutRaporuDetayAlani.innerHTML = `<p>Seçili cari için bu ayda süt alım kaydı bulunamadı.</p>`;
                 }
-            });
+            }
         }
         
         function handleYemKarRaporuOlustur() {
@@ -609,8 +624,7 @@
 
         function handleYazdir(sectionId) {
             const sectionToPrint = document.getElementById(sectionId);
-            const reportContent = sectionToPrint.querySelector('.printable-content, #cari-list-printable-area');
-
+            const reportContent = sectionToPrint.querySelector('.printable-content, #cari-list-printable-area, #yemRaporuAlani');
             if (!reportContent || reportContent.innerText.trim() === '' || reportContent.innerText.includes("Lütfen Rapor Kriterlerini Seçin")) {
                  if (sectionId !== 'cari-yonetimi') {
                     alert("Lütfen önce raporu oluşturun.");
