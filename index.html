@@ -411,19 +411,12 @@ function initializeApp() {
 
 async function loadAndRenderAllData() {
     try {
-        console.log("Test Başladı:updatedash ");
+        // SADECE BU SATIR AKTİF KALSIN
         await Promise.all([
-            renderCariListesi(),
-            //renderYemStokListesi(), 
-            //renderOdemeListesi(),
-            renderCariKategoriListesi(), 
-            populateCariKategoriFiltre(),
-           populateCariKategoriSelect(document.getElementById('topluGirisKategori')),
-         updateDashboardStats()
+            renderCariListesi() 
         ]);
-        console.log("Test Başarılı: ");
     } catch (error) { 
-        console.error("Test Başarısız: Hata carikategorifiltree!", error); 
+        console.error("Hata renderCariListesi fonksiyonunda:", error); 
     }
 }
 function generateId() { return db.collection('_').doc().id; }
