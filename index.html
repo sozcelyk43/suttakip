@@ -410,15 +410,24 @@ function initializeApp() {
 }
 
 async function loadAndRenderAllData() {
-    try {
-        await Promise.all([
-            renderCariListesi(), renderYemStokListesi(), renderOdemeListesi(), renderCariKategoriListesi(), 
-            populateCariKategoriFiltre(), populateCariKategoriSelect(document.getElementById('topluGirisKategori')),
-            updateDashboardStats()]);
-    } catch (error) { console.error("Test Başarısız", error); 
-    }
-}
+    console.log("Veri yükleme fonksiyonları kontrollü bir şekilde başlatılıyor...");
 
+    // Promise.all yerine her fonksiyonu ayrı ayrı çalıştırıyoruz.
+    // Bu sayede, biri (örneğin var olmayan bir koleksiyonu okumaya çalışan) hata verse bile
+    // diğerleri çalışmaya devam eder ve uygulama çökmez.
+    
+    // Her bir fonksiyonu kendi try-catch bloğu içine alarak hataları ayrı ayrı yakalıyoruz.
+    // console.error yerine console.warn kullanarak, bunların beklenen hatalar olabileceğini belirtiyoruz.
+    try { await renderCariListesi(); } catch (e) { console.warn("Cari listesi yüklenemedi (koleksiyon henüz oluşturulmamış olabilir)."); }
+    try { await renderYemStokListesi(); } catch (e) { console.warn("Yem stoku yüklenemedi (koleksiyon henüz oluşturulmamış olabilir)."); }
+    try { await renderOdemeListesi(); } catch (e) { console.warn("Ödeme listesi yüklenemedi (koleksiyon henüz oluşturulmamış olabilir)."); }
+    try { await renderCariKategoriListesi(); } catch (e) { console.warn("Cari kategori listesi yüklenemedi (koleksiyon henüz oluşturulmamış olabilir)."); }
+    try { await populateCariKategoriFiltre(); } catch (e) { console.warn("Cari kategori filtresi doldurulamadı."); }
+    try { await populateCariKategoriSelect(document.getElementById('topluGirisKategori')); } catch (e) { console.warn("Toplu giriş kategorisi doldurulamadı."); }
+    try { await updateDashboardStats(); } catch (e) { console.warn("Panel istatistikleri güncellenemedi."); }
+
+    console.log("Veri yükleme denemeleri tamamlandı. Uygulama arayüzü şimdi kullanılabilir olmalı.");
+}
 
 function generateId() { return db.collection('_').doc().id; }
 function formatDate(dateString) { if (!dateString) return ''; const date = new Date(dateString); const userTimezoneOffset = date.getTimezoneOffset() * 60000; return new Date(date.getTime() + userTimezoneOffset).toLocaleDateString('tr-TR'); }
