@@ -52,6 +52,22 @@ tfoot tr { background-color: #e9ecef; font-weight: bold; color: #2c3e50; }
 .role-calisan a[href="#yem-stok-yonetimi"], .role-calisan a[href="#tahsilat-ve-odemeler"], .role-calisan a[href="#hesap-ozeti"], .role-calisan a[href="#sut-alim-raporu"], .role-calisan a[href="#aylik-yem-raporu"], .role-calisan a[href="#ayarlar"] { display: none; }
 .role-calisan #cari-yonetimi .dont-calisan { display: none !important; }
 .role-admin .dont-admin { display: none !important; }
+.ayarlar-ust-bolum {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-start;
+}
+.ayarlar-ust-bolum > .settings-section {
+    flex: 1;
+    min-width: 300px;
+}
+#sifreDegistirForm {
+    grid-template-columns: 1fr !important;
+}
+#sifreDegistirForm button {
+    width: 100%;
+}
 
 @media print {
     body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
