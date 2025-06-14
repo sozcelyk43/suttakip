@@ -415,15 +415,15 @@ async function loadAndRenderAllData() {
         await Promise.all([
             renderCariListesi(),
             //renderYemStokListesi(), 
-            renderOdemeListesi(),
-           // renderCariKategoriListesi(), 
+            //renderOdemeListesi(),
+            renderCariKategoriListesi(), 
             //populateCariKategoriFiltre(),
            // populateCariKategoriSelect(document.getElementById('topluGirisKategori')),
           //  updateDashboardStats()
         ]);
         console.log("Test Başarılı: ");
     } catch (error) { 
-        console.error("Test Başarısız: Hata renderodeme!", error); 
+        console.error("Test Başarısız: Hata carikategori!", error); 
     }
 }
 function generateId() { return db.collection('_').doc().id; }
