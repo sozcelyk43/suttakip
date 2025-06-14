@@ -414,12 +414,12 @@ async function loadAndRenderAllData() {
         console.log("Test Başladı: Sadece renderCariListesi() çalıştırılıyor...");
         await Promise.all([
             renderCariListesi(),
-            renderYemStokListesi(), 
-            // renderOdemeListesi(),
-            // renderCariKategoriListesi(), 
-            // populateCariKategoriFiltre(),
-            // populateCariKategoriSelect(document.getElementById('topluGirisKategori')),
-            // updateDashboardStats()
+            //renderYemStokListesi(), 
+            renderOdemeListesi(),
+            renderCariKategoriListesi(), 
+            populateCariKategoriFiltre(),
+            populateCariKategoriSelect(document.getElementById('topluGirisKategori')),
+            updateDashboardStats()
         ]);
         console.log("Test Başarılı: renderCariListesi() hata vermedi.");
     } catch (error) { 
