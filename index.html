@@ -616,6 +616,23 @@ async function deleteCari(id) {
         }
     }
 }
+function resetYemTanimForm() {
+    const yemTanimForm = document.getElementById('yemTanimForm');
+    const yemTanimFormBaslik = document.getElementById('yemTanimFormBaslik');
+    const yemTanimKaydetBtn = document.getElementById('yemTanimKaydetBtn');
+    const yemTanimFormTemizleBtn = document.getElementById('yemTanimFormTemizleBtn');
+    
+    yemTanimForm.reset();
+    editingYemTanimId = null;
+    document.getElementById('yemTanimEditId').value = '';
+    
+    // Formu "Yeni Kayıt" moduna geri al
+    if(yemTanimFormBaslik) yemTanimFormBaslik.textContent = 'Yeni Yem Tanımla';
+    if(yemTanimKaydetBtn) yemTanimKaydetBtn.textContent = 'Kaydet';
+    if(yemTanimFormTemizleBtn) yemTanimFormTemizleBtn.style.display = 'none';
+}
+
+        
 function resetCariForm(){ 
     const cariForm = document.getElementById('cariForm');
     const cariFormBaslik = document.getElementById('cariFormBaslik');
