@@ -417,13 +417,13 @@ async function loadAndRenderAllData() {
             //renderYemStokListesi(), 
             //renderOdemeListesi(),
             renderCariKategoriListesi(), 
-            //populateCariKategoriFiltre(),
+            populateCariKategoriFiltre(),
            // populateCariKategoriSelect(document.getElementById('topluGirisKategori')),
           //  updateDashboardStats()
         ]);
         console.log("Test Başarılı: ");
     } catch (error) { 
-        console.error("Test Başarısız: Hata carikategori!", error); 
+        console.error("Test Başarısız: Hata carikategorifiltree!", error); 
     }
 }
 function generateId() { return db.collection('_').doc().id; }
