@@ -561,7 +561,141 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
     }
 }
 
+async function handleHesapOzetiRaporuOlustur() {
+    const cariId = document.getElementById('raporCariSecimi').value;
+    const ayYil = document.getElementById('raporTarihAraligi').value;
+    const raporBaslik = document.getElementById('raporBaslik');
+    const raporDetayAlani = document.getElementById('raporDetayAlani');
 
+    if (!cariId || !ayYil) {
+        alert("Lütfen cari ve ay seçimi yapın.");
+        raporDetayAlani.innerHTML = '';
+        raporBaslik.textContent = 'Lütfen Rapor Kriterlerini Seçin';
+        return;
+    }
+
+    const cariAdi = document.getElementById('raporCariSecimi').options[document.getElementById('raporCariSecimi').selectedIndex].text;
+    const [year, month] = ayYil.split('-');
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
+    const oncekiAyEndDate = new Date(year, month - 1, 0);
+
+    raporBaslik.textContent = `${cariAdi} - ${month}/${year} Hesap Özeti`;
+    raporDetayAlani.innerHTML = '<p>Rapor oluşturuluyor, lütfen bekleyin...</p>';
+
+    try {
+        // 1. Adım: Önceki aydan devreden bakiyeyi hesapla
+        let devredenBakiye = 0;
+        const koleksiyonlar = ['sut_alimlari', 'yem_satislari', 'odemeVeTahsilatlar'];
+        const devirTarihiStr = oncekiAyEndDate.toISOString().split('T')[0];
+
+        for (const koleksiyon of koleksiyonlar) {
+            const snapshot = await db.collection(koleksiyon)
+                .where('sahipId', '==', currentUserId)
+                .where('cariId', '==', cariId)
+                .where('tarih', '<=', devirTarihiStr)
+                .get();
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (koleksiyon === 'sut_alimlari') devredenBakiye += data.toplamTutar; // Cari alacaklanır
+                else if (koleksiyon === 'yem_satislari') devredenBakiye -= data.toplamTutar; // Cari borçlanır
+                else if (koleksiyon === 'odemeVeTahsilatlar') {
+                    if (data.islemTuru === 'tahsilat') devredenBakiye += data.tutar; // Cari alacaklanır
+                    else devredenBakiye -= data.tutar; // Cari borçlanır (ona ödeme yapılmış)
+                }
+            });
+        }
+
+        // 2. Adım: Seçili aydaki tüm hareketleri çek
+        let hareketler = [];
+        const startDateStr = startDate.toISOString().split('T')[0];
+        const endDateStr = endDate.toISOString().split('T')[0];
+
+        // Süt Alımları (Alacak)
+        const sutSnapshot = await db.collection('sut_alimlari').where('sahipId', '==', currentUserId).where('cariId', '==', cariId).where('tarih', '>=', startDateStr).where('tarih', '<=', endDateStr).get();
+        sutSnapshot.forEach(doc => {
+            const data = doc.data();
+            hareketler.push({ tarih: data.tarih, aciklama: `Süt Alımı (${data.toplam.toFixed(2)} Lt)`, borc: 0, alacak: data.toplamTutar });
+        });
+
+        // Yem Satışları (Borç)
+        const yemSnapshot = await db.collection('yem_satislari').where('sahipId', '==', currentUserId).where('cariId', '==', cariId).where('tarih', '>=', startDateStr).where('tarih', '<=', endDateStr).get();
+        yemSnapshot.forEach(doc => {
+            const data = doc.data();
+            hareketler.push({ tarih: data.tarih, aciklama: 'Yem Satışı', borc: data.toplamTutar, alacak: 0 });
+        });
+
+        // Ödeme ve Tahsilatlar
+        const odemeSnapshot = await db.collection('odemeVeTahsilatlar').where('sahipId', '==', currentUserId).where('cariId', '==', cariId).where('tarih', '>=', startDateStr).where('tarih', '<=', endDateStr).get();
+        odemeSnapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.islemTuru === 'tahsilat') {
+                hareketler.push({ tarih: data.tarih, aciklama: data.aciklama || 'Tahsilat', borc: 0, alacak: data.tutar });
+            } else {
+                hareketler.push({ tarih: data.tarih, aciklama: data.aciklama || 'Ödeme', borc: data.tutar, alacak: 0 });
+            }
+        });
+
+        // 3. Adım: Tüm hareketleri tarihe göre sırala
+        hareketler.sort((a, b) => new Date(a.tarih) - new Date(b.tarih));
+
+        // 4. Adım: HTML tablosunu oluştur
+        let bakiye = devredenBakiye;
+        let ayIciBorc = 0;
+        let ayIciAlacak = 0;
+
+        let tableHTML = `
+            <table class="report-table">
+                <thead>
+                    <tr><th>Tarih</th><th>Açıklama</th><th>Borç</th><th>Alacak</th><th>Bakiye</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="4"><strong>Önceki Aydan Devir</strong></td>
+                        <td><strong>${formatCurrency(devredenBakiye)}</strong></td>
+                    </tr>
+        `;
+
+        hareketler.forEach(h => {
+            bakiye = bakiye - h.borc + h.alacak;
+            ayIciBorc += h.borc;
+            ayIciAlacak += h.alacak;
+            tableHTML += `
+                <tr>
+                    <td>${formatDate(h.tarih)}</td>
+                    <td>${h.aciklama}</td>
+                    <td>${h.borc > 0 ? formatCurrency(h.borc) : ''}</td>
+                    <td>${h.alacak > 0 ? formatCurrency(h.alacak) : ''}</td>
+                    <td>${formatCurrency(bakiye)}</td>
+                </tr>
+            `;
+        });
+
+        tableHTML += `
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2"><strong>Ay İçi Toplamları</strong></td>
+                        <td><strong>${formatCurrency(ayIciBorc)}</strong></td>
+                        <td><strong>${formatCurrency(ayIciAlacak)}</strong></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4"><strong>AY SONU GENEL BAKİYE</strong></td>
+                        <td><strong>${formatCurrency(bakiye)}</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        `;
+
+        raporDetayAlani.innerHTML = tableHTML;
+
+    } catch (error) {
+        console.error("Hesap özeti raporu oluşturulurken hata:", error);
+        raporDetayAlani.innerHTML = `<p style="color:red;">Rapor oluşturulurken bir hata oluştu. Bu sorgu için bir Firestore dizini (index) oluşturmanız gerekebilir. Lütfen tarayıcı konsolunu (F12) kontrol edin.</p>`;
+    }
+}
         
 async function handleYemAlisKaydet(event) {
     event.preventDefault();
