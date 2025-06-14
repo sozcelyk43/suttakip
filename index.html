@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Süt Takip Programı - Tam Sürüm</title>
     <link rel="stylesheet" href="style.css">
+    <meta name="theme-color" content="#343a40">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icon-192x192.png">
 </head>
 <body>
     <div class="sidebar">
@@ -236,6 +239,16 @@
                 <hr>
                 <div class="settings-section"><h3>Cari Kategori/Köy Tanımları</h3><form id="cariKategoriForm" action="#"><div class="form-grid" style="grid-template-columns: 1fr auto; align-items:end;"><div class="form-group" style="margin-bottom:0;"><label for="yeniCariKategoriAdi">Yeni Ad:</label><input type="text" id="yeniCariKategoriAdi" required></div><button type="submit" class="btn dont-print" style="height:45px;">Ekle</button></div></form><div class="list-section" style="margin-top:20px;"><h4>Tanımlı Kategoriler/Köyler</h4><ul id="cariKategoriListesiUl"></ul></div></div>
                 <hr>
+                <div class="settings-section">
+                    <h3>Şifre Değiştir</h3>
+                    <form id="sifreDegistirForm" class="form-grid" style="grid-template-columns: 1fr 1fr 1fr auto; align-items: end;">
+                        <div class="form-group"><label for="eskiSifre">Eski Şifre:</label><input type="password" id="eskiSifre" required></div>
+                        <div class="form-group"><label for="yeniSifre">Yeni Şifre:</label><input type="password" id="yeniSifre" required></div>
+                        <div class="form-group"><label for="yeniSifreTekrar">Yeni Şifre (Tekrar):</label><input type="password" id="yeniSifreTekrar" required></div>
+                        <button type="submit" class="btn btn-primary" style="height: 45px;">Güncelle</button>
+                    </form>
+                </div>
+                <hr class="dont-calisan">
                 <div class="settings-section dont-calisan"><h3>Kullanıcı Yönetimi</h3><form id="kullaniciForm"><input type="hidden" id="kullaniciEditId"><div class="form-grid">
                     <div class="form-group"><label for="kullaniciAdi">Kullanıcı Adı:</label><input type="text" id="kullaniciAdi" required></div>
                     <div class="form-group"><label for="kullaniciSifre">Şifre:</label><input type="password" id="kullaniciSifre" required></div>
@@ -246,8 +259,9 @@
     </div>
 
     <script>
+        const currentUserId = sessionStorage.getItem('userId');
         const currentUserRole = sessionStorage.getItem('userRole');
-        if (!currentUserRole) {
+        if (!currentUserRole || !currentUserId) {
             window.location.href = 'login.html';
         }
 
@@ -258,10 +272,7 @@
         let db_yemAlimlari = [];
         let db_yemSatislari = [];
         let db_odemeVeTahsilatlar = [];
-        let db_kullanicilar = [
-            {id: 'adminuser', kullaniciAdi: 'admin', sifre: '123', rol: 'admin'},
-            {id: generateId(), kullaniciAdi: 'calisan', sifre: '456', rol: 'calisan'}
-        ];
+        let db_kullanicilar = [];
         let globalSettings = { defaultMilkPrice: 15.00 };
 
         let editingCariId = null, editingYemTanimId = null, editingYemAlisId = null, editingYemSatisId = null, editingOdemeId = null, editingKullaniciId = null;
@@ -303,7 +314,8 @@
         const topluGirisTarihInput = document.getElementById('topluGirisTarih');
         const topluGirisKategoriSelect = document.getElementById('topluGirisKategori');
         const kullaniciForm = document.getElementById('kullaniciForm'), kullaniciKaydetBtn = document.getElementById('kullaniciKaydetBtn'), kullaniciListesiBody = document.getElementById('kullaniciListesiBody');
-        
+        const sifreDegistirForm = document.getElementById('sifreDegistirForm');
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
@@ -332,13 +344,14 @@
         function handleLogout(event) {
             event.preventDefault();
             sessionStorage.removeItem('userRole');
+            sessionStorage.removeItem('userId');
             window.location.href = 'login.html';
         }
 
         function renderSutAlimGecmisi() {
             const tarih = document.getElementById('topluGirisTarih').value;
             const gecmisTarihSpan = document.getElementById('gecmisTarihSpan');
-            
+            if(!gecmisTarihSpan) return;
             gecmisTarihSpan.textContent = formatDate(tarih) || 'Tüm Zamanlar';
             sutAlimGecmisiHeader.innerHTML = '';
             sutAlimGecmisiBody.innerHTML = ''; 
@@ -418,6 +431,7 @@
             ayarlarForm.addEventListener('submit', handleAyarlarKaydet);
             cariKategoriForm.addEventListener('submit', handleCariKategoriEkle);
             kullaniciForm.addEventListener('submit', handleKullaniciKaydet);
+            sifreDegistirForm.addEventListener('submit', handleSifreDegistir);
 
             raporOlusturBtn.addEventListener('click', handleHesapOzetiRaporuOlustur);
             raporYazdirBtn.addEventListener('click', () => handleYazdir('hesap-ozeti'));
@@ -430,6 +444,17 @@
         });
 
         function loadInitialData() {
+            const storedUsers = localStorage.getItem('sutTakipKullanicilari');
+            if (storedUsers) {
+                db_kullanicilar = JSON.parse(storedUsers);
+            } else {
+                db_kullanicilar = [
+                    {id: 'adminuser', kullaniciAdi: 'admin', sifre: '123', rol: 'admin'},
+                    {id: generateId(), kullaniciAdi: 'calisan', sifre: '456', rol: 'calisan'}
+                ];
+                localStorage.setItem('sutTakipKullanicilari', JSON.stringify(db_kullanicilar));
+            }
+            
             const c1_id = generateId(); const c2_id = generateId(); const c3_id = generateId();
             db_cariler = [ {id: c1_id, kodu: 'C001', adiSoyadi: 'A Ticaret A.Ş.', kategori: 'A Köyü', durum: 'aktif', telefon: '05429876543'}, {id: c2_id, kodu: 'C002', adiSoyadi: 'B Marketleri Ltd.', kategori: 'Merkez', durum: 'pasif', telefon: '02321112233'}, {id: c3_id, kodu: 'C003', adiSoyadi: 'Cemil Çiftçi', kategori: 'A Köyü', durum: 'aktif', telefon: '05321234567'} ];
             db_cariKategorileri = [ {id: generateId(), ad: 'A Köyü'}, {id: generateId(), ad: 'B Mahallesi'}, {id: generateId(), ad: 'Merkez'} ];
@@ -500,7 +525,6 @@
         function editYemTanim(id) { const yem = db_yemler.find(y => y.id === id); if (!yem) return; editingYemTanimId = id; document.getElementById('yemKodu').value = yem.kod; document.getElementById('yemAdi').value = yem.ad; document.getElementById('yemKategorisi').value = yem.kategori; document.getElementById('yemBirimi').value = yem.birim; document.getElementById('yemAlisFiyati').value = yem.alisFiyati.toFixed(2); document.getElementById('yemSatisFiyati').value = yem.satisFiyati.toFixed(2); setEditingMode(yemTanimFormBaslik, yemTanimKaydetBtn, yemTanimFormTemizleBtn, editingYemTanimId, 'Yem Tanım');}
         function deleteYemTanim(id) { if (confirm('Bu yemi silmek istediğinizden emin misiniz? İlgili alış ve satış hareketleri de silinecektir!')) { db_yemler = db_yemler.filter(y => y.id !== id); db_yemAlimlari = db_yemAlimlari.filter(ya => ya.yemId !== id); db_yemSatislari = db_yemSatislari.filter(ys => ys.yemId !== id); renderAllLists(); if(editingYemTanimId === id) resetYemTanimForm(); }}
         function resetYemTanimForm() { yemTanimForm.reset(); editingYemTanimId = null; setEditingMode(yemTanimFormBaslik, yemTanimKaydetBtn, yemTanimFormTemizleBtn, null, 'Yem Tanım');}
-        function populateYemSelect(selectElement, defaultText = "Yem Seçiniz...") { if(!selectElement) return; const currentValue = selectElement.value; selectElement.innerHTML = ''; const firstOption = document.createElement('option'); firstOption.value = ""; firstOption.textContent = defaultText; selectElement.appendChild(firstOption); db_yemler.sort((a,b) => a.ad.localeCompare(b.ad)).forEach(y => { const option = document.createElement('option'); option.value = y.id; option.textContent = `${y.ad} (${y.kod}) - Stok: ${y.stokMiktari} ${y.birim}`; selectElement.appendChild(option); }); if (db_yemler.find(y => y.id === currentValue)) { selectElement.value = currentValue; }}
         function handleYemAlisKaydet(event) { event.preventDefault(); const yemId = yemSecimiAlisSelect.value; const yem = db_yemler.find(y => y.id === yemId); if (!yem) { alert('Lütfen geçerli bir yem seçin.'); return; } const alinanMiktar = parseInt(document.getElementById('yemAlisMiktar').value) || 0; if (alinanMiktar <= 0) { alert('Alınan miktar pozitif olmalıdır.'); return; } const formData = { id: editingYemAlisId || generateId(), tarih: document.getElementById('yemAlisTarih').value, cariId: yemAlisTedarikciSelect.value, cariAdi: yemAlisTedarikciSelect.options[yemAlisTedarikciSelect.selectedIndex]?.text.split(' (')[0] || 'Bilinmiyor', yemId: yemId, yemAdi: yem.ad, miktar: alinanMiktar, birimFiyat: parseFloat(yemAlisBirimFiyatiInput.value) || 0, }; formData.toplamTutar = formData.miktar * formData.birimFiyat; if (editingYemAlisId) { const oldAlis = db_yemAlimlari.find(ya => ya.id === editingYemAlisId); if(oldAlis){ const eskiYemStok = db_yemler.find(y => y.id === oldAlis.yemId); if (eskiYemStok) eskiYemStok.stokMiktari -= oldAlis.miktar; } const index = db_yemAlimlari.findIndex(ya => ya.id === editingYemAlisId); if(index > -1) db_yemAlimlari[index] = formData; } else { db_yemAlimlari.push(formData); } yem.stokMiktari += formData.miktar; renderYemAlisHareketListesi(); renderYemStokListesi(); populateYemSelect(yemSecimiAlis); populateYemSelect(yemSecimiSatis); resetYemAlisForm(); }
         function renderYemAlisHareketListesi() { yemAlisHareketListesiBody.innerHTML = ''; db_yemAlimlari.sort((a,b) => new Date(b.tarih) - new Date(a.tarih)).forEach(ya => { const row = yemAlisHareketListesiBody.insertRow(); row.innerHTML = `<td>${formatDate(ya.tarih)}</td><td>${ya.yemAdi}</td><td>${ya.miktar}</td><td>${ya.cariAdi}</td><td>${formatCurrency(ya.birimFiyat)}</td><td>${formatCurrency(ya.toplamTutar)}</td><td class="dont-print"><button class="btn btn-edit dont-print" onclick="editYemAlis('${ya.id}')">Düzenle</button><button class="btn btn-delete dont-print" onclick="deleteYemAlis('${ya.id}')">Sil</button></td>`; });}
         function editYemAlis(id) { const yemAlis = db_yemAlimlari.find(ya => ya.id === id); if (!yemAlis) return; editingYemAlisId = id; document.getElementById('yemAlisTarih').value = yemAlis.tarih; yemAlisTedarikciSelect.value = yemAlis.cariId; yemSecimiAlisSelect.value = yemAlis.yemId; document.getElementById('yemAlisMiktar').value = yemAlis.miktar; yemAlisBirimFiyatiInput.value = yemAlis.birimFiyat.toFixed(2); handleYemAlisHesaplama(); setEditingMode(yemAlisFormBaslik, yemAlisKaydetBtn, yemAlisFormTemizleBtn, editingYemAlisId, 'Yem Alış');}
@@ -558,7 +582,7 @@
                     let genelToplamLitre = 0; let genelToplamTutar = 0;
                     ilgiliSutAlimlari.forEach(sa => { raporHtml += `<tr><td>${formatDate(sa.tarih)}</td><td>${sa.aksamLitre.toFixed(1)}</td><td>${sa.sabahLitre.toFixed(1)}</td><td>${sa.toplamLitre.toFixed(1)}</td><td>${formatCurrency(sa.birimFiyat)}</td><td>${formatCurrency(sa.toplamTutar)}</td></tr>`; genelToplamLitre += sa.toplamLitre; genelToplamTutar += sa.toplamTutar; }); 
                     const genelOrtalamaFiyat = genelToplamLitre > 0 ? (genelToplamTutar / genelToplamLitre) : 0; 
-                    raporHtml += `</tbody><tfoot><tr style="font-weight:bold;"><td>TOPLAM</td><td></td><td></td><td>${genelToplamLitre.toFixed(1)} Lt</td><td>${formatCurrency(genelOrtalamaFiyat)}</td><td>${formatCurrency(genelToplamTutar)}</td></tr></tfoot></table>`;
+                    raporHtml += `</tbody><tfoot style="font-weight:bold;"><td>TOPLAM</td><td></td><td></td><td>${genelToplamLitre.toFixed(1)} Lt</td><td>${formatCurrency(genelOrtalamaFiyat)}</td><td>${formatCurrency(genelToplamTutar)}</td></tr></tfoot></table>`;
                     sutRaporuDetayAlani.innerHTML = raporHtml;
                 } else {
                     sutRaporuDetayAlani.innerHTML = `<p>Seçili cari için bu ayda süt alım kaydı bulunamadı.</p>`;
@@ -669,21 +693,50 @@
                 row.innerHTML = `<td>${user.kullaniciAdi}</td><td>Çalışan</td><td class="dont-print"><button class="btn btn-delete btn-sm" onclick="deleteKullanici('${user.id}')">Sil</button></td>`;
             });
         }
+
         function handleKullaniciKaydet(event) {
             event.preventDefault();
             const kullaniciAdi = document.getElementById('kullaniciAdi').value;
             const sifre = document.getElementById('kullaniciSifre').value;
             if(!kullaniciAdi || !sifre) { alert("Kullanıcı adı ve şifre boş bırakılamaz."); return; }
+            if (db_kullanicilar.some(user => user.kullaniciAdi === kullaniciAdi)) {
+                alert("Bu kullanıcı adı zaten mevcut. Lütfen farklı bir kullanıcı adı seçin.");
+                return;
+            }
             db_kullanicilar.push({ id: generateId(), kullaniciAdi: kullaniciAdi, sifre: sifre, rol: 'calisan' });
-            alert("Yeni çalışan başarıyla eklendi. Bu veri, sayfa yenilenince kaybolacaktır.");
+            localStorage.setItem('sutTakipKullanicilari', JSON.stringify(db_kullanicilar));
+            alert("Yeni çalışan başarıyla eklendi.");
             renderKullaniciListesi();
             kullaniciForm.reset();
         }
+
         function deleteKullanici(id) {
             if(confirm("Bu kullanıcıyı silmek istediğinizden emin misiniz?")) {
                 db_kullanicilar = db_kullanicilar.filter(user => user.id !== id);
+                localStorage.setItem('sutTakipKullanicilari', JSON.stringify(db_kullanicilar));
                 renderKullaniciListesi();
             }
+        }
+
+        function handleSifreDegistir(event) {
+            event.preventDefault();
+            const eskiSifre = document.getElementById('eskiSifre').value;
+            const yeniSifre = document.getElementById('yeniSifre').value;
+            const yeniSifreTekrar = document.getElementById('yeniSifreTekrar').value;
+
+            const userIndex = db_kullanicilar.findIndex(user => user.id === currentUserId);
+            if(userIndex === -1) { alert("Kullanıcı bulunamadı."); return; }
+            
+            const currentUser = db_kullanicilar[userIndex];
+
+            if(currentUser.sifre !== eskiSifre) { alert("Eski şifreniz yanlış!"); return; }
+            if(!yeniSifre) { alert("Yeni şifre boş olamaz!"); return; }
+            if(yeniSifre !== yeniSifreTekrar) { alert("Yeni şifreler uyuşmuyor!"); return; }
+
+            db_kullanicilar[userIndex].sifre = yeniSifre;
+            localStorage.setItem('sutTakipKullanicilari', JSON.stringify(db_kullanicilar));
+            alert("Şifreniz başarıyla güncellendi!");
+            sifreDegistirForm.reset();
         }
 
         window.onafterprint = () => {
