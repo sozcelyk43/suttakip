@@ -18,7 +18,7 @@ h4 { color: #333; margin-top: 15px; margin-bottom: 10px; }
 .form-section, .list-section, .report-section, .settings-section { margin-bottom: 25px; padding: 20px; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 5px; }
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
 .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #495057; }
-.form-group input[type="text"], .form-group input[type="email"], .form-group input[type="tel"], .form-group input[type="number"], .form-group input[type="date"], .form-group input[type="month"], .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 0.95em; transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; }
+.form-group input[type="text"], .form-group input[type="email"], .form-group input[type="tel"], .form-group input[type="number"], .form-group input[type="date"], .form-group input[type="month"], .form-group select, .form-group input[type="password"], .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 0.95em; transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; }
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #80bdff; outline: 0; box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); }
 .form-group input[readonly] { background-color: #e9ecef; cursor: not-allowed; }
 .btn { display: inline-block; background-color: #28a745; color: white; padding: 10px 20px; text-align: center; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; font-weight: 500; transition: background-color 0.2s ease; margin-top: 10px; }
@@ -40,32 +40,31 @@ td .btn:not(.btn-sm) { margin-top: 0; margin-right: 5px; padding: 6px 10px; font
 .alert-info strong { font-weight: 600; }
 .calculation-example { background-color: #f0f0f0; padding: 15px; border-radius: 5px; border: 1px solid #ccc; margin-top: 10px; font-family: monospace; }
 .calculation-example p { margin: 5px 0; } .calculation-example .credit { color: green; } .calculation-example .debit { color: red; } .calculation-example .balance { font-weight: bold; }
-.list-header-with-filter {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
-.list-header-with-filter h3 {
-    margin: 0;
-    border: none;
-    padding: 0;
-}
+.totals-summary-container { margin-top: 25px; padding: 20px; background-color: #f0f8ff; border: 1px solid #b8daff; border-radius: 5px; }
+.totals-summary-container h4 { margin-top: 0; color: #0056b3; }
 .totals-summary-container p { margin: 5px 0; font-size: 1.1em; }
+.list-header-with-filter { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+.list-header-with-filter h3 { margin: 0; border: none; padding: 0; }
 .hidden-section { display: none; }
 .print-only { display: none !important; } 
 .dont-print { }
 #cariKategoriListesiUl li { padding: 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
 #cariKategoriListesiUl li:last-child { border-bottom: none; }
-.role-calisan .btn, .role-calisan .btn-edit, .role-calisan .btn-delete, .role-calisan button[type="submit"] { display: none !important; }
-.role-calisan .btn-print, .role-calisan #raporOlusturBtn, .role-calisan #sutRaporuOlusturBtn, .role-calisan #sutRaporuTumunuGosterBtn, .role-calisan #yemRaporuOlusturBtn, .role-calisan #cariListesiYazdirBtn { display: inline-block !important; }
-.role-calisan .form-group input, .role-calisan .form-group select, .role-calisan .form-group textarea { pointer-events: none; background-color: #e9ecef; }
-.role-calisan a[href="#cari-yonetimi"], .role-calisan a[href="#yem-stok-yonetimi"], .role-calisan a[href="#tedarikci-odemeleri"], .role-calisan a[href="#ayarlar"] { display: none; }
+
+.role-calisan a[href="#yem-stok-yonetimi"],
+.role-calisan a[href="#tahsilat-ve-odemeler"],
+.role-calisan a[href="#hesap-ozeti"],
+.role-calisan a[href="#sut-alim-raporu"],
+.role-calisan a[href="#aylik-yem-raporu"],
+.role-calisan a[href="#ayarlar"] { display: none; }
+.role-calisan #cari-yonetimi .dont-calisan { display: none !important; }
+
+.role-admin .dont-admin { display: none !important; }
 
 @media print {
     body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    .print-only { display: block !important; }
     .dont-print { display: none !important; }
+    .print-only { display: block !important; }
 
     body.print-active > * { display: none !important; }
     body.print-active .main-content { display: block !important; margin: 0 !important; padding: 0 !important; }
@@ -74,9 +73,9 @@ td .btn:not(.btn-sm) { margin-top: 0; margin-right: 5px; padding: 6px 10px; font
     body.print-active .main-content > .print-section-active { display: block !important; }
     
     .print-section-active { border: none !important; box-shadow: none !important; }
-    .print-section-active > .container > .form-section,
-    .print-section-active > .container > .report-section > .form-grid,
     .print-section-active .module-header,
+    .print-section-active .form-section,
+    .print-section-active .report-section > .form-grid,
     .print-section-active hr { display: none !important; }
     
     table { font-size: 9pt; margin-top: 10px !important; width:100% !important; border-collapse: collapse !important;} 
