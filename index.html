@@ -693,7 +693,19 @@ function resetYemTanimForm() {
     if(yemTanimFormTemizleBtn) yemTanimFormTemizleBtn.style.display = 'none';
 }
 
-        
+        function resetYemAlisForm() {
+    const yemAlisForm = document.getElementById('yemAlisForm');
+    const yemAlisFormBaslik = document.getElementById('yemAlisFormBaslik');
+    const yemAlisKaydetBtn = document.getElementById('yemAlisKaydetBtn');
+    const yemAlisFormTemizleBtn = document.getElementById('yemAlisFormTemizleBtn');
+
+    yemAlisForm.reset();
+    editingYemAlisId = null;
+    document.getElementById('yemAlisEditId').value = '';
+
+    // Formu "Yeni Kayıt" moduna geri döndür
+    setEditingMode(yemAlisFormBaslik, yemAlisKaydetBtn, yemAlisFormTemizleBtn, null, 'Yeni Yem Alışı');
+}
 function resetCariForm(){ 
     const cariForm = document.getElementById('cariForm');
     const cariFormBaslik = document.getElementById('cariFormBaslik');
