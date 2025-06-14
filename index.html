@@ -440,6 +440,129 @@ function applyRolePermissions() {
         document.querySelector('#sidebarNav a.nav-link[href="#dashboard"]').click();
     }
 }
+
+
+        async function renderTopluSutGirisFormu() {
+    const tarih = document.getElementById('topluGirisTarih').value;
+    const kategori = document.getElementById('topluGirisKategori').value;
+    const container = document.getElementById('topluSutGirisTablosuAlani');
+    const yokMesaji = document.getElementById('topluGirisTedarikciYokMesaji');
+
+    if (!tarih) {
+        container.innerHTML = '<p style="text-align:center;">Lütfen bir tarih seçin.</p>';
+        yokMesaji.style.display = 'none';
+        return;
+    }
+
+    let query = db.collection('cariler').where('sahipId', '==', currentUserId).where('durum', '==', 'aktif');
+    if (kategori) {
+        query = query.where('kategori', '==', kategori);
+    }
+
+    try {
+        const snapshot = await query.orderBy('adiSoyadi').get();
+
+        if (snapshot.empty) {
+            container.innerHTML = '';
+            yokMesaji.style.display = 'block';
+            return;
+        }
+
+        yokMesaji.style.display = 'none';
+
+        let tableHTML = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Adı Soyadı</th>
+                        <th>Sabah (Lt)</th>
+                        <th>Akşam (Lt)</th>
+                        <th>Fiyat (TL)</th>
+                        <th class="dont-print">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        const defaultFiyat = (globalSettings.defaultMilkPrice || 15.00).toFixed(2);
+        snapshot.forEach(doc => {
+            const cari = { id: doc.id, ...doc.data() };
+            // String içindeki tırnak işaretlerinin sorun çıkarmaması için kaçış karakteri kullanıldı
+            const escapedCariAdi = cari.adiSoyadi.replace(/'/g, "\\'").replace(/"/g, '\\"');
+            
+            tableHTML += `
+                <tr>
+                    <td>${cari.adiSoyadi}</td>
+                    <td><input type="number" id="sabah-${cari.id}" class="sut-input" step="0.1" min="0"></td>
+                    <td><input type="number" id="aksam-${cari.id}" class="sut-input" step="0.1" min="0"></td>
+                    <td><input type="number" id="fiyat-${cari.id}" class="sut-input" step="0.01" min="0" value="${defaultFiyat}"></td>
+                    <td class="dont-print">
+                        <button id="kaydet-btn-${cari.id}" class="btn btn-primary btn-sm" onclick="handleTopluSutKaydet('${cari.id}', '${escapedCariAdi}', '${tarih}')">Kaydet</button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        tableHTML += `</tbody></table>`;
+        container.innerHTML = tableHTML;
+
+    } catch (error) {
+        console.error("Süt girişi için cariler getirilirken hata:", error);
+        if (error.code === 'failed-precondition') {
+             container.innerHTML = '<p style="text-align:center; color: red;"><b>Veritabanı Hatası:</b> Bu sorgu için bir dizin (index) oluşturmanız gerekiyor.<br>Lütfen tarayıcı konsolundaki (F12) hatayı kontrol edin ve index oluşturma linkine tıklayın.</p>';
+        } else {
+             container.innerHTML = '<p style="text-align:center; color: red;">Tedarikçiler yüklenirken bir hata oluştu.</p>';
+        }
+    }
+}
+async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
+    const sabahInput = document.getElementById(`sabah-${cariId}`);
+    const aksamInput = document.getElementById(`aksam-${cariId}`);
+    const fiyatInput = document.getElementById(`fiyat-${cariId}`);
+    const kaydetBtn = document.getElementById(`kaydet-btn-${cariId}`);
+
+    const sabahMiktar = parseFloat(sabahInput.value) || 0;
+    const aksamMiktar = parseFloat(aksamInput.value) || 0;
+    const birimFiyat = parseFloat(fiyatInput.value) || globalSettings.defaultMilkPrice || 0;
+    const toplamMiktar = sabahMiktar + aksamMiktar;
+
+    if (toplamMiktar <= 0) {
+        alert("Lütfen en az bir süt miktarı girin.");
+        return;
+    }
+
+    const sutAlimData = {
+        tarih: tarih,
+        cariId: cariId,
+        cariAdi: cariAdi,
+        sabah: sabahMiktar,
+        aksam: aksamMiktar,
+        toplam: toplamMiktar,
+        fiyat: birimFiyat,
+        toplamTutar: toplamMiktar * birimFiyat,
+        sahipId: currentUserId
+    };
+
+    try {
+        await db.collection("sut_alimlari").add(sutAlimData);
+        alert(`${cariAdi} için süt alımı kaydedildi.`);
+        sabahInput.disabled = true;
+        aksamInput.disabled = true;
+        fiyatInput.disabled = true;
+        kaydetBtn.disabled = true;
+        kaydetBtn.textContent = "Kaydedildi";
+        
+        if (typeof renderSutAlimGecmisi === 'function') {
+            renderSutAlimGecmisi();
+        }
+    } catch (error) {
+        console.error("Süt alımı kaydedilirken hata:", error);
+        alert("Süt alımı kaydedilirken bir hata oluştu.");
+    }
+}
+
+
+        
 async function handleYemAlisKaydet(event) {
     event.preventDefault();
     const yemAlisForm = document.getElementById('yemAlisForm');
