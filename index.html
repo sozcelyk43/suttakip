@@ -297,42 +297,44 @@ if ('serviceWorker' in navigator) {
     });
 }
 
+// DÜZELTİLMİŞ KULLANICI GİRİŞ KONTROLÜ
 auth.onAuthStateChanged(async (user) => {
     if (user) {
-        console.log("TEST BAŞLADI: Kullanıcı girişi algılandı. UID:", user.uid);
-        console.log("TEST ADIMI: Firestore'dan kullanıcı belgesi okunacak...");
-
+        currentUserId = user.uid;
         try {
-            const userDoc = await db.collection('kullanicilar').doc(user.uid).get();
-
+            const userDoc = await db.collection('kullanicilar').doc(currentUserId).get();
             if (userDoc.exists) {
-                // EĞER BU MESAJI GÖRÜRSENİZ, OKUMA İŞLEMİ BAŞARILI DEMEKTİR.
-                console.log("%c----------- TEST BAŞARILI! -----------", "color: green; font-size: 16px;");
-                console.log("TEST SONUCU: Belge bulundu! İçerik:", userDoc.data());
-                alert("TEST BAŞARILI! Veritabanı okuması çalışıyor.");
-                
-                // Okuma başarılı olduğu için şimdi uygulamayı başlatabiliriz.
                 currentUserRole = userDoc.data().rol;
+                // Uygulama, tüm verileri yüklemeye çalışmadan önce ana fonksiyonları yüklüyor.
                 initializeApp();
-
             } else {
-                // EĞER BU MESAJI GÖRÜRSENİZ, BELGE VERİTABANINDA YOK DEMEKTİR.
-                console.error("%c---------- TEST BAŞARISIZ! (Belge Yok) ----------", "color: orange; font-size: 16px;");
-                console.error("TEST SONUCU: Giriş başarılı ama Firestore'da bu UID ile bir belge bulunamadı:", user.uid);
-                alert("TEST BAŞARISIZ! Firestore veritabanında bu kullanıcı için bir belge bulunmuyor.");
+                alert("Kullanıcı rol bilgisi bulunamadı. Lütfen yöneticinizle iletişime geçin.");
+                handleLogout();
             }
         } catch (error) {
-            // EĞER BU MESAJI GÖRÜRSENİZ, İZİN VEYA BAĞLANTI HATASI VAR DEMEKTİR.
-            console.error("%c---------- KRİTİK HATA! (İzin/Bağlantı) ----------", "color: red; font-size: 16px;");
-            console.error("TEST SONUCU: Belgeyi okuma denemesi doğrudan hataya düştü. ASIL SORUN BU:", error);
-            alert("KRİTİK HATA! Veritabanından okuma işlemi temel bir nedenle (izin, kota, yanlış proje vb.) başarısız oldu. Lütfen konsolu kontrol edin.");
+            console.error("Kullanıcı rolü alınırken kritik bir hata oluştu. Proje ayarlarınızı (Project ID, Kotalar) veya güvenlik kurallarınızı kontrol edin.", error);
+            alert("Veritabanına erişirken bir sorun oluştu. Lütfen internet bağlantınızı ve Firebase proje ayarlarınızı kontrol edin.");
+            handleLogout();
         }
     } else {
         window.location.href = 'login.html';
     }
 });
 
-      
+// DÜZELTİLMİŞ VERİ YÜKLEME FONKSİYONU
+async function loadAndRenderAllData() {
+    console.log("Veri yükleme fonksiyonları kontrollü bir şekilde başlatılıyor...");
+    // Her fonksiyonu ayrı ayrı ve kontrollü bir şekilde çalıştırıyoruz.
+    // Böylece biri (örneğin var olmayan bir koleksiyonu okumaya çalışan) hata verse bile diğerleri çalışmaya devam edebilir.
+    try { await renderCariListesi(); } catch (e) { console.warn("Cari listesi yüklenemedi (koleksiyon henüz oluşturulmamış veya index eksik olabilir)."); }
+    try { await renderYemStokListesi(); } catch (e) { console.warn("Yem stoku yüklenemedi (koleksiyon henüz oluşturulmamış veya index eksik olabilir)."); }
+    try { await renderOdemeListesi(); } catch (e) { console.warn("Ödeme listesi yüklenemedi (koleksiyon henüz oluşturulmamış veya index eksik olabilir)."); }
+    try { await renderCariKategoriListesi(); } catch (e) { console.warn("Cari kategori listesi yüklenemedi (koleksiyon henüz oluşturulmamış veya index eksik olabilir)."); }
+    try { await populateCariKategoriFiltre(); } catch (e) { console.warn("Cari kategori filtresi doldurulamadı."); }
+    try { await populateCariKategoriSelect(document.getElementById('topluGirisKategori')); } catch (e) { console.warn("Toplu giriş kategorisi doldurulamadı."); }
+    try { await updateDashboardStats(); } catch (e) { console.warn("Panel istatistikleri güncellenemedi."); }
+    console.log("Veri yükleme denemeleri tamamlandı. Arayüz şimdi kullanılabilir olmalı.");
+}
 
 
 function initializeApp() {
@@ -416,26 +418,6 @@ function initializeApp() {
     sutRaporuYazdirBtn.addEventListener('click', () => handleYazdir('sut-alim-raporu'));
     yemRaporuOlusturBtn.addEventListener('click', handleYemKarRaporuOlustur);
     yemRaporuYazdirBtn.addEventListener('click', () => handleYazdir('aylik-yem-raporu'));
-}
-
-async function loadAndRenderAllData() {
-    console.log("Veri yükleme fonksiyonları kontrollü bir şekilde başlatılıyor...");
-
-    // Promise.all yerine her fonksiyonu ayrı ayrı çalıştırıyoruz.
-    // Bu sayede, biri (örneğin var olmayan bir koleksiyonu okumaya çalışan) hata verse bile
-    // diğerleri çalışmaya devam eder ve uygulama çökmez.
-    
-    // Her bir fonksiyonu kendi try-catch bloğu içine alarak hataları ayrı ayrı yakalıyoruz.
-    // console.error yerine console.warn kullanarak, bunların beklenen hatalar olabileceğini belirtiyoruz.
-    try { await renderCariListesi(); } catch (e) { console.warn("Cari listesi yüklenemedi (koleksiyon henüz oluşturulmamış olabilir)."); }
-    try { await renderYemStokListesi(); } catch (e) { console.warn("Yem stoku yüklenemedi (koleksiyon henüz oluşturulmamış olabilir)."); }
-    try { await renderOdemeListesi(); } catch (e) { console.warn("Ödeme listesi yüklenemedi (koleksiyon henüz oluşturulmamış olabilir)."); }
-    try { await renderCariKategoriListesi(); } catch (e) { console.warn("Cari kategori listesi yüklenemedi (koleksiyon henüz oluşturulmamış olabilir)."); }
-    try { await populateCariKategoriFiltre(); } catch (e) { console.warn("Cari kategori filtresi doldurulamadı."); }
-    try { await populateCariKategoriSelect(document.getElementById('topluGirisKategori')); } catch (e) { console.warn("Toplu giriş kategorisi doldurulamadı."); }
-    try { await updateDashboardStats(); } catch (e) { console.warn("Panel istatistikleri güncellenemedi."); }
-
-    console.log("Veri yükleme denemeleri tamamlandı. Uygulama arayüzü şimdi kullanılabilir olmalı.");
 }
 
 function generateId() { return db.collection('_').doc().id; }
@@ -758,8 +740,6 @@ async function handleAyarlarKaydet(event) {
     }
 }
 
-// ... Diğer tüm fonksiyonlar ...
-
 async function calculateCariBakiyeDetayli(cariId, endDateStr = null) {
     let alacak = 0;
     let borc = 0;
@@ -831,10 +811,6 @@ window.onafterprint = () => {
         el.classList.remove('print-section-active');
     });
 };
-        
-    
-    
-    
-    </script>
+</script>
 </body>
 </html>
