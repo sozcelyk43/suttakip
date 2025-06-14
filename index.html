@@ -411,14 +411,14 @@ function initializeApp() {
 
 async function loadAndRenderAllData() {
     try {
-        console.log("Test Başladı: ");
+        console.log("Test Başladı:docget ");
         await Promise.all([
             renderCariListesi(),
             //renderYemStokListesi(), 
             //renderOdemeListesi(),
             renderCariKategoriListesi(), 
             populateCariKategoriFiltre(),
-           // populateCariKategoriSelect(document.getElementById('topluGirisKategori')),
+           populateCariKategoriSelect(document.getElementById('topluGirisKategori')),
           //  updateDashboardStats()
         ]);
         console.log("Test Başarılı: ");
