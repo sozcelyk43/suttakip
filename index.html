@@ -692,7 +692,77 @@ function resetYemTanimForm() {
     if(yemTanimKaydetBtn) yemTanimKaydetBtn.textContent = 'Kaydet';
     if(yemTanimFormTemizleBtn) yemTanimFormTemizleBtn.style.display = 'none';
 }
+async function handleYemSatisKaydet(event) {
+    event.preventDefault();
+    const yemSatisForm = document.getElementById('yemSatisForm');
+    const miktar = parseInt(document.getElementById('yemSatisMiktar').value);
+    const birimFiyat = parseFloat(document.getElementById('yemSatisBirimFiyati').value);
+    const yemId = document.getElementById('yemSecimiSatis').value;
+    const cariId = document.getElementById('yemAlanTedarikci').value;
+    const editId = document.getElementById('yemSatisEditId').value;
 
+    if (!yemId || !cariId || isNaN(miktar) || miktar <= 0 || isNaN(birimFiyat)) {
+        alert("Lütfen cari, yem, miktar ve fiyat alanlarını doğru bir şekilde doldurun.");
+        return;
+    }
+    
+    // Düzenleme özelliği henüz aktif değil
+    if (editId) {
+        alert("Yem satışı düzenleme özelliği henüz aktif değil.");
+        return;
+    }
+
+    const yemRef = db.collection('yemler').doc(yemId);
+    const yemSatisRef = db.collection('yem_satislari').doc();
+
+    try {
+        // Stok kontrolü ve kayıt işlemini bir transaction içinde yaparak veri bütünlüğünü sağlıyoruz.
+        await db.runTransaction(async (transaction) => {
+            const yemDoc = await transaction.get(yemRef);
+            if (!yemDoc.exists) {
+                throw "Satılmak istenen yem veritabanında bulunamadı.";
+            }
+
+            const anlikStok = yemDoc.data().stokMiktari || 0;
+            if (anlikStok < miktar) {
+                // Hata fırlatarak işlemi durduruyoruz.
+                throw `Yetersiz stok! Bu yem için anlık stok: ${anlikStok}`;
+            }
+
+            // Stok yeterliyse, satış bilgilerini oluştur
+            const formData = {
+                tarih: document.getElementById('yemSatisTarih').value,
+                yemId: yemId,
+                cariId: cariId,
+                miktar: miktar,
+                satisFiyati: birimFiyat,
+                toplamTutar: miktar * birimFiyat,
+                sahipId: currentUserId
+            };
+            
+            // Satış kaydını 'yem_satislari' koleksiyonuna ekle
+            transaction.set(yemSatisRef, formData);
+
+            // Stoğu düşür
+            transaction.update(yemRef, {
+                stokMiktari: firebase.firestore.FieldValue.increment(-miktar)
+            });
+        });
+
+        yemSatisForm.reset();
+        alert("Yem satışı başarıyla kaydedildi.");
+
+        // İlgili listeleri yenile
+        if (typeof renderYemStokListesi === 'function') await renderYemStokListesi();
+        // Henüz olmayan ama olması gereken yem satış hareketleri listesini yenileme fonksiyonu
+        if (typeof renderYemSatisListesi === 'function') await renderYemSatisListesi();
+
+    } catch (error) {
+        console.error("Yem satışı kaydedilirken hata:", error);
+        // Kullanıcıya stok yetersizliği gibi anlamlı bir hata göstermek için.
+        alert("Yem satışı kaydedilemedi: " + error);
+    }
+}
         function resetYemAlisForm() {
     const yemAlisForm = document.getElementById('yemAlisForm');
     const yemAlisFormBaslik = document.getElementById('yemAlisFormBaslik');
