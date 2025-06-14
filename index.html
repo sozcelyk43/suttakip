@@ -182,7 +182,7 @@
             </div>
         </section>
         <section id="sut-alim-raporu" class="module-section">
-             <div class="module-header dont-print"><h2>🗓️ Aylık Süt Raporu</h2></div>
+             <div class="module-header dont-print"><h2>🗓️ Aylık Süt Alım Raporu</h2></div>
             <div class="container">
                  <div class="report-section">
                     <h3>Detaylı Süt Alım Raporu</h3>
@@ -259,266 +259,252 @@
              </div>
         </section>
     </div>
-
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    
-<script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCWG4nFwpXRffr_3MO8-Us9mWK6Wsfn0mY",
-            authDomain: "sut-takip-projem.firebaseapp.com",
-            projectId: "sut-takip-projem",
-            storageBucket: "sut-takip-projem.appspot.com",
-            messagingSenderId: "512756958486",
-            appId: "1:512756958486:web:13cceb6835e2c575e9fc37",
-            measurementId: "G-LYLT9WFVNK"
-        };
-        
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+    <script>
+const firebaseConfig = {
+    apiKey: "AIzaSyCWG4nFwpXRffr_3MO8-Us9mWK6Wsfn0mY",
+    authDomain: "sut-takip-projem.firebaseapp.com",
+    projectId: "sut-takip-projem",
+    storageBucket: "sut-takip-projem.appspot.com",
+    messagingSenderId: "512756958486",
+    appId: "1:512756958486:web:13cceb6835e2c575e9fc37",
+    measurementId: "G-LYLT9WFVNK"
+};
 
-        let currentUserRole = '';
-        let currentUserId = '';
-        let globalSettings = { defaultMilkPrice: 15.00 };
-        let editingCariId = null, editingYemTanimId = null, editingYemAlisId = null, editingYemSatisId = null, editingOdemeId = null, editingKullaniciId = null;
-        
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => console.log('Service Worker registered.'))
-                    .catch(err => console.error('Service Worker registration failed: ', err));
-            });
-        }
-        
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                currentUserId = user.uid;
-                try {
-                    const userDoc = await db.collection('kullanicilar').doc(currentUserId).get();
-                    if (userDoc.exists) {
-                        currentUserRole = userDoc.data().rol;
-                        initializeApp();
-                    } else {
-                        alert("Kullanıcı rol bilgisi bulunamadı. Lütfen yöneticinizle iletişime geçin.");
-                        handleLogout();
-                    }
-                } catch (error) {
-                    console.error("Kullanıcı rolü alınırken hata:", error);
-                    alert("Veritabanına erişirken bir sorun oluştu. Lütfen internet bağlantınızı ve Firebase API/Güvenlik kurallarınızı kontrol edin.");
-                    handleLogout();
-                }
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUserRole = '';
+let currentUserId = '';
+let globalSettings = { defaultMilkPrice: 15.00 };
+let editingCariId = null, editingYemTanimId = null, editingYemAlisId = null, editingYemSatisId = null, editingOdemeId = null;
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(registration => console.log('Service Worker registered.'))
+            .catch(err => console.error('Service Worker registration failed: ', err));
+    });
+}
+
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        currentUserId = user.uid;
+        try {
+            const userDoc = await db.collection('kullanicilar').doc(currentUserId).get();
+            if (userDoc.exists) {
+                currentUserRole = userDoc.data().rol;
+                initializeApp();
             } else {
-                window.location.href = 'login.html';
+                alert("Kullanıcı rol bilgisi bulunamadı. Lütfen yöneticinizle iletişime geçin.");
+                handleLogout();
             }
-        });
-
-        function initializeApp() {
-            const moduleSections = document.querySelectorAll('.main-content .module-section');
-            const bodyElement = document.body;
-            const logoutButton = document.getElementById('logoutButton');
-            const cariForm = document.getElementById('cariForm'), cariKaydetBtn = document.getElementById('cariKaydetBtn'), cariFormBaslik = document.getElementById('cariFormBaslik'), cariFormTemizleBtn = document.getElementById('cariFormTemizleBtn'), cariSearchInput = document.getElementById('cariSearchInput'), cariKategoriFiltre = document.getElementById('cariKategoriFiltre'), cariListesiYazdirBtn = document.getElementById('cariListesiYazdirBtn');
-            const yemTanimForm = document.getElementById('yemTanimForm'), yemTanimKaydetBtn = document.getElementById('yemTanimKaydetBtn'), yemTanimFormBaslik = document.getElementById('yemTanimFormBaslik'), yemTanimFormTemizleBtn = document.getElementById('yemTanimFormTemizleBtn');
-            const yemAlisForm = document.getElementById('yemAlisForm'), yemAlisKaydetBtn = document.getElementById('yemAlisKaydetBtn'), yemAlisFormBaslik = document.getElementById('yemAlisFormBaslik'), yemAlisFormTemizleBtn = document.getElementById('yemAlisFormTemizleBtn');
-            const yemSatisForm = document.getElementById('yemSatisForm'), yemSatisKaydetBtn = document.getElementById('yemSatisKaydetBtn'), yemSatisFormBaslik = document.getElementById('yemSatisFormBaslik'), yemSatisFormTemizleBtn = document.getElementById('yemSatisFormTemizleBtn');
-            const ayarlarForm = document.getElementById('ayarlarForm');
-            const cariKategoriForm = document.getElementById('cariKategoriForm');
-            const odemeForm = document.getElementById('odemeForm'), odemeKaydetBtn = document.getElementById('odemeKaydetBtn'), odemeFormBaslik = document.getElementById('odemeFormBaslik'), odemeFormTemizleBtn = document.getElementById('odemeFormTemizleBtn');
-            const kullaniciForm = document.getElementById('kullaniciForm'), kullaniciKaydetBtn = document.getElementById('kullaniciKaydetBtn');
-            const sifreDegistirForm = document.getElementById('sifreDegistirForm');
-            const raporOlusturBtn = document.getElementById('raporOlusturBtn');
-            const raporYazdirBtn = document.getElementById('raporYazdirBtn');
-            const sutRaporuOlusturBtn = document.getElementById('sutRaporuOlusturBtn');
-            const sutRaporuTumunuGosterBtn = document.getElementById('sutRaporuTumunuGosterBtn');
-            const sutRaporuKategoriGosterBtn = document.getElementById('sutRaporuKategoriGosterBtn');
-            const sutRaporuYazdirBtn = document.getElementById('sutRaporuYazdirBtn');
-            const yemRaporuOlusturBtn = document.getElementById('yemRaporuOlusturBtn');
-            const yemRaporuYazdirBtn = document.getElementById('yemRaporuYazdirBtn');
-            const topluGirisTarihInput = document.getElementById('topluGirisTarih');
-            const topluGirisKategoriSelect = document.getElementById('topluGirisKategori');
-
-            applyRolePermissions();
-            loadAndRenderAllData();
-            
-            sidebarNav.addEventListener('click', function(event) {
-                const link = event.target.closest('a.nav-link');
-                if (!link || link.id === 'logoutButton') return;
-                event.preventDefault();
-                sidebarNav.querySelectorAll('a.nav-link').forEach(lnk => lnk.classList.remove('active'));
-                link.classList.add('active');
-                const targetId = link.getAttribute('href').substring(1);
-                moduleSections.forEach(section => { section.style.display = 'none'; });
-                const activeSection = document.getElementById(targetId);
-                if(activeSection) activeSection.style.display = 'block';
-                
-                if (targetId === 'dashboard') { updateDashboardStats(); }
-                if (targetId === 'cari-yonetimi') { populateCariKategoriFiltre(); renderCariListesi(); populateCariKategoriSelect(document.getElementById('cariKategori')); }
-                if (targetId === 'sut-alimi') { topluGirisTarihInput.value = getTodayForInput(); populateCariKategoriSelect(topluGirisKategori); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); }
-                if (targetId === 'yem-stok-yonetimi') { populateCariSelect(document.getElementById('yemAlisTedarikci')); populateYemSelect(document.getElementById('yemSecimiAlis')); }
-                if (targetId === 'yem-satisi') { populateCariSelect(document.getElementById('yemAlanTedarikci')); populateYemSelect(document.getElementById('yemSecimiSatis')); }
-                if (targetId === 'tahsilat-ve-odemeler') { populateCariSelect(document.getElementById('odemeYapilanTedarikci')); }
-                if (targetId === 'hesap-ozeti'){ populateCariSelect(document.getElementById('raporCariSecimi')); if(!document.getElementById('raporTarihAraligi').value) document.getElementById('raporTarihAraligi').value = getMonthYearForInput(); }
-                if (targetId === 'sut-alim-raporu'){ populateCariSelect(document.getElementById('sutRaporuTedarikciSecimi')); populateCariKategoriSelect(document.getElementById('sutRaporuKategoriSecimi'), "Tümü"); if(!document.getElementById('sutRaporuAySecimi').value) document.getElementById('sutRaporuAySecimi').value = getMonthYearForInput(); }
-                if (targetId === 'aylik-yem-raporu'){ if(!document.getElementById('yemRaporuAySecimi').value) document.getElementById('yemRaporuAySecimi').value = getMonthYearForInput(); }
-                if (targetId === 'ayarlar') { populateCariKategoriSelect(document.getElementById('cariKategori')); renderCariKategoriListesi(); getSettings(); renderKullaniciListesi(); }
-            });
-            
-            logoutButton.addEventListener('click', handleLogout);
-            cariForm.addEventListener('submit', handleCariKaydet);
-            if(cariFormTemizleBtn) cariFormTemizleBtn.addEventListener('click', resetCariForm);
-            yemTanimForm.addEventListener('submit', handleYemTanimKaydet);
-            if(yemTanimFormTemizleBtn) yemTanimFormTemizleBtn.addEventListener('click', resetYemTanimForm);
-            yemAlisForm.addEventListener('submit', handleYemAlisKaydet);
-            if(yemAlisFormTemizleBtn) yemAlisFormTemizleBtn.addEventListener('click', resetYemAlisForm);
-            yemSatisForm.addEventListener('submit', handleYemSatisKaydet);
-            if(yemSatisFormTemizleBtn) yemSatisFormTemizleBtn.addEventListener('click', resetYemSatisForm);
-            odemeForm.addEventListener('submit', handleOdemeKaydet);
-            if(odemeFormTemizleBtn) odemeFormTemizleBtn.addEventListener('click', resetOdemeForm);
-            ayarlarForm.addEventListener('submit', handleAyarlarKaydet);
-            cariKategoriForm.addEventListener('submit', handleCariKategoriEkle);
-            if(kullaniciForm) kullaniciForm.addEventListener('submit', handleKullaniciKaydet);
-            sifreDegistirForm.addEventListener('submit', handleSifreDegistir);
-
-            cariSearchInput.addEventListener('input', renderCariListesi);
-            cariKategoriFiltre.addEventListener('change', renderCariListesi);
-            cariListesiYazdirBtn.addEventListener('click', handleCariListeYazdir);
-            topluGirisTarihInput.addEventListener('change', () => { renderTopluSutGirisFormu(); renderSutAlimGecmisi(); });
-            topluGirisKategoriSelect.addEventListener('change', renderTopluSutGirisFormu);
-
-            raporOlusturBtn.addEventListener('click', handleHesapOzetiRaporuOlustur);
-            raporYazdirBtn.addEventListener('click', () => handleYazdir('hesap-ozeti'));
-            sutRaporuOlusturBtn.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: false}));
-            sutRaporuTumunuGosterBtn.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: true, kategori: false}));
-            sutRaporuKategoriGosterBtn.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: true}));
-            sutRaporuYazdirBtn.addEventListener('click', () => handleYazdir('sut-alim-raporu'));
-            yemRaporuOlusturBtn.addEventListener('click', handleYemKarRaporuOlustur);
-            yemRaporuYazdirBtn.addEventListener('click', () => handleYazdir('aylik-yem-raporu'));
+        } catch (error) {
+            console.error("Kullanıcı rolü alınırken hata:", error);
+            alert("Veritabanına erişirken bir sorun oluştu. Lütfen internet bağlantınızı ve Firebase API/Güvenlik kurallarınızı kontrol edin.");
+            handleLogout();
         }
+    } else {
+        window.location.href = 'login.html';
+    }
+});
 
-        async function loadAndRenderAllData() {
-            // Tüm listeleri ve verileri Firebase'den çekip render eden ana fonksiyon
-            // Bu fonksiyon, sayfa ilk yüklendiğinde ve büyük değişikliklerden sonra çağrılır.
-            try {
-                await renderCariListesi();
-                await renderYemStokListesi();
-                await renderOdemeListesi();
-                await renderYemAlisHareketListesi();
-                await renderYemSatisListesi();
-                await renderCariKategoriListesi();
-                await populateCariKategoriFiltre();
-                await populateCariKategoriSelect(document.getElementById('topluGirisKategori'));
-                await updateDashboardStats();
-            } catch (error) {
-                console.error("Veri yükleme sırasında hata oluştu:", error);
-            }
-        }
+function initializeApp() {
+    const sidebarNav = document.getElementById('sidebarNav');
+    const moduleSections = document.querySelectorAll('.main-content .module-section');
+    const bodyElement = document.body;
+    const logoutButton = document.getElementById('logoutButton');
+    const cariForm = document.getElementById('cariForm'), cariKaydetBtn = document.getElementById('cariKaydetBtn'), cariFormBaslik = document.getElementById('cariFormBaslik'), cariFormTemizleBtn = document.getElementById('cariFormTemizleBtn'), cariSearchInput = document.getElementById('cariSearchInput'), cariKategoriFiltre = document.getElementById('cariKategoriFiltre'), cariListesiYazdirBtn = document.getElementById('cariListesiYazdirBtn');
+    const yemTanimForm = document.getElementById('yemTanimForm'), yemTanimKaydetBtn = document.getElementById('yemTanimKaydetBtn'), yemTanimFormBaslik = document.getElementById('yemTanimFormBaslik'), yemTanimFormTemizleBtn = document.getElementById('yemTanimFormTemizleBtn');
+    const yemAlisForm = document.getElementById('yemAlisForm'), yemAlisKaydetBtn = document.getElementById('yemAlisKaydetBtn'), yemAlisFormBaslik = document.getElementById('yemAlisFormBaslik'), yemAlisFormTemizleBtn = document.getElementById('yemAlisFormTemizleBtn');
+    const yemSatisForm = document.getElementById('yemSatisForm'), yemSatisKaydetBtn = document.getElementById('yemSatisKaydetBtn'), yemSatisFormBaslik = document.getElementById('yemSatisFormBaslik'), yemSatisFormTemizleBtn = document.getElementById('yemSatisFormTemizleBtn');
+    const ayarlarForm = document.getElementById('ayarlarForm');
+    const cariKategoriForm = document.getElementById('cariKategoriForm');
+    const odemeForm = document.getElementById('odemeForm'), odemeKaydetBtn = document.getElementById('odemeKaydetBtn'), odemeFormBaslik = document.getElementById('odemeFormBaslik'), odemeFormTemizleBtn = document.getElementById('odemeFormTemizleBtn');
+    const kullaniciForm = document.getElementById('kullaniciForm');
+    const sifreDegistirForm = document.getElementById('sifreDegistirForm');
+    const raporOlusturBtn = document.getElementById('raporOlusturBtn');
+    const raporYazdirBtn = document.getElementById('raporYazdirBtn');
+    const sutRaporuOlusturBtn = document.getElementById('sutRaporuOlusturBtn');
+    const sutRaporuTumunuGosterBtn = document.getElementById('sutRaporuTumunuGosterBtn');
+    const sutRaporuKategoriGosterBtn = document.getElementById('sutRaporuKategoriGosterBtn');
+    const sutRaporuYazdirBtn = document.getElementById('sutRaporuYazdirBtn');
+    const yemRaporuOlusturBtn = document.getElementById('yemRaporuOlusturBtn');
+    const yemRaporuYazdirBtn = document.getElementById('yemRaporuYazdirBtn');
+    const topluGirisTarihInput = document.getElementById('topluGirisTarih');
+    const topluGirisKategoriSelect = document.getElementById('topluGirisKategori');
 
-        function generateId() { return db.collection('_').doc().id; }
-        function formatDate(dateString) { if (!dateString) return ''; const date = new Date(dateString); const userTimezoneOffset = date.getTimezoneOffset() * 60000; return new Date(date.getTime() + userTimezoneOffset).toLocaleDateString('tr-TR'); }
-        function getTodayForInput() { return new Date().toISOString().split('T')[0]; }
-        function getMonthYearForInput() { const d = new Date(); return `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}`;}
-        function formatCurrency(number) { return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(number); }
-        function setEditingMode(formBaslikEl, kaydetBtnEl, temizleBtnEl, editIdVar, formType) { formBaslikEl.textContent = editIdVar ? `${formType} Bilgilerini Düzenle` : `Yeni ${formType} Kaydı`; kaydetBtnEl.textContent = editIdVar ? 'Güncelle' : 'Kaydet'; if (temizleBtnEl) temizleBtnEl.style.display = editIdVar ? 'inline-block' : 'none'; }
-        function applyRolePermissions() {
-            const bodyElement = document.body;
-            bodyElement.className = `role-${currentUserRole}`;
-            const calisanAllowed = ['#dashboard', '#sut-alimi', '#yem-satisi', '#cari-yonetimi'];
-            const activeLink = document.querySelector('#sidebarNav a.nav-link.active');
-            const activeHref = activeLink ? activeLink.getAttribute('href') : '#dashboard';
-            if (currentUserRole === 'calisan' && !calisanAllowed.includes(activeHref)) {
-                document.querySelector('#sidebarNav a.nav-link[href="#dashboard"]').click();
-            }
-        }
-        function handleLogout() { auth.signOut().then(() => { window.location.href = 'login.html'; }).catch(error => console.error("Logout error", error)); }
+    applyRolePermissions();
+    loadAndRenderAllData();
+    
+    sidebarNav.addEventListener('click', function(event) {
+        const link = event.target.closest('a.nav-link');
+        if (!link || link.id === 'logoutButton') return;
+        event.preventDefault();
+        sidebarNav.querySelectorAll('a.nav-link').forEach(lnk => lnk.classList.remove('active'));
+        link.classList.add('active');
+        const targetId = link.getAttribute('href').substring(1);
+        moduleSections.forEach(section => { section.style.display = 'none'; });
+        const activeSection = document.getElementById(targetId);
+        if(activeSection) activeSection.style.display = 'block';
         
-        async function getSettings() {
-            const settingsRef = db.collection('ayarlar').doc(currentUserId);
-            const doc = await settingsRef.get();
-            if (doc.exists) {
-                globalSettings = doc.data();
-            }
-            varsayilanSutFiyatiInput.value = globalSettings.defaultMilkPrice.toFixed(2);
-        }
+        if (targetId === 'dashboard') { updateDashboardStats(); }
+        if (targetId === 'cari-yonetimi') { populateCariKategoriFiltre(); renderCariListesi(); populateCariKategoriSelect(document.getElementById('cariKategori')); }
+        if (targetId === 'sut-alimi') { if(topluGirisTarihInput) topluGirisTarihInput.value = getTodayForInput(); populateCariKategoriSelect(topluGirisKategori); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); }
+        if (targetId === 'yem-stok-yonetimi') { populateCariSelect(document.getElementById('yemAlisTedarikci')); populateYemSelect(document.getElementById('yemSecimiAlis')); }
+        if (targetId === 'yem-satisi') { populateCariSelect(document.getElementById('yemAlanTedarikci')); populateYemSelect(document.getElementById('yemSecimiSatis')); }
+        if (targetId === 'tahsilat-ve-odemeler') { populateCariSelect(document.getElementById('odemeYapilanTedarikci')); }
+        if (targetId === 'hesap-ozeti'){ populateCariSelect(document.getElementById('raporCariSecimi')); if(!document.getElementById('raporTarihAraligi').value) document.getElementById('raporTarihAraligi').value = getMonthYearForInput(); }
+        if (targetId === 'sut-alim-raporu'){ populateCariSelect(document.getElementById('sutRaporuTedarikciSecimi')); populateCariKategoriSelect(document.getElementById('sutRaporuKategoriSecimi'), "Tümü"); if(!document.getElementById('sutRaporuAySecimi').value) document.getElementById('sutRaporuAySecimi').value = getMonthYearForInput(); }
+        if (targetId === 'aylik-yem-raporu'){ if(!document.getElementById('yemRaporuAySecimi').value) document.getElementById('yemRaporuAySecimi').value = getMonthYearForInput(); }
+        if (targetId === 'ayarlar') { populateCariKategoriSelect(document.getElementById('cariKategori')); renderCariKategoriListesi(); getSettings(); renderKullaniciListesi(); }
+    });
+    
+    logoutButton.addEventListener('click', handleLogout);
+    cariForm.addEventListener('submit', handleCariKaydet);
+    if(cariFormTemizleBtn) cariFormTemizleBtn.addEventListener('click', resetCariForm);
+    yemTanimForm.addEventListener('submit', handleYemTanimKaydet);
+    if(yemTanimFormTemizleBtn) yemTanimFormTemizleBtn.addEventListener('click', resetYemTanimForm);
+    yemAlisForm.addEventListener('submit', handleYemAlisKaydet);
+    if(yemAlisFormTemizleBtn) yemAlisFormTemizleBtn.addEventListener('click', resetYemAlisForm);
+    yemSatisForm.addEventListener('submit', handleYemSatisKaydet);
+    if(yemSatisFormTemizleBtn) yemSatisFormTemizleBtn.addEventListener('click', resetYemSatisForm);
+    odemeForm.addEventListener('submit', handleOdemeKaydet);
+    if(odemeFormTemizleBtn) odemeFormTemizleBtn.addEventListener('click', resetOdemeForm);
+    ayarlarForm.addEventListener('submit', handleAyarlarKaydet);
+    cariKategoriForm.addEventListener('submit', handleCariKategoriEkle);
+    if(kullaniciForm) kullaniciForm.addEventListener('submit', handleKullaniciKaydet);
+    sifreDegistirForm.addEventListener('submit', handleSifreDegistir);
 
-        function generateId() { return db.collection('_').doc().id; }
-        function formatDate(dateString) { if (!dateString) return ''; const date = new Date(dateString); const userTimezoneOffset = date.getTimezoneOffset() * 60000; return new Date(date.getTime() + userTimezoneOffset).toLocaleDateString('tr-TR'); }
-        function getTodayForInput() { return new Date().toISOString().split('T')[0]; }
-        function getMonthYearForInput() { const d = new Date(); return `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}`;}
-        function formatCurrency(number) { return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(number); }
-        function setEditingMode(formBaslikEl, kaydetBtnEl, temizleBtnEl, editIdVar, formType) { formBaslikEl.textContent = editIdVar ? `${formType} Bilgilerini Düzenle` : `Yeni ${formType} Kaydı`; kaydetBtnEl.textContent = editIdVar ? 'Güncelle' : 'Kaydet'; if (temizleBtnEl) temizleBtnEl.style.display = editIdVar ? 'inline-block' : 'none'; }
+    cariSearchInput.addEventListener('input', renderCariListesi);
+    cariKategoriFiltre.addEventListener('change', renderCariListesi);
+    cariListesiYazdirBtn.addEventListener('click', handleCariListeYazdir);
+    topluGirisTarihInput.addEventListener('change', () => { renderTopluSutGirisFormu(); renderSutAlimGecmisi(); });
+    topluGirisKategoriSelect.addEventListener('change', renderTopluSutGirisFormu);
+
+    raporOlusturBtn.addEventListener('click', handleHesapOzetiRaporuOlustur);
+    raporYazdirBtn.addEventListener('click', () => handleYazdir('hesap-ozeti'));
+    sutRaporuOlusturBtn.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: false}));
+    sutRaporuTumunuGosterBtn.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: true, kategori: false}));
+    sutRaporuKategoriGosterBtn.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: true}));
+    sutRaporuYazdirBtn.addEventListener('click', () => handleYazdir('sut-alim-raporu'));
+    yemRaporuOlusturBtn.addEventListener('click', handleYemKarRaporuOlustur);
+    yemRaporuYazdirBtn.addEventListener('click', () => handleYazdir('aylik-yem-raporu'));
+}
+
+async function loadAndRenderAllData() {
+    try {
+        await Promise.all([
+            renderCariListesi(), renderYemStokListesi(), renderOdemeListesi(),
+            renderCariKategoriListesi(), populateCariKategoriFiltre(),
+            populateCariKategoriSelect(document.getElementById('topluGirisKategori')),
+            updateDashboardStats()
+        ]);
+    } catch (error) { console.error("Veri yükleme sırasında hata oluştu:", error); }
+}
+
+function generateId() { return db.collection('_').doc().id; }
+function formatDate(dateString) { if (!dateString) return ''; const date = new Date(dateString); const userTimezoneOffset = date.getTimezoneOffset() * 60000; return new Date(date.getTime() + userTimezoneOffset).toLocaleDateString('tr-TR'); }
+function getTodayForInput() { return new Date().toISOString().split('T')[0]; }
+function getMonthYearForInput() { const d = new Date(); return `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}`;}
+function formatCurrency(number) { return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(number); }
+function setEditingMode(formBaslikEl, kaydetBtnEl, temizleBtnEl, editIdVar, formType) { if(!formBaslikEl || !kaydetBtnEl) return; formBaslikEl.textContent = editIdVar ? `${formType} Bilgilerini Düzenle` : `Yeni ${formType} Kaydı`; kaydetBtnEl.textContent = editIdVar ? 'Güncelle' : 'Kaydet'; if (temizleBtnEl) temizleBtnEl.style.display = editIdVar ? 'inline-block' : 'none'; }
+function applyRolePermissions() {
+    const bodyElement = document.body;
+    bodyElement.className = `role-${currentUserRole}`;
+    const calisanAllowed = ['#dashboard', '#sut-alimi', '#yem-satisi', '#cari-yonetimi'];
+    const activeLink = document.querySelector('#sidebarNav a.nav-link.active');
+    const activeHref = activeLink ? activeLink.getAttribute('href') : '#dashboard';
+    if (currentUserRole === 'calisan' && !calisanAllowed.includes(activeHref)) {
+        document.querySelector('#sidebarNav a.nav-link[href="#dashboard"]').click();
+    }
+}
+function handleLogout() { auth.signOut().then(() => { window.location.href = 'login.html'; }).catch(error => console.error("Logout error", error)); }
+async function getSettings() {
+    const varsayilanSutFiyatiInput = document.getElementById('varsayilanSutFiyati');
+    const settingsRef = db.collection('ayarlar').doc(currentUserId);
+    try {
+        const doc = await settingsRef.get();
+        if (doc.exists) {
+            globalSettings = doc.data();
+        }
+        varsayilanSutFiyatiInput.value = (globalSettings.defaultMilkPrice || 15.00).toFixed(2);
+    } catch(e) { console.error("Ayarlar alınırken hata: ", e); }
+}
+async function updateDashboardStats() {
+    const totalCari = document.getElementById('totalCari');
+    const totalYemCesidi = document.getElementById('totalYemCesidi');
+    const todaySutAlim = document.getElementById('todaySutAlim');
+    const todayStr = getTodayForInput();
+    try {
+        const [carilerSnapshot, yemlerSnapshot, sutAlimSnapshot] = await Promise.all([
+            db.collection('cariler').where("sahipId", "==", currentUserId).get(),
+            db.collection('yemler').where("sahipId", "==", currentUserId).get(),
+            db.collection('sut_alimlari').where("sahipId", "==", currentUserId).where("tarih", "==", todayStr).get()
+        ]);
+        totalCari.textContent = carilerSnapshot.size;
+        totalYemCesidi.textContent = yemlerSnapshot.size;
+        todaySutAlim.textContent = sutAlimSnapshot.size;
+    } catch(e) { console.error("Dashboard istatistikleri alınırken hata", e); }
+}
+async function handleCariKaydet(event) {
+    event.preventDefault();
+    const formData = {
+        kodu: document.getElementById('cariKodu').value, adiSoyadi: document.getElementById('cariAdiSoyadi').value,
+        kategori: document.getElementById('cariKategori').value, durum: document.getElementById('cariDurum').value,
+        telefon: document.getElementById('cariTelefon').value, eposta: document.getElementById('cariEposta').value,
+        adres: document.getElementById('cariAdres').value, bankaAdi: document.getElementById('cariBankaAdi').value,
+        iban: document.getElementById('cariIban').value, vergiDairesi: document.getElementById('cariVergiDairesi').value,
+        vergiNo: document.getElementById('cariVergiNo').value, notlar: document.getElementById('cariNotlar').value,
+        sahipId: currentUserId
+    };
+    try {
+        if (editingCariId) {
+            await db.collection('cariler').doc(editingCariId).set(formData, { merge: true });
+        } else {
+            await db.collection('cariler').add(formData);
+        }
+        resetCariForm();
+        await renderCariListesi();
+    } catch(error) { console.error("Hata: ", error); alert("Cari kaydedilirken bir hata oluştu."); }
+}
+async function renderCariListesi() {
+    const cariListesiBody = document.getElementById('cariListesiBody');
+    const cariListesiFooter = document.getElementById('cariListesiFooter');
+    const cariSearchInput = document.getElementById('cariSearchInput');
+    const cariKategoriFiltre = document.getElementById('cariKategoriFiltre');
+    const searchTerm = cariSearchInput.value.toLowerCase();
+    const kategori = cariKategoriFiltre.value;
+    let query = db.collection('cariler').where("sahipId", "==", currentUserId);
+    if (kategori) {
+        query = query.where("kategori", "==", kategori);
+    }
+    try {
+        const snapshot = await query.orderBy('adiSoyadi').get();
+        let cariler = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        if (searchTerm) {
+            cariler = cariler.filter(c => c.kodu?.toLowerCase().includes(searchTerm) || c.adiSoyadi?.toLowerCase().includes(searchTerm));
+        }
+        cariListesiBody.innerHTML = '';
+        cariListesiFooter.innerHTML = '';
         
-        function applyRolePermissions() {
-            bodyElement.className = `role-${currentUserRole}`;
-            const calisanAllowed = ['#dashboard', '#sut-alimi', '#yem-satisi', '#cari-yonetimi'];
-            const activeLink = sidebarNav.querySelector('a.nav-link.active');
-            const activeHref = activeLink ? activeLink.getAttribute('href') : '#dashboard';
-            if (currentUserRole === 'calisan' && !calisanAllowed.includes(activeHref)) {
-                sidebarNav.querySelector('a.nav-link[href="#dashboard"]').click();
-            }
-        }
+        if(cariler.length === 0) return;
+
+        const bakiyePromises = cariler.map(c => calculateCariBakiyeDetayli(c.id));
+        const bakiyeler = await Promise.all(bakiyePromises);
         
-        function handleLogout() { auth.signOut().then(() => { window.location.href = 'login.html'; }); }
+        let toplamAlacak = 0;
+        let toplamBorc = 0;
 
-        async function updateDashboardStats() {
-            const carilerSnapshot = await db.collection('cariler').where("sahipId", "==", currentUserId).get();
-            const yemlerSnapshot = await db.collection('yemler').where("sahipId", "==", currentUserId).get();
-            const todayStr = getTodayForInput();
-            const sutAlimSnapshot = await db.collection('sut_alimlari').where("sahipId", "==", currentUserId).where("tarih", "==", todayStr).get();
-
-            totalCari.textContent = carilerSnapshot.size;
-            totalYemCesidi.textContent = yemlerSnapshot.size;
-            todaySutAlim.textContent = sutAlimSnapshot.size;
-        }
-
-        async function handleCariKaydet(event) {
-            event.preventDefault();
-            const formData = { 
-                kodu: document.getElementById('cariKodu').value, adiSoyadi: document.getElementById('cariAdiSoyadi').value, 
-                kategori: document.getElementById('cariKategori').value, durum: document.getElementById('cariDurum').value, 
-                telefon: document.getElementById('cariTelefon').value, eposta: document.getElementById('cariEposta').value, 
-                adres: document.getElementById('cariAdres').value, bankaAdi: document.getElementById('cariBankaAdi').value, 
-                iban: document.getElementById('cariIban').value, vergiDairesi: document.getElementById('cariVergiDairesi').value, 
-                vergiNo: document.getElementById('cariVergiNo').value, notlar: document.getElementById('cariNotlar').value,
-                sahipId: currentUserId
-            };
-            try {
-                if (editingCariId) {
-                    await db.collection('cariler').doc(editingCariId).set(formData, { merge: true });
-                } else {
-                    await db.collection('cariler').add(formData);
-                }
-                resetCariForm();
-                await renderCariListesi();
-            } catch(error) { console.error("Hata: ", error); }
-        }
-        
-        async function renderCariListesi() {
-            const searchTerm = cariSearchInput.value.toLowerCase();
-            const kategori = cariKategoriFiltre.value;
-            let query = db.collection('cariler').where("sahipId", "==", currentUserId);
-            if (kategori) {
-                query = query.where("kategori", "==", kategori);
-            }
-            const snapshot = await query.orderBy('adiSoyadi').get();
-            let cariler = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-            if (searchTerm) {
-                cariler = cariler.filter(c => c.kodu?.toLowerCase().includes(searchTerm) || c.adiSoyadi?.toLowerCase().includes(searchTerm));
-            }
-
-            cariListesiBody.innerHTML = '';
-            cariListesiFooter.innerHTML = '';
-            
-            const bakiyePromises = cariler.map(c => calculateCariBakiyeDetayli(c.id));
-            const bakiyeler = await Promise.all(bakiyePromises);
-            
-            let toplamAlacak = 0;
-            let toplamBorc = 0;
-
-            cariler.forEach((c, index) => {
-                const row = cariListesiBody.insertRow();
-                const bakiyeDetay = bakiyeler[index];
+        cariler.forEach((c, index) => {
+            const row = cariListesiBody.insertRow();
+            const bakiyeDetay = bakiyeler[index];
+            if (bakiyeDetay) {
                 toplamAlacak += bakiyeDetay.alacak;
                 toplamBorc += bakiyeDetay.borc;
                 const bakiye = bakiyeDetay.bakiye;
@@ -527,198 +513,297 @@
                 const bakiyeStyle = bakiye >= 0 ? 'color:green;' : 'color:red;';
                 const bakiyeText = `${formatCurrency(bakiye)} ${bakiye >= 0 ? '(Alacaklı)' : '(Borçlu)'}`;
                 row.innerHTML = `<td>${c.kodu || ''}</td><td>${c.adiSoyadi || ''}</td><td>${c.kategori || ''}</td><td style="${durumStyle}">${durumText}</td><td>${c.telefon || ''}</td><td style="${bakiyeStyle}">${bakiyeText}</td><td class="dont-print"><button class="btn btn-edit btn-sm" onclick="editCari('${c.id}')">Düzenle</button><button class="btn btn-delete btn-sm" onclick="deleteCari('${c.id}')">Sil</button></td>`;
-            });
-
-            if (cariler.length > 0) {
-                const footerRow = cariListesiFooter.insertRow();
-                const toplamBakiye = toplamAlacak - toplamBorc;
-                const toplamBakiyeStyle = toplamBakiye >= 0 ? 'color:green;' : 'color:red;';
-                const etiket = kategori ? `Kategori Toplamı ('${kategori}')` : 'Genel Toplam';
-                footerRow.innerHTML = `<td colspan="5"><strong>${etiket} | Toplam Alacak: ${formatCurrency(toplamAlacak)} | Toplam Borç: ${formatCurrency(toplamBorc)}</strong></td><td style="${toplamBakiyeStyle}"><strong>${formatCurrency(toplamBakiye)}</strong></td><td class="dont-print"></td>`;
             }
-        }
-        
-        async function editCari(id) { 
-            const doc = await db.collection('cariler').doc(id).get();
-            if (!doc.exists) return;
-            const cari = doc.data();
-            editingCariId = id; 
-            document.getElementById('cariEditId').value = id; 
-            document.getElementById('cariKodu').value = cari.kodu || ''; 
-            document.getElementById('cariAdiSoyadi').value = cari.adiSoyadi || ''; 
-            document.getElementById('cariKategori').value = cari.kategori || ''; 
-            document.getElementById('cariDurum').value = cari.durum || 'aktif'; 
-            document.getElementById('cariTelefon').value = cari.telefon || ''; 
-            document.getElementById('cariEposta').value = cari.eposta || ''; 
-            document.getElementById('cariAdres').value = cari.adres || ''; 
-            document.getElementById('cariBankaAdi').value = cari.bankaAdi || ''; 
-            document.getElementById('cariIban').value = cari.iban || ''; 
-            document.getElementById('cariVergiDairesi').value = cari.vergiDairesi || ''; 
-            document.getElementById('cariVergiNo').value = cari.vergiNo || ''; 
-            document.getElementById('cariNotlar').value = cari.notlar || ''; 
-            setEditingMode(cariFormBaslik, cariKaydetBtn, cariFormTemizleBtn, editingCariId, 'Cari Kart');
-        }
-        
-        async function deleteCari(id) { 
-            if (confirm('Bu cariyi ve ilgili tüm hareketlerini silmek istediğinizden emin misiniz?')) {
-                const batch = db.batch();
-                batch.delete(db.collection('cariler').doc(id));
-                const hareketler = ['sut_alimlari', 'yem_alimlari', 'yem_satislari', 'odemeVeTahsilatlar'];
-                for(const koleksiyon of hareketler) {
-                    const snapshot = await db.collection(koleksiyon).where('cariId', '==', id).get();
-                    snapshot.forEach(doc => batch.delete(doc.ref));
-                }
-                await batch.commit();
-                await renderCariListesi();
+        });
+
+        const footerRow = cariListesiFooter.insertRow();
+        const toplamBakiye = toplamAlacak - toplamBorc;
+        const toplamBakiyeStyle = toplamBakiye >= 0 ? 'color:green;' : 'color:red;';
+        const etiket = kategori ? `Kategori Toplamı ('${kategori}')` : 'Genel Toplam';
+        footerRow.innerHTML = `<td colspan="5"><strong>${etiket} | Toplam Alacak: ${formatCurrency(toplamAlacak)} | Toplam Borç: ${formatCurrency(toplamBorc)}</strong></td><td style="${toplamBakiyeStyle}"><strong>${formatCurrency(toplamBakiye)}</strong></td><td class="dont-print"></td>`;
+    } catch (error) {
+        console.error("Cariler listelenirken hata", error);
+    }
+}
+async function editCari(id) { 
+    const cariForm = document.getElementById('cariForm');
+    const cariFormBaslik = document.getElementById('cariFormBaslik');
+    const cariKaydetBtn = document.getElementById('cariKaydetBtn');
+    const cariFormTemizleBtn = document.getElementById('cariFormTemizleBtn');
+    try {
+        const doc = await db.collection('cariler').doc(id).get();
+        if (!doc.exists) return;
+        const cari = doc.data();
+        editingCariId = id; 
+        document.getElementById('cariEditId').value = id; 
+        document.getElementById('cariKodu').value = cari.kodu || ''; 
+        document.getElementById('cariAdiSoyadi').value = cari.adiSoyadi || ''; 
+        document.getElementById('cariKategori').value = cari.kategori || ''; 
+        document.getElementById('cariDurum').value = cari.durum || 'aktif'; 
+        document.getElementById('cariTelefon').value = cari.telefon || ''; 
+        document.getElementById('cariEposta').value = cari.eposta || ''; 
+        document.getElementById('cariAdres').value = cari.adres || ''; 
+        document.getElementById('cariBankaAdi').value = cari.bankaAdi || ''; 
+        document.getElementById('cariIban').value = cari.iban || ''; 
+        document.getElementById('cariVergiDairesi').value = cari.vergiDairesi || ''; 
+        document.getElementById('cariVergiNo').value = cari.vergiNo || ''; 
+        document.getElementById('cariNotlar').value = cari.notlar || ''; 
+        setEditingMode(cariFormBaslik, cariKaydetBtn, cariFormTemizleBtn, editingCariId, 'Cari Kart');
+    } catch (error) {
+        console.error("Cari düzenleme için getirilirken hata:", error);
+    }
+}
+async function deleteCari(id) { 
+    if (confirm('Bu cariyi ve ilgili tüm hareketlerini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!')) {
+        const batch = db.batch();
+        batch.delete(db.collection('cariler').doc(id));
+        const hareketler = ['sut_alimlari', 'yem_alimlari', 'yem_satislari', 'odemeVeTahsilatlar'];
+        try {
+            for(const koleksiyon of hareketler) {
+                const snapshot = await db.collection(koleksiyon).where('cariId', '==', id).where('sahipId', '==', currentUserId).get();
+                snapshot.forEach(doc => batch.delete(doc.ref));
             }
+            await batch.commit();
+            await renderCariListesi();
+        } catch(error) {
+            console.error("Cari silinirken hata:", error);
+            alert("İlişkili hareketler silinirken bir hata oluştu.");
         }
+    }
+}
+function resetCariForm(){ 
+    const cariForm = document.getElementById('cariForm');
+    const cariFormBaslik = document.getElementById('cariFormBaslik');
+    const cariKaydetBtn = document.getElementById('cariKaydetBtn');
+    const cariFormTemizleBtn = document.getElementById('cariFormTemizleBtn');
+    cariForm.reset(); 
+    editingCariId = null; 
+    document.getElementById('cariEditId').value = ''; 
+    setEditingMode(cariFormBaslik, cariKaydetBtn, cariFormTemizleBtn, null, 'Cari Kart');
+}
+async function handleCariKategoriEkle(event) { 
+    event.preventDefault(); 
+    const yeniCariKategoriAdiInput = document.getElementById('yeniCariKategoriAdi');
+    const yeniAd = yeniCariKategoriAdiInput.value.trim(); 
+    if (yeniAd === '') { alert('Kategori/Köy adı boş olamaz.'); return; }
+    try {
+        await db.collection('cari_kategorileri').add({ ad: yeniAd, sahipId: currentUserId });
+        await Promise.all([renderCariKategoriListesi(), populateCariKategoriSelect(document.getElementById('cariKategori')), populateCariKategoriFiltre(), populateCariKategoriSelect(document.getElementById('topluGirisKategori'))]);
+        yeniCariKategoriAdiInput.value = ''; 
+    } catch(error) { console.error("Kategori eklenirken hata: ", error); }
+}
+async function renderCariKategoriListesi() {
+    const cariKategoriListesiUl = document.getElementById('cariKategoriListesiUl');
+    if (!cariKategoriListesiUl) return;
+    try {
+        const snapshot = await db.collection('cari_kategorileri').where("sahipId", "==", currentUserId).orderBy('ad').get();
+        const kategoriler = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+        cariKategoriListesiUl.innerHTML = ''; 
+        if (kategoriler.length === 0) { cariKategoriListesiUl.innerHTML = '<li>Tanımlı kategori/köy bulunmuyor.</li>'; return; } 
+        kategoriler.forEach(kat => { const li = document.createElement('li'); li.textContent = kat.ad; const deleteBtn = document.createElement('button'); deleteBtn.textContent = 'Sil'; deleteBtn.classList.add('btn', 'btn-delete', 'btn-sm', 'dont-print'); deleteBtn.onclick = () => deleteCariKategori(kat.id); li.appendChild(deleteBtn); cariKategoriListesiUl.appendChild(li); });
+    } catch(error) { console.error("Kategoriler listelenirken hata:", error); }
+}
+async function deleteCariKategori(id) { 
+    if (confirm('Bu kategoriyi/köyü silmek istediğinizden emin misiniz?')) { 
+        try {
+            await db.collection('cari_kategorileri').doc(id).delete(); 
+            await Promise.all([renderCariKategoriListesi(), populateCariKategoriSelect(document.getElementById('cariKategori')), populateCariKategoriFiltre(), populateCariKategoriSelect(document.getElementById('topluGirisKategori'))]);
+        } catch(error) { console.error("Kategori silinirken hata:", error); }
+    }
+}
+async function populateCariKategoriFiltre() { 
+    const selectElement = document.getElementById('cariKategoriFiltre');
+    try {
+        const snapshot = await db.collection('cari_kategorileri').where("sahipId", "==", currentUserId).orderBy('ad').get();
+        const kategoriler = snapshot.docs.map(doc => doc.data());
+        const currentValue = selectElement.value; 
+        selectElement.innerHTML = `<option value="">Tüm Kategoriler</option>`; 
+        kategoriler.forEach(kat => { const option = document.createElement('option'); option.value = kat.ad; option.textContent = kat.ad; selectElement.appendChild(option); }); 
+        selectElement.value = currentValue; 
+    } catch(error) { console.error("Kategori filtresi yüklenirken hata:", error); }
+}
+async function populateCariKategoriSelect(selectElement, defaultOptionText = "Seçiniz...") { 
+    if(!selectElement) return;
+    try {
+        const snapshot = await db.collection('cari_kategorileri').where("sahipId", "==", currentUserId).orderBy('ad').get();
+        const kategoriler = snapshot.docs.map(doc => doc.data());
+        const currentValue = selectElement.value; 
+        selectElement.innerHTML = `<option value="">${defaultOptionText}</option>`; 
+        kategoriler.forEach(kat => { const option = document.createElement('option'); option.value = kat.ad; option.textContent = kat.ad; selectElement.appendChild(option); }); 
+        if (kategoriler.some(kat => kat.ad === currentValue)) { selectElement.value = currentValue; }
+    } catch(error) { console.error("Kategori seçimi yüklenirken hata:", error); }
+}
+async function populateCariSelect(selectElement, defaultText = "Seçiniz...") { 
+    if(!selectElement) return;
+    try {
+        const snapshot = await db.collection('cariler').where("sahipId", "==", currentUserId).where("durum", "==", "aktif").orderBy('adiSoyadi').get();
+        const cariler = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+        const currentValue = selectElement.value; 
+        selectElement.innerHTML = ''; 
+        const firstOption = document.createElement('option'); firstOption.value = ""; firstOption.textContent = defaultText; selectElement.appendChild(firstOption); 
+        cariler.forEach(c => { const option = document.createElement('option'); option.value = c.id; option.textContent = `${c.adiSoyadi} (${c.kodu || 'Kodsuz'})`; selectElement.appendChild(option); }); 
+        if (cariler.some(c => c.id === currentValue)) { selectElement.value = currentValue; }
+    } catch(error) { console.error("Cari seçimi yüklenirken hata:", error); }
+}
+async function populateYemSelect(selectElement, defaultText = "Yem Seçiniz...") {
+    if(!selectElement) return;
+    try {
+        const snapshot = await db.collection('yemler').where("sahipId", "==", currentUserId).orderBy('ad').get();
+        const yemler = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+        const currentValue = selectElement.value;
+        selectElement.innerHTML = ''; 
+        const firstOption = document.createElement('option'); firstOption.value = ""; firstOption.textContent = defaultText; selectElement.appendChild(firstOption);
+        yemler.forEach(y => { const option = document.createElement('option'); option.value = y.id; option.textContent = `${y.ad} (${y.kod}) - Stok: ${y.stokMiktari || 0} ${y.birim}`; selectElement.appendChild(option); });
+        if (yemler.some(y => y.id === currentValue)) { selectElement.value = currentValue; }
+    } catch (error) {
+        console.error("Yem seçimi yüklenirken hata:", error);
+    }
+}
+async function handleSifreDegistir(event) {
+    event.preventDefault();
+    const eskiSifre = document.getElementById('eskiSifre').value;
+    const yeniSifre = document.getElementById('yeniSifre').value;
+    const yeniSifreTekrar = document.getElementById('yeniSifreTekrar').value;
 
-        function resetCariForm(){ cariForm.reset(); editingCariId = null; document.getElementById('cariEditId').value = ''; setEditingMode(cariFormBaslik, cariKaydetBtn, cariFormTemizleBtn, null, 'Cari Kart');}
-        
-        async function handleCariKategoriEkle(event) { 
-            event.preventDefault(); 
-            const yeniAd = yeniCariKategoriAdiInput.value.trim(); 
-            if (yeniAd === '') { alert('Kategori/Köy adı boş olamaz.'); return; }
-            await db.collection('cari_kategorileri').add({ ad: yeniAd, sahipId: currentUserId });
-            await Promise.all([renderCariKategoriListesi(), populateCariKategoriSelect(cariKategori), populateCariKategoriFiltre(), populateCariKategoriSelect(topluGirisKategori)]);
-            yeniCariKategoriAdiInput.value = ''; 
-        }
+    if(!yeniSifre || yeniSifre.length < 6) { alert("Yeni şifre en az 6 karakter olmalıdır!"); return; }
+    if(yeniSifre !== yeniSifreTekrar) { alert("Yeni şifreler uyuşmuyor!"); return; }
 
-        async function renderCariKategoriListesi() {
-            const snapshot = await db.collection('cari_kategorileri').where("sahipId", "==", currentUserId).orderBy('ad').get();
-            const kategoriler = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-            cariKategoriListesiUl.innerHTML = ''; 
-            if (kategoriler.length === 0) { cariKategoriListesiUl.innerHTML = '<li>Tanımlı kategori/köy bulunmuyor.</li>'; return; } 
-            kategoriler.forEach(kat => { const li = document.createElement('li'); li.textContent = kat.ad; const deleteBtn = document.createElement('button'); deleteBtn.textContent = 'Sil'; deleteBtn.classList.add('btn', 'btn-delete', 'btn-sm', 'dont-print'); deleteBtn.onclick = () => deleteCariKategori(kat.id); li.appendChild(deleteBtn); cariKategoriListesiUl.appendChild(li); });
-        }
-        async function deleteCariKategori(id) { if (confirm('Bu kategoriyi/köyü silmek istediğinizden emin misiniz?')) { await db.collection('cari_kategorileri').doc(id).delete(); await Promise.all([renderCariKategoriListesi(), populateCariKategoriSelect(cariKategori), populateCariKategoriFiltre(), populateCariKategoriSelect(topluGirisKategori)]); }}
-        
-        async function populateCariKategoriFiltre() {
-            const snapshot = await db.collection('cari_kategorileri').where("sahipId", "==", currentUserId).orderBy('ad').get();
-            const kategoriler = snapshot.docs.map(doc => doc.data());
-            const selectElement = cariKategoriFiltre; const currentValue = selectElement.value; selectElement.innerHTML = `<option value="">Tüm Kategoriler</option>`; 
-            kategoriler.forEach(kat => { const option = document.createElement('option'); option.value = kat.ad; option.textContent = kat.ad; selectElement.appendChild(option); }); selectElement.value = currentValue; 
-        }
-        async function populateCariKategoriSelect(selectElement, defaultOptionText = "Seçiniz...") {
-            if(!selectElement) return;
-            const snapshot = await db.collection('cari_kategorileri').where("sahipId", "==", currentUserId).orderBy('ad').get();
-            const kategoriler = snapshot.docs.map(doc => doc.data());
-            const currentValue = selectElement.value; selectElement.innerHTML = `<option value="">${defaultOptionText}</option>`; 
-            kategoriler.forEach(kat => { const option = document.createElement('option'); option.value = kat.ad; option.textContent = kat.ad; selectElement.appendChild(option); }); 
-            if (kategoriler.some(kat => kat.ad === currentValue)) { selectElement.value = currentValue; }
-        }
+    const user = auth.currentUser;
+    const credential = firebase.auth.EmailAuthProvider.credential(user.email, eskiSifre);
 
-        async function populateCariSelect(selectElement, defaultText = "Seçiniz...") { 
-            if(!selectElement) return;
-            const snapshot = await db.collection('cariler').where("sahipId", "==", currentUserId).where("durum", "==", "aktif").orderBy('adiSoyadi').get();
-            const cariler = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-            const currentValue = selectElement.value; 
-            selectElement.innerHTML = ''; 
-            const firstOption = document.createElement('option'); firstOption.value = ""; firstOption.textContent = defaultText; selectElement.appendChild(firstOption); 
-            cariler.forEach(c => { const option = document.createElement('option'); option.value = c.id; option.textContent = `${c.adiSoyadi} (${c.kodu || 'Kodsuz'})`; selectElement.appendChild(option); }); 
-            if (cariler.some(c => c.id === currentValue)) { selectElement.value = currentValue; }
+    try {
+        await user.reauthenticateWithCredential(credential);
+        await user.updatePassword(yeniSifre);
+        alert("Şifreniz başarıyla güncellendi!");
+        document.getElementById('sifreDegistirForm').reset();
+    } catch (error) {
+        console.error("Şifre güncelleme hatası:", error);
+        alert("Eski şifre hatalı veya bir sorun oluştu.");
+    }
+}
+async function handleKullaniciKaydet(event) {
+    event.preventDefault();
+    alert("Bu özellik güvenlik nedeniyle doğrudan yeni kullanıcı oluşturmaz. Lütfen önce Firebase Authentication panelinden kullanıcıyı e-posta/şifre ile oluşturun, ardından bu panelden o kullanıcıya ait bir profil (rol ataması) oluşturabilirsiniz.");
+}
+async function deleteKullanici(id) {
+    if(confirm("Bu işlem sadece kullanıcının profilini veritabanından siler, giriş yapmasını engellemez. Kullanıcıyı tamamen silmek için Firebase Authentication panelini kullanın. Devam etmek istiyor musunuz?")) {
+        try {
+            await db.collection('kullanicilar').doc(id).delete();
+            await renderKullaniciListesi();
+        } catch (error) {
+            console.error("Kullanıcı silinirken hata:", error);
         }
-        
-        async function populateYemSelect(selectElement, defaultText = "Yem Seçiniz...") {
-            if(!selectElement) return;
-            const snapshot = await db.collection('yemler').where("sahipId", "==", currentUserId).orderBy('ad').get();
-            const yemler = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-            const currentValue = selectElement.value;
-            selectElement.innerHTML = ''; 
-            const firstOption = document.createElement('option'); firstOption.value = ""; firstOption.textContent = defaultText; selectElement.appendChild(firstOption);
-            yemler.forEach(y => { const option = document.createElement('option'); option.value = y.id; option.textContent = `${y.ad} (${y.kod}) - Stok: ${y.stokMiktari || 0} ${y.birim}`; selectElement.appendChild(option); });
-            if (yemler.some(y => y.id === currentValue)) { selectElement.value = currentValue; }
+    }
+}
+async function renderKullaniciListesi() {
+    const kullaniciListesiBody = document.getElementById('kullaniciListesiBody');
+    if(!kullaniciListesiBody) return;
+    try {
+        const snapshot = await db.collection('kullanicilar').where("sahipId", "==", currentUserId).get();
+        kullaniciListesiBody.innerHTML = '';
+        snapshot.forEach(doc => {
+            const user = doc.data();
+            if(user.rol === 'admin') return;
+            const row = kullaniciListesiBody.insertRow();
+            row.innerHTML = `<td>${user.kullaniciAdi}</td><td>Çalışan</td><td class="dont-print"><button class="btn btn-delete btn-sm" onclick="deleteKullanici('${doc.id}')">Sil</button></td>`;
+        });
+    } catch(error) { console.error("Kullanıcılar listelenirken hata", error); }
+}
+async function handleAyarlarKaydet(event) {
+    event.preventDefault();
+    const varsayilanSutFiyatiInput = document.getElementById('varsayilanSutFiyati');
+    const yeniFiyat = parseFloat(varsayilanSutFiyatiInput.value);
+    if (!isNaN(yeniFiyat) && yeniFiyat >= 0) {
+        try {
+            await db.collection('ayarlar').doc(currentUserId).set({ defaultMilkPrice: yeniFiyat, sahipId: currentUserId });
+            globalSettings.defaultMilkPrice = yeniFiyat;
+            alert('Genel ayarlar kaydedildi.');
+        } catch (error) {
+            console.error("Ayarlar kaydedilirken hata:", error);
+            alert("Ayarlar kaydedilemedi.");
         }
+    } else {
+        alert('Lütfen geçerli bir süt fiyatı giriniz.');
+    }
+}
 
-        async function handleSifreDegistir(event) {
-            event.preventDefault();
-            const eskiSifre = document.getElementById('eskiSifre').value;
-            const yeniSifre = document.getElementById('yeniSifre').value;
-            const yeniSifreTekrar = document.getElementById('yeniSifreTekrar').value;
-            if(!yeniSifre || yeniSifre.length < 6) { alert("Yeni şifre en az 6 karakter olmalıdır!"); return; }
-            if(yeniSifre !== yeniSifreTekrar) { alert("Yeni şifreler uyuşmuyor!"); return; }
+// ... Diğer tüm fonksiyonlar ...
 
-            const user = auth.currentUser;
-            const credential = firebase.auth.EmailAuthProvider.credential(user.email, eskiSifre);
+async function calculateCariBakiyeDetayli(cariId, endDateStr = null) {
+    let alacak = 0;
+    let borc = 0;
+    try {
+        const sutQuery = db.collection('sut_alimlari').where('sahipId', '==', currentUserId).where('cariId', '==', cariId);
+        const yemQuery = db.collection('yem_satislari').where('sahipId', '==', currentUserId).where('cariId', '==', cariId);
+        const odemeQuery = db.collection('odemeVeTahsilatlar').where('sahipId', '==', currentUserId).where('cariId', '==', cariId);
 
-            try {
-                await user.reauthenticateWithCredential(credential);
-                await user.updatePassword(yeniSifre);
-                await db.collection('kullanicilar').doc(user.uid).update({ sifre: yeniSifre });
-                alert("Şifreniz başarıyla güncellendi!");
-                sifreDegistirForm.reset();
-            } catch (error) {
-                console.error("Şifre güncelleme hatası:", error);
-                alert("Eski şifre hatalı veya bir sorun oluştu.");
+        const [sutSnapshot, yemSnapshot, odemeSnapshot] = await Promise.all([
+            sutQuery.get(),
+            yemQuery.get(),
+            odemeQuery.get()
+        ]);
+
+        sutSnapshot.forEach(doc => alacak += doc.data().toplamTutar);
+        yemSnapshot.forEach(doc => borc += doc.data().toplamTutar);
+        odemeSnapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.islemTuru === 'odeme') {
+                borc += data.tutar;
+            } else {
+                alacak += data.tutar;
             }
-        }
-        
-        async function handleKullaniciKaydet(event) {
-            event.preventDefault();
-            alert("Bu özellik güvenlik nedeniyle doğrudan kullanılamaz. Yeni kullanıcılar Firebase Authentication panelinden manuel olarak eklenmelidir. Bu işlem sadece kullanıcının profilini Firestore'a ekler.");
-        }
-        
-        async function deleteKullanici(id) {
-            if(confirm("Bu işlem sadece kullanıcının profilini siler, giriş yapmasını engellemez. Kullanıcıyı tamamen silmek için Firebase Authentication panelini kullanın. Devam etmek istiyor musunuz?")) {
-                await db.collection('kullanicilar').doc(id).delete();
-                await renderKullaniciListesi();
-            }
-        }
+        });
 
-        async function renderKullaniciListesi() {
-            if(!kullaniciListesiBody) return;
-            const snapshot = await db.collection('kullanicilar').get();
-            kullaniciListesiBody.innerHTML = '';
-            snapshot.forEach(doc => {
-                const user = {id: doc.id, ...doc.data()};
-                if(user.rol === 'admin') return;
-                const row = kullaniciListesiBody.insertRow();
-                row.innerHTML = `<td>${user.kullaniciAdi}</td><td>Çalışan</td><td class="dont-print"><button class="btn btn-delete btn-sm" onclick="deleteKullanici('${user.id}')">Sil</button></td>`;
-            });
-        }
-        
-        function handleCariListeYazdir() {
-            const kategoriFiltreElement = cariKategoriFiltre;
-            const seciliKategoriText = kategoriFiltreElement.options[kategoriFiltreElement.selectedIndex].text;
-            document.getElementById('cariListeRaporBaslik').textContent = `${seciliKategoriText} Cari Listesi`;
-            handleYazdir('cari-yonetimi');
-        }
-
-        function handleYazdir(sectionId) {
-            const sectionToPrint = document.getElementById(sectionId);
-            if (!sectionToPrint) return;
-            
-            let reportContent = sectionToPrint.querySelector('.printable-content, #cari-list-printable-area, #yemRaporuAlani');
-            if(!reportContent && sectionId === 'cari-yonetimi') {
-                reportContent = document.getElementById('cari-list-printable-area');
-            }
-
-            if (sectionId !== 'cari-yonetimi' && (!reportContent || reportContent.innerText.trim() === '' || reportContent.innerText.includes("Lütfen Rapor Kriterlerini Seçin"))) {
-                 alert("Lütfen önce bir rapor oluşturun.");
-                 return;
-            }
-            
-            bodyElement.classList.add('print-active');
-            sectionToPrint.classList.add('print-section-active');
-            
-            const pageFormatClass = reportContent.classList.contains('format-a5') ? 'format-a5' : 'format-a4';
-            bodyElement.classList.add(pageFormatClass);
-
-            window.print();
-        }
-
-        window.onafterprint = () => {
-            bodyElement.classList.remove('print-active', 'format-a4', 'format-a5');
-            document.querySelectorAll('.print-section-active').forEach(el => {
-                el.classList.remove('print-section-active');
-            });
-        };
-    </script>
+        return { alacak, borc, bakiye: alacak - borc };
+    } catch (error) {
+        console.error(`Bakiye hesaplanırken hata (Cari ID: ${cariId}):`, error);
+        return { alacak: 0, borc: 0, bakiye: 0 };
+    }
+}
 
 
+function handleCariListeYazdir() {
+    const kategoriFiltreElement = document.getElementById('cariKategoriFiltre');
+    const seciliKategoriText = kategoriFiltreElement.options[kategoriFiltreElement.selectedIndex].text;
+    document.getElementById('cariListeRaporBaslik').textContent = `${seciliKategoriText} Cari Listesi`;
+    handleYazdir('cari-yonetimi');
+}
 
-
-
+function handleYazdir(sectionId) {
+    const sectionToPrint = document.getElementById(sectionId);
+    if (!sectionToPrint) return;
     
+    let reportContent = sectionToPrint.querySelector('.printable-content, #cari-list-printable-area, #yemRaporuAlani');
+    if(!reportContent && sectionId === 'cari-yonetimi') {
+        reportContent = document.getElementById('cari-list-printable-area');
+    }
+    
+    if (sectionId !== 'cari-yonetimi' && (!reportContent || reportContent.innerText.trim() === '' || reportContent.innerText.includes("Lütfen Rapor Kriterlerini Seçin"))) {
+            alert("Lütfen önce bir rapor oluşturun.");
+            return;
+    }
+    
+    const bodyElement = document.body;
+    bodyElement.classList.add('print-active');
+    sectionToPrint.classList.add('print-section-active');
+    
+    const pageFormatClass = reportContent.classList.contains('format-a5') ? 'format-a5' : 'format-a4';
+    bodyElement.classList.add(pageFormatClass);
+
+    window.print();
+}
+
+window.onafterprint = () => {
+    const bodyElement = document.body;
+    bodyElement.classList.remove('print-active', 'format-a4', 'format-a5');
+    document.querySelectorAll('.print-section-active').forEach(el => {
+        el.classList.remove('print-section-active');
+    });
+};
+        
+    
+    
+    
+    </script>
 </body>
 </html>
