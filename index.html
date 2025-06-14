@@ -499,7 +499,55 @@ async function handleYemAlisKaydet(event) {
     }
 }
 
+async function handleOdemeKaydet(event) {
+    event.preventDefault();
+    const odemeForm = document.getElementById('odemeForm');
+    const tutar = parseFloat(document.getElementById('odemeTutari').value);
+    const cariId = document.getElementById('odemeYapilanTedarikci').value;
+    const islemTuru = document.getElementById('islemTuru').value;
+    const editId = document.getElementById('odemeEditId').value;
 
+    if (!cariId || isNaN(tutar) || tutar <= 0) {
+        alert("Lütfen cari ve tutar alanlarını doğru bir şekilde doldurun.");
+        return;
+    }
+
+    const formData = {
+        tarih: document.getElementById('odemeTarih').value,
+        cariId: cariId,
+        islemTuru: islemTuru,
+        tutar: tutar,
+        aciklama: document.getElementById('odemeAciklama').value.trim(),
+        sahipId: currentUserId
+    };
+
+    try {
+        if (editId) {
+            // Düzenleme mantığı
+            await db.collection('odemeVeTahsilatlar').doc(editId).set(formData, { merge: true });
+        } else {
+            // Yeni kayıt mantığı
+            await db.collection('odemeVeTahsilatlar').add(formData);
+        }
+
+        // Formu temizle ve listeyi yenile
+        if (typeof resetOdemeForm === 'function') {
+            resetOdemeForm();
+        } else {
+            odemeForm.reset();
+        }
+
+        if (typeof renderOdemeListesi === 'function') {
+            await renderOdemeListesi();
+        }
+
+        alert("İşlem başarıyla kaydedildi.");
+
+    } catch (error) {
+        console.error("Ödeme/Tahsilat kaydedilirken hata:", error);
+        alert("İşlem kaydedilirken bir hata oluştu.");
+    }
+}
         
 function handleLogout() { auth.signOut().then(() => { window.location.href = 'login.html'; }).catch(error => console.error("Logout error", error)); }
 async function getSettings() {
