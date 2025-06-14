@@ -561,6 +561,131 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
     }
 }
 
+async function handleYemKarRaporuOlustur() {
+    const ayYil = document.getElementById('yemRaporuAySecimi').value;
+    const raporAlani = document.getElementById('yemRaporuAlani');
+
+    if (!ayYil) {
+        alert("Lütfen bir ay seçin.");
+        raporAlani.innerHTML = '';
+        return;
+    }
+
+    const [year, month] = ayYil.split('-');
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = endDate.toISOString().split('T')[0];
+
+    raporAlani.innerHTML = '<p>Rapor oluşturuluyor, lütfen bekleyin...</p>';
+
+    try {
+        // 1. Adım: Seçilen aydaki tüm yem satışlarını çek
+        const satisSnapshot = await db.collection('yem_satislari')
+            .where('sahipId', '==', currentUserId)
+            .where('tarih', '>=', startDateStr)
+            .where('tarih', '<=', endDateStr)
+            .get();
+
+        if (satisSnapshot.empty) {
+            raporAlani.innerHTML = '<h4>Bu ay için yem satışı bulunmuyor.</h4>';
+            return;
+        }
+
+        // 2. Adım: Yemlerin maliyet fiyatlarını ve isimlerini almak için tüm yem tanımlarını çek
+        const yemlerSnapshot = await db.collection('yemler').where('sahipId', '==', currentUserId).get();
+        const yemlerMap = new Map();
+        yemlerSnapshot.forEach(doc => {
+            yemlerMap.set(doc.id, doc.data());
+        });
+
+        // 3. Adım: Satış verilerini işle ve kârı hesapla
+        const raporVerisi = {};
+
+        satisSnapshot.forEach(doc => {
+            const satis = doc.data();
+            const yemDetay = yemlerMap.get(satis.yemId);
+            const yemAdi = yemDetay ? yemDetay.ad : 'Bilinmeyen Yem';
+            // Eğer yemin alış fiyatı tanımlı değilse maliyeti 0 kabul et
+            const maliyet = yemDetay ? (yemDetay.alisFiyati || 0) : 0;
+
+            if (!raporVerisi[satis.yemId]) {
+                raporVerisi[satis.yemId] = {
+                    ad: yemAdi,
+                    toplamMiktar: 0,
+                    toplamSatisTutar: 0,
+                    toplamMaliyet: 0,
+                    toplamKar: 0
+                };
+            }
+
+            const satisKar = (satis.satisFiyati - maliyet) * satis.miktar;
+            raporVerisi[satis.yemId].toplamMiktar += satis.miktar;
+            raporVerisi[satis.yemId].toplamSatisTutar += satis.toplamTutar;
+            raporVerisi[satis.yemId].toplamMaliyet += maliyet * satis.miktar;
+            raporVerisi[satis.yemId].toplamKar += satisKar;
+        });
+
+        // 4. Adım: HTML tablosunu oluştur
+        let genelToplamSatis = 0;
+        let genelToplamMaliyet = 0;
+        let genelToplamKar = 0;
+
+        let tableHTML = `
+            <h3 class="print-only print-title">Aylık Yem Satış Kârlılık Raporu - ${month}/${year}</h3>
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>Yem Adı</th>
+                        <th>Satılan Miktar (Birim)</th>
+                        <th>Toplam Satış Tutarı</th>
+                        <th>Toplam Maliyet</th>
+                        <th>Toplam Kâr</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        for (const yemId in raporVerisi) {
+            const veri = raporVerisi[yemId];
+            genelToplamSatis += veri.toplamSatisTutar;
+            genelToplamMaliyet += veri.toplamMaliyet;
+            genelToplamKar += veri.toplamKar;
+            tableHTML += `
+                <tr>
+                    <td>${veri.ad}</td>
+                    <td>${veri.toplamMiktar}</td>
+                    <td>${formatCurrency(veri.toplamSatisTutar)}</td>
+                    <td>${formatCurrency(veri.toplamMaliyet)}</td>
+                    <td>${formatCurrency(veri.toplamKar)}</td>
+                </tr>
+            `;
+        }
+
+        tableHTML += `
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td><strong>GENEL TOPLAM</strong></td>
+                        <td></td>
+                        <td><strong>${formatCurrency(genelToplamSatis)}</strong></td>
+                        <td><strong>${formatCurrency(genelToplamMaliyet)}</strong></td>
+                        <td><strong>${formatCurrency(genelToplamKar)}</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        `;
+
+        raporAlani.innerHTML = tableHTML;
+
+    } catch (error) {
+        console.error("Yem kârlılık raporu oluşturulurken hata:", error);
+        raporAlani.innerHTML = `<p style="color:red;">Rapor oluşturulurken bir hata oluştu. Bu sorgu için bir Firestore dizini (index) oluşturmanız gerekebilir.</p>`;
+    }
+}
+
+        
+
 async function handleHesapOzetiRaporuOlustur() {
     const cariId = document.getElementById('raporCariSecimi').value;
     const ayYil = document.getElementById('raporTarihAraligi').value;
