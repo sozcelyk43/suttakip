@@ -35,11 +35,7 @@
         <section id="dashboard" class="module-section">
             <div class="module-header"><h2>📝 Kontrol Paneli</h2></div>
             <div class="container">
-                <h3>Hoş Geldiniz!</h3>
-                <div class="alert-info">
-                    <strong>Bilgilendirme:</strong> Bu, Süt Takip Programı'nın interaktif bir önizlemesidir.
-                    Verileriniz sayfa yenilendiğinde veya kapatıldığında kaybolacaktır.
-                </div>
+                <h3>Genel İstatistikler</h3>
                  <p>Toplam Kayıtlı Cari Sayısı: <span id="totalCari">0</span></p>
                  <p>Tanımlı Yem Çeşidi: <span id="totalYemCesidi">0</span></p>
                  <p>Bugünkü Toplam Süt Alım Kayıt Sayısı: <span id="todaySutAlim">0</span></p>
@@ -67,14 +63,14 @@
                     <div class="form-group"><label for="cariVergiDairesi">Vergi Dairesi:</label><input type="text" id="cariVergiDairesi"></div>
                     <div class="form-group"><label for="cariVergiNo">Vergi No / T.C.:</label><input type="text" id="cariVergiNo"></div>
                     <div class="form-group" style="grid-column: span 2;"><label for="cariNotlar">Özel Notlar:</label><textarea id="cariNotlar"></textarea></div>
-                </div><button type="submit" class="btn dont-print" id="cariKaydetBtn">Kaydet</button><button type="button" class="btn btn-primary dont-print dont-calisan" id="cariFormTemizleBtn" style="display:none;">Yeni Kayıt</button></form></div>
+                </div><button type="submit" class="btn btn-primary" id="cariKaydetBtn">Kaydet</button><button type="button" class="btn dont-calisan" id="cariFormTemizleBtn" style="display:none;">Yeni Kayıt</button></form></div>
                 
                 <div id="cari-list-printable-area" class="dont-calisan">
                     <h3 class="print-only print-title" id="cariListeRaporBaslik">Cari Listesi Raporu</h3>
                     <div class="list-section">
                         <div class="list-header-with-filter">
                             <h3>Cari Listesi</h3>
-                            <select id="cariKategoriFiltre" style="padding: 8px 10px; border-radius: 4px; border: 1px solid #ced4da; font-size: 0.9em;">
+                            <select id="cariKategoriFiltre">
                                 <option value="">Tüm Kategoriler</option>
                             </select>
                         </div>
@@ -85,7 +81,7 @@
                         </table>
                     </div>
                 </div>
-                <button type="button" class="btn btn-print dont-print dont-calisan" id="cariListesiYazdirBtn" style="margin-top: 20px;">Listeyi Yazdır</button>
+                <button type="button" class="btn btn-secondary dont-print dont-calisan" id="cariListesiYazdirBtn" style="margin-top: 20px;">Listeyi Yazdır</button>
             </div>
         </section>
 
@@ -125,7 +121,7 @@
                     <div class="form-group"><label for="yemBirimi">Birim:</label><input type="text" id="yemBirimi" value="Çuval"></div>
                     <div class="form-group"><label for="yemAlisFiyati">Alış Fiyatı:</label><input type="number" id="yemAlisFiyati" step="0.01"></div>
                     <div class="form-group"><label for="yemSatisFiyati">Satış Fiyatı:</label><input type="number" id="yemSatisFiyati" step="0.01"></div>
-                </div><button type="submit" class="btn dont-print" id="yemTanimKaydetBtn">Kaydet</button><button type="button" class="btn btn-primary dont-print" id="yemTanimFormTemizleBtn" style="display:none;">Yeni</button></form></div>
+                </div><button type="submit" class="btn btn-primary" id="yemTanimKaydetBtn">Kaydet</button><button type="button" class="btn" id="yemTanimFormTemizleBtn" style="display:none;">Yeni</button></form></div>
                 <div class="list-section"><h3>Tanımlı Yemler & Stok</h3><table><thead><tr><th>Kod</th><th>Ad</th><th>Kategori</th><th>Birim</th><th>Alış F.</th><th>Satış F.</th><th>Stok</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemStokListesiBody"></tbody></table></div>
                 <hr>
                 <div class="form-section"><h3><span id="yemAlisFormBaslik">Yeni Yem Alışı</span></h3><form id="yemAlisForm" action="#"><input type="hidden" id="yemAlisEditId"><div class="form-grid">
@@ -135,7 +131,7 @@
                     <div class="form-group"><label for="yemAlisTedarikci">Cari:</label><select id="yemAlisTedarikci"><option value="">Seçiniz...</option></select></div>
                     <div class="form-group"><label for="yemAlisBirimFiyati">Alış Fiyatı:</label><input type="number" id="yemAlisBirimFiyati" step="0.01" required></div>
                     <div class="form-group"><label>Toplam Tutar:</label><input type="text" id="yemAlisToplamTutar" readonly></div>
-                </div><button type="submit" class="btn dont-print" id="yemAlisKaydetBtn">Alışı Kaydet</button><button type="button" class="btn btn-primary dont-print" id="yemAlisFormTemizleBtn" style="display:none;">Yeni</button></form></div>
+                </div><button type="submit" class="btn btn-primary" id="yemAlisKaydetBtn">Alışı Kaydet</button><button type="button" class="btn" id="yemAlisFormTemizleBtn" style="display:none;">Yeni</button></form></div>
                 <div class="list-section"><h3>Yem Alış Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Yem</th><th>Miktar</th><th>Cari</th><th>Alış F.</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemAlisHareketListesiBody"></tbody></table></div>
              </div>
         </section>
@@ -149,7 +145,7 @@
                     <div class="form-group"><label for="yemSatisMiktar">Miktar:</label><input type="number" id="yemSatisMiktar" step="1" required></div>
                     <div class="form-group"><label for="yemSatisBirimFiyati">Satış Fiyatı:</label><input type="number" id="yemSatisBirimFiyati" step="0.01" required></div>
                     <div class="form-group"><label>Toplam Tutar:</label><input type="text" id="yemSatisToplamTutar" readonly></div>
-                </div><button type="submit" class="btn dont-print" id="yemSatisKaydetBtn">Satışı Kaydet</button><button type="button" class="btn btn-primary dont-print" id="yemSatisFormTemizleBtn" style="display:none;">Yeni</button></form></div>
+                </div><button type="submit" class="btn btn-primary" id="yemSatisKaydetBtn">Satışı Kaydet</button><button type="button" class="btn" id="yemSatisFormTemizleBtn" style="display:none;">Yeni</button></form></div>
                 <div class="list-section"><h3>Yem Satış Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Alan Cari</th><th>Yem</th><th>Miktar</th><th>Fiyat</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemSatisListesiBody"></tbody></table></div>
              </div>
         </section>
@@ -162,7 +158,7 @@
                     <div class="form-group"><label for="odemeYapilanTedarikci">Cari:</label><select id="odemeYapilanTedarikci" required><option value="">Seçiniz...</option></select></div>
                     <div class="form-group"><label for="odemeTutari">Tutar (TL):</label><input type="number" id="odemeTutari" step="0.01" required></div>
                     <div class="form-group" style="grid-column: span 2;"><label for="odemeAciklama">Açıklama:</label><textarea id="odemeAciklama" rows="2"></textarea></div>
-                 </div><button type="submit" class="btn dont-print" id="odemeKaydetBtn">Kaydet</button><button type="button" class="btn btn-primary dont-print" id="odemeFormTemizleBtn" style="display:none;">Yeni</button></form></div>
+                 </div><button type="submit" class="btn btn-primary" id="odemeKaydetBtn">Kaydet</button><button type="button" class="btn" id="odemeFormTemizleBtn" style="display:none;">Yeni</button></form></div>
                  <div class="list-section"><h3>İşlem Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Cari</th><th>İşlem Türü</th><th>Tutar</th><th>Açıklama</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="odemeListesiBody"></tbody></table></div>
             </div>
         </section>
@@ -171,21 +167,17 @@
             <div class="container">
                 <div class="report-section">
                     <h3 class="dont-print">Cari Hesap Özeti</h3>
-                    <div class="form-group dont-print">
-                        <label for="raporCariAramaInput">Cari Ara:</label>
-                        <input type="text" id="raporCariAramaInput" placeholder="Aramak için yazın...">
-                    </div>
                     <div class="form-grid dont-print" style="grid-template-columns: 1fr 1fr auto; align-items: end;">
-                        <div class="form-group"><label for="raporCariSecimi">Cari Seçin:</label><select id="raporCariSecimi" size="5"><option value="">Seçiniz...</option></select></div>
+                        <div class="form-group"><label for="raporCariSecimi">Cari Seçin:</label><select id="raporCariSecimi"><option value="">Seçiniz...</option></select></div>
                         <div class="form-group"><label for="raporTarihAraligi">Ay:</label><input type="month" id="raporTarihAraligi"></div>
-                        <button type="button" class="btn btn-primary dont-print" id="raporOlusturBtn" style="height:45px;">Rapor Oluştur</button>
+                        <button type="button" class="btn btn-primary" id="raporOlusturBtn" style="height:45px;">Rapor Oluştur</button>
                     </div> <hr class="dont-print">
                     <div id="report-content-to-print" class="printable-content format-a5">
                         <h1 class="print-only print-title">Süt Takip Programı - Cari Hesap Özeti</h1>
                         <h4 id="raporBaslik" style="text-align:center;">Lütfen Rapor Kriterlerini Seçin</h4>
                         <div id="raporDetayAlani"></div>
                     </div>
-                    <button type="button" class="btn btn-print dont-print" id="raporYazdirBtn" style="margin-top:20px;">Özeti Yazdır</button>
+                    <button type="button" class="btn btn-secondary dont-print" id="raporYazdirBtn" style="margin-top:20px;">Özeti Yazdır</button>
                 </div>
             </div>
         </section>
@@ -199,9 +191,9 @@
                         <div class="form-group"><label for="sutRaporuAySecimi">Ay:</label><input type="month" id="sutRaporuAySecimi"></div>
                         <div class="form-group"><label for="sutRaporuKategoriSecimi">Kategori:</label><select id="sutRaporuKategoriSecimi"><option value="">Tümü</option></select></div>
                         <div style="display: flex; gap: 10px;">
-                            <button type="button" class="btn btn-primary dont-print" id="sutRaporuOlusturBtn" style="height:45px; flex-grow: 1;">Göster</button>
-                            <button type="button" class="btn dont-print" id="sutRaporuKategoriGosterBtn" style="height:45px; background-color: #fd7e14; flex-grow: 1;">Kategori</button>
-                            <button type="button" class="btn dont-print" id="sutRaporuTumunuGosterBtn" style="height:45px; background-color: #17a2b8; flex-grow: 1;">Toplu</button>
+                            <button type="button" class="btn btn-primary" id="sutRaporuOlusturBtn" style="height:45px; flex-grow: 1;">Göster</button>
+                            <button type="button" class="btn btn-info" id="sutRaporuKategoriGosterBtn" style="height:45px; flex-grow: 1;">Kategori</button>
+                            <button type="button" class="btn btn-info" id="sutRaporuTumunuGosterBtn" style="height:45px; flex-grow: 1;">Toplu</button>
                         </div>
                     </div> <hr class="dont-print">
                     <div id="sutAlimRaporAlani" class="printable-content format-a5">
@@ -209,7 +201,7 @@
                         <h4 id="sutRaporuBaslik" style="text-align:center;">Lütfen Rapor Kriterlerini Seçin</h4>
                         <div id="sutRaporuDetayAlani"></div>
                     </div>
-                    <button type="button" class="btn btn-print dont-print" id="sutRaporuYazdirBtn" style="margin-top:20px;">Raporu Yazdır</button>
+                    <button type="button" class="btn btn-secondary dont-print" id="sutRaporuYazdirBtn" style="margin-top:20px;">Raporu Yazdır</button>
                  </div>
             </div>
         </section>
@@ -223,21 +215,19 @@
                             <label for="yemRaporuAySecimi">Ay Seçin:</label>
                             <input type="month" id="yemRaporuAySecimi">
                         </div>
-                        <button type="button" class="btn btn-primary dont-print" id="yemRaporuOlusturBtn" style="height:45px;">Raporu Göster</button>
+                        <button type="button" class="btn btn-primary" id="yemRaporuOlusturBtn" style="height:45px;">Raporu Göster</button>
                     </div>
                     <hr class="dont-print">
                     <div id="yemRaporuAlani" class="printable-content format-a4">
                     </div>
-                    <button type="button" class="btn btn-print dont-print" id="yemRaporuYazdirBtn" style="margin-top:20px;">Raporu Yazdır</button>
+                    <button type="button" class="btn btn-secondary dont-print" id="yemRaporuYazdirBtn" style="margin-top:20px;">Raporu Yazdır</button>
                  </div>
              </div>
         </section>
         <section id="ayarlar" class="module-section hidden-section">
              <div class="module-header"><h2>⚙️ Ayarlar</h2></div>
              <div class="container">
-                <div class="settings-section"><h3>Genel Ayarlar</h3><form id="ayarlarForm" action="#"><div class="form-group"><label for="varsayilanSutFiyati">Varsayılan Süt Fiyatı (TL/Lt):</label><input type="number" id="varsayilanSutFiyati" step="0.01"></div><button type="submit" class="btn dont-print">Kaydet</button></form></div>
-                <hr>
-                <div class="settings-section"><h3>Cari Kategori/Köy Tanımları</h3><form id="cariKategoriForm" action="#"><div class="form-grid" style="grid-template-columns: 1fr auto; align-items:end;"><div class="form-group" style="margin-bottom:0;"><label for="yeniCariKategoriAdi">Yeni Ad:</label><input type="text" id="yeniCariKategoriAdi" required></div><button type="submit" class="btn dont-print" style="height:45px;">Ekle</button></div></form><div class="list-section" style="margin-top:20px;"><h4>Tanımlı Kategoriler/Köyler</h4><ul id="cariKategoriListesiUl"></ul></div></div>
+                <div class="settings-section"><h3>Genel Ayarlar</h3><form id="ayarlarForm" action="#"><div class="form-group"><label for="varsayilanSutFiyati">Varsayılan Süt Fiyatı (TL/Lt):</label><input type="number" id="varsayilanSutFiyati" step="0.01"></div><button type="submit" class="btn btn-primary">Kaydet</button></form></div>
                 <hr>
                 <div class="settings-section">
                     <h3>Şifre Değiştir</h3>
@@ -281,7 +271,6 @@
         const moduleSections = document.querySelectorAll('.main-content .module-section');
         const bodyElement = document.body;
         const logoutButton = document.getElementById('logoutButton');
-        
         const cariForm = document.getElementById('cariForm'), cariKaydetBtn = document.getElementById('cariKaydetBtn'), cariFormBaslik = document.getElementById('cariFormBaslik'), cariFormTemizleBtn = document.getElementById('cariFormTemizleBtn'), cariSearchInput = document.getElementById('cariSearchInput'), cariKategoriFiltre = document.getElementById('cariKategoriFiltre'), cariListesiYazdirBtn = document.getElementById('cariListesiYazdirBtn'), cariListesiFooter = document.getElementById('cariListesiFooter');
         const yemTanimForm = document.getElementById('yemTanimForm'), yemTanimKaydetBtn = document.getElementById('yemTanimKaydetBtn'), yemTanimFormBaslik = document.getElementById('yemTanimFormBaslik'), yemTanimFormTemizleBtn = document.getElementById('yemTanimFormTemizleBtn');
         const yemAlisForm = document.getElementById('yemAlisForm'), yemAlisKaydetBtn = document.getElementById('yemAlisKaydetBtn'), yemAlisFormBaslik = document.getElementById('yemAlisFormBaslik'), yemAlisFormTemizleBtn = document.getElementById('yemAlisFormTemizleBtn');
@@ -323,7 +312,7 @@
                     .catch(err => console.error('Service Worker registration failed: ', err));
             });
         }
-
+        
         function generateId() { return Date.now().toString(36) + Math.random().toString(36).substring(2, 9); }
         function formatDate(dateString) { if (!dateString) return ''; const date = new Date(dateString); const userTimezoneOffset = date.getTimezoneOffset() * 60000; return new Date(date.getTime() + userTimezoneOffset).toLocaleDateString('tr-TR'); }
         function getTodayForInput() { return new Date().toISOString().split('T')[0]; }
@@ -674,13 +663,17 @@
 
         function handleYazdir(sectionId) {
             const sectionToPrint = document.getElementById(sectionId);
-            if (!sectionToPrint) return;
+            if (!sectionToPrint) { return; }
+
             const reportContent = sectionToPrint.querySelector('.printable-content, #cari-list-printable-area, #yemRaporuAlani');
             if (sectionId !== 'cari-yonetimi' && (!reportContent || reportContent.innerText.trim() === '' || reportContent.innerText.includes("Lütfen Rapor Kriterlerini Seçin"))) {
                  alert("Lütfen önce bir rapor oluşturun.");
                  return;
             }
-            bodyElement.classList.add('print-active');
+
+            const pageFormatClass = reportContent.classList.contains('format-a5') ? 'format-a5' : 'format-a4';
+            
+            bodyElement.classList.add('print-active', pageFormatClass);
             sectionToPrint.classList.add('print-section-active');
             window.print();
         }
@@ -693,7 +686,6 @@
                 row.innerHTML = `<td>${user.kullaniciAdi}</td><td>Çalışan</td><td class="dont-print"><button class="btn btn-delete btn-sm" onclick="deleteKullanici('${user.id}')">Sil</button></td>`;
             });
         }
-
         function handleKullaniciKaydet(event) {
             event.preventDefault();
             const kullaniciAdi = document.getElementById('kullaniciAdi').value;
@@ -709,7 +701,6 @@
             renderKullaniciListesi();
             kullaniciForm.reset();
         }
-
         function deleteKullanici(id) {
             if(confirm("Bu kullanıcıyı silmek istediğinizden emin misiniz?")) {
                 db_kullanicilar = db_kullanicilar.filter(user => user.id !== id);
@@ -740,7 +731,7 @@
         }
 
         window.onafterprint = () => {
-            bodyElement.classList.remove('print-active');
+            bodyElement.classList.remove('print-active', 'format-a4', 'format-a5');
             document.querySelectorAll('.print-section-active').forEach(el => {
                 el.classList.remove('print-section-active');
             });
