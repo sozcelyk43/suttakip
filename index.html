@@ -411,14 +411,15 @@ function initializeApp() {
 
 async function loadAndRenderAllData() {
     try {
-        // SADECE BU SATIR AKTİF KALSIN
-        await Promise.all([
-            renderCariListesi() 
-        ]);
-    } catch (error) { 
-        console.error("Hata renderCariListesi fonksiyonunda:", error); 
-    }
+        await Promise.all([
+            renderCariListesi(), renderYemStokListesi(), renderOdemeListesi(), renderCariKategoriListesi(), 
+            populateCariKategoriFiltre(), populateCariKategoriSelect(document.getElementById('topluGirisKategori')),
+            updateDashboardStats()]);
+    } catch (error) { console.error("Test Başarısız", error); 
+    }
 }
+
+
 function generateId() { return db.collection('_').doc().id; }
 function formatDate(dateString) { if (!dateString) return ''; const date = new Date(dateString); const userTimezoneOffset = date.getTimezoneOffset() * 60000; return new Date(date.getTime() + userTimezoneOffset).toLocaleDateString('tr-TR'); }
 function getTodayForInput() { return new Date().toISOString().split('T')[0]; }
