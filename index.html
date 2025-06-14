@@ -414,8 +414,8 @@ async function loadAndRenderAllData() {
         console.log("Test Başladı: ");
         await Promise.all([
             renderCariListesi(),
-            renderYemStokListesi(), 
-            //renderOdemeListesi(),
+            //renderYemStokListesi(), 
+            renderOdemeListesi(),
            // renderCariKategoriListesi(), 
             //populateCariKategoriFiltre(),
            // populateCariKategoriSelect(document.getElementById('topluGirisKategori')),
@@ -423,7 +423,7 @@ async function loadAndRenderAllData() {
         ]);
         console.log("Test Başarılı: ");
     } catch (error) { 
-        console.error("Test Başarısız: Hata yemstok!", error); 
+        console.error("Test Başarısız: Hata renderodeme!", error); 
     }
 }
 function generateId() { return db.collection('_').doc().id; }
