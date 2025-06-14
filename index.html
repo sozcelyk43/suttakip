@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -46,7 +47,7 @@
             <div class="module-header">
                 <h2>👥 Cari Yönetimi</h2>
                 <div class="search-container dont-calisan">
-                    <input type="text" id="cariSearchInput" placeholder="Cari Ara...">
+                    <input type="text" id="cariSearchInput" placeholder="Cari Ara..." aria-label="Cari Arama Kutusu">
                 </div>
             </div>
             <div class="container">
@@ -227,16 +228,26 @@
         <section id="ayarlar" class="module-section hidden-section">
              <div class="module-header"><h2>⚙️ Ayarlar</h2></div>
              <div class="container">
-                <div class="settings-section"><h3>Genel Ayarlar</h3><form id="ayarlarForm" action="#"><div class="form-group"><label for="varsayilanSutFiyati">Varsayılan Süt Fiyatı (TL/Lt):</label><input type="number" id="varsayilanSutFiyati" step="0.01"></div><button type="submit" class="btn btn-primary">Kaydet</button></form></div>
-                <hr>
-                <div class="settings-section">
-                    <h3>Şifre Değiştir</h3>
-                    <form id="sifreDegistirForm" class="form-grid" style="grid-template-columns: 1fr; gap: 15px;">
-                        <div class="form-group"><label for="eskiSifre">Eski Şifre:</label><input type="password" id="eskiSifre" required></div>
-                        <div class="form-group"><label for="yeniSifre">Yeni Şifre:</label><input type="password" id="yeniSifre" required></div>
-                        <div class="form-group"><label for="yeniSifreTekrar">Yeni Şifre (Tekrar):</label><input type="password" id="yeniSifreTekrar" required></div>
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">Güncelle</button>
-                    </form>
+                <div class="ayarlar-ust-bolum">
+                    <div class="settings-section">
+                        <h3>Genel Ayarlar</h3>
+                        <form id="ayarlarForm">
+                            <div class="form-group">
+                                <label for="varsayilanSutFiyati">Varsayılan Süt Fiyatı (TL/Lt):</label>
+                                <input type="number" id="varsayilanSutFiyati" step="0.01">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Kaydet</button>
+                        </form>
+                    </div>
+                    <div class="settings-section">
+                        <h3>Şifre Değiştir</h3>
+                        <form id="sifreDegistirForm">
+                            <div class="form-group"><label for="eskiSifre">Eski Şifre:</label><input type="password" id="eskiSifre" required></div>
+                            <div class="form-group"><label for="yeniSifre">Yeni Şifre:</label><input type="password" id="yeniSifre" required></div>
+                            <div class="form-group"><label for="yeniSifreTekrar">Yeni Şifre (Tekrar):</label><input type="password" id="yeniSifreTekrar" required></div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Güncelle</button>
+                        </form>
+                    </div>
                 </div>
                 <hr>
                 <div class="settings-section"><h3>Cari Kategori/Köy Tanımları</h3><form id="cariKategoriForm" action="#"><div class="form-grid" style="grid-template-columns: 1fr auto; align-items:end;"><div class="form-group" style="margin-bottom:0;"><label for="yeniCariKategoriAdi">Yeni Ad:</label><input type="text" id="yeniCariKategoriAdi" required></div><button type="submit" class="btn" style="height:45px;">Ekle</button></div></form><div class="list-section" style="margin-top:20px;"><h4>Tanımlı Kategoriler/Köyler</h4><ul id="cariKategoriListesiUl"></ul></div></div>
@@ -250,7 +261,7 @@
         </section>
     </div>
 
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script>
@@ -263,7 +274,7 @@
             appId: "1:512756958486:web:13cceb6835e2c575e9fc37",
             measurementId: "G-LYLT9WFVNK"
         };
-
+        
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
@@ -311,6 +322,14 @@
         const kullaniciForm = document.getElementById('kullaniciForm'), kullaniciKaydetBtn = document.getElementById('kullaniciKaydetBtn'), kullaniciListesiBody = document.getElementById('kullaniciListesiBody');
         const sifreDegistirForm = document.getElementById('sifreDegistirForm');
 
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => console.log('Service Worker registered.'))
+                    .catch(err => console.error('Service Worker registration failed: ', err));
+            });
+        }
+        
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 currentUserId = user.uid;
@@ -325,7 +344,7 @@
                     }
                 } catch (error) {
                     console.error("Kullanıcı rolü alınırken hata:", error);
-                    alert("Kullanıcı bilgileri alınamadı.");
+                    alert("Kullanıcı bilgileri alınamadı. Lütfen internet bağlantınızı ve güvenlik kurallarınızı kontrol edin.");
                     handleLogout();
                 }
             } else {
@@ -344,7 +363,9 @@
                 sidebarNav.querySelectorAll('a.nav-link').forEach(lnk => lnk.classList.remove('active'));
                 link.classList.add('active');
                 const targetId = link.getAttribute('href').substring(1);
-                moduleSections.forEach(section => { section.style.display = section.id === targetId ? 'block' : 'none'; });
+                moduleSections.forEach(section => {
+                    section.style.display = section.id === targetId ? 'block' : 'none';
+                });
                 
                 if (targetId === 'dashboard') { updateDashboardStats(); }
                 if (targetId === 'cari-yonetimi') { populateCariKategoriFiltre(); renderCariListesi(); populateCariKategoriSelect(cariKategori); }
@@ -357,14 +378,28 @@
                 if (targetId === 'aylik-yem-raporu'){ if(!yemRaporuAySecimi.value) yemRaporuAySecimi.value = getMonthYearForInput(); }
                 if (targetId === 'ayarlar') { populateCariKategoriSelect(cariKategori); renderCariKategoriListesi(); getSettings(); renderKullaniciListesi(); }
             });
-
+            
             logoutButton.addEventListener('click', handleLogout);
             cariForm.addEventListener('submit', handleCariKaydet);
+            cariFormTemizleBtn.addEventListener('click', resetCariForm);
             yemTanimForm.addEventListener('submit', handleYemTanimKaydet);
+            yemTanimFormTemizleBtn.addEventListener('click', resetYemTanimForm);
+            yemAlisForm.addEventListener('submit', handleYemAlisKaydet);
+            yemAlisFormTemizleBtn.addEventListener('click', resetYemAlisForm);
+            yemSatisForm.addEventListener('submit', handleYemSatisKaydet);
+            yemSatisFormTemizleBtn.addEventListener('click', resetYemSatisForm);
             odemeForm.addEventListener('submit', handleOdemeKaydet);
+            odemeFormTemizleBtn.addEventListener('click', resetOdemeForm);
             cariKategoriForm.addEventListener('submit', handleCariKategoriEkle);
             sifreDegistirForm.addEventListener('submit', handleSifreDegistir);
             kullaniciForm.addEventListener('submit', handleKullaniciKaydet);
+            
+            cariSearchInput.addEventListener('input', renderCariListesi);
+            cariKategoriFiltre.addEventListener('change', renderCariListesi);
+            cariListesiYazdirBtn.addEventListener('click', handleCariListeYazdir);
+            topluGirisTarihInput.addEventListener('change', () => { renderTopluSutGirisFormu(); renderSutAlimGecmisi(); });
+            topluGirisKategoriSelect.addEventListener('change', renderTopluSutGirisFormu);
+
             
             raporOlusturBtn.addEventListener('click', handleHesapOzetiRaporuOlustur);
             raporYazdirBtn.addEventListener('click', () => handleYazdir('hesap-ozeti'));
