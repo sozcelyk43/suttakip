@@ -1244,17 +1244,55 @@ function resetCariForm(){
     document.getElementById('cariEditId').value = ''; 
     setEditingMode(cariFormBaslik, cariKaydetBtn, cariFormTemizleBtn, null, 'Cari Kart');
 }
-async function handleCariKategoriEkle(event) { 
-    event.preventDefault(); 
-    const yeniCariKategoriAdiInput = document.getElementById('yeniCariKategoriAdi');
-    const yeniAd = yeniCariKategoriAdiInput.value.trim(); 
-    if (yeniAd === '') { alert('Kategori/Köy adı boş olamaz.'); return; }
-    try {
-        await db.collection('cari_kategorileri').add({ ad: yeniAd, sahipId: currentUserId });
-        await Promise.all([renderCariKategoriListesi(), populateCariKategoriSelect(document.getElementById('cariKategori')), populateCariKategoriFiltre(), populateCariKategoriSelect(document.getElementById('topluGirisKategori'))]);
-        yeniCariKategoriAdiInput.value = ''; 
-    } catch(error) { console.error("Kategori eklenirken hata: ", error); }
+
+async function handleCariKategoriEkle(event) {
+  event.preventDefault();
+  
+  const yeniCariKategoriAdiInput = document.getElementById('yeniCariKategoriAdi');
+  const yeniAd = yeniCariKategoriAdiInput.value.trim();
+
+  if (yeniAd === '') {
+    alert('Kategori/Köy adı boş olamaz.');
+    return;
+  }
+
+  const currentUser = firebase.auth().currentUser;
+  if (!currentUser) {
+    alert("Lütfen giriş yapın.");
+    return;
+  }
+
+  const currentUserId = currentUser.uid;
+
+  try {
+    console.log("Yeni eklenecek kategori:", { ad: yeniAd, sahipId: currentUserId });
+    
+    await db.collection('cari_kategorileri').add({
+      ad: yeniAd,
+      sahipId: currentUserId
+    });
+
+    await Promise.all([
+      renderCariKategoriListesi(),
+      populateCariKategoriSelect(document.getElementById('cariKategori')),
+      populateCariKategoriFiltre(),
+      populateCariKategoriSelect(document.getElementById('topluGirisKategori'))
+    ]);
+
+    yeniCariKategoriAdiInput.value = '';
+
+  } catch (error) {
+    console.error("Kategori eklenirken hata: ", error);
+    alert("Kategori eklenemedi. Konsolda hatayı kontrol edin.");
+  }
 }
+
+
+
+
+
+
+        
 async function renderCariKategoriListesi() {
     const cariKategoriListesiUl = document.getElementById('cariKategoriListesiUl');
     if (!cariKategoriListesiUl) return;
