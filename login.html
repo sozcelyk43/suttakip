@@ -31,6 +31,23 @@
         const loginForm = document.getElementById('loginForm');
         const errorMessage = document.getElementById('errorMessage');
 
+        function generateId() {
+             return Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
+        }
+        
+        // Sayfa yüklendiğinde ilk kurulumu kontrol et
+        document.addEventListener('DOMContentLoaded', () => {
+            const storedUsers = localStorage.getItem('sutTakipKullanicilari');
+            if (!storedUsers) {
+                console.log('İlk kurulum: Varsayılan kullanıcılar oluşturuluyor...');
+                const defaultUsers = [
+                    {id: 'adminuser', kullaniciAdi: 'admin', sifre: '123', rol: 'admin'},
+                    {id: generateId(), kullaniciAdi: 'calisan', sifre: '456', rol: 'calisan'}
+                ];
+                localStorage.setItem('sutTakipKullanicilari', JSON.stringify(defaultUsers));
+            }
+        });
+
         loginForm.addEventListener('submit', function(event) {
             event.preventDefault();
 
