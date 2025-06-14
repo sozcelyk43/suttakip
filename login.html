@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Süt Takip Programı - Giriş</title>
     <link rel="stylesheet" href="login.css">
+    <meta name="theme-color" content="#343a40">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icon-192x192.png">
 </head>
 <body>
     <div class="login-container">
@@ -25,33 +28,26 @@
     </div>
 
     <script>
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
 
-  const users = [
-            { username: 'admin', password: '123', role: 'admin' },
-            { username: 'calisan', password: '456', role: 'calisan' }
-        ];
+        loginForm.addEventListener('submit', function(event) {
+            event.preventDefault();
 
-        
-    const loginForm = document.getElementById('loginForm');
-    const errorMessage = document.getElementById('errorMessage');
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
 
-    loginForm.addEventListener('submit', function(event) {
-        event.preventDefault();
+            const users = JSON.parse(localStorage.getItem('sutTakipKullanicilari')) || [];
+            const foundUser = users.find(user => user.kullaniciAdi === username && user.sifre === password);
 
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-
-        const users = JSON.parse(localStorage.getItem('sutTakipKullanicilari')) || [];
-        const foundUser = users.find(user => user.kullaniciAdi === username && user.sifre === password);
-
-        if (foundUser) {
-            sessionStorage.setItem('userRole', foundUser.rol);
-            sessionStorage.setItem('userId', foundUser.id);
-            window.location.href = 'index.html';
-        } else {
-            errorMessage.textContent = 'Kullanıcı adı veya şifre hatalı!';
-        }
-    });
-</script>
+            if (foundUser) {
+                sessionStorage.setItem('userRole', foundUser.rol);
+                sessionStorage.setItem('userId', foundUser.id);
+                window.location.href = 'index.html';
+            } else {
+                errorMessage.textContent = 'Kullanıcı adı veya şifre hatalı!';
+            }
+        });
+    </script>
 </body>
 </html>
