@@ -498,7 +498,19 @@ async function handleYemAlisKaydet(event) {
         alert("Yem alışı kaydedilirken bir hata oluştu. Stok bilgisi güncellenememiş olabilir.");
     }
 }
+function resetOdemeForm() {
+    const odemeForm = document.getElementById('odemeForm');
+    const odemeFormBaslik = document.getElementById('odemeFormBaslik');
+    const odemeKaydetBtn = document.getElementById('odemeKaydetBtn');
+    const odemeFormTemizleBtn = document.getElementById('odemeFormTemizleBtn');
 
+    odemeForm.reset();
+    editingOdemeId = null;
+    document.getElementById('odemeEditId').value = '';
+
+    // Formu "Yeni Kayıt" moduna geri döndür
+    setEditingMode(odemeFormBaslik, odemeKaydetBtn, odemeFormTemizleBtn, null, 'Yeni Hareket Girişi');
+}
 async function handleOdemeKaydet(event) {
     event.preventDefault();
     const odemeForm = document.getElementById('odemeForm');
