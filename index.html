@@ -264,54 +264,54 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCWG4nFwpXRffr_3MO8-Us9mWK6Wsfn0mY",
-            authDomain: "sut-takip-projem.firebaseapp.com",
-            projectId: "sut-takip-projem",
-            storageBucket: "sut-takip-projem.appspot.com",
-            messagingSenderId: "512756958486",
-            appId: "1:512756958486:web:13cceb6835e2c575e9fc37",
-            measurementId: "G-LYLT9WFVNK"
-        };
-        
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+const firebaseConfig = {
+    apiKey: "AIzaSyCWG4nFwpXRffr_3MO8-Us9mWK6Wsfn0mY",
+    authDomain: "sut-takip-projem.firebaseapp.com",
+    projectId: "sut-takip-projem",
+    storageBucket: "sut-takip-projem.appspot.com",
+    messagingSenderId: "512756958486",
+    appId: "1:512756958486:web:13cceb6835e2c575e9fc37",
+    measurementId: "G-LYLT9WFVNK"
+};
 
-        let currentUserRole = '';
-        let currentUserId = '';
-        let globalSettings = { defaultMilkPrice: 15.00 };
-        let editingCariId = null, editingYemTanimId = null, editingYemAlisId = null, editingYemSatisId = null, editingOdemeId = null;
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => console.log('Service Worker registered.'))
-                    .catch(err => console.error('Service Worker registration failed: ', err));
-            });
-        }
+let currentUserRole = '';
+let currentUserId = '';
+let globalSettings = { defaultMilkPrice: 15.00 };
+let editingCariId = null, editingYemTanimId = null, editingYemAlisId = null, editingYemSatisId = null, editingOdemeId = null;
 
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                currentUserId = user.uid;
-                try {
-                    const userDoc = await db.collection('kullanicilar').doc(currentUserId).get();
-                    if (userDoc.exists) {
-                        currentUserRole = userDoc.data().rol;
-                        initializeApp();
-                    } else {
-                        alert("Kullanıcı rol bilgisi bulunamadı. Lütfen yöneticinizle iletişime geçin.");
-                        handleLogout();
-                    }
-                } catch (error) {
-                    console.error("Kullanıcı rolü alınırken hata:", error);
-                    alert("Veritabanına erişirken bir sorun oluştu. Lütfen internet bağlantınızı ve Firebase API/Güvenlik kurallarınızı kontrol edin.");
-                    handleLogout();
-                }
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(registration => console.log('Service Worker registered.'))
+            .catch(err => console.error('Service Worker registration failed: ', err));
+    });
+}
+
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        currentUserId = user.uid;
+        try {
+            const userDoc = await db.collection('kullanicilar').doc(currentUserId).get();
+            if (userDoc.exists) {
+                currentUserRole = userDoc.data().rol;
+                initializeApp();
             } else {
-                window.location.href = 'login.html';
+                alert("Kullanıcı rol bilgisi bulunamadı. Lütfen yöneticinizle iletişime geçin.");
+                handleLogout();
             }
-        });
+        } catch (error) {
+            console.error("Kullanıcı rolü alınırken hata:", error);
+            alert("Veritabanına erişirken bir sorun oluştu. Lütfen internet bağlantınızı ve Firebase API/Güvenlik kurallarınızı kontrol edin.");
+            handleLogout();
+        }
+    } else {
+        window.location.href = 'login.html';
+    }
+});
 
 function initializeApp() {
     const sidebarNav = document.getElementById('sidebarNav');
