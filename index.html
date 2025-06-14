@@ -290,25 +290,35 @@ if ('serviceWorker' in navigator) {
             .catch(err => console.error('Service Worker registration failed: ', err));
     });
 }
-
-// DÜZELTİLMİŞ KULLANICI GİRİŞ KONTROLÜ
 auth.onAuthStateChanged(async (user) => {
     if (user) {
-        currentUserId = user.uid;
+        console.log("TEST BAŞLADI: Kullanıcı girişi algılandı. UID:", user.uid);
+        console.log("TEST ADIMI: Firestore'dan kullanıcı belgesi okunacak...");
+
         try {
-            const userDoc = await db.collection('kullanicilar').doc(currentUserId).get();
+            const userDoc = await db.collection('kullanicilar').doc(user.uid).get();
+
             if (userDoc.exists) {
+                // EĞER BU MESAJI GÖRÜRSENİZ, OKUMA İŞLEMİ BAŞARILI DEMEKTİR.
+                console.log("%c----------- TEST BAŞARILI! -----------", "color: green; font-size: 16px;");
+                console.log("TEST SONUCU: Belge bulundu! İçerik:", userDoc.data());
+                alert("TEST BAŞARILI! Veritabanı okuması çalışıyor.");
+                
+                // Okuma başarılı olduğu için şimdi uygulamayı başlatabiliriz.
                 currentUserRole = userDoc.data().rol;
-                // Uygulama, tüm verileri yüklemeye çalışmadan önce ana fonksiyonları yüklüyor.
                 initializeApp();
+
             } else {
-                alert("Kullanıcı rol bilgisi bulunamadı. Lütfen yöneticinizle iletişime geçin.");
-                handleLogout();
+                // EĞER BU MESAJI GÖRÜRSENİZ, BELGE VERİTABANINDA YOK DEMEKTİR.
+                console.error("%c---------- TEST BAŞARISIZ! (Belge Yok) ----------", "color: orange; font-size: 16px;");
+                console.error("TEST SONUCU: Giriş başarılı ama Firestore'da bu UID ile bir belge bulunamadı:", user.uid);
+                alert("TEST BAŞARISIZ! Firestore veritabanında bu kullanıcı için bir belge bulunmuyor.");
             }
         } catch (error) {
-            console.error("Kullanıcı rolü alınırken kritik bir hata oluştu. Proje ayarlarınızı (Project ID, Kotalar) veya güvenlik kurallarınızı kontrol edin.", error);
-            alert("Veritabanına erişirken bir sorun oluştu. Lütfen internet bağlantınızı ve Firebase proje ayarlarınızı kontrol edin.");
-            handleLogout();
+            // EĞER BU MESAJI GÖRÜRSENİZ, İZİN VEYA BAĞLANTI HATASI VAR DEMEKTİR.
+            console.error("%c---------- KRİTİK HATA! (İzin/Bağlantı) ----------", "color: red; font-size: 16px;");
+            console.error("TEST SONUCU: Belgeyi okuma denemesi doğrudan hataya düştü. ASIL SORUN BU:", error);
+            alert("KRİTİK HATA! Veritabanından okuma işlemi temel bir nedenle (izin, kota, yanlış proje vb.) başarısız oldu. Lütfen konsolu kontrol edin.");
         }
     } else {
         window.location.href = 'login.html';
