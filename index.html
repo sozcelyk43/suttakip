@@ -415,11 +415,11 @@ async function loadAndRenderAllData() {
         await Promise.all([
             renderCariListesi(),
             //renderYemStokListesi(), 
-            renderOdemeListesi(),
-            renderCariKategoriListesi(), 
-            populateCariKategoriFiltre(),
-            populateCariKategoriSelect(document.getElementById('topluGirisKategori')),
-            updateDashboardStats()
+            //renderOdemeListesi(),
+           // renderCariKategoriListesi(), 
+            //populateCariKategoriFiltre(),
+           // populateCariKategoriSelect(document.getElementById('topluGirisKategori')),
+          //  updateDashboardStats()
         ]);
         console.log("Test Başarılı: renderCariListesi() hata vermedi.");
     } catch (error) { 
