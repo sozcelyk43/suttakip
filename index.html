@@ -411,19 +411,19 @@ function initializeApp() {
 
 async function loadAndRenderAllData() {
     try {
-        console.log("Test Başladı: Sadece renderCariListesi() çalıştırılıyor...");
+        console.log("Test Başladı: ");
         await Promise.all([
             renderCariListesi(),
-            //renderYemStokListesi(), 
+            renderYemStokListesi(), 
             //renderOdemeListesi(),
            // renderCariKategoriListesi(), 
             //populateCariKategoriFiltre(),
            // populateCariKategoriSelect(document.getElementById('topluGirisKategori')),
           //  updateDashboardStats()
         ]);
-        console.log("Test Başarılı: renderCariListesi() hata vermedi.");
+        console.log("Test Başarılı: ");
     } catch (error) { 
-        console.error("Test Başarısız: Hata renderCariListesi() fonksiyonunda!", error); 
+        console.error("Test Başarısız: Hata yemstok!", error); 
     }
 }
 function generateId() { return db.collection('_').doc().id; }
