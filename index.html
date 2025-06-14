@@ -440,6 +440,67 @@ function applyRolePermissions() {
         document.querySelector('#sidebarNav a.nav-link[href="#dashboard"]').click();
     }
 }
+async function handleYemAlisKaydet(event) {
+    event.preventDefault();
+    const yemAlisForm = document.getElementById('yemAlisForm');
+    const miktar = parseInt(document.getElementById('yemAlisMiktar').value);
+    const birimFiyat = parseFloat(document.getElementById('yemAlisBirimFiyati').value);
+    const yemId = document.getElementById('yemSecimiAlis').value;
+    const editId = document.getElementById('yemAlisEditId').value;
+
+    if (!yemId || isNaN(miktar) || miktar <= 0 || isNaN(birimFiyat)) {
+        alert("Lütfen yem, miktar ve fiyat alanlarını doğru bir şekilde doldurun.");
+        return;
+    }
+
+    const formData = {
+        tarih: document.getElementById('yemAlisTarih').value,
+        yemId: yemId,
+        miktar: miktar,
+        cariId: document.getElementById('yemAlisTedarikci').value || '',
+        alisFiyati: birimFiyat,
+        toplamTutar: miktar * birimFiyat,
+        sahipId: currentUserId
+    };
+
+    // Bu fonksiyon düzenleme modunu henüz desteklemediği için sadece yeni kayıt ekliyoruz.
+    // Eğer düzenleme eklenirse, eski stoğu geri alıp yeni stoğu eklemek gibi bir mantık gerekir.
+    if (editId) {
+        alert("Yem alışı düzenleme özelliği henüz aktif değil.");
+        return;
+    }
+
+    try {
+        const batch = db.batch();
+
+        // 1. Yem alım hareketini 'yem_alimlari' koleksiyonuna kaydet
+        const yemAlimRef = db.collection('yem_alimlari').doc();
+        batch.set(yemAlimRef, formData);
+
+        // 2. İlgili yemin stoğunu 'yemler' koleksiyonunda artır
+        const yemRef = db.collection('yemler').doc(yemId);
+        batch.update(yemRef, {
+            stokMiktari: firebase.firestore.FieldValue.increment(miktar)
+        });
+
+        // İki işlemi aynı anda gerçekleştir
+        await batch.commit();
+
+        yemAlisForm.reset();
+        
+        // İlgili listeleri yenile
+        if (typeof renderYemStokListesi === 'function') await renderYemStokListesi();
+        // Henüz olmayan ama olması gereken yem alış hareketleri listesini yenileme fonksiyonu
+        if (typeof renderYemAlisHareketleri === 'function') await renderYemAlisHareketleri(); 
+        
+    } catch (error) {
+        console.error("Yem alışı kaydedilirken hata:", error);
+        alert("Yem alışı kaydedilirken bir hata oluştu. Stok bilgisi güncellenememiş olabilir.");
+    }
+}
+
+
+        
 function handleLogout() { auth.signOut().then(() => { window.location.href = 'login.html'; }).catch(error => console.error("Logout error", error)); }
 async function getSettings() {
     const varsayilanSutFiyatiInput = document.getElementById('varsayilanSutFiyati');
