@@ -238,6 +238,8 @@
                         <button type="submit" class="btn btn-primary" style="height: 45px;">Güncelle</button>
                     </form>
                 </div>
+                <hr>
+                <div class="settings-section"><h3>Cari Kategori/Köy Tanımları</h3><form id="cariKategoriForm" action="#"><div class="form-grid" style="grid-template-columns: 1fr auto; align-items:end;"><div class="form-group" style="margin-bottom:0;"><label for="yeniCariKategoriAdi">Yeni Ad:</label><input type="text" id="yeniCariKategoriAdi" required></div><button type="submit" class="btn dont-print" style="height:45px;">Ekle</button></div></form><div class="list-section" style="margin-top:20px;"><h4>Tanımlı Kategoriler/Köyler</h4><ul id="cariKategoriListesiUl"></ul></div></div>
                 <hr class="dont-calisan">
                 <div class="settings-section dont-calisan"><h3>Kullanıcı Yönetimi</h3><form id="kullaniciForm"><input type="hidden" id="kullaniciEditId"><div class="form-grid">
                     <div class="form-group"><label for="kullaniciAdi">Kullanıcı Adı:</label><input type="text" id="kullaniciAdi" required></div>
@@ -271,6 +273,7 @@
         const moduleSections = document.querySelectorAll('.main-content .module-section');
         const bodyElement = document.body;
         const logoutButton = document.getElementById('logoutButton');
+        
         const cariForm = document.getElementById('cariForm'), cariKaydetBtn = document.getElementById('cariKaydetBtn'), cariFormBaslik = document.getElementById('cariFormBaslik'), cariFormTemizleBtn = document.getElementById('cariFormTemizleBtn'), cariSearchInput = document.getElementById('cariSearchInput'), cariKategoriFiltre = document.getElementById('cariKategoriFiltre'), cariListesiYazdirBtn = document.getElementById('cariListesiYazdirBtn'), cariListesiFooter = document.getElementById('cariListesiFooter');
         const yemTanimForm = document.getElementById('yemTanimForm'), yemTanimKaydetBtn = document.getElementById('yemTanimKaydetBtn'), yemTanimFormBaslik = document.getElementById('yemTanimFormBaslik'), yemTanimFormTemizleBtn = document.getElementById('yemTanimFormTemizleBtn');
         const yemAlisForm = document.getElementById('yemAlisForm'), yemAlisKaydetBtn = document.getElementById('yemAlisKaydetBtn'), yemAlisFormBaslik = document.getElementById('yemAlisFormBaslik'), yemAlisFormTemizleBtn = document.getElementById('yemAlisFormTemizleBtn');
@@ -351,7 +354,7 @@
 
             filtrelenmisAlimlar.forEach(sa => {
                 const row = sutAlimGecmisiBody.insertRow();
-                row.innerHTML = `<td>${sa.cariAdi}</td><td>${sa.aksamLitre.toFixed(1)}</td><td>${sa.sabahLitre.toFixed(1)}</td><td>${sa.toplamLitre.toFixed(1)}</td><td>${formatCurrency(sa.birimFiyat)}</td><td>${formatCurrency(sa.toplamTutar)}</td><td class="dont-print"><button class="btn btn-delete btn-sm" onclick="deleteSutAlim('${sa.id}')">Sil</button></td>`;
+                row.innerHTML = `<td>${sa.cariAdi}</td><td>${sa.aksamLitre.toFixed(1)}</td><td>${sa.sabahLitre.toFixed(1)}</td><td>${sa.toplamLitre.toFixed(1)}</td><td>${formatCurrency(sa.birimFiyat)}</td><td>${formatCurrency(sa.toplamTutar)}</td><td class="dont-print"><button class="btn btn-edit btn-sm" onclick="alert('Düzenleme işlevi yakında eklenecektir. Şimdilik kaydı silip yeniden ekleyebilirsiniz.')">Düzenle</button><button class="btn btn-delete btn-sm" onclick="deleteSutAlim('${sa.id}')">Sil</button></td>`;
                 totalAksam += sa.aksamLitre;
                 totalSabah += sa.sabahLitre;
                 totalLitre += sa.toplamLitre;
@@ -408,7 +411,9 @@
             cariSearchInput.addEventListener('input', renderCariListesi);
             cariKategoriFiltre.addEventListener('change', renderCariListesi);
             cariListesiYazdirBtn.addEventListener('click', handleCariListeYazdir);
-            raporCariAramaInput.addEventListener('keyup', filterRaporCariSelect);
+            if(raporCariAramaInput) {
+                raporCariAramaInput.addEventListener('keyup', filterRaporCariSelect);
+            }
             topluGirisTarihInput.addEventListener('change', () => { renderTopluSutGirisFormu(); renderSutAlimGecmisi(); });
             topluGirisKategoriSelect.addEventListener('change', renderTopluSutGirisFormu);
             
@@ -455,7 +460,7 @@
             db_odemeVeTahsilatlar = [ {id: generateId(), tarih: '2025-06-10', cariId: c1_id, cariAdi: 'A Ticaret A.Ş.', tutar: 300.00, islemTuru: 'odeme', aciklama: 'Haziran avansı'} ];
             db_yemAlimlari = [ {id:generateId(), tarih:today, cariId: c2_id, cariAdi:'B Marketleri Ltd.', yemId: y1_id, yemAdi:'Süt Yemi Standart', miktar:10, birimFiyat:580, toplamTutar:5800} ];
         }
-
+        
         function renderAllLists() { renderCariListesi(); populateCariKategoriFiltre(); populateCariKategoriSelect(topluGirisKategori); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); renderYemStokListesi(); renderYemAlisHareketListesi(); renderYemSatisListesi(); renderOdemeListesi(); renderCariKategoriListesi(); updateDashboardStats(); }
         function updateDashboardStats() { totalCari.textContent = db_cariler.length; totalYemCesidi.textContent = db_yemler.length; const todayStr = getTodayForInput(); const todaySutAlimCount = db_sutAlimlari.filter(sa => sa.tarih === todayStr).length; todaySutAlim.textContent = todaySutAlimCount;}
         function handleCariKaydet(event) { event.preventDefault(); const formData = { id: editingCariId || generateId(), kodu: document.getElementById('cariKodu').value, adiSoyadi: document.getElementById('cariAdiSoyadi').value, kategori: document.getElementById('cariKategori').value, durum: document.getElementById('cariDurum').value, telefon: document.getElementById('cariTelefon').value, eposta: document.getElementById('cariEposta').value, adres: document.getElementById('cariAdres').value, bankaAdi: document.getElementById('cariBankaAdi').value, iban: document.getElementById('cariIban').value, vergiDairesi: document.getElementById('cariVergiDairesi').value, vergiNo: document.getElementById('cariVergiNo').value, notlar: document.getElementById('cariNotlar').value, }; if (editingCariId) { const index = db_cariler.findIndex(c => c.id === editingCariId); if (index > -1) db_cariler[index] = formData; } else { db_cariler.push(formData); } renderAllLists(); resetCariForm(); }
@@ -514,6 +519,7 @@
         function editYemTanim(id) { const yem = db_yemler.find(y => y.id === id); if (!yem) return; editingYemTanimId = id; document.getElementById('yemKodu').value = yem.kod; document.getElementById('yemAdi').value = yem.ad; document.getElementById('yemKategorisi').value = yem.kategori; document.getElementById('yemBirimi').value = yem.birim; document.getElementById('yemAlisFiyati').value = yem.alisFiyati.toFixed(2); document.getElementById('yemSatisFiyati').value = yem.satisFiyati.toFixed(2); setEditingMode(yemTanimFormBaslik, yemTanimKaydetBtn, yemTanimFormTemizleBtn, editingYemTanimId, 'Yem Tanım');}
         function deleteYemTanim(id) { if (confirm('Bu yemi silmek istediğinizden emin misiniz? İlgili alış ve satış hareketleri de silinecektir!')) { db_yemler = db_yemler.filter(y => y.id !== id); db_yemAlimlari = db_yemAlimlari.filter(ya => ya.yemId !== id); db_yemSatislari = db_yemSatislari.filter(ys => ys.yemId !== id); renderAllLists(); if(editingYemTanimId === id) resetYemTanimForm(); }}
         function resetYemTanimForm() { yemTanimForm.reset(); editingYemTanimId = null; setEditingMode(yemTanimFormBaslik, yemTanimKaydetBtn, yemTanimFormTemizleBtn, null, 'Yem Tanım');}
+        function populateYemSelect(selectElement, defaultText = "Yem Seçiniz...") { if(!selectElement) return; const currentValue = selectElement.value; selectElement.innerHTML = ''; const firstOption = document.createElement('option'); firstOption.value = ""; firstOption.textContent = defaultText; selectElement.appendChild(firstOption); db_yemler.sort((a,b) => a.ad.localeCompare(b.ad)).forEach(y => { const option = document.createElement('option'); option.value = y.id; option.textContent = `${y.ad} (${y.kod}) - Stok: ${y.stokMiktari} ${y.birim}`; selectElement.appendChild(option); }); if (db_yemler.find(y => y.id === currentValue)) { selectElement.value = currentValue; }}
         function handleYemAlisKaydet(event) { event.preventDefault(); const yemId = yemSecimiAlisSelect.value; const yem = db_yemler.find(y => y.id === yemId); if (!yem) { alert('Lütfen geçerli bir yem seçin.'); return; } const alinanMiktar = parseInt(document.getElementById('yemAlisMiktar').value) || 0; if (alinanMiktar <= 0) { alert('Alınan miktar pozitif olmalıdır.'); return; } const formData = { id: editingYemAlisId || generateId(), tarih: document.getElementById('yemAlisTarih').value, cariId: yemAlisTedarikciSelect.value, cariAdi: yemAlisTedarikciSelect.options[yemAlisTedarikciSelect.selectedIndex]?.text.split(' (')[0] || 'Bilinmiyor', yemId: yemId, yemAdi: yem.ad, miktar: alinanMiktar, birimFiyat: parseFloat(yemAlisBirimFiyatiInput.value) || 0, }; formData.toplamTutar = formData.miktar * formData.birimFiyat; if (editingYemAlisId) { const oldAlis = db_yemAlimlari.find(ya => ya.id === editingYemAlisId); if(oldAlis){ const eskiYemStok = db_yemler.find(y => y.id === oldAlis.yemId); if (eskiYemStok) eskiYemStok.stokMiktari -= oldAlis.miktar; } const index = db_yemAlimlari.findIndex(ya => ya.id === editingYemAlisId); if(index > -1) db_yemAlimlari[index] = formData; } else { db_yemAlimlari.push(formData); } yem.stokMiktari += formData.miktar; renderYemAlisHareketListesi(); renderYemStokListesi(); populateYemSelect(yemSecimiAlis); populateYemSelect(yemSecimiSatis); resetYemAlisForm(); }
         function renderYemAlisHareketListesi() { yemAlisHareketListesiBody.innerHTML = ''; db_yemAlimlari.sort((a,b) => new Date(b.tarih) - new Date(a.tarih)).forEach(ya => { const row = yemAlisHareketListesiBody.insertRow(); row.innerHTML = `<td>${formatDate(ya.tarih)}</td><td>${ya.yemAdi}</td><td>${ya.miktar}</td><td>${ya.cariAdi}</td><td>${formatCurrency(ya.birimFiyat)}</td><td>${formatCurrency(ya.toplamTutar)}</td><td class="dont-print"><button class="btn btn-edit dont-print" onclick="editYemAlis('${ya.id}')">Düzenle</button><button class="btn btn-delete dont-print" onclick="deleteYemAlis('${ya.id}')">Sil</button></td>`; });}
         function editYemAlis(id) { const yemAlis = db_yemAlimlari.find(ya => ya.id === id); if (!yemAlis) return; editingYemAlisId = id; document.getElementById('yemAlisTarih').value = yemAlis.tarih; yemAlisTedarikciSelect.value = yemAlis.cariId; yemSecimiAlisSelect.value = yemAlis.yemId; document.getElementById('yemAlisMiktar').value = yemAlis.miktar; yemAlisBirimFiyatiInput.value = yemAlis.birimFiyat.toFixed(2); handleYemAlisHesaplama(); setEditingMode(yemAlisFormBaslik, yemAlisKaydetBtn, yemAlisFormTemizleBtn, editingYemAlisId, 'Yem Alış');}
@@ -614,6 +620,7 @@
         }
 
         function filterRaporCariSelect() {
+            if(!raporCariAramaInput) return;
             const filter = raporCariAramaInput.value.toUpperCase();
             const options = raporCariSecimi.getElementsByTagName('option');
             for (let i = 0; i < options.length; i++) {
@@ -663,22 +670,29 @@
 
         function handleYazdir(sectionId) {
             const sectionToPrint = document.getElementById(sectionId);
-            if (!sectionToPrint) { return; }
-
-            const reportContent = sectionToPrint.querySelector('.printable-content, #cari-list-printable-area, #yemRaporuAlani');
+            if (!sectionToPrint) return;
+            
+            let reportContent = sectionToPrint.querySelector('.printable-content');
+            if(!reportContent) {
+                reportContent = sectionToPrint.querySelector('#cari-list-printable-area, #yemRaporuAlani');
+            }
+            
             if (sectionId !== 'cari-yonetimi' && (!reportContent || reportContent.innerText.trim() === '' || reportContent.innerText.includes("Lütfen Rapor Kriterlerini Seçin"))) {
                  alert("Lütfen önce bir rapor oluşturun.");
                  return;
             }
-
-            const pageFormatClass = reportContent.classList.contains('format-a5') ? 'format-a5' : 'format-a4';
             
-            bodyElement.classList.add('print-active', pageFormatClass);
+            bodyElement.classList.add('print-active');
             sectionToPrint.classList.add('print-section-active');
+            
+            const pageFormatClass = reportContent.classList.contains('format-a5') ? 'format-a5' : 'format-a4';
+            bodyElement.classList.add(pageFormatClass);
+
             window.print();
         }
 
         function renderKullaniciListesi() {
+            if(!kullaniciListesiBody) return;
             kullaniciListesiBody.innerHTML = '';
             db_kullanicilar.forEach(user => {
                 if(user.rol === 'admin') return;
