@@ -25,34 +25,26 @@
     </div>
 
     <script>
-        // Demo için kullanıcıları burada tanımlıyoruz. Gerçek bir uygulamada bu veriler sunucudan gelmelidir.
-        const users = [
-            { username: 'admin', password: '123', role: 'admin' },
-            { username: 'calisan', password: '456', role: 'calisan' }
-        ];
+    const loginForm = document.getElementById('loginForm');
+    const errorMessage = document.getElementById('errorMessage');
 
-        const loginForm = document.getElementById('loginForm');
-        const errorMessage = document.getElementById('errorMessage');
+    loginForm.addEventListener('submit', function(event) {
+        event.preventDefault();
 
-        loginForm.addEventListener('submit', function(event) {
-            event.preventDefault(); // Formun varsayılan gönderme işlemini engelle
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
 
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+        const users = JSON.parse(localStorage.getItem('sutTakipKullanicilari')) || [];
+        const foundUser = users.find(user => user.kullaniciAdi === username && user.sifre === password);
 
-            const foundUser = users.find(user => user.username === username && user.password === password);
-
-            if (foundUser) {
-                // Kullanıcı rolünü tarayıcı oturum belleğine kaydet
-                // Bu bilgi, sekme kapatılana kadar saklanır.
-                sessionStorage.setItem('userRole', foundUser.role);
-                
-                // Ana sayfaya yönlendir
-                window.location.href = 'index.html';
-            } else {
-                errorMessage.textContent = 'Kullanıcı adı veya şifre hatalı!';
-            }
-        });
-    </script>
+        if (foundUser) {
+            sessionStorage.setItem('userRole', foundUser.rol);
+            sessionStorage.setItem('userId', foundUser.id);
+            window.location.href = 'index.html';
+        } else {
+            errorMessage.textContent = 'Kullanıcı adı veya şifre hatalı!';
+        }
+    });
+</script>
 </body>
 </html>
