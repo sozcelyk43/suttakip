@@ -51,18 +51,18 @@
             </div>
             <div class="container">
                 <div class="form-section"><h3><span id="cariFormBaslik">Yeni Cari Kart</span></h3><form id="cariForm" action="#"><input type="hidden" id="cariEditId"><div class="form-grid">
-                    <div class="form-group"><label for for for="cariKodu">Cari Kodu:</label><input type="text" id="cariKodu" placeholder="Örn: C001"></div>
-                    <div class="form-group"><label for for for="cariAdiSoyadi">Adı Soyadı / Firma Adı:</label><input type="text" id="cariAdiSoyadi" required></div>
-                    <div class="form-group"><label for for for="cariKategori">Kategori/Köy:</label><select id="cariKategori" required><option value="">Seçiniz...</option></select></div>
-                    <div class="form-group"><label for for for="cariDurum">Durum:</label><select id="cariDurum"><option value="aktif">Aktif</option><option value="pasif">Pasif</option></select></div>
-                    <div class="form-group"><label for for for="cariTelefon">Telefon:</label><input type="tel" id="cariTelefon"></div>
-                    <div class="form-group"><label for for for="cariEposta">E-posta:</label><input type="email" id="cariEposta"></div>
-                    <div class="form-group" style="grid-column: span 2;"><label for for for="cariAdres">Adres:</label><textarea id="cariAdres"></textarea></div>
-                    <div class="form-group"><label for for for="cariBankaAdi">Banka Adı:</label><input type="text" id="cariBankaAdi"></div>
-                    <div class="form-group"><label for for for="cariIban">IBAN:</label><input type="text" id="cariIban"></div>
-                    <div class="form-group"><label for for for="cariVergiDairesi">Vergi Dairesi:</label><input type="text" id="cariVergiDairesi"></div>
-                    <div class="form-group"><label for for for="cariVergiNo">Vergi No / T.C.:</label><input type="text" id="cariVergiNo"></div>
-                    <div class="form-group" style="grid-column: span 2;"><label for for for="cariNotlar">Özel Notlar:</label><textarea id="cariNotlar"></textarea></div>
+                    <div class="form-group"><label for="cariKodu">Cari Kodu:</label><input type="text" id="cariKodu" placeholder="Örn: C001"></div>
+                    <div class="form-group"><label for="cariAdiSoyadi">Adı Soyadı / Firma Adı:</label><input type="text" id="cariAdiSoyadi" required></div>
+                    <div class="form-group"><label for="cariKategori">Kategori/Köy:</label><select id="cariKategori" required><option value="">Seçiniz...</option></select></div>
+                    <div class="form-group"><label for="cariDurum">Durum:</label><select id="cariDurum"><option value="aktif">Aktif</option><option value="pasif">Pasif</option></select></div>
+                    <div class="form-group"><label for="cariTelefon">Telefon:</label><input type="tel" id="cariTelefon"></div>
+                    <div class="form-group"><label for="cariEposta">E-posta:</label><input type="email" id="cariEposta"></div>
+                    <div class="form-group" style="grid-column: span 2;"><label for="cariAdres">Adres:</label><textarea id="cariAdres"></textarea></div>
+                    <div class="form-group"><label for="cariBankaAdi">Banka Adı:</label><input type="text" id="cariBankaAdi"></div>
+                    <div class="form-group"><label for="cariIban">IBAN:</label><input type="text" id="cariIban"></div>
+                    <div class="form-group"><label for="cariVergiDairesi">Vergi Dairesi:</label><input type="text" id="cariVergiDairesi"></div>
+                    <div class="form-group"><label for="cariVergiNo">Vergi No / T.C.:</label><input type="text" id="cariVergiNo"></div>
+                    <div class="form-group" style="grid-column: span 2;"><label for="cariNotlar">Özel Notlar:</label><textarea id="cariNotlar"></textarea></div>
                 </div><button type="submit" class="btn btn-primary" id="cariKaydetBtn">Kaydet</button><button type="button" class="btn dont-calisan" id="cariFormTemizleBtn" style="display:none;">Yeni Kayıt</button></form></div>
                 
                 <div id="cari-list-printable-area" class="dont-calisan">
@@ -91,8 +91,8 @@
                 <div class="form-section">
                     <h3>Giriş Filtreleri</h3>
                     <div class="form-grid" id="sutGirisFiltreler" style="grid-template-columns: 1fr 1fr;">
-                        <div class="form-group"><label for for for="topluGirisTarih">Giriş Tarihi:</label><input type="date" id="topluGirisTarih" required></div>
-                        <div class="form-group"><label for for for="topluGirisKategori">Kategori/Köy Seçin:</label><select id="topluGirisKategori" required><option value="">Tüm Kategoriler</option></select></div>
+                        <div class="form-group"><label for="topluGirisTarih">Giriş Tarihi:</label><input type="date" id="topluGirisTarih" required></div>
+                        <div class="form-group"><label for="topluGirisKategori">Kategori/Köy Seçin:</label><select id="topluGirisKategori" required><option value="">Tüm Kategoriler</option></select></div>
                     </div>
                 </div>
                 <div class="list-section">
@@ -115,22 +115,22 @@
              <div class="module-header"><h2>📦 Yem Stok Yönetimi</h2></div>
              <div class="container">
                 <div class="form-section"><h3><span id="yemTanimFormBaslik">Yeni Yem Tanımla</span></h3><form id="yemTanimForm" action="#"><input type="hidden" id="yemTanimEditId"><div class="form-grid">
-                    <div class="form-group"><label for for for="yemKodu">Kod:</label><input type="text" id="yemKodu" required></div>
-                    <div class="form-group"><label for for for="yemAdi">Ad:</label><input type="text" id="yemAdi" required></div>
-                    <div class="form-group"><label for for for="yemKategorisi">Kategori:</label><select id="yemKategorisi"><option value="buyukbas">Büyükbaş</option><option value="kucukbas">Küçükbaş</option></select></div>
-                    <div class="form-group"><label for for for="yemBirimi">Birim:</label><input type="text" id="yemBirimi" value="Çuval"></div>
-                    <div class="form-group"><label for for for="yemAlisFiyati">Alış Fiyatı:</label><input type="number" id="yemAlisFiyati" step="0.01"></div>
-                    <div class="form-group"><label for for for="yemSatisFiyati">Satış Fiyatı:</label><input type="number" id="yemSatisFiyati" step="0.01"></div>
+                    <div class="form-group"><label for="yemKodu">Kod:</label><input type="text" id="yemKodu" required></div>
+                    <div class="form-group"><label for="yemAdi">Ad:</label><input type="text" id="yemAdi" required></div>
+                    <div class="form-group"><label for="yemKategorisi">Kategori:</label><select id="yemKategorisi"><option value="buyukbas">Büyükbaş</option><option value="kucukbas">Küçükbaş</option></select></div>
+                    <div class="form-group"><label for="yemBirimi">Birim:</label><input type="text" id="yemBirimi" value="Çuval"></div>
+                    <div class="form-group"><label for="yemAlisFiyati">Alış Fiyatı:</label><input type="number" id="yemAlisFiyati" step="0.01"></div>
+                    <div class="form-group"><label for="yemSatisFiyati">Satış Fiyatı:</label><input type="number" id="yemSatisFiyati" step="0.01"></div>
                 </div><button type="submit" class="btn btn-primary" id="yemTanimKaydetBtn">Kaydet</button><button type="button" class="btn" id="yemTanimFormTemizleBtn" style="display:none;">Yeni</button></form></div>
                 <div class="list-section"><h3>Tanımlı Yemler & Stok</h3><table><thead><tr><th>Kod</th><th>Ad</th><th>Kategori</th><th>Birim</th><th>Alış F.</th><th>Satış F.</th><th>Stok</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemStokListesiBody"></tbody></table></div>
                 <hr>
                 <div class="form-section"><h3><span id="yemAlisFormBaslik">Yeni Yem Alışı</span></h3><form id="yemAlisForm" action="#"><input type="hidden" id="yemAlisEditId"><div class="form-grid">
-                    <div class="form-group"><label for for for="yemAlisTarih">Tarih:</label><input type="date" id="yemAlisTarih" required></div>
-                    <div class="form-group"><label for for for="yemSecimiAlis">Yem:</label><select id="yemSecimiAlis" required><option value="">Seçiniz...</option></select></div>
-                    <div class="form-group"><label for for for="yemAlisMiktar">Miktar:</label><input type="number" id="yemAlisMiktar" step="1" required></div>
-                    <div class="form-group"><label for for for="yemAlisTedarikci">Cari:</label><select id="yemAlisTedarikci"><option value="">Seçiniz...</option></select></div>
-                    <div class="form-group"><label for for for="yemAlisBirimFiyati">Alış Fiyatı:</label><input type="number" id="yemAlisBirimFiyati" step="0.01" required></div>
-                    <div class="form-group"><label for for>Toplam Tutar:</label><input type="text" id="yemAlisToplamTutar" readonly></div>
+                    <div class="form-group"><label for="yemAlisTarih">Tarih:</label><input type="date" id="yemAlisTarih" required></div>
+                    <div class="form-group"><label for="yemSecimiAlis">Yem:</label><select id="yemSecimiAlis" required><option value="">Seçiniz...</option></select></div>
+                    <div class="form-group"><label for="yemAlisMiktar">Miktar:</label><input type="number" id="yemAlisMiktar" step="1" required></div>
+                    <div class="form-group"><label for="yemAlisTedarikci">Cari:</label><select id="yemAlisTedarikci"><option value="">Seçiniz...</option></select></div>
+                    <div class="form-group"><label for="yemAlisBirimFiyati">Alış Fiyatı:</label><input type="number" id="yemAlisBirimFiyati" step="0.01" required></div>
+                    <div class="form-group"><label for="yemAlisToplamTutar">Toplam Tutar:</label><input type="text" id="yemAlisToplamTutar" readonly></div>
                 </div><button type="submit" class="btn btn-primary" id="yemAlisKaydetBtn">Alışı Kaydet</button><button type="button" class="btn" id="yemAlisFormTemizleBtn" style="display:none;">Yeni</button></form></div>
                 <div class="list-section"><h3>Yem Alış Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Yem</th><th>Miktar</th><th>Cari</th><th>Alış F.</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemAlisHareketListesiBody"></tbody></table></div>
              </div>
@@ -139,12 +139,12 @@
              <div class="module-header"><h2>🌾 Yem Satışı</h2></div>
              <div class="container">
                 <div class="form-section"><h3><span id="yemSatisFormBaslik">Yeni Yem Satışı</span></h3><form id="yemSatisForm" action="#"><input type="hidden" id="yemSatisEditId"><div class="form-grid">
-                    <div class="form-group"><label for for for="yemSatisTarih">Tarih:</label><input type="date" id="yemSatisTarih" required></div>
-                    <div class="form-group"><label for for for="yemAlanTedarikci">Alan Cari:</label><select id="yemAlanTedarikci" required><option value="">Seçiniz...</option></select></div>
-                    <div class="form-group"><label for for for="yemSecimiSatis">Yem:</label><select id="yemSecimiSatis" required><option value="">Seçiniz...</option></select></div>
-                    <div class="form-group"><label for for for="yemSatisMiktar">Miktar:</label><input type="number" id="yemSatisMiktar" step="1" required></div>
-                    <div class="form-group"><label for for for="yemSatisBirimFiyati">Satış Fiyatı:</label><input type="number" id="yemSatisBirimFiyati" step="0.01" required></div>
-                    <div class="form-group"><label for for>Toplam Tutar:</label><input type="text" id="yemSatisToplamTutar" readonly></div>
+                    <div class="form-group"><label for="yemSatisTarih">Tarih:</label><input type="date" id="yemSatisTarih" required></div>
+                    <div class="form-group"><label for="yemAlanTedarikci">Alan Cari:</label><select id="yemAlanTedarikci" required><option value="">Seçiniz...</option></select></div>
+                    <div class="form-group"><label for="yemSecimiSatis">Yem:</label><select id="yemSecimiSatis" required><option value="">Seçiniz...</option></select></div>
+                    <div class="form-group"><label for="yemSatisMiktar">Miktar:</label><input type="number" id="yemSatisMiktar" step="1" required></div>
+                    <div class="form-group"><label for="yemSatisBirimFiyati">Satış Fiyatı:</label><input type="number" id="yemSatisBirimFiyati" step="0.01" required></div>
+                    <div class="form-group"><label for="yemSatisToplamTutar">Toplam Tutar:</label><input type="text" id="yemSatisToplamTutar" readonly></div>
                 </div><button type="submit" class="btn btn-primary" id="yemSatisKaydetBtn">Satışı Kaydet</button><button type="button" class="btn" id="yemSatisFormTemizleBtn" style="display:none;">Yeni</button></form></div>
                 <div class="list-section"><h3>Yem Satış Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Alan Cari</th><th>Yem</th><th>Miktar</th><th>Fiyat</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemSatisListesiBody"></tbody></table></div>
              </div>
@@ -153,11 +153,11 @@
             <div class="module-header"><h2>💳 Tahsilat ve Ödemeler</h2></div>
             <div class="container">
                  <div class="form-section"><h3><span id="odemeFormBaslik">Yeni Hareket Girişi</span></h3><form id="odemeForm" action="#"><input type="hidden" id="odemeEditId"><div class="form-grid">
-                    <div class="form-group"><label for for for="islemTuru">İşlem Türü:</label><select id="islemTuru" required><option value="odeme">Ödeme</option><option value="tahsilat">Tahsilat</option></select></div>
-                    <div class="form-group"><label for for for="odemeTarih">Tarih:</label><input type="date" id="odemeTarih" required></div>
-                    <div class="form-group"><label for for for="odemeYapilanTedarikci">Cari:</label><select id="odemeYapilanTedarikci" required><option value="">Seçiniz...</option></select></div>
-                    <div class="form-group"><label for for for="odemeTutari">Tutar (TL):</label><input type="number" id="odemeTutari" step="0.01" required></div>
-                    <div class="form-group" style="grid-column: span 2;"><label for for for="odemeAciklama">Açıklama:</label><textarea id="odemeAciklama" rows="2"></textarea></div>
+                    <div class="form-group"><label for="islemTuru">İşlem Türü:</label><select id="islemTuru" required><option value="odeme">Ödeme</option><option value="tahsilat">Tahsilat</option></select></div>
+                    <div class="form-group"><label for="odemeTarih">Tarih:</label><input type="date" id="odemeTarih" required></div>
+                    <div class="form-group"><label for="odemeYapilanTedarikci">Cari:</label><select id="odemeYapilanTedarikci" required><option value="">Seçiniz...</option></select></div>
+                    <div class="form-group"><label for="odemeTutari">Tutar (TL):</label><input type="number" id="odemeTutari" step="0.01" required></div>
+                    <div class="form-group" style="grid-column: span 2;"><label for="odemeAciklama">Açıklama:</label><textarea id="odemeAciklama" rows="2"></textarea></div>
                  </div><button type="submit" class="btn btn-primary" id="odemeKaydetBtn">Kaydet</button><button type="button" class="btn" id="odemeFormTemizleBtn" style="display:none;">Yeni</button></form></div>
                  <div class="list-section"><h3>İşlem Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Cari</th><th>İşlem Türü</th><th>Tutar</th><th>Açıklama</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="odemeListesiBody"></tbody></table></div>
             </div>
@@ -168,8 +168,8 @@
                 <div class="report-section">
                     <h3 class="dont-print">Cari Hesap Özeti</h3>
                     <div class="form-grid dont-print" style="grid-template-columns: 1fr 1fr auto; align-items: end;">
-                        <div class="form-group"><label for for for="raporCariSecimi">Cari Seçin:</label><select id="raporCariSecimi"><option value="">Seçiniz...</option></select></div>
-                        <div class="form-group"><label for for for="raporTarihAraligi">Ay:</label><input type="month" id="raporTarihAraligi"></div>
+                        <div class="form-group"><label for="raporCariSecimi">Cari Seçin:</label><select id="raporCariSecimi"><option value="">Seçiniz...</option></select></div>
+                        <div class="form-group"><label for="raporTarihAraligi">Ay:</label><input type="month" id="raporTarihAraligi"></div>
                         <button type="button" class="btn btn-primary" id="raporOlusturBtn" style="height:45px;">Rapor Oluştur</button>
                     </div> <hr class="dont-print">
                     <div id="report-content-to-print" class="printable-content format-a5">
@@ -187,9 +187,9 @@
                  <div class="report-section">
                     <h3>Detaylı Süt Alım Raporu</h3>
                     <div class="form-grid dont-print" style="grid-template-columns: repeat(4, 1fr); align-items: end; gap: 10px;">
-                        <div class="form-group"><label for for for="sutRaporuTedarikciSecimi">Cari Seçin:</label><select id="sutRaporuTedarikciSecimi"><option value="">Seçiniz...</option></select></div>
-                        <div class="form-group"><label for for for="sutRaporuAySecimi">Ay:</label><input type="month" id="sutRaporuAySecimi"></div>
-                        <div class="form-group"><label for for for="sutRaporuKategoriSecimi">Kategori:</label><select id="sutRaporuKategoriSecimi"><option value="">Tümü</option></select></div>
+                        <div class="form-group"><label for="sutRaporuTedarikciSecimi">Cari Seçin:</label><select id="sutRaporuTedarikciSecimi"><option value="">Seçiniz...</option></select></div>
+                        <div class="form-group"><label for="sutRaporuAySecimi">Ay:</label><input type="month" id="sutRaporuAySecimi"></div>
+                        <div class="form-group"><label for="sutRaporuKategoriSecimi">Kategori:</label><select id="sutRaporuKategoriSecimi"><option value="">Tümü</option></select></div>
                         <div style="display: flex; gap: 10px;">
                             <button type="button" class="btn btn-primary" id="sutRaporuOlusturBtn" style="height:45px; flex-grow: 1;">Göster</button>
                             <button type="button" class="btn btn-info" id="sutRaporuKategoriGosterBtn" style="height:45px; flex-grow: 1;">Kategori</button>
@@ -212,7 +212,7 @@
                     <h3>Aylık Yem Satış Kârlılık Raporu</h3>
                     <div class="form-grid dont-print" style="grid-template-columns: 1fr auto; align-items: end;">
                         <div class="form-group">
-                            <label for for for="yemRaporuAySecimi">Ay Seçin:</label>
+                            <label for="yemRaporuAySecimi">Ay Seçin:</label>
                             <input type="month" id="yemRaporuAySecimi">
                         </div>
                         <button type="button" class="btn btn-primary" id="yemRaporuOlusturBtn" style="height:45px;">Raporu Göster</button>
@@ -232,7 +232,7 @@
                         <h3>Genel Ayarlar</h3>
                         <form id="ayarlarForm">
                             <div class="form-group">
-                                <label for for for="varsayilanSutFiyati">Varsayılan Süt Fiyatı (TL/Lt):</label>
+                                <label for="varsayilanSutFiyati">Varsayılan Süt Fiyatı (TL/Lt):</label>
                                 <input type="number" id="varsayilanSutFiyati" step="0.01">
                             </div>
                             <button type="submit" class="btn btn-primary">Kaydet</button>
@@ -241,19 +241,19 @@
                     <div class="settings-section">
                         <h3>Şifre Değiştir</h3>
                         <form id="sifreDegistirForm">
-                            <div class="form-group"><label for for for="eskiSifre">Eski Şifre:</label><input type="password" id="eskiSifre" required></div>
-                            <div class="form-group"><label for for for="yeniSifre">Yeni Şifre:</label><input type="password" id="yeniSifre" required></div>
-                            <div class="form-group"><label for for for="yeniSifreTekrar">Yeni Şifre (Tekrar):</label><input type="password" id="yeniSifreTekrar" required></div>
+                            <div class="form-group"><label for="eskiSifre">Eski Şifre:</label><input type="password" id="eskiSifre" required></div>
+                            <div class="form-group"><label for="yeniSifre">Yeni Şifre:</label><input type="password" id="yeniSifre" required></div>
+                            <div class="form-group"><label for="yeniSifreTekrar">Yeni Şifre (Tekrar):</label><input type="password" id="yeniSifreTekrar" required></div>
                             <button type="submit" class="btn btn-primary" style="width: 100%;">Güncelle</button>
                         </form>
                     </div>
                 </div>
                 <hr>
-                <div class="settings-section"><h3>Cari Kategori/Köy Tanımları</h3><form id="cariKategoriForm" action="#"><div class="form-grid" style="grid-template-columns: 1fr auto; align-items:end;"><div class="form-group" style="margin-bottom:0;"><label for for for="yeniCariKategoriAdi">Yeni Ad:</label><input type="text" id="yeniCariKategoriAdi" required></div><button type="submit" class="btn" style="height:45px;">Ekle</button></div></form><div class="list-section" style="margin-top:20px;"><h4>Tanımlı Kategoriler/Köyler</h4><ul id="cariKategoriListesiUl"></ul></div></div>
+                <div class="settings-section"><h3>Cari Kategori/Köy Tanımları</h3><form id="cariKategoriForm" action="#"><div class="form-grid" style="grid-template-columns: 1fr auto; align-items:end;"><div class="form-group" style="margin-bottom:0;"><label for="yeniCariKategoriAdi">Yeni Ad:</label><input type="text" id="yeniCariKategoriAdi" required></div><button type="submit" class="btn" style="height:45px;">Ekle</button></div></form><div class="list-section" style="margin-top:20px;"><h4>Tanımlı Kategoriler/Köyler</h4><ul id="cariKategoriListesiUl"></ul></div></div>
                 <hr class="dont-calisan">
                 <div class="settings-section dont-calisan"><h3>Kullanıcı Yönetimi</h3><form id="kullaniciForm"><input type="hidden" id="kullaniciEditId"><div class="form-grid">
-                    <div class="form-group"><label for for for="kullaniciAdi">Kullanıcı E-posta:</label><input type="email" id="kullaniciAdi" required></div>
-                    <div class="form-group"><label for for for="kullaniciSifre">Şifre:</label><input type="password" id="kullaniciSifre" required></div>
+                    <div class="form-group"><label for="kullaniciAdi">Kullanıcı E-posta:</label><input type="email" id="kullaniciAdi" required></div>
+                    <div class="form-group"><label for="kullaniciSifre">Şifre:</label><input type="password" id="kullaniciSifre" required></div>
                 </div><button type="submit" class="btn" id="kullaniciKaydetBtn">Çalışan Ekle</button></form>
                 <div class="list-section"><h4>Kullanıcı Listesi</h4><table><thead><tr><th>Kullanıcı Adı</th><th>Rol</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="kullaniciListesiBody"></tbody></table></div></div>
              </div>
