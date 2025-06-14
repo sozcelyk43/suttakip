@@ -313,6 +313,13 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 
+        auth.onAuthStateChanged((user) => {
+  if (user) {
+    console.log("Giriş yapan kullanıcı UID:", user.uid); // UID burada
+  }
+});
+
+
 function initializeApp() {
     const sidebarNav = document.getElementById('sidebarNav');
     const moduleSections = document.querySelectorAll('.main-content .module-section');
