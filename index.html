@@ -677,6 +677,22 @@ async function deleteCari(id) {
         }
     }
 }
+
+
+function resetYemSatisForm() {
+    const yemSatisForm = document.getElementById('yemSatisForm');
+    const yemSatisFormBaslik = document.getElementById('yemSatisFormBaslik');
+    const yemSatisKaydetBtn = document.getElementById('yemSatisKaydetBtn');
+    const yemSatisFormTemizleBtn = document.getElementById('yemSatisFormTemizleBtn');
+
+    yemSatisForm.reset();
+    editingYemSatisId = null;
+    document.getElementById('yemSatisEditId').value = '';
+
+    // Formu "Yeni Kayıt" moduna geri döndür
+    setEditingMode(yemSatisFormBaslik, yemSatisKaydetBtn, yemSatisFormTemizleBtn, null, 'Yeni Yem Satışı');
+}
+        
 function resetYemTanimForm() {
     const yemTanimForm = document.getElementById('yemTanimForm');
     const yemTanimFormBaslik = document.getElementById('yemTanimFormBaslik');
