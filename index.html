@@ -468,6 +468,34 @@ async function updateDashboardStats() {
         todaySutAlim.textContent = sutAlimSnapshot.size;
     } catch(e) { console.error("Dashboard istatistikleri alınırken hata", e); }
 }
+
+async function handleYemTanimKaydet(event) {
+    event.preventDefault();
+    const formData = {
+        kod: document.getElementById('yemKodu').value,
+        ad: document.getElementById('yemAdi').value,
+        kategori: document.getElementById('yemKategorisi').value,
+        birim: document.getElementById('yemBirimi').value,
+        alisFiyati: parseFloat(document.getElementById('yemAlisFiyati').value) || 0,
+        satisFiyati: parseFloat(document.getElementById('yemSatisFiyati').value) || 0,
+        stokMiktari: 0, // Yeni yem tanımında stok başlangıçta 0'dır.
+        sahipId: currentUserId
+    };
+    try {
+        // Bu kısımda henüz bir düzenleme (edit) mantığı olmadığı için sadece yeni kayıt ekliyoruz.
+        await db.collection('yemler').add(formData);
+        document.getElementById('yemTanimForm').reset();
+        // Yem stok listesini yeniden yüklemek için ilgili fonksiyonu çağırın (aşağıda ekledim)
+        if(typeof renderYemStokListesi === 'function') {
+            await renderYemStokListesi();
+        }
+    } catch (error) {
+        console.error("Yem tanımı kaydedilirken hata:", error);
+        alert("Yem tanımı kaydedilirken bir hata oluştu.");
+    }
+}
+
+        
 async function handleCariKaydet(event) {
     event.preventDefault();
     const formData = {
