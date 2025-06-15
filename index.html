@@ -684,7 +684,85 @@ async function handleYemKarRaporuOlustur() {
     }
 }
 
-        
+        async function renderSutAlimGecmisi() {
+    const tarih = document.getElementById('topluGirisTarih').value;
+    const gecmisTarihSpan = document.getElementById('gecmisTarihSpan');
+    const header = document.getElementById('sutAlimGecmisiHeader');
+    const body = document.getElementById('sutAlimGecmisiBody');
+
+    if (!tarih) {
+        header.innerHTML = '';
+        body.innerHTML = '';
+        return;
+    }
+
+    gecmisTarihSpan.textContent = formatDate(tarih);
+    header.innerHTML = `
+        <tr>
+            <th>Cari Adı</th>
+            <th>Sabah (Lt)</th>
+            <th>Akşam (Lt)</th>
+            <th>Toplam (Lt)</th>
+            <th>Fiyat (TL)</th>
+            <th>Tutar (TL)</th>
+        </tr>
+    `;
+    body.innerHTML = '<tr><td colspan="6">Yükleniyor...</td></tr>';
+
+    try {
+        const snapshot = await db.collection('sut_alimlari')
+            .where('sahipId', '==', currentUserId)
+            .where('tarih', '==', tarih)
+            .orderBy('cariAdi')
+            .get();
+
+        if (snapshot.empty) {
+            body.innerHTML = '<tr><td colspan="6" style="text-align:center;">Bu tarih için süt alım kaydı bulunmuyor.</td></tr>';
+            return;
+        }
+
+        let bodyHTML = '';
+        let genelToplamLt = 0;
+        let genelToplamTutar = 0;
+
+        snapshot.forEach(doc => {
+            const alim = doc.data();
+            genelToplamLt += alim.toplam;
+            genelToplamTutar += alim.toplamTutar;
+            bodyHTML += `
+                <tr>
+                    <td>${alim.cariAdi}</td>
+                    <td>${alim.sabah.toFixed(2)}</td>
+                    <td>${alim.aksam.toFixed(2)}</td>
+                    <td><strong>${alim.toplam.toFixed(2)}</strong></td>
+                    <td>${formatCurrency(alim.fiyat)}</td>
+                    <td><strong>${formatCurrency(alim.toplamTutar)}</strong></td>
+                </tr>
+            `;
+        });
+
+        // Genel toplamları içeren alt bilgi satırını ekle
+        bodyHTML += `
+            <tr style="font-weight: bold; background-color: #f2f2f2;">
+                <td>GENEL TOPLAM</td>
+                <td colspan="2"></td>
+                <td>${genelToplamLt.toFixed(2)} Lt</td>
+                <td></td>
+                <td>${formatCurrency(genelToplamTutar)}</td>
+            </tr>
+        `;
+
+        body.innerHTML = bodyHTML;
+
+    } catch (error) {
+        console.error("Süt alım geçmişi yüklenirken hata:", error);
+        if (error.code === 'failed-precondition') {
+             body.innerHTML = '<tr><td colspan="6" style="text-align:center; color: red;"><b>Veritabanı Hatası:</b> Bu sorgu için bir dizin (index) oluşturmanız gerekiyor.<br>Lütfen tarayıcı konsolundaki (F12) hatayı kontrol edin ve index oluşturma linkine tıklayın.</td></tr>';
+        } else {
+             body.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">Geçmiş yüklenirken bir hata oluştu.</td></tr>';
+        }
+    }
+}
 
 async function handleHesapOzetiRaporuOlustur() {
     const cariId = document.getElementById('raporCariSecimi').value;
