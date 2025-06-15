@@ -35,10 +35,15 @@
         <section id="dashboard" class="module-section">
             <div class="module-header"><h2>📝 Kontrol Paneli</h2></div>
             <div class="container">
-                <h3>Genel İstatistikler</h3>
-                 <p>Toplam Kayıtlı Cari Sayısı: <span id="totalCari">0</span></p>
-                 <p>Tanımlı Yem Çeşidi: <span id="totalYemCesidi">0</span></p>
-                 <p>Bugünkü Toplam Süt Alım Kayıt Sayısı: <span id="todaySutAlim">0</span></p>
+                <h3>Genel Durum</h3>
+<div class="dashboard-grid">
+    <div class="stat-card"><h4>Bugünkü Sabah Sütü</h4><p><span id="dashSabahSut">0.00</span> Lt</p></div>
+    <div class="stat-card"><h4>Bugünkü Akşam Sütü</h4><p><span id="dashAksamSut">0.00</span> Lt</p></div>
+    <div class="stat-card"><h4>Aktif Müşteri Sayısı</h4><p><span id="dashAktifMusteri">0</span></p></div>
+    <div class="stat-card alacak"><h4>Toplam Alacak Bakiyesi</h4><p><span id="dashToplamAlacak">0,00 ₺</span></p></div>
+    <div class="stat-card borc"><h4>Toplam Borç Bakiyesi</h4><p><span id="dashToplamBorc">0,00 ₺</span></p></div>
+</div>
+                 
             </div>
         </section>
         
@@ -381,6 +386,11 @@ function initializeApp() {
     });
     
     logoutButton.addEventListener('click', handleLogout);
+document.getElementById('yemAlisMiktar').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
+    document.getElementById('yemAlisBirimFiyati').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
+
+    document.getElementById('yemSatisMiktar').addEventListener('input', () => hesaplaToplamTutar('yemSatisMiktar', 'yemSatisBirimFiyati', 'yemSatisToplamTutar'));
+    document.getElementById('yemSatisBirimFiyati').addEventListener('input', () => hesaplaToplamTutar('yemSatisMiktar', 'yemSatisBirimFiyati', 'yemSatisToplamTutar'));
     cariForm.addEventListener('submit', handleCariKaydet);
     if(cariFormTemizleBtn) cariFormTemizleBtn.addEventListener('click', resetCariForm);
     yemTanimForm.addEventListener('submit', handleYemTanimKaydet);
@@ -511,24 +521,51 @@ async function handleSifreDegistir(event) {
 
 // --- DASHBOARD FONKSİYONLARI ---
 async function updateDashboardStats() {
-    const totalCari = document.getElementById('totalCari');
-    const totalYemCesidi = document.getElementById('totalYemCesidi');
-    const todaySutAlim = document.getElementById('todaySutAlim');
-    const todayStr = getTodayForInput();
     const currentUser = auth.currentUser;
     if (!currentUser) return;
-    try {
-        const [carilerSnapshot, yemlerSnapshot, sutAlimSnapshot] = await Promise.all([
-            db.collection('cariler').where("sahipId", "==", currentUser.uid).get(),
-            db.collection('yemler').where("sahipId", "==", currentUser.uid).get(),
-            db.collection('sut_alimlari').where("sahipId", "==", currentUser.uid).where("tarih", "==", todayStr).get()
-        ]);
-        totalCari.textContent = carilerSnapshot.size;
-        totalYemCesidi.textContent = yemlerSnapshot.size;
-        todaySutAlim.textContent = sutAlimSnapshot.size;
-    } catch(e) { console.error("Dashboard istatistikleri alınırken hata", e); }
-}
+    const todayStr = getTodayForInput();
 
+    // Süt Toplamları
+    try {
+        const sutSnapshot = await db.collection('sut_alimlari').where("sahipId", "==", currentUser.uid).where("tarih", "==", todayStr).get();
+        let sabahToplam = 0;
+        let aksamToplam = 0;
+        sutSnapshot.forEach(doc => {
+            sabahToplam += doc.data().sabah || 0;
+            aksamToplam += doc.data().aksam || 0;
+        });
+        document.getElementById('dashSabahSut').textContent = sabahToplam.toFixed(2);
+        document.getElementById('dashAksamSut').textContent = aksamToplam.toFixed(2);
+    } catch (e) { console.error("Dashboard süt istatistikleri alınırken hata", e); }
+
+    // Aktif Müşteri
+    try {
+        const carilerSnapshot = await db.collection('cariler').where("sahipId", "==", currentUser.uid).where("durum", "==", "aktif").get();
+        document.getElementById('dashAktifMusteri').textContent = carilerSnapshot.size;
+    } catch (e) { console.error("Dashboard aktif müşteri sayısı alınırken hata", e); }
+    
+    // Bakiye Toplamları (Bu işlem çok sayıda okuma yapabilir)
+    try {
+        const allCarilerSnapshot = await db.collection('cariler').where("sahipId", "==", currentUser.uid).get();
+        if(!allCarilerSnapshot.empty) {
+            let toplamGenelAlacak = 0;
+            let toplamGenelBorc = 0;
+            const bakiyePromises = allCarilerSnapshot.docs.map(doc => calculateCariBakiyeDetayli(doc.id));
+            const tumBakiyeler = await Promise.all(bakiyePromises);
+            
+            tumBakiyeler.forEach(bakiyeDetay => {
+                if (bakiyeDetay.bakiye > 0) {
+                    toplamGenelAlacak += bakiyeDetay.bakiye;
+                } else {
+                    toplamGenelBorc += Math.abs(bakiyeDetay.bakiye);
+                }
+            });
+
+            document.getElementById('dashToplamAlacak').textContent = formatCurrency(toplamGenelAlacak);
+            document.getElementById('dashToplamBorc').textContent = formatCurrency(toplamGenelBorc);
+        }
+    } catch (e) { console.error("Dashboard bakiye toplamları alınırken hata", e); }
+}
 // --- CARİ YÖNETİMİ FONKSİYONLARI ---
 async function handleCariKaydet(event) {
     event.preventDefault();
@@ -795,6 +832,58 @@ async function renderKullaniciListesi() {
 }
 
 // --- YEM YÖNETİMİ ---
+
+// Yem Alış Hareketleri için Düzenleme
+async function editYemAlisi(id) {
+    try {
+        const doc = await db.collection('yem_alimlari').doc(id).get();
+        if (!doc.exists) { alert("Düzenlenecek kayıt bulunamadı."); return; }
+        const data = doc.data();
+        
+        document.getElementById('yemAlisEditId').value = id;
+        document.getElementById('yemAlisTarih').value = data.tarih;
+        document.getElementById('yemSecimiAlis').value = data.yemId;
+        document.getElementById('yemAlisMiktar').value = data.miktar;
+        document.getElementById('yemAlisTedarikci').value = data.cariId;
+        document.getElementById('yemAlisBirimFiyati').value = data.alisFiyati;
+        hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar');
+
+        setEditingMode(document.getElementById('yemAlisFormBaslik'), document.getElementById('yemAlisKaydetBtn'), document.getElementById('yemAlisFormTemizleBtn'), id, 'Yem Alışı');
+        document.getElementById('yemAlisForm').scrollIntoView();
+        alert("Stokları etkileyen bu kaydı düzenlemek şu an için desteklenmemektedir. Lütfen kaydı silip yeniden oluşturun.");
+    } catch (error) {
+        console.error("Yem alışı düzenleme için getirilirken hata:", error);
+    }
+}
+
+// Yem Satış Hareketleri için Düzenleme
+async function editYemSatisi(id) {
+    try {
+        const doc = await db.collection('yem_satislari').doc(id).get();
+        if (!doc.exists) { alert("Düzenlenecek kayıt bulunamadı."); return; }
+        const data = doc.data();
+
+        document.getElementById('yemSatisEditId').value = id;
+        document.getElementById('yemSatisTarih').value = data.tarih;
+        document.getElementById('yemAlanTedarikci').value = data.cariId;
+        document.getElementById('yemSecimiSatis').value = data.yemId;
+        document.getElementById('yemSatisMiktar').value = data.miktar;
+        document.getElementById('yemSatisBirimFiyati').value = data.satisFiyati;
+        hesaplaToplamTutar('yemSatisMiktar', 'yemSatisBirimFiyati', 'yemSatisToplamTutar');
+
+        setEditingMode(document.getElementById('yemSatisFormBaslik'), document.getElementById('yemSatisKaydetBtn'), document.getElementById('yemSatisFormTemizleBtn'), id, 'Yem Satışı');
+        document.getElementById('yemSatisForm').scrollIntoView();
+        alert("Stokları etkileyen bu kaydı düzenlemek şu an için desteklenmemektedir. Lütfen kaydı silip yeniden oluşturun.");
+    } catch (error) {
+        console.error("Yem satışı düzenleme için getirilirken hata:", error);
+    }
+}
+
+
+
+
+
+
 async function handleYemTanimKaydet(event) {
     event.preventDefault();
     const currentUser = auth.currentUser;
@@ -901,16 +990,13 @@ function resetYemAlisForm() {
     setEditingMode(document.getElementById('yemAlisFormBaslik'), document.getElementById('yemAlisKaydetBtn'), document.getElementById('yemAlisFormTemizleBtn'), null, 'Yeni Yem Alışı');
 }
 
-      async function renderYemAlisHareketleri() {
+     async function renderYemAlisHareketleri() {
     const listBody = document.getElementById('yemAlisHareketListesiBody');
     const currentUser = auth.currentUser;
     if (!currentUser) return;
     try {
         const snapshot = await db.collection('yem_alimlari').where('sahipId', '==', currentUser.uid).orderBy('tarih', 'desc').limit(20).get();
-        if (snapshot.empty) {
-            listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Yem alım hareketi bulunmuyor.</td></tr>';
-            return;
-        }
+        if (snapshot.empty) { listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Yem alım hareketi bulunmuyor.</td></tr>'; return; }
         
         const yemIds = [...new Set(snapshot.docs.map(doc => doc.data().yemId))];
         const yemMap = new Map();
@@ -924,22 +1010,19 @@ function resetYemAlisForm() {
             const alim = doc.data();
             const yemAdi = yemMap.get(alim.yemId) || 'Bilinmiyor';
             rows += `<tr>
-                <td>${formatDate(alim.tarih)}</td>
-                <td>${yemAdi}</td>
-                <td>${alim.miktar}</td>
-                <td>${alim.cariId || ''}</td>
-                <td>${formatCurrency(alim.alisFiyati)}</td>
-                <td>${formatCurrency(alim.toplamTutar)}</td>
+                <td>${formatDate(alim.tarih)}</td><td>${yemAdi}</td><td>${alim.miktar}</td>
+                <td>${alim.cariId || ''}</td><td>${formatCurrency(alim.alisFiyati)}</td><td>${formatCurrency(alim.toplamTutar)}</td>
                 <td class="dont-print">
+                    <button class="btn btn-edit btn-sm" onclick="editYemAlisi('${doc.id}')">Düzenle</button>
                     <button class="btn btn-delete btn-sm" onclick="deleteYemAlisi('${doc.id}')">Sil</button>
                 </td>
             </tr>`;
         });
         listBody.innerHTML = rows;
     } catch(e) { console.error("Yem alış hareketleri yüklenirken hata:", e); }
-}  
+}
 
-// Ödeme/Tahsilat düzenleme formunu doldurur
+
 async function editOdeme(id) {
     try {
         const doc = await db.collection('odemeVeTahsilatlar').doc(id).get();
@@ -989,7 +1072,49 @@ async function deleteSutAlimi(id) {
     }
 }
         
+async function editSutAlimi(id) {
+    if (!confirm("Bu kaydı düzenlemek istediğinizden emin misiniz? Kayıt silinecek ve yukarıdaki listede yeniden düzenlemeniz için açılacaktır.")) return;
+
+    try {
+        const docRef = db.collection('sut_alimlari').doc(id);
+        const doc = await docRef.get();
+        if (!doc.exists) {
+            alert("Düzenlenecek kayıt bulunamadı.");
+            return;
+        }
+        const alimData = doc.data();
+        const cariId = alimData.cariId;
+
+        await docRef.delete(); // Kaydı sil
+
+        // Üstteki formda ilgili carinin satırını bul ve tekrar aktif et
+        const sabahInput = document.getElementById(`sabah-${cariId}`);
+        if(sabahInput) {
+             const satir = sabahInput.closest('tr');
+             const aksamInput = document.getElementById(`aksam-${cariId}`);
+             const fiyatInput = document.getElementById(`fiyat-${cariId}`);
+             const kaydetBtn = document.getElementById(`kaydet-btn-${cariId}`);
+
+             sabahInput.value = alimData.sabah;
+             aksamInput.value = alimData.aksam;
+             fiyatInput.value = alimData.fiyat;
+
+             sabahInput.disabled = false;
+             aksamInput.disabled = false;
+             fiyatInput.disabled = false;
+             kaydetBtn.disabled = false;
+             kaydetBtn.textContent = "Güncelle";
+             if(satir) satir.style.display = ''; // Satırı tekrar görünür yap
+        }
         
+        await renderSutAlimGecmisi(); // Geçmiş listesini yenile
+        alert("Kayıt düzenlemeye açıldı. Lütfen yukarıdaki listeden düzeltip tekrar kaydedin.");
+
+    } catch (error) {
+        console.error("Süt alımı düzenlenirken hata:", error);
+        alert("Düzenleme işlemi sırasında bir hata oluştu.");
+    }
+}        
         
 async function handleYemSatisKaydet(event) {
     event.preventDefault();
@@ -1083,10 +1208,8 @@ async function renderYemSatisListesi() {
     if (!currentUser) return;
     try {
         const snapshot = await db.collection('yem_satislari').where('sahipId', '==', currentUser.uid).orderBy('tarih', 'desc').limit(20).get();
-        if (snapshot.empty) {
-            listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Yem satış hareketi bulunmuyor.</td></tr>';
-            return;
-        }
+        if (snapshot.empty) { listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Yem satış hareketi bulunmuyor.</td></tr>'; return; }
+        
         const yemIds = [...new Set(snapshot.docs.map(doc => doc.data().yemId))];
         const cariIds = [...new Set(snapshot.docs.map(doc => doc.data().cariId))];
         const yemMap = new Map();
@@ -1106,14 +1229,11 @@ async function renderYemSatisListesi() {
             const yemAdi = yemMap.get(satis.yemId) || 'Bilinmiyor';
             const cariAdi = cariMap.get(satis.cariId) || 'Bilinmiyor';
             rows += `<tr>
-                <td>${formatDate(satis.tarih)}</td>
-                <td>${cariAdi}</td>
-                <td>${yemAdi}</td>
-                <td>${satis.miktar}</td>
-                <td>${formatCurrency(satis.satisFiyati)}</td>
-                <td>${formatCurrency(satis.toplamTutar)}</td>
+                <td>${formatDate(satis.tarih)}</td><td>${cariAdi}</td><td>${yemAdi}</td><td>${satis.miktar}</td>
+                <td>${formatCurrency(satis.satisFiyati)}</td><td>${formatCurrency(satis.toplamTutar)}</td>
                 <td class="dont-print">
-                     <button class="btn btn-delete btn-sm" onclick="deleteYemSatisi('${doc.id}')">Sil</button>
+                    <button class="btn btn-edit btn-sm" onclick="editYemSatisi('${doc.id}')">Düzenle</button>
+                    <button class="btn btn-delete btn-sm" onclick="deleteYemSatisi('${doc.id}')">Sil</button>
                 </td>
             </tr>`;
         });
@@ -1121,7 +1241,9 @@ async function renderYemSatisListesi() {
     } catch(e) { console.error("Yem satış hareketleri yüklenirken hata:", e); }
 }
 
-// --- ÖDEME/TAHSİLAT FONKSİYONLARI ---
+
+
+
 async function handleOdemeKaydet(event) {
     event.preventDefault();
     const currentUser = auth.currentUser;
@@ -1290,48 +1412,68 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
     const aksamInput = document.getElementById(`aksam-${cariId}`);
     const fiyatInput = document.getElementById(`fiyat-${cariId}`);
     const kaydetBtn = document.getElementById(`kaydet-btn-${cariId}`);
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
+    const satir = kaydetBtn.closest('tr'); // Satırı bul
 
     const sabahMiktar = parseFloat(sabahInput.value) || 0;
     const aksamMiktar = parseFloat(aksamInput.value) || 0;
     const birimFiyat = parseFloat(fiyatInput.value) || globalSettings.defaultMilkPrice || 0;
     const toplamMiktar = sabahMiktar + aksamMiktar;
 
-    if (toplamMiktar <= 0) { alert("Lütfen en az bir süt miktarı girin."); return; }
+    if (toplamMiktar <= 0) {
+        alert("Lütfen en az bir süt miktarı girin.");
+        return;
+    }
 
     const sutAlimData = {
-        tarih: tarih, cariId: cariId, cariAdi: cariAdi,
-        sabah: sabahMiktar, aksam: aksamMiktar, toplam: toplamMiktar,
-        fiyat: birimFiyat, toplamTutar: toplamMiktar * birimFiyat,
-        sahipId: currentUser.uid
+        tarih: tarih,
+        cariId: cariId,
+        cariAdi: cariAdi,
+        sabah: sabahMiktar,
+        aksam: aksamMiktar,
+        toplam: toplamMiktar,
+        fiyat: birimFiyat,
+        toplamTutar: toplamMiktar * birimFiyat,
+        sahipId: auth.currentUser.uid
     };
+
     try {
         await db.collection("sut_alimlari").add(sutAlimData);
         alert(`${cariAdi} için süt alımı kaydedildi.`);
-        sabahInput.disabled = true;
-        aksamInput.disabled = true;
-        fiyatInput.disabled = true;
-        kaydetBtn.disabled = true;
-        kaydetBtn.textContent = "Kaydedildi";
-        if (typeof renderSutAlimGecmisi === 'function') { await renderSutAlimGecmisi(); }
+        
+        // Kaydedilen satırı üst listeden gizle
+        if(satir) {
+            satir.style.display = 'none';
+        }
+        
+        // Geçmiş listesini anında yenile
+        await renderSutAlimGecmisi();
     } catch (error) {
         console.error("Süt alımı kaydedilirken hata:", error);
         alert("Süt alımı kaydedilirken bir hata oluştu.");
     }
 }
+
+
+function hesaplaToplamTutar(miktarInputId, fiyatInputId, toplamInputId) {
+    const miktarInput = document.getElementById(miktarInputId);
+    const fiyatInput = document.getElementById(fiyatInputId);
+    const toplamInput = document.getElementById(toplamInputId);
+
+    const miktar = parseFloat(miktarInput.value) || 0;
+    const fiyat = parseFloat(fiyatInput.value) || 0;
+    toplamInput.value = formatCurrency(miktar * fiyat);
+}
+
 async function renderSutAlimGecmisi() {
     const tarih = document.getElementById('topluGirisTarih').value;
     const gecmisTarihSpan = document.getElementById('gecmisTarihSpan');
     const header = document.getElementById('sutAlimGecmisiHeader');
     const body = document.getElementById('sutAlimGecmisiBody');
     const currentUser = auth.currentUser;
-    if (!currentUser) return;
-
-    if (!tarih) { header.innerHTML = ''; body.innerHTML = ''; return; }
+    if (!currentUser || !tarih) { header.innerHTML = ''; body.innerHTML = ''; return; }
 
     gecmisTarihSpan.textContent = formatDate(tarih);
-    header.innerHTML = `<tr><th>Cari Adı</th><th>Sabah (Lt)</th><th>Akşam (Lt)</th><th>Toplam (Lt)</th><th>Fiyat (TL)</th><th>Tutar (TL)</th><th class="dont-print">İşlemler</th></tr>`;
+    header.innerHTML = `<tr><th>Cari Adı</th><th>Sabah (Lt)</th><th>Akşam (Lt)</th><th>Toplam</th><th>Fiyat</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr>`;
     body.innerHTML = '<tr><td colspan="7">Yükleniyor...</td></tr>';
 
     try {
@@ -1341,37 +1483,31 @@ async function renderSutAlimGecmisi() {
         if (snapshot.empty) { body.innerHTML = '<tr><td colspan="7" style="text-align:center;">Bu tarih için süt alım kaydı bulunmuyor.</td></tr>'; return; }
 
         let bodyHTML = '';
-        let genelToplamLt = 0;
-        let genelToplamTutar = 0;
+        let genelToplamLt = 0, genelToplamTutar = 0;
 
         snapshot.forEach(doc => {
             const alim = doc.data();
             genelToplamLt += alim.toplam;
             genelToplamTutar += alim.toplamTutar;
             bodyHTML += `<tr>
-                <td>${alim.cariAdi}</td><td>${alim.sabah.toFixed(2)}</td>
-                <td>${alim.aksam.toFixed(2)}</td><td><strong>${alim.toplam.toFixed(2)}</strong></td>
+                <td>${alim.cariAdi}</td><td>${alim.toplam.toFixed(2)}</td>
+                <td>${alim.sabah.toFixed(2)}</td><td>${alim.aksam.toFixed(2)}</td>
                 <td>${formatCurrency(alim.fiyat)}</td><td><strong>${formatCurrency(alim.toplamTutar)}</strong></td>
                 <td class="dont-print">
+                    <button class="btn btn-edit btn-sm" onclick="editSutAlimi('${doc.id}')">Düzenle</button>
                     <button class="btn btn-delete btn-sm" onclick="deleteSutAlimi('${doc.id}')">Sil</button>
                 </td>
             </tr>`;
         });
-
-        bodyHTML += `<tr style="font-weight: bold; background-color: #f2f2f2;">
-            <td>GENEL TOPLAM</td><td colspan="2"></td>
-            <td>${genelToplamLt.toFixed(2)} Lt</td><td></td><td>${formatCurrency(genelToplamTutar)}</td><td></td>
-        </tr>`;
+        bodyHTML += `<tr style="font-weight: bold; background-color: #f2f2f2;"><td>GENEL TOPLAM</td><td colspan="2"></td><td>${genelToplamLt.toFixed(2)} Lt</td><td></td><td>${formatCurrency(genelToplamTutar)}</td><td></td></tr>`;
         body.innerHTML = bodyHTML;
     } catch (error) {
         console.error("Süt alım geçmişi yüklenirken hata:", error);
-        if (error.code === 'failed-precondition') {
-             body.innerHTML = '<tr><td colspan="7" style="text-align:center; color: red;"><b>Veritabanı Hatası:</b> Bu sorgu için bir dizin (index) oluşturmanız gerekiyor.<br>Lütfen tarayıcı konsolundaki (F12) hatayı kontrol edin ve index oluşturma linkine tıklayın.</td></tr>';
-        } else {
-             body.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Geçmiş yüklenirken bir hata oluştu.</td></tr>';
-        }
+        body.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Geçmiş yüklenirken bir hata oluştu.</td></tr>';
     }
 }
+
+
 
 // --- RAPORLAMA FONKSİYONLARI ---
 async function handleHesapOzetiRaporuOlustur() {
