@@ -944,17 +944,31 @@ async function handleOdemeKaydet(event) {
 }
         
 function handleLogout() { auth.signOut().then(() => { window.location.href = 'login.html'; }).catch(error => console.error("Logout error", error)); }
+
 async function getSettings() {
     const varsayilanSutFiyatiInput = document.getElementById('varsayilanSutFiyati');
+
+    if (!currentUserId) {
+        console.error("getSettings çağrıldı ama currentUserId tanımsız.");
+        return;
+    }
+
     const settingsRef = db.collection('ayarlar').doc(currentUserId);
+
     try {
         const doc = await settingsRef.get();
         if (doc.exists) {
             globalSettings = doc.data();
         }
         varsayilanSutFiyatiInput.value = (globalSettings.defaultMilkPrice || 15.00).toFixed(2);
-    } catch(e) { console.error("Ayarlar alınırken hata: ", e); }
+    } catch(e) {
+        console.error("Ayarlar alınırken hata: ", e);
+    }
 }
+
+
+
+        
 async function updateDashboardStats() {
     const totalCari = document.getElementById('totalCari');
     const totalYemCesidi = document.getElementById('totalYemCesidi');
