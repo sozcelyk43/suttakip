@@ -1370,12 +1370,117 @@ async function handleSutAlimRaporuOlustur(options) {
     const raporBaslik = document.getElementById('sutRaporuBaslik');
     const raporDetayAlani = document.getElementById('sutRaporuDetayAlani');
     const currentUser = auth.currentUser;
-    if(!currentUser || !ayYil) { alert("Lütfen ay seçimi yapın."); return; }
+
+    if (!currentUser || !ayYil) {
+        alert("Rapor oluşturmak için lütfen bir ay seçin.");
+        return;
+    }
+
+    if (!options.tumu && !options.kategori && !cariId) {
+        alert("Lütfen bir cari seçin veya 'Kategori' ya da 'Toplu' raporu seçin.");
+        return;
+    }
+
+    if (options.kategori && !kategori) {
+        alert("Kategori raporu için lütfen bir kategori seçin.");
+        return;
+    }
 
     raporDetayAlani.innerHTML = '<p>Rapor oluşturuluyor, lütfen bekleyin...</p>';
-    // Logic for this complex report is not fully implemented as it can be very specific.
-    alert("Bu raporlama özelliği henüz tam olarak tamamlanmamıştır.");
-    raporDetayAlani.innerHTML = '';
+
+    const [year, month] = ayYil.split('-');
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
+    const daysInMonth = endDate.getDate();
+
+    let baslikText = `${month}/${year} Aylık Süt Alım Raporu`;
+    raporBaslik.textContent = baslikText;
+
+    try {
+        // Ayın başlangıç ve bitiş tarihine göre temel sorgu
+        let query = db.collection('sut_alimlari')
+            .where('sahipId', '==', currentUser.uid)
+            .where('tarih', '>=', startDate.toISOString().split('T')[0])
+            .where('tarih', '<=', endDate.toISOString().split('T')[0]);
+
+        // Seçeneklere göre sorguyu daralt
+        if (!options.tumu && !options.kategori) { // Tek cari raporu
+            query = query.where('cariId', '==', cariId);
+            const cariAdi = document.getElementById('sutRaporuTedarikciSecimi').options[document.getElementById('sutRaporuTedarikciSecimi').selectedIndex].text;
+            raporBaslik.textContent = `${cariAdi} - ${baslikText}`;
+        }
+
+        const alimlarSnapshot = await query.get();
+        let alimlar = alimlarSnapshot.docs.map(doc => doc.data());
+
+        // Kategoriye göre filtreleme gerekiyorsa, gelen tüm sonuçları ayrıca filtrele
+        if (options.kategori) {
+            const cariSnapshot = await db.collection('cariler').where('sahipId', '==', currentUser.uid).where('kategori', '==', kategori).get();
+            const cariIdsInKategori = cariSnapshot.docs.map(doc => doc.id);
+            alimlar = alimlar.filter(alim => cariIdsInKategori.includes(alim.cariId));
+            raporBaslik.textContent = `${kategori} Kategorisi - ${baslikText}`;
+        }
+        
+        if (alimlar.length === 0) {
+            raporDetayAlani.innerHTML = '<p>Seçili kriterlere uygun süt alım kaydı bulunamadı.</p>';
+            return;
+        }
+
+        // Veriyi, satırları cari, sütunları gün olan bir yapıya dönüştür
+        const raporData = {};
+        
+        alimlar.forEach(alim => {
+            if (!raporData[alim.cariId]) {
+                raporData[alim.cariId] = {
+                    cariAdi: alim.cariAdi,
+                    gunler: {},
+                    ayToplam: 0
+                };
+            }
+            const gun = new Date(alim.tarih).getUTCDate();
+            raporData[alim.cariId].gunler[gun] = (raporData[alim.cariId].gunler[gun] || 0) + alim.toplam;
+            raporData[alim.cariId].ayToplam += alim.toplam;
+        });
+
+        // HTML Tablosunu oluştur
+        let tableHTML = '<table class="report-table pivot-table"><thead><tr><th>Cari Adı</th>';
+        const gunlukToplamlar = {};
+
+        for (let i = 1; i <= daysInMonth; i++) {
+            tableHTML += `<th>${i}</th>`;
+            gunlukToplamlar[i] = 0;
+        }
+        tableHTML += '<th>Ay Toplam</th></tr></thead><tbody>';
+
+        for (const id in raporData) {
+            const cariData = raporData[id];
+            tableHTML += `<tr><td>${cariData.cariAdi}</td>`;
+            for (let i = 1; i <= daysInMonth; i++) {
+                const gunlukSut = cariData.gunler[i] || 0;
+                tableHTML += `<td>${gunlukSut > 0 ? gunlukSut.toFixed(2) : '-'}</td>`;
+                gunlukToplamlar[i] += gunlukSut;
+            }
+            tableHTML += `<td><strong>${cariData.ayToplam.toFixed(2)}</strong></td></tr>`;
+        }
+
+        tableHTML += '</tbody><tfoot><tr style="font-weight:bold; background-color: #f2f2f2;"><td>GÜNLÜK TOPLAM</td>';
+        let genelToplam = 0;
+        for (let i = 1; i <= daysInMonth; i++) {
+            tableHTML += `<td>${gunlukToplamlar[i] > 0 ? gunlukToplamlar[i].toFixed(2) : '-'}</td>`;
+            genelToplam += gunlukToplamlar[i];
+        }
+        tableHTML += `<td><strong>${genelToplam.toFixed(2)}</strong></td></tr></tfoot></table>`;
+        
+        raporDetayAlani.innerHTML = tableHTML;
+
+    } catch (error) {
+        console.error("Süt alım raporu oluşturulurken hata:", error);
+        if (error.code === 'failed-precondition') {
+            raporDetayAlani.innerHTML = '<p style="color:red;"><b>Veritabanı Hatası:</b> Bu sorgu için bir dizin (index) oluşturmanız gerekiyor.<br>Lütfen tarayıcı konsolundaki (F12) hatayı kontrol edin ve index oluşturma linkine tıklayın.</p>';
+        } else {
+            raporDetayAlani.innerHTML = '<p style="color:red;">Rapor oluşturulurken bir hata oluştu.</p>';
+        }
+    }
 }
 
 async function handleYemKarRaporuOlustur() {
