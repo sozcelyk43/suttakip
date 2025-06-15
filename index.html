@@ -978,6 +978,49 @@ function resetYemSatisForm() {
     document.getElementById('yemSatisEditId').value = '';
     setEditingMode(document.getElementById('yemSatisFormBaslik'), document.getElementById('yemSatisKaydetBtn'), document.getElementById('yemSatisFormTemizleBtn'), null, 'Yeni Yem Satışı');
 }
+async function calculateCariBakiyeDetayli(cariId) {
+    let alacak = 0; // İşletmenin cariye borcu (Süt alımı, Tahsilat)
+    let borc = 0;   // Cariyenin işletmeye borcu (Yem satışı, Ödeme)
+
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+        console.error("Bakiye hesaplanamıyor, kullanıcı oturumu bulunamadı.");
+        return { alacak: 0, borc: 0, bakiye: 0 };
+    }
+
+    try {
+        const sutQuery = db.collection('sut_alimlari').where('sahipId', '==', currentUser.uid).where('cariId', '==', cariId);
+        const yemQuery = db.collection('yem_satislari').where('sahipId', '==', currentUser.uid).where('cariId', '==', cariId);
+        const odemeQuery = db.collection('odemeVeTahsilatlar').where('sahipId', '==', currentUser.uid).where('cariId', '==', cariId);
+
+        const [sutSnapshot, yemSnapshot, odemeSnapshot] = await Promise.all([
+            sutQuery.get(),
+            yemQuery.get(),
+            odemeQuery.get()
+        ]);
+
+        sutSnapshot.forEach(doc => alacak += doc.data().toplamTutar);
+        yemSnapshot.forEach(doc => borc += doc.data().toplamTutar);
+        
+        odemeSnapshot.forEach(doc => {
+            const data = doc.data();
+            // Yapılan ödeme, işletmenin borcunu azaltır, bu yüzden cari için bir "borç" hareketidir.
+            if (data.islemTuru === 'odeme') {
+                borc += data.tutar;
+            } 
+            // Yapılan tahsilat, cariyenin borcunu azaltır, bu yüzden cari için bir "alacak" hareketidir.
+            else { 
+                alacak += data.tutar;
+            }
+        });
+
+        return { alacak, borc, bakiye: alacak - borc };
+
+    } catch (error) {
+        console.error(`Bakiye hesaplanırken hata (Cari ID: ${cariId}):`, error);
+        return { alacak: 0, borc: 0, bakiye: 0 };
+    }
+}        
 async function renderYemSatisListesi() {
     const listBody = document.getElementById('yemSatisListesiBody');
     const currentUser = auth.currentUser;
