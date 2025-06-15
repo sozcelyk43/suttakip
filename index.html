@@ -1000,16 +1000,23 @@ async function handleOdemeKaydet(event) {
 }
         
 function handleLogout() { auth.signOut().then(() => { window.location.href = 'login.html'; }).catch(error => console.error("Logout error", error)); }
+
+
 async function getSettings() {
     const varsayilanSutFiyatiInput = document.getElementById('varsayilanSutFiyati');
+    
+    // GÜVENLİ YÖNTEM: Global değişkene güvenmek yerine, kullanıcıyı doğrudan Firebase'den al.
+    const currentUser = firebase.auth().currentUser;
 
-    if (!currentUserId) {
-        console.error("getSettings çağrıldı ancak currentUserId tanımsız. Kullanıcı oturumu düzgün başlatılamamış.");
-        alert("Ayarları yüklemek için kullanıcı bilgisi bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin.");
+    // Kullanıcı oturumunun o anda aktif olup olmadığını kontrol et.
+    if (!currentUser) {
+        console.error("getSettings çağrıldı ancak aktif bir kullanıcı oturumu bulunamadı.");
+        alert("Ayarları yüklemek için kullanıcı oturumu bulunamadı. Lütfen tekrar giriş yapmayı deneyin.");
         return;
     }
 
-    const settingsRef = db.collection('ayarlar').doc(currentUserId);
+    // Global değişken yerine doğrudan currentUser.uid kullan.
+    const settingsRef = db.collection('ayarlar').doc(currentUser.uid);
     try {
         const doc = await settingsRef.get();
         if (doc.exists) {
@@ -1019,12 +1026,16 @@ async function getSettings() {
         if (globalSettings && globalSettings.defaultMilkPrice) {
             varsayilanSutFiyatiInput.value = globalSettings.defaultMilkPrice.toFixed(2);
         } else {
-            varsayilanSutFiyatiInput.value = (15.00).toFixed(2);
+            varsayilanSutFiyatiInput.value = (15.00).toFixed(2); // Varsayılan değer
         }
     } catch(e) { 
         console.error("Ayarlar alınırken hata: ", e); 
     }
 }
+
+
+
+        
 async function updateDashboardStats() {
     const totalCari = document.getElementById('totalCari');
     const totalYemCesidi = document.getElementById('totalYemCesidi');
