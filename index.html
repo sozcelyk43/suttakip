@@ -900,7 +900,8 @@ function resetYemAlisForm() {
     document.getElementById('yemAlisEditId').value = '';
     setEditingMode(document.getElementById('yemAlisFormBaslik'), document.getElementById('yemAlisKaydetBtn'), document.getElementById('yemAlisFormTemizleBtn'), null, 'Yeni Yem Alışı');
 }
-async function renderYemAlisHareketleri() {
+
+      async function renderYemAlisHareketleri() {
     const listBody = document.getElementById('yemAlisHareketListesiBody');
     const currentUser = auth.currentUser;
     if (!currentUser) return;
@@ -910,7 +911,7 @@ async function renderYemAlisHareketleri() {
             listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Yem alım hareketi bulunmuyor.</td></tr>';
             return;
         }
-        // Performans için yem ve cari isimlerini toplu çek
+        
         const yemIds = [...new Set(snapshot.docs.map(doc => doc.data().yemId))];
         const yemMap = new Map();
         if (yemIds.length > 0) {
@@ -929,12 +930,14 @@ async function renderYemAlisHareketleri() {
                 <td>${alim.cariId || ''}</td>
                 <td>${formatCurrency(alim.alisFiyati)}</td>
                 <td>${formatCurrency(alim.toplamTutar)}</td>
-                <td class="dont-print"></td>
+                <td class="dont-print">
+                    <button class="btn btn-delete btn-sm" onclick="deleteYemAlisi('${doc.id}')">Sil</button>
+                </td>
             </tr>`;
         });
         listBody.innerHTML = rows;
     } catch(e) { console.error("Yem alış hareketleri yüklenirken hata:", e); }
-}
+}  
 
 // Ödeme/Tahsilat düzenleme formunu doldurur
 async function editOdeme(id) {
@@ -973,7 +976,19 @@ async function deleteOdeme(id) {
         }
     }
 }
-
+async function deleteSutAlimi(id) {
+    if (confirm("Bu süt alım kaydını silmek istediğinizden emin misiniz?")) {
+        try {
+            await db.collection('sut_alimlari').doc(id).delete();
+            alert("Süt alım kaydı başarıyla silindi.");
+            await renderSutAlimGecmisi(); // Listeyi yenile
+        } catch (error) {
+            console.error("Süt alımı silinirken hata:", error);
+            alert("Kayıt silinirken bir hata oluştu.");
+        }
+    }
+}
+        
         
         
 async function handleYemSatisKaydet(event) {
@@ -1316,14 +1331,14 @@ async function renderSutAlimGecmisi() {
     if (!tarih) { header.innerHTML = ''; body.innerHTML = ''; return; }
 
     gecmisTarihSpan.textContent = formatDate(tarih);
-    header.innerHTML = `<tr><th>Cari Adı</th><th>Sabah (Lt)</th><th>Akşam (Lt)</th><th>Toplam (Lt)</th><th>Fiyat (TL)</th><th>Tutar (TL)</th></tr>`;
-    body.innerHTML = '<tr><td colspan="6">Yükleniyor...</td></tr>';
+    header.innerHTML = `<tr><th>Cari Adı</th><th>Sabah (Lt)</th><th>Akşam (Lt)</th><th>Toplam (Lt)</th><th>Fiyat (TL)</th><th>Tutar (TL)</th><th class="dont-print">İşlemler</th></tr>`;
+    body.innerHTML = '<tr><td colspan="7">Yükleniyor...</td></tr>';
 
     try {
         const snapshot = await db.collection('sut_alimlari')
             .where('sahipId', '==', currentUser.uid).where('tarih', '==', tarih).orderBy('cariAdi').get();
 
-        if (snapshot.empty) { body.innerHTML = '<tr><td colspan="6" style="text-align:center;">Bu tarih için süt alım kaydı bulunmuyor.</td></tr>'; return; }
+        if (snapshot.empty) { body.innerHTML = '<tr><td colspan="7" style="text-align:center;">Bu tarih için süt alım kaydı bulunmuyor.</td></tr>'; return; }
 
         let bodyHTML = '';
         let genelToplamLt = 0;
@@ -1337,20 +1352,23 @@ async function renderSutAlimGecmisi() {
                 <td>${alim.cariAdi}</td><td>${alim.sabah.toFixed(2)}</td>
                 <td>${alim.aksam.toFixed(2)}</td><td><strong>${alim.toplam.toFixed(2)}</strong></td>
                 <td>${formatCurrency(alim.fiyat)}</td><td><strong>${formatCurrency(alim.toplamTutar)}</strong></td>
+                <td class="dont-print">
+                    <button class="btn btn-delete btn-sm" onclick="deleteSutAlimi('${doc.id}')">Sil</button>
+                </td>
             </tr>`;
         });
 
         bodyHTML += `<tr style="font-weight: bold; background-color: #f2f2f2;">
             <td>GENEL TOPLAM</td><td colspan="2"></td>
-            <td>${genelToplamLt.toFixed(2)} Lt</td><td></td><td>${formatCurrency(genelToplamTutar)}</td>
+            <td>${genelToplamLt.toFixed(2)} Lt</td><td></td><td>${formatCurrency(genelToplamTutar)}</td><td></td>
         </tr>`;
         body.innerHTML = bodyHTML;
     } catch (error) {
         console.error("Süt alım geçmişi yüklenirken hata:", error);
         if (error.code === 'failed-precondition') {
-             body.innerHTML = '<tr><td colspan="6" style="text-align:center; color: red;"><b>Veritabanı Hatası:</b> Bu sorgu için bir dizin (index) oluşturmanız gerekiyor.<br>Lütfen tarayıcı konsolundaki (F12) hatayı kontrol edin ve index oluşturma linkine tıklayın.</td></tr>';
+             body.innerHTML = '<tr><td colspan="7" style="text-align:center; color: red;"><b>Veritabanı Hatası:</b> Bu sorgu için bir dizin (index) oluşturmanız gerekiyor.<br>Lütfen tarayıcı konsolundaki (F12) hatayı kontrol edin ve index oluşturma linkine tıklayın.</td></tr>';
         } else {
-             body.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">Geçmiş yüklenirken bir hata oluştu.</td></tr>';
+             body.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Geçmiş yüklenirken bir hata oluştu.</td></tr>';
         }
     }
 }
@@ -1561,6 +1579,46 @@ async function handleSutAlimRaporuOlustur(options) {
     }
 }
 
+        async function deleteYemAlisi(id) {
+    if (confirm("Bu yem alışını silmek istediğinizden emin misiniz? Bu işlem, alınan yemi stoktan düşecektir.")) {
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+            alert("Lütfen giriş yapın.");
+            return;
+        }
+
+        const alisRef = db.collection('yem_alimlari').doc(id);
+        try {
+            const alisDoc = await alisRef.get();
+            if (!alisDoc.exists) {
+                throw "Silinecek alış kaydı bulunamadı.";
+            }
+            const alisData = alisDoc.data();
+            const yemRef = db.collection('yemler').doc(alisData.yemId);
+
+            // Hem alış kaydını silmek hem de stoğu güncellemek için toplu işlem kullan
+            const batch = db.batch();
+            
+            // 1. Alış kaydını sil
+            batch.delete(alisRef);
+            // 2. Stoğu azalt (alınan miktarın negatifini ekleyerek)
+            batch.update(yemRef, { stokMiktari: firebase.firestore.FieldValue.increment(-alisData.miktar) });
+            
+            await batch.commit();
+            alert("Yem alışı silindi ve stok güncellendi.");
+
+            // Listeleri yenile
+            await renderYemAlisHareketleri();
+            await renderYemStokListesi();
+
+        } catch (error) {
+            console.error("Yem alışı silinirken hata:", error);
+            alert("Hata: " + error);
+        }
+    }
+}
+
+        
 async function handleYemKarRaporuOlustur() {
     const ayYil = document.getElementById('yemRaporuAySecimi').value;
     const raporAlani = document.getElementById('yemRaporuAlani');
