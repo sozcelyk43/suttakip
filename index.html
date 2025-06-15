@@ -936,6 +936,46 @@ async function renderYemAlisHareketleri() {
     } catch(e) { console.error("Yem alış hareketleri yüklenirken hata:", e); }
 }
 
+// Ödeme/Tahsilat düzenleme formunu doldurur
+async function editOdeme(id) {
+    try {
+        const doc = await db.collection('odemeVeTahsilatlar').doc(id).get();
+        if (!doc.exists) {
+            alert("Düzenlenecek kayıt bulunamadı.");
+            return;
+        }
+        const data = doc.data();
+        
+        document.getElementById('odemeEditId').value = id;
+        document.getElementById('islemTuru').value = data.islemTuru;
+        document.getElementById('odemeTarih').value = data.tarih;
+        document.getElementById('odemeYapilanTedarikci').value = data.cariId;
+        document.getElementById('odemeTutari').value = data.tutar;
+        document.getElementById('odemeAciklama').value = data.aciklama;
+        
+        setEditingMode(document.getElementById('odemeFormBaslik'), document.getElementById('odemeKaydetBtn'), document.getElementById('odemeFormTemizleBtn'), id, 'Hareket Girişi');
+        document.getElementById('odemeForm').scrollIntoView();
+
+    } catch (error) {
+        console.error("Ödeme düzenleme için getirilirken hata:", error);
+    }
+}
+
+// Ödeme/Tahsilat kaydını siler
+async function deleteOdeme(id) {
+    if (confirm("Bu işlem hareketini silmek istediğinizden emin misiniz?")) {
+        try {
+            await db.collection('odemeVeTahsilatlar').doc(id).delete();
+            await renderOdemeListesi(); // Listeyi yenile
+        } catch (error) {
+            console.error("Ödeme silinirken hata:", error);
+            alert("İşlem silinirken bir hata oluştu.");
+        }
+    }
+}
+
+        
+        
 async function handleYemSatisKaydet(event) {
     event.preventDefault();
     const currentUser = auth.currentUser;
@@ -1032,7 +1072,6 @@ async function renderYemSatisListesi() {
             listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Yem satış hareketi bulunmuyor.</td></tr>';
             return;
         }
-        // Performans için yem ve cari isimlerini toplu çek
         const yemIds = [...new Set(snapshot.docs.map(doc => doc.data().yemId))];
         const cariIds = [...new Set(snapshot.docs.map(doc => doc.data().cariId))];
         const yemMap = new Map();
@@ -1058,7 +1097,9 @@ async function renderYemSatisListesi() {
                 <td>${satis.miktar}</td>
                 <td>${formatCurrency(satis.satisFiyati)}</td>
                 <td>${formatCurrency(satis.toplamTutar)}</td>
-                <td class="dont-print"></td>
+                <td class="dont-print">
+                     <button class="btn btn-delete btn-sm" onclick="deleteYemSatisi('${doc.id}')">Sil</button>
+                </td>
             </tr>`;
         });
         listBody.innerHTML = rows;
@@ -1113,7 +1154,6 @@ async function renderOdemeListesi() {
             listBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">İşlem hareketi bulunmuyor.</td></tr>';
             return;
         }
-        // Performans için cari isimlerini toplu çek
         const cariIds = [...new Set(snapshot.docs.map(doc => doc.data().cariId))];
         const cariMap = new Map();
         if (cariIds.length > 0) {
@@ -1132,13 +1172,50 @@ async function renderOdemeListesi() {
                 <td>${islemTuruText}</td>
                 <td>${formatCurrency(islem.tutar)}</td>
                 <td>${islem.aciklama}</td>
-                <td class="dont-print"></td>
+                <td class="dont-print">
+                    <button class="btn btn-edit btn-sm" onclick="editOdeme('${doc.id}')">Düzenle</button>
+                    <button class="btn btn-delete btn-sm" onclick="deleteOdeme('${doc.id}')">Sil</button>
+                </td>
             </tr>`;
         });
         listBody.innerHTML = rows;
     } catch (e) { console.error("Ödeme listesi yüklenirken hata:", e); }
 }
 
+async function deleteYemSatisi(id) {
+    if (confirm("Bu yem satışını silmek istediğinizden emin misiniz? Bu işlem, satılan yemi stoğa geri ekleyecektir.")) {
+        const currentUser = auth.currentUser;
+        if (!currentUser) return;
+
+        const satisRef = db.collection('yem_satislari').doc(id);
+        try {
+            const satisDoc = await satisRef.get();
+            if (!satisDoc.exists) {
+                throw "Silinecek satış kaydı bulunamadı.";
+            }
+            const satisData = satisDoc.data();
+            const yemRef = db.collection('yemler').doc(satisData.yemId);
+
+            const batch = db.batch();
+            // Satış kaydını sil
+            batch.delete(satisRef);
+            // Stoğu geri ekle
+            batch.update(yemRef, { stokMiktari: firebase.firestore.FieldValue.increment(satisData.miktar) });
+            
+            await batch.commit();
+            alert("Yem satışı silindi ve stok güncellendi.");
+
+            await renderYemSatisListesi();
+            await renderYemStokListesi();
+
+        } catch (error) {
+            console.error("Yem satışı silinirken hata:", error);
+            alert("Hata: " + error);
+        }
+    }
+}
+
+        
 // --- SÜT ALIM FONKSİYONLARI ---
 async function renderTopluSutGirisFormu() {
     const tarih = document.getElementById('topluGirisTarih').value;
