@@ -1003,11 +1003,10 @@ function handleLogout() { auth.signOut().then(() => { window.location.href = 'lo
 async function getSettings() {
     const varsayilanSutFiyatiInput = document.getElementById('varsayilanSutFiyati');
 
-    // GÜVENLİK KONTROLÜ: currentUserId'nin dolu olup olmadığını kontrol et
     if (!currentUserId) {
         console.error("getSettings çağrıldı ancak currentUserId tanımsız. Kullanıcı oturumu düzgün başlatılamamış.");
         alert("Ayarları yüklemek için kullanıcı bilgisi bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin.");
-        return; // Hata durumunda fonksiyonun devam etmesini engelle
+        return;
     }
 
     const settingsRef = db.collection('ayarlar').doc(currentUserId);
@@ -1016,16 +1015,16 @@ async function getSettings() {
         if (doc.exists) {
             globalSettings = doc.data();
         }
-        // globalSettings'in ve defaultMilkPrice'ın varlığını kontrol et
+        
         if (globalSettings && globalSettings.defaultMilkPrice) {
             varsayilanSutFiyatiInput.value = globalSettings.defaultMilkPrice.toFixed(2);
         } else {
-            varsayilanSutFiyatiInput.value = (15.00).toFixed(2); // Varsayılan bir değer ata
+            varsayilanSutFiyatiInput.value = (15.00).toFixed(2);
         }
     } catch(e) { 
         console.error("Ayarlar alınırken hata: ", e); 
     }
-}   
+}
 async function updateDashboardStats() {
     const totalCari = document.getElementById('totalCari');
     const totalYemCesidi = document.getElementById('totalYemCesidi');
