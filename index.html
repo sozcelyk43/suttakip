@@ -158,18 +158,19 @@
                         </div>
                         <table>
                             <thead>
-                                <tr>
-                                    <th>Kod</th>
-                                    <th>Ad/Firma</th>
-                                    <th>Kategori</th>
-                                    <th>Durum</th>
-                                    <th>Telefon</th>
-                                    <th>Borç</th>
-                                    <th>Alınan</th>
-                                    <th>Bakiye</th>
-                                    <th class="dont-print">İşlemler</th>
-                                </tr>
-                            </thead>
+    <tr>
+        <th>Kod</th>
+        <th>Ad/Firma</th>
+        <th>Kategori</th>
+        <th>Rota Sırası</th>
+        <th>Durum</th>
+        <th>Telefon</th>
+        <th>Borç</th>
+        <th>Alınan</th>
+        <th>Bakiye</th>
+        <th class="dont-print">İşlemler</th>
+    </tr>
+</thead>
                             <tbody id="cariListesiBody"></tbody>
                             <tfoot id="cariListesiFooter"></tfoot>
                         </table>
@@ -870,7 +871,8 @@ async function renderCariListesi() {
         cariListesiFooter.innerHTML = '';
         
         if (cariler.length === 0) {
-            cariListesiBody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Kayıtlı cari bulunmuyor.</td></tr>';
+            // Colspan 10'a güncellendi
+            cariListesiBody.innerHTML = '<tr><td colspan="10" style="text-align:center;">Kayıtlı cari bulunmuyor.</td></tr>';
             return;
         }
 
@@ -891,14 +893,14 @@ async function renderCariListesi() {
                 const durumText = c.durum === 'aktif' ? 'Aktif' : 'Pasif';
                 const durumStyle = c.durum === 'aktif' ? 'color:green;' : 'color:red;';
                 const bakiyeStyle = bakiye >= 0 ? 'color:green;' : 'color:red;';
-                // DEĞİŞİKLİK 1: Bakiye metni (A) ve (B) olarak kısaltıldı.
                 const bakiyeText = `${formatCurrency(bakiye)} ${bakiye >= 0 ? '(A)' : '(B)'}`;
                 
-                // DEĞİŞİKLİK 2: Sütun sırası (Borç, Alınan olarak) güncellendi.
+                // YENİ ROTA SIRASI SÜTUNU EKLENDİ
                 row.innerHTML = `
                     <td>${c.kodu || ''}</td>
                     <td>${c.adiSoyadi || ''}</td>
                     <td>${c.kategori || ''}</td>
+                    <td>${c.rotaSirasi || ''}</td>
                     <td style="${durumStyle}">${durumText}</td>
                     <td>${c.telefon || ''}</td>
                     <td>${formatCurrency(bakiyeDetay.borc)}</td>
@@ -916,9 +918,9 @@ async function renderCariListesi() {
         const toplamBakiyeStyle = toplamBakiye >= 0 ? 'color:green;' : 'color:red;';
         const etiket = kategori ? `Kategori Toplamı` : 'Genel Toplam';
         
-        // DEĞİŞİKLİK 3: Alt toplamların sırası güncellendi
+        // Colspan değeri 6'ya güncellendi
         footerRow.innerHTML = `
-            <td colspan="5"><strong>${etiket}</strong></td>
+            <td colspan="6"><strong>${etiket}</strong></td>
             <td><strong>${formatCurrency(genelToplamBorc)}</strong></td>
             <td><strong>${formatCurrency(genelToplamAlacak)}</strong></td>
             <td style="${toplamBakiyeStyle}"><strong>${formatCurrency(toplamBakiye)}</strong></td>
@@ -926,11 +928,9 @@ async function renderCariListesi() {
 
     } catch (error) {
         console.error("Cariler listelenirken hata", error);
-        cariListesiBody.innerHTML = '<tr><td colspan="9" style="color:red; text-align:center;">Liste yüklenirken bir hata oluştu. Firestore index\'i gerekebilir.</td></tr>';
+        cariListesiBody.innerHTML = '<tr><td colspan="10" style="color:red; text-align:center;">Liste yüklenirken bir hata oluştu. Firestore index\'i gerekebilir.</td></tr>';
     }
 }
-
-
 
         // Yeni grafikler için global değişkenler
 let gunlukPastaChartInstance = null;
