@@ -172,7 +172,7 @@ tfoot tr { background-color: #e9ecef; font-weight: bold; color: #2c3e50; }
 }
 .sidebar-logo {
   display: block; /* Resmin bir blok olarak davranmasını sağlar */
-  max-width: 150px; /* Logonuzun maksimum genişliği, bu değeri değiştirebilirsiniz */
+  max-width: 300px; /* Logonuzun maksimum genişliği, bu değeri değiştirebilirsiniz */
   margin: 15px auto 20px; /* Üst, Sağ/Sol (otomatik ortalar), Alt boşlukları ayarlar */
 }
 
