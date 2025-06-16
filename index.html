@@ -2421,16 +2421,18 @@ function handleYazdir(sectionId) {
     window.print();
 }
 
+
 window.onafterprint = () => {
-    const bodyElement = document.body;
-    bodyElement.classList.remove('print-active', 'format-a4', 'format-a5');
-    document.querySelectorAll('.print-section-active').forEach(el => {
-        el.classList.remove('print-section-active');
-    });
-};
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+        const bodyElement = document.body;
+        bodyElement.classList.remove('print-active', 'format-a4', 'format-a5');
+        document.querySelectorAll('.print-section-active').forEach(el => {
+            el.classList.remove('print-section-active');
+        });
+    };
+
 // --- END: TAM VE DÜZELTİLMİŞ JAVASCRIPT KODU ---
 </script>
+
 </body>
 </html>
+
