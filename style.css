@@ -241,3 +241,26 @@ tfoot tr { background-color: #e9ecef; font-weight: bold; color: #2c3e50; }
         grid-template-columns: 1fr;
     }
 }
+
+<div class="charts-container">
+    <div class="chart-card">
+        <h3>Günlük Süt Dağılımı</h3>
+        <div class="chart-filters">
+            <input type="date" id="pastaGunlukTarih">
+            <button id="pastaGunlukGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
+        </div>
+        <div class="chart-wrapper">
+            <canvas id="gunlukPastaGrafik"></canvas>
+        </div>
+    </div>
+    <div class="chart-card">
+        <h3>Aylık Süt Dağılımı</h3>
+        <div class="chart-filters">
+            <input type="month" id="pastaAylikTarih">
+            <button id="pastaAylikGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
+        </div>
+        <div class="chart-wrapper">
+            <canvas id="aylikPastaGrafik"></canvas>
+        </div>
+    </div>
+</div>
