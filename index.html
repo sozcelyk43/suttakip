@@ -38,15 +38,46 @@
             <div class="module-header"><h2>📝 Kontrol Paneli</h2></div>
             <div class="container">
                 <h3>Genel Durum</h3>
+
+
+
+
                 <div class="dashboard-grid">
-                    <div class="stat-card"><h4>Bugünkü Sabah Sütü</h4><p><span id="dashSabahSut">0.00</span> Lt</p></div>
-                    <div class="stat-card"><h4>Bugünkü Akşam Sütü</h4><p><span id="dashAksamSut">0.00</span> Lt</p></div>
-                    <div class="stat-card"><h4>Bugünkü Toplam Süt</h4><p><span id="dashToplamSut">0.00</span> Lt</p></div>
-                    <div class="stat-card"><h4>Aktif Müşteri Sayısı</h4><p><span id="dashAktifMusteri">0</span></p></div>
-                    <div class="stat-card alacak"><h4>Toplam Alacak</h4><p><span id="dashToplamAlacak">0,00 ₺</span></p></div>
-                    <div class="stat-card borc"><h4>Toplam Borç</h4><p><span id="dashToplamBorc">0,00 ₺</span></p></div>
-                    <div class="stat-card"><h4>Toplam Bakiye</h4><p><span id="dashToplamBakiye">0,00 ₺</span></p></div>
+                    <div class="stat-card"><h4>☀️ Bugünkü Sabah Sütü</h4><p><span id="dashSabahSut">0.00</span> Lt</p></div>
+            <div class="stat-card"><h4>🌙 Bugünkü Akşam Sütü</h4><p><span id="dashAksamSut">0.00</span> Lt</p></div>
+            <div class="stat-card">
+                <h4>📈 Bugünkü Toplam Süt</h4>
+                <p><span id="dashToplamSut">0.00</span> Lt</p>
+                <small id="dunKarsilastirma">(Düne göre...)</small>
+            </div>
+            <div class="stat-card"><h4>👥 Aktif Müşteri Sayısı</h4><p><span id="dashAktifMusteri">0</span></p></div>
+        
+
+
                 </div>
+
+
+<div class="balance-bars">
+            <div class="balance-bar-item">
+                <div class="balance-bar-header">
+                    <span>Toplam Alacak (Müşteri Borcu)</span>
+                    <strong id="dashToplamAlacak">0,00 ₺</strong>
+                </div>
+                <div class="progress-bar-container">
+                    <div id="alacakBar" class="progress-bar alacak" style="width: 0%;"></div>
+                </div>
+            </div>
+            <div class="balance-bar-item">
+                <div class="balance-bar-header">
+                    <span>Toplam Borç (Müşteri Alacağı)</span>
+                    <strong id="dashToplamBorc">0,00 ₺</strong>
+                </div>
+                <div class="progress-bar-container">
+                    <div id="borcBar" class="progress-bar borc" style="width: 0%;"></div>
+                </div>
+            </div>
+        </div>
+
                 <div class="charts-container">
                     <div class="chart-card">
                         <h3>Günlük Süt Dağılımı</h3>
@@ -674,71 +705,87 @@ async function handleSifreDegistir(event) {
 async function updateDashboardStats() {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
-    const todayStr = getTodayForInput();
 
-    // Süt ve Aktif Müşteri İstatistikleri
+    // --- Süt ve Müşteri İstatistikleri ---
     try {
-        const sutSnapshot = await db.collection('sut_alimlari').where("sahipId", "==", currentUser.uid).where("tarih", "==", todayStr).get();
+        const today = new Date();
+        const yesterday = new Date();
+        yesterday.setDate(today.getDate() - 1);
+        
+        const todayStr = today.toISOString().split('T')[0];
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+        const todaySutPromise = db.collection('sut_alimlari').where("sahipId", "==", currentUser.uid).where("tarih", "==", todayStr).get();
+        const yesterdaySutPromise = db.collection('sut_alimlari').where("sahipId", "==", currentUser.uid).where("tarih", "==", yesterdayStr).get();
+        const carilerPromise = db.collection('cariler').where("sahipId", "==", currentUser.uid).where("durum", "==", "aktif").get();
+
+        const [sutSnapshot, dunkuSutSnapshot, carilerSnapshot] = await Promise.all([todaySutPromise, yesterdaySutPromise, carilerPromise]);
+        
         let sabahToplam = 0, aksamToplam = 0;
         sutSnapshot.forEach(doc => {
             sabahToplam += doc.data().sabah || 0;
             aksamToplam += doc.data().aksam || 0;
         });
         const gunlukToplamSut = sabahToplam + aksamToplam;
+
+        let dunkuToplamSut = 0;
+        dunkuSutSnapshot.forEach(doc => { dunkuToplamSut += doc.data().toplam || 0; });
         
+        const fark = gunlukToplamSut - dunkuToplamSut;
+        const karsilastirmaEl = document.getElementById('dunKarsilastirma');
+        if (fark > 0) {
+            karsilastirmaEl.textContent = `(Düne göre +${fark.toFixed(2)} Lt)`;
+            karsilastirmaEl.style.color = 'green';
+        } else if (fark < 0) {
+            karsilastirmaEl.textContent = `(Düne göre ${fark.toFixed(2)} Lt)`;
+            karsilastirmaEl.style.color = 'red';
+        } else {
+            karsilastirmaEl.textContent = '(Düne göre değişiklik yok)';
+            karsilastirmaEl.style.color = '#7f8c8d';
+        }
+
         document.getElementById('dashToplamSut').textContent = gunlukToplamSut.toFixed(2);
         document.getElementById('dashSabahSut').textContent = sabahToplam.toFixed(2);
         document.getElementById('dashAksamSut').textContent = aksamToplam.toFixed(2);
-        
-        const carilerSnapshot = await db.collection('cariler').where("sahipId", "==", currentUser.uid).where("durum", "==", "aktif").get();
         document.getElementById('dashAktifMusteri').textContent = carilerSnapshot.size;
+
     } catch (e) { console.error("Dashboard temel istatistikleri alınırken hata", e); }
     
-    // Bakiye Toplamları
+    // --- Bakiye Toplamları ve İlerleme Çubukları ---
     try {
         const allCarilerSnapshot = await db.collection('cariler').where("sahipId", "==", currentUser.uid).get();
-        let toplamGenelAlacak = 0; // İşletmenin alacağı (Müşterilerin borcu)
-        let toplamGenelBorc = 0;   // İşletmenin borcu (Müşterilerin alacağı)
+        let toplamMusteriBorcu = 0; // İşletmenin alacağı
+        let toplamMusteriAlacagi = 0;   // İşletmenin borcu
         
         if(!allCarilerSnapshot.empty) {
             const bakiyePromises = allCarilerSnapshot.docs.map(doc => calculateCariBakiyeDetayli(doc.id));
             const tumBakiyeler = await Promise.all(bakiyePromises);
-            
             tumBakiyeler.forEach(bakiyeDetay => {
                 if (bakiyeDetay.bakiye > 0) {
-                    toplamGenelBorc += bakiyeDetay.bakiye;
+                    toplamMusteriAlacagi += bakiyeDetay.bakiye;
                 } else {
-                    toplamGenelAlacak += Math.abs(bakiyeDetay.bakiye);
+                    toplamMusteriBorcu += Math.abs(bakiyeDetay.bakiye);
                 }
             });
         }
         
-        const toplamBakiye = toplamGenelAlacak - toplamGenelBorc;
-        document.getElementById('dashToplamAlacak').textContent = formatCurrency(toplamGenelAlacak);
-        document.getElementById('dashToplamBorc').textContent = formatCurrency(toplamGenelBorc);
-        
-        const toplamBakiyeSpan = document.getElementById('dashToplamBakiye');
-        if(toplamBakiyeSpan) {
-            toplamBakiyeSpan.textContent = formatCurrency(toplamBakiye);
-            const bakiyeKarti = toplamBakiyeSpan.closest('.stat-card');
-            if (bakiyeKarti) {
-                bakiyeKarti.classList.remove('alacak', 'borc');
-                if (toplamBakiye >= 0) {
-                    bakiyeKarti.classList.add('alacak');
-                } else {
-                    bakiyeKarti.classList.add('borc');
-                }
-            }
-        }
+        document.getElementById('dashToplamAlacak').textContent = formatCurrency(toplamMusteriBorcu);
+        document.getElementById('dashToplamBorc').textContent = formatCurrency(toplamMusteriAlacagi);
+
+        const total = toplamMusteriBorcu + toplamMusteriAlacagi;
+        const alacakYuzde = total > 0 ? (toplamMusteriBorcu / total) * 100 : 0;
+        const borcYuzde = total > 0 ? (toplamMusteriAlacagi / total) * 100 : 0;
+        document.getElementById('alacakBar').style.width = alacakYuzde + '%';
+        document.getElementById('borcBar').style.width = borcYuzde + '%';
+
     } catch (e) { console.error("Dashboard bakiye toplamları alınırken hata", e); }
 
-    // Grafik fonksiyonlarını çağır
+    // --- Grafikleri Oluşturma ---
     try {
         if (typeof renderGunlukSutGrafik === 'function') await renderGunlukSutGrafik();
         if (typeof renderAylikSutGrafik === 'function') await renderAylikSutGrafik();
     } catch(e) { console.error("Grafikler oluşturulurken hata", e); }
-}
-// --- CARİ YÖNETİMİ FONKSİYONLARI ---
+}// --- CARİ YÖNETİMİ FONKSİYONLARI ---
 async function handleCariKaydet(event) {
     event.preventDefault();
     const currentUser = auth.currentUser;
