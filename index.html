@@ -541,7 +541,8 @@ function initializeApp() {
 document.getElementById('yemAlisMiktar').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
     document.getElementById('yemAlisBirimFiyati').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
 document.getElementById('sutDuzenleForm').addEventListener('submit', handleSutAlimiGuncelle);
-
+document.getElementById('pastaGunlukGosterBtn').addEventListener('click', renderGunlukPastaGrafik);
+document.getElementById('pastaAylikGosterBtn').addEventListener('click', renderAylikPastaGrafik);
     document.getElementById('yemSatisMiktar').addEventListener('input', () => hesaplaToplamTutar('yemSatisMiktar', 'yemSatisBirimFiyati', 'yemSatisToplamTutar'));
     document.getElementById('yemSatisBirimFiyati').addEventListener('input', () => hesaplaToplamTutar('yemSatisMiktar', 'yemSatisBirimFiyati', 'yemSatisToplamTutar'));
     cariForm.addEventListener('submit', handleCariKaydet);
