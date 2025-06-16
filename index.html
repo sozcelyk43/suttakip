@@ -74,6 +74,14 @@
     </select>
 </div>
                     <div class="form-group"><label for="cariDurum">Durum:</label><select id="cariDurum"><option value="aktif">Aktif</option><option value="pasif">Pasif</option></select></div>
+                   <div class="form-group">
+    <label for="cariTipi">Cari Tipi:</label>
+    <select id="cariTipi">
+        <option value="sut_ve_yem">Süt ve Yem</option>
+        <option value="sadece_sut">Sadece Süt</option>
+        <option value="sadece_yem">Sadece Yem</option>
+    </select>
+</div>
                     <div class="form-group"><label for="cariTelefon">Telefon:</label><input type="tel" id="cariTelefon"></div>
                     <div class="form-group"><label for="cariEposta">E-posta:</label><input type="email" id="cariEposta"></div>
                     <div class="form-group" style="grid-column: span 2;"><label for="cariAdres">Adres:</label><textarea id="cariAdres"></textarea></div>
@@ -631,14 +639,12 @@ async function handleCariKaydet(event) {
     const currentUser = auth.currentUser;
     if (!currentUser) { alert("Lütfen giriş yapın."); return; }
     
-    const cariAdi = document.getElementById('cariAdiSoyadi').value;
-    if (!cariAdi) { alert("Adı Soyadı / Firma Adı alanı zorunludur."); return; }
-
     const formData = {
         kodu: document.getElementById('cariKodu').value,
-        adiSoyadi: cariAdi,
+        adiSoyadi: document.getElementById('cariAdiSoyadi').value,
         kategori: document.getElementById('cariKategori').value,
         durum: document.getElementById('cariDurum').value,
+        cariTipi: document.getElementById('cariTipi').value, // YENİ EKLENDİ
         telefon: document.getElementById('cariTelefon').value,
         eposta: document.getElementById('cariEposta').value,
         adres: document.getElementById('cariAdres').value,
@@ -651,48 +657,15 @@ async function handleCariKaydet(event) {
     };
 
     try {
-        let cariId = editingCariId;
         if (editingCariId) {
             await db.collection('cariler').doc(editingCariId).set(formData, { merge: true });
         } else {
-            const docRef = await db.collection('cariler').add(formData);
-            cariId = docRef.id; // Yeni carinin ID'sini al
+            await db.collection('cariler').add(formData);
         }
-
-        // Açılış Bakiyesi işlemini yap (sadece yeni kayıtta)
-        if (!editingCariId) {
-            const acilisBakiye = parseFloat(document.getElementById('cariAcilisBakiye').value) || 0;
-            const bakiyeTuru = document.getElementById('cariAcilisBakiyeTuru').value;
-
-            if (acilisBakiye > 0 && bakiyeTuru !== 'yok') {
-                let islemTuru = '';
-                // Bakiye türüne göre işlem türünü belirle (muhasebe mantığına göre ters)
-                // Cari Borçlu ise -> İşletme için bir alacak doğar (Tahsilat gibi)
-                // Cari Alacaklı ise -> İşletme için bir borç doğar (Ödeme gibi)
-                if(bakiyeTuru === 'borc') islemTuru = 'tahsilat';
-                if(bakiyeTuru === 'alacak') islemTuru = 'odeme';
-
-                const bakiyeData = {
-                    aciklama: "Açılış Bakiyesi Devri",
-                    cariId: cariId,
-                    islemTuru: islemTuru,
-                    sahipId: currentUser.uid,
-                    tarih: getTodayForInput(),
-                    tutar: acilisBakiye
-                };
-                await db.collection('odemeVeTahsilatlar').add(bakiyeData);
-            }
-        }
-        
         resetCariForm();
         await renderCariListesi();
-
-    } catch(error) { 
-        console.error("Hata: ", error); 
-        alert("Cari kaydedilirken bir hata oluştu."); 
-    }
+    } catch(error) { console.error("Hata: ", error); alert("Cari kaydedilirken bir hata oluştu."); }
 }
-
 async function renderCariListesi() {
     const cariListesiBody = document.getElementById('cariListesiBody');
     const cariListesiFooter = document.getElementById('cariListesiFooter');
@@ -757,12 +730,17 @@ async function editCari(id) {
         const doc = await db.collection('cariler').doc(id).get();
         if (!doc.exists) return;
         const cari = doc.data();
+
+        const cariKoduInput = document.getElementById('cariKodu');
+        cariKoduInput.readOnly = false;
+        
         editingCariId = id; 
         document.getElementById('cariEditId').value = id; 
         document.getElementById('cariKodu').value = cari.kodu || ''; 
         document.getElementById('cariAdiSoyadi').value = cari.adiSoyadi || ''; 
         document.getElementById('cariKategori').value = cari.kategori || ''; 
-        document.getElementById('cariDurum').value = cari.durum || 'aktif'; 
+        document.getElementById('cariDurum').value = cari.durum || 'aktif';
+        document.getElementById('cariTipi').value = cari.cariTipi || 'sut_ve_yem'; // YENİ EKLENDİ
         document.getElementById('cariTelefon').value = cari.telefon || ''; 
         document.getElementById('cariEposta').value = cari.eposta || ''; 
         document.getElementById('cariAdres').value = cari.adres || ''; 
@@ -772,6 +750,7 @@ async function editCari(id) {
         document.getElementById('cariVergiNo').value = cari.vergiNo || ''; 
         document.getElementById('cariNotlar').value = cari.notlar || ''; 
         setEditingMode(document.getElementById('cariFormBaslik'), document.getElementById('cariKaydetBtn'), document.getElementById('cariFormTemizleBtn'), editingCariId, 'Cari Kart');
+        document.getElementById('cariForm').scrollIntoView();
     } catch (error) {
         console.error("Cari düzenleme için getirilirken hata:", error);
     }
@@ -1603,14 +1582,21 @@ async function renderTopluSutGirisFormu() {
     const yokMesaji = document.getElementById('topluGirisTedarikciYokMesaji');
     const currentUser = auth.currentUser;
     if (!currentUser || !tarih) {
-        container.innerHTML = ''; yokMesaji.style.display = 'none'; return;
+        container.innerHTML = '<p style="text-align:center;">Lütfen bir tarih seçin.</p>';
+        yokMesaji.style.display = 'none';
+        return;
     }
 
     try {
         const sutAlimSnapshot = await db.collection('sut_alimlari').where('sahipId', '==', currentUser.uid).where('tarih', '==', tarih).get();
         const kayitliCariIdleri = new Set(sutAlimSnapshot.docs.map(doc => doc.data().cariId));
 
-        let query = db.collection('cariler').where('sahipId', '==', currentUser.uid).where('durum', '==', 'aktif');
+        // GÜNCELLEME: Sorguya 'cariTipi' filtresi eklendi
+        let query = db.collection('cariler')
+            .where('sahipId', '==', currentUser.uid)
+            .where('durum', '==', 'aktif')
+            .where('cariTipi', 'in', ['sut_ve_yem', 'sadece_sut']);
+
         if (kategori) {
             query = query.where('kategori', '==', kategori);
         }
@@ -1625,19 +1611,25 @@ async function renderTopluSutGirisFormu() {
         }
         yokMesaji.style.display = 'none';
         
-        let tableHTML = `<table><thead><tr><th>Cari Adı</th><th>Akşam (Lt)</th><th>Sabah (Lt)</th><th class="dont-print">İşlem</th></tr></thead><tbody>`;
+        let tableHTML = `<table><thead><tr><th>Cari Adı</th><th>Akşam (Lt)</th><th>Sabah (Lt)</th><th>Toplam (Lt)</th><th>Fiyat</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr></thead><tbody>`;
+
+        const defaultFiyat = (globalSettings.defaultMilkPrice || 15.00).toFixed(2);
         gosterilecekCariler.forEach(doc => {
             const cari = { id: doc.id, ...doc.data() };
             const escapedCariAdi = cari.adiSoyadi.replace(/'/g, "\\'").replace(/"/g, '\\"');
             tableHTML += `<tr id="satir-${cari.id}">
                 <td>${cari.adiSoyadi}</td>
-                <td><input type="number" id="aksam-${cari.id}" class="sut-input" step="0.1" min="0"></td>
-                <td><input type="number" id="sabah-${cari.id}" class="sut-input" step="0.1" min="0"></td>
+                <td><input type="number" id="aksam-${cari.id}" class="sut-input" step="0.1" min="0" oninput="sutMiktarGuncelle('${cari.id}')"></td>
+                <td><input type="number" id="sabah-${cari.id}" class="sut-input" step="0.1" min="0" oninput="sutMiktarGuncelle('${cari.id}')"></td>
+                <td><span id="toplam-lt-${cari.id}">0.00</span></td>
+                <td><input type="number" id="fiyat-${cari.id}" class="sut-input" step="0.01" min="0" value="${defaultFiyat}" oninput="sutMiktarGuncelle('${cari.id}')"></td>
+                <td><span id="toplam-tutar-${cari.id}">0,00 ₺</span></td>
                 <td class="dont-print"><button id="kaydet-btn-${cari.id}" class="btn btn-primary btn-sm" onclick="handleTopluSutKaydet('${cari.id}', '${escapedCariAdi}', '${tarih}')">Kaydet</button></td>
             </tr>`;
         });
         tableHTML += `</tbody></table>`;
         container.innerHTML = tableHTML;
+
     } catch (error) {
         console.error("Süt girişi için cariler getirilirken hata:", error);
     }
