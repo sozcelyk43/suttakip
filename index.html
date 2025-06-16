@@ -106,8 +106,19 @@
                             </select>
                         </div>
                         <table>
-                            <thead><tr><th>Kod</th><th>Ad/Firma</th><th>Kategori</th><th>Durum</th><th>Telefon</th><th>Bakiye</th><th class="dont-print">İşlemler</th></tr></thead>
-                            <tbody id="cariListesiBody"></tbody>
+<thead>
+    <tr>
+        <th>Kod</th>
+        <th>Ad/Firma</th>
+        <th>Kategori</th>
+        <th>Durum</th>
+        <th>Telefon</th>
+        <th>Alınan</th>
+        <th>Borç</th>
+        <th>Bakiye</th>
+        <th class="dont-print">İşlemler</th>
+    </tr>
+</thead>                      <tbody id="cariListesiBody"></tbody>
                             <tfoot id="cariListesiFooter"></tfoot>
                         </table>
                     </div>
@@ -734,6 +745,7 @@ async function renderCariListesi() {
     const kategori = cariKategoriFiltre.value;
     const currentUser = auth.currentUser;
     if (!currentUser) return;
+
     let query = db.collection('cariler').where("sahipId", "==", currentUser.uid);
     if (kategori) {
         query = query.where("kategori", "==", kategori);
@@ -745,43 +757,66 @@ async function renderCariListesi() {
         if (searchTerm) {
             cariler = cariler.filter(c => c.kodu?.toLowerCase().includes(searchTerm) || c.adiSoyadi?.toLowerCase().includes(searchTerm));
         }
+        
         cariListesiBody.innerHTML = '';
         cariListesiFooter.innerHTML = '';
         
-        if(cariler.length === 0) {
-            cariListesiBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Kayıtlı cari bulunmuyor.</td></tr>';
+        if (cariler.length === 0) {
+            cariListesiBody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Kayıtlı cari bulunmuyor.</td></tr>';
             return;
         }
 
         const bakiyePromises = cariler.map(c => calculateCariBakiyeDetayli(c.id));
         const bakiyeler = await Promise.all(bakiyePromises);
         
-        let toplamAlacak = 0;
-        let toplamBorc = 0;
+        let genelToplamAlacak = 0;
+        let genelToplamBorc = 0;
 
         cariler.forEach((c, index) => {
             const row = cariListesiBody.insertRow();
             const bakiyeDetay = bakiyeler[index];
             if (bakiyeDetay) {
-                toplamAlacak += bakiyeDetay.alacak;
-                toplamBorc += bakiyeDetay.borc;
+                genelToplamAlacak += bakiyeDetay.alacak;
+                genelToplamBorc += bakiyeDetay.borc;
+                
                 const bakiye = bakiyeDetay.bakiye;
                 const durumText = c.durum === 'aktif' ? 'Aktif' : 'Pasif';
                 const durumStyle = c.durum === 'aktif' ? 'color:green;' : 'color:red;';
                 const bakiyeStyle = bakiye >= 0 ? 'color:green;' : 'color:red;';
                 const bakiyeText = `${formatCurrency(bakiye)} ${bakiye >= 0 ? '(Alacaklı)' : '(Borçlu)'}`;
-                row.innerHTML = `<td>${c.kodu || ''}</td><td>${c.adiSoyadi || ''}</td><td>${c.kategori || ''}</td><td style="${durumStyle}">${durumText}</td><td>${c.telefon || ''}</td><td style="${bakiyeStyle}">${bakiyeText}</td><td class="dont-print"><button class="btn btn-edit btn-sm" onclick="editCari('${c.id}')">Düzenle</button><button class="btn btn-delete btn-sm" onclick="deleteCari('${c.id}')">Sil</button></td>`;
+                
+                row.innerHTML = `
+                    <td>${c.kodu || ''}</td>
+                    <td>${c.adiSoyadi || ''}</td>
+                    <td>${c.kategori || ''}</td>
+                    <td style="${durumStyle}">${durumText}</td>
+                    <td>${c.telefon || ''}</td>
+                    <td>${formatCurrency(bakiyeDetay.alacak)}</td>
+                    <td>${formatCurrency(bakiyeDetay.borc)}</td>
+                    <td style="${bakiyeStyle}">${bakiyeText}</td>
+                    <td class="dont-print">
+                        <button class="btn btn-edit btn-sm" onclick="editCari('${c.id}')">Düzenle</button>
+                        <button class="btn btn-delete btn-sm" onclick="deleteCari('${c.id}')">Sil</button>
+                    </td>`;
             }
         });
 
         const footerRow = cariListesiFooter.insertRow();
-        const toplamBakiye = toplamAlacak - toplamBorc;
+        const toplamBakiye = genelToplamAlacak - genelToplamBorc;
         const toplamBakiyeStyle = toplamBakiye >= 0 ? 'color:green;' : 'color:red;';
-        const etiket = kategori ? `Kategori Toplamı ('${kategori}')` : 'Genel Toplam';
-        footerRow.innerHTML = `<td colspan="5"><strong>${etiket} | Toplam Alacak: ${formatCurrency(toplamAlacak)} | Toplam Borç: ${formatCurrency(toplamBorc)}</strong></td><td style="${toplamBakiyeStyle}"><strong>${formatCurrency(toplamBakiye)}</strong></td><td class="dont-print"></td>`;
+        const etiket = kategori ? `Kategori Toplamı` : 'Genel Toplam';
+        
+        // Colspan değeri 7'ye güncellendi ve yeni toplamlar eklendi
+        footerRow.innerHTML = `
+            <td colspan="5"><strong>${etiket}</strong></td>
+            <td><strong>${formatCurrency(genelToplamAlacak)}</strong></td>
+            <td><strong>${formatCurrency(genelToplamBorc)}</strong></td>
+            <td style="${toplamBakiyeStyle}"><strong>${formatCurrency(toplamBakiye)}</strong></td>
+            <td class="dont-print"></td>`;
+
     } catch (error) {
         console.error("Cariler listelenirken hata", error);
-        cariListesiBody.innerHTML = '<tr><td colspan="7" style="color:red; text-align:center;">Liste yüklenirken bir hata oluştu. Firestore index\'i gerekebilir.</td></tr>';
+        cariListesiBody.innerHTML = '<tr><td colspan="9" style="color:red; text-align:center;">Liste yüklenirken bir hata oluştu. Firestore index\'i gerekebilir.</td></tr>';
     }
 }
 async function editCari(id) { 
