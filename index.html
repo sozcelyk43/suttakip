@@ -35,37 +35,41 @@
 
     <div class="main-content">
         <section id="dashboard" class="module-section">
-            <div class="module-header"><h2>📝 Kontrol Paneli</h2></div>
-            <div class="container">
-               <h3>Genel Durum</h3>
-<div class="dashboard-grid">
-    <div class="stat-card"><h4>Bugünkü Sabah Sütü</h4><p><span id="dashSabahSut">0.00</span> Lt</p></div>
-    <div class="stat-card"><h4>Bugünkü Akşam Sütü</h4><p><span id="dashAksamSut">0.00</span> Lt</p></div>
-    <div class="stat-card">
-    <h4>Bugünkü Toplam Süt</h4>
-    <p><span id="dashToplamSut">0.00</span> Lt</p>
-</div>
-
-
-    
-<div class="charts-container">
-    <div class="chart-card">
-        <h3>Günlük Süt Dağılımı</h3>
-        <div class="chart-filters">
-            <input type="date" id="pastaGunlukTarih">
-            <button id="pastaGunlukGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
+    <div class="module-header"><h2>📝 Kontrol Paneli</h2></div>
+    <div class="container">
+        
+        <h3>Genel Durum</h3>
+        <div class="dashboard-grid">
+            <div class="stat-card"><h4>Bugünkü Sabah Sütü</h4><p><span id="dashSabahSut">0.00</span> Lt</p></div>
+            <div class="stat-card"><h4>Bugünkü Akşam Sütü</h4><p><span id="dashAksamSut">0.00</span> Lt</p></div>
+            <div class="stat-card"><h4>Bugünkü Toplam Süt</h4><p><span id="dashToplamSut">0.00</span> Lt</p></div>
+            <div class="stat-card"><h4>Aktif Müşteri Sayısı</h4><p><span id="dashAktifMusteri">0</span></p></div>
+            <div class="stat-card alacak"><h4>Toplam Alacak</h4><p><span id="dashToplamAlacak">0,00 ₺</span></p></div>
+            <div class="stat-card borc"><h4>Toplam Borç</h4><p><span id="dashToplamBorc">0,00 ₺</span></p></div>
+            <div class="stat-card"><h4>Toplam Bakiye</h4><p><span id="dashToplamBakiye">0,00 ₺</span></p></div>
         </div>
-        <canvas id="gunlukPastaGrafik"></canvas>
-    </div>
-    <div class="chart-card">
-        <h3>Aylık Süt Dağılımı</h3>
-        <div class="chart-filters">
-            <input type="month" id="pastaAylikTarih">
-            <button id="pastaAylikGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
+
+        <div class="charts-container">
+            <div class="chart-card">
+                <h3>Günlük Süt Dağılımı</h3>
+                <div class="chart-filters">
+                    <input type="date" id="pastaGunlukTarih">
+                    <button id="pastaGunlukGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
+                </div>
+                <canvas id="gunlukPastaGrafik"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Aylık Süt Dağılımı</h3>
+                <div class="chart-filters">
+                    <input type="month" id="pastaAylikTarih">
+                    <button id="pastaAylikGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
+                </div>
+                <canvas id="aylikPastaGrafik"></canvas>
+            </div>
         </div>
-        <canvas id="aylikPastaGrafik"></canvas>
+
     </div>
-</div>
+</section>
 
 
     
