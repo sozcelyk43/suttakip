@@ -92,6 +92,7 @@ tfoot tr { background-color: #e9ecef; font-weight: bold; color: #2c3e50; }
     th { background-color: #f0f0f0 !important; }
     h1.print-title, h3.print-title, h4.print-title { font-size: 14pt; text-align: center; margin-bottom: 15px; color: #000; }
     h5 { font-size: 11pt; margin-top: 15px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+ 
 }
 
 @page {
@@ -100,4 +101,21 @@ tfoot tr { background-color: #e9ecef; font-weight: bold; color: #2c3e50; }
 }
 .print-section-active .format-a5 {
     @page { size: A5 portrait; margin: 1cm; }
+}
+
+
+/* Bu kural, toplamlar satırının normal ekranda nasıl görüneceğini belirler */
+.report-totals-row {
+  font-weight: bold;
+  background-color: #f2f2f2; /* Gri arka plan */
+}
+
+/* Bu kural, SADECE yazdırma sırasında devreye girer */
+@media print {
+  .report-totals-row {
+    background-color: #ffffff !important; /* Arka planı BEYAZ yap */
+    color: #000000 !important; /* Yazı rengini SİYAH yap */
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
 }
