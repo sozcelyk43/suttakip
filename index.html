@@ -992,7 +992,7 @@ async function handleKullaniciKaydet(event) {
     alert("Bu özellik güvenlik nedeniyle doğrudan yeni kullanıcı oluşturmaz. Lütfen önce Firebase Authentication panelinden kullanıcıyı e-posta/şifre ile oluşturun, ardından bu panelden o kullanıcıya ait bir profil (rol ataması) oluşturabilirsiniz.");
 }
 async function deleteKullanici(id) {
-    if(confirm("Bu işlem sadece kullanıcının profilini veritabanından siler, giriş yapmasını engellemez. Kullanıcıyı tamamen silmek için Firebase Authentication panelini kullanın. Devam etmek istiyor musunuz?")) {
+    if(confirm("Kullanıcıyı silmek istiyor musunuz?")) {
         try {
             await db.collection('kullanicilar').doc(id).delete();
             await renderKullaniciListesi();
