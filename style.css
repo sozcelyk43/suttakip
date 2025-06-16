@@ -264,3 +264,9 @@ tfoot tr { background-color: #e9ecef; font-weight: bold; color: #2c3e50; }
         </div>
     </div>
 </div>
+.charts-container-vertical {
+    display: grid;
+    grid-template-columns: 1fr; /* Tek sütunlu yapı */
+    gap: 20px;
+    margin-top: 30px;
+}
