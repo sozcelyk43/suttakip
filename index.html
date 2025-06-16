@@ -39,6 +39,10 @@
 <div class="dashboard-grid">
     <div class="stat-card"><h4>Bugünkü Sabah Sütü</h4><p><span id="dashSabahSut">0.00</span> Lt</p></div>
     <div class="stat-card"><h4>Bugünkü Akşam Sütü</h4><p><span id="dashAksamSut">0.00</span> Lt</p></div>
+    <div class="stat-card">
+    <h4>Bugünkü Toplam Süt</h4>
+    <p><span id="dashToplamSut">0.00</span> Lt</p>
+</div>
     <div class="stat-card"><h4>Aktif Müşteri Sayısı</h4><p><span id="dashAktifMusteri">0</span></p></div>
     <div class="stat-card alacak"><h4>Toplam Alacak</h4><p><span id="dashToplamAlacak">0,00 ₺</span></p></div>
     <div class="stat-card borc"><h4>Toplam Borç</h4><p><span id="dashToplamBorc">0,00 ₺</span></p></div>
@@ -551,6 +555,12 @@ async function updateDashboardStats() {
             sabahToplam += doc.data().sabah || 0;
             aksamToplam += doc.data().aksam || 0;
         });
+
+        // YENİ EKLENEN SATIRLAR BAŞLANGICI
+        const gunlukToplamSut = sabahToplam + aksamToplam;
+        document.getElementById('dashToplamSut').textContent = gunlukToplamSut.toFixed(2);
+        // YENİ EKLENEN SATIRLAR SONU
+
         document.getElementById('dashSabahSut').textContent = sabahToplam.toFixed(2);
         document.getElementById('dashAksamSut').textContent = aksamToplam.toFixed(2);
         
@@ -558,7 +568,7 @@ async function updateDashboardStats() {
         document.getElementById('dashAktifMusteri').textContent = carilerSnapshot.size;
     } catch (e) { console.error("Dashboard temel istatistikleri alınırken hata", e); }
     
-    // Bakiye Toplamları (Bu işlem çok sayıda okuma yapabilir ve yavaş olabilir)
+    // Bakiye Toplamları
     try {
         const allCarilerSnapshot = await db.collection('cariler').where("sahipId", "==", currentUser.uid).get();
         if(!allCarilerSnapshot.empty) {
@@ -569,8 +579,6 @@ async function updateDashboardStats() {
             const tumBakiyeler = await Promise.all(bakiyePromises);
             
             tumBakiyeler.forEach(bakiyeDetay => {
-                // Bakiye > 0 ise işletme müşteriye borçludur.
-                // Bakiye < 0 ise müşteri işletmeye borçludur.
                 if (bakiyeDetay.bakiye > 0) {
                     toplamGenelBorc += bakiyeDetay.bakiye;
                 } else {
