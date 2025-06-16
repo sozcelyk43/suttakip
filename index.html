@@ -45,16 +45,30 @@
     <h4>Bugünkü Toplam Süt</h4>
     <p><span id="dashToplamSut">0.00</span> Lt</p>
 </div>
-    <div class="charts-container" style="margin-top: 30px;">
+
+
+    
+<div class="charts-container">
     <div class="chart-card">
-        <h3>Son 7 Günlük Süt Alımı (Litre)</h3>
-        <canvas id="gunlukSutChart"></canvas>
+        <h3>Günlük Süt Dağılımı</h3>
+        <div class="chart-filters">
+            <input type="date" id="pastaGunlukTarih">
+            <button id="pastaGunlukGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
+        </div>
+        <canvas id="gunlukPastaGrafik"></canvas>
     </div>
     <div class="chart-card">
-        <h3>Bu Ayın Günlere Göre Süt Alımı (Litre)</h3>
-        <canvas id="aylikSutChart"></canvas>
+        <h3>Aylık Süt Dağılımı</h3>
+        <div class="chart-filters">
+            <input type="month" id="pastaAylikTarih">
+            <button id="pastaAylikGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
+        </div>
+        <canvas id="aylikPastaGrafik"></canvas>
     </div>
 </div>
+
+
+    
     <div class="stat-card"><h4>Aktif Müşteri Sayısı</h4><p><span id="dashAktifMusteri">0</span></p></div>
     <div class="stat-card alacak"><h4>Toplam Alacak</h4><p><span id="dashToplamAlacak">0,00 ₺</span></p></div>
     <div class="stat-card borc"><h4>Toplam Borç</h4><p><span id="dashToplamBorc">0,00 ₺</span></p></div>
@@ -850,66 +864,79 @@ async function renderCariListesi() {
     }
 }
 
-        let gunlukChartInstance = null;
-let aylikChartInstance = null;
 
-async function renderGunlukSutGrafik() {
+
+        // Yeni grafikler için global değişkenler
+let gunlukPastaChartInstance = null;
+let aylikPastaChartInstance = null;
+
+// Rastgele renk üreten yardımcı fonksiyon
+function generateRandomColors(count) {
+    const colors = [];
+    for (let i = 0; i < count; i++) {
+        const r = Math.floor(Math.random() * 200);
+        const g = Math.floor(Math.random() * 200);
+        const b = Math.floor(Math.random() * 200);
+        colors.push(`rgba(${r}, ${g}, ${b}, 0.8)`);
+    }
+    return colors;
+}
+
+// GÜNLÜK PASTA GRAFİĞİ OLUŞTURMA FONKSİYONU
+async function renderGunlukPastaGrafik() {
+    const tarih = document.getElementById('pastaGunlukTarih').value;
+    if (!tarih) { alert("Lütfen günlük grafik için bir tarih seçin."); return; }
+
     const currentUser = auth.currentUser;
     if (!currentUser) return;
 
-    const labels = [];
-    const data = [];
-    
-    // Son 7 günün verisini çek
-    for (let i = 6; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const tarihStr = d.toISOString().split('T')[0];
-        labels.push(d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }));
-        
-        const snapshot = await db.collection('sut_alimlari')
-            .where('sahipId', '==', currentUser.uid)
-            .where('tarih', '==', tarihStr)
-            .get();
-        
-        let gunlukToplam = 0;
-        snapshot.forEach(doc => {
-            gunlukToplam += doc.data().toplam;
-        });
-        data.push(gunlukToplam);
-    }
+    const snapshot = await db.collection('sut_alimlari')
+        .where('sahipId', '==', currentUser.uid)
+        .where('tarih', '==', tarih)
+        .get();
 
-    const ctx = document.getElementById('gunlukSutChart').getContext('2d');
-    if(gunlukChartInstance) {
-        gunlukChartInstance.destroy(); // Önceki grafiği temizle
-    }
-    gunlukChartInstance = new Chart(ctx, {
-        type: 'bar',
+    const dataByCari = {};
+    snapshot.forEach(doc => {
+        const alim = doc.data();
+        if (!dataByCari[alim.cariAdi]) {
+            dataByCari[alim.cariAdi] = 0;
+        }
+        dataByCari[alim.cariAdi] += alim.toplam;
+    });
+
+    const labels = Object.keys(dataByCari);
+    const data = Object.values(dataByCari);
+    const colors = generateRandomColors(labels.length);
+
+    const ctx = document.getElementById('gunlukPastaGrafik').getContext('2d');
+    if (gunlukPastaChartInstance) gunlukPastaChartInstance.destroy();
+
+    gunlukPastaChartInstance = new Chart(ctx, {
+        type: 'pie',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Toplam Süt (Lt)',
+                label: 'Süt Miktarı (Lt)',
                 data: data,
-                backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
+                backgroundColor: colors,
             }]
         },
-        options: { scales: { y: { beginAtZero: true } } }
+        options: { responsive: true, maintainAspectRatio: false }
     });
 }
 
-async function renderAylikSutGrafik() {
+// AYLIK PASTA GRAFİĞİ OLUŞTURMA FONKSİYONU
+async function renderAylikPastaGrafik() {
+    const ayYil = document.getElementById('pastaAylikTarih').value;
+    if (!ayYil) { alert("Lütfen aylık grafik için bir ay seçin."); return; }
+
     const currentUser = auth.currentUser;
     if (!currentUser) return;
 
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    
-    const startDateStr = new Date(year, month, 1).toISOString().split('T')[0];
-    const endDateStr = new Date(year, month, daysInMonth).toISOString().split('T')[0];
+    const [year, month] = ayYil.split('-');
+    const startDateStr = `<span class="math-inline">\{year\}\-</span>{month}-01`;
+    const endDate = new Date(year, month, 0);
+    const endDateStr = endDate.toISOString().split('T')[0];
 
     const snapshot = await db.collection('sut_alimlari')
         .where('sahipId', '==', currentUser.uid)
@@ -917,36 +944,40 @@ async function renderAylikSutGrafik() {
         .where('tarih', '<=', endDateStr)
         .get();
 
-    const labels = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-    const data = Array(daysInMonth).fill(0);
-
+    const dataByCari = {};
     snapshot.forEach(doc => {
         const alim = doc.data();
-        const gunIndex = new Date(alim.tarih).getUTCDate() - 1;
-        if(gunIndex >= 0 && gunIndex < daysInMonth) {
-            data[gunIndex] += alim.toplam;
+        if (!dataByCari[alim.cariAdi]) {
+            dataByCari[alim.cariAdi] = 0;
         }
+        dataByCari[alim.cariAdi] += alim.toplam;
     });
 
-    const ctx = document.getElementById('aylikSutChart').getContext('2d');
-    if(aylikChartInstance) {
-        aylikChartInstance.destroy();
-    }
-    aylikChartInstance = new Chart(ctx, {
-        type: 'line',
+    const labels = Object.keys(dataByCari);
+    const data = Object.values(dataByCari);
+    const colors = generateRandomColors(labels.length);
+
+    const ctx = document.getElementById('aylikPastaGrafik').getContext('2d');
+    if (aylikPastaChartInstance) aylikPastaChartInstance.destroy();
+
+    aylikPastaChartInstance = new Chart(ctx, {
+        type: 'pie',
         data: {
             labels: labels,
             datasets: [{
                 label: 'Toplam Süt (Lt)',
                 data: data,
-                fill: false,
-                borderColor: 'rgb(75, 192, 192)',
-                tension: 0.1
+                backgroundColor: colors,
             }]
         },
-        options: { scales: { y: { beginAtZero: true } } }
+        options: { responsive: true, maintainAspectRatio: false }
     });
 }
+
+
+
+
+        
 async function editCari(id) { 
     try {
         const doc = await db.collection('cariler').doc(id).get();
