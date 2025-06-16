@@ -1518,21 +1518,18 @@ async function renderTopluSutGirisFormu() {
     }
 
     try {
-        // O gün için süt alımı yapılmış carilerin listesini al
         const sutAlimSnapshot = await db.collection('sut_alimlari')
             .where('sahipId', '==', currentUser.uid)
             .where('tarih', '==', tarih)
             .get();
         const kayitliCariIdleri = new Set(sutAlimSnapshot.docs.map(doc => doc.data().cariId));
 
-        // Filtreye uygun tüm aktif carileri çek
         let query = db.collection('cariler').where('sahipId', '==', currentUser.uid).where('durum', '==', 'aktif');
         if (kategori) {
             query = query.where('kategori', '==', kategori);
         }
         const carilerSnapshot = await query.orderBy('adiSoyadi').get();
         
-        // Sadece süt alımı yapılmamış carileri filtrele
         const gosterilecekCariler = carilerSnapshot.docs.filter(doc => !kayitliCariIdleri.has(doc.id));
 
         if (gosterilecekCariler.length === 0) {
@@ -1544,17 +1541,19 @@ async function renderTopluSutGirisFormu() {
 
         yokMesaji.style.display = 'none';
         
-        // DÜZELTİLDİ: Sütun sıralaması güncellendi
-        let tableHTML = `<table><thead><tr><th>Cari Adı</th><th>Sabah (Lt)</th><th>Akşam (Lt)</th><th>Toplam (Lt)</th><th>Fiyat</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr></thead><tbody>`;
+        // DEĞİŞİKLİK: Başlık sırası güncellendi (Akşam, Sabah oldu)
+        let tableHTML = `<table><thead><tr><th>Cari Adı</th><th>Akşam (Lt)</th><th>Sabah (Lt)</th><th>Toplam (Lt)</th><th>Fiyat</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr></thead><tbody>`;
 
         const defaultFiyat = (globalSettings.defaultMilkPrice || 15.00).toFixed(2);
         gosterilecekCariler.forEach(doc => {
             const cari = { id: doc.id, ...doc.data() };
             const escapedCariAdi = cari.adiSoyadi.replace(/'/g, "\\'").replace(/"/g, '\\"');
+            
+            // DEĞİŞİKLİK: Giriş kutularının sırası güncellendi (Akşam, Sabah oldu)
             tableHTML += `<tr id="satir-${cari.id}">
                 <td>${cari.adiSoyadi}</td>
-                <td><input type="number" id="sabah-${cari.id}" class="sut-input" step="0.1" min="0" oninput="sutMiktarGuncelle('${cari.id}')"></td>
                 <td><input type="number" id="aksam-${cari.id}" class="sut-input" step="0.1" min="0" oninput="sutMiktarGuncelle('${cari.id}')"></td>
+                <td><input type="number" id="sabah-${cari.id}" class="sut-input" step="0.1" min="0" oninput="sutMiktarGuncelle('${cari.id}')"></td>
                 <td><span id="toplam-lt-${cari.id}">0.00</span></td>
                 <td><input type="number" id="fiyat-${cari.id}" class="sut-input" step="0.01" min="0" value="${defaultFiyat}" oninput="sutMiktarGuncelle('${cari.id}')"></td>
                 <td><span id="toplam-tutar-${cari.id}">0,00 ₺</span></td>
@@ -1573,7 +1572,6 @@ async function renderTopluSutGirisFormu() {
         }
     }
 }
-
 function sutMiktarGuncelle(cariId) {
     const sabah = parseFloat(document.getElementById(`sabah-${cariId}`).value) || 0;
     const aksam = parseFloat(document.getElementById(`aksam-${cariId}`).value) || 0;
@@ -1638,7 +1636,9 @@ async function renderSutAlimGecmisi() {
     if (!currentUser || !tarih) { header.innerHTML = ''; body.innerHTML = ''; return; }
 
     gecmisTarihSpan.textContent = formatDate(tarih);
-    header.innerHTML = `<tr><th>Cari Adı</th><th>Sabah (Lt)</th><th>Akşam (Lt)</th><th>Toplam</th><th>Fiyat</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr>`;
+    
+    // DEĞİŞİKLİK: Başlık sırası güncellendi (Akşam, Sabah oldu)
+    header.innerHTML = `<tr><th>Cari Adı</th><th>Akşam (Lt)</th><th>Sabah (Lt)</th><th>Toplam</th><th>Fiyat</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr>`;
     body.innerHTML = '<tr><td colspan="7">Yükleniyor...</td></tr>';
 
     try {
@@ -1650,9 +1650,15 @@ async function renderSutAlimGecmisi() {
         let bodyHTML = '';
         snapshot.forEach(doc => {
             const alim = doc.data();
+            
+            // DEĞİŞİKLİK: Veri sırası güncellendi (Akşam, Sabah oldu)
             bodyHTML += `<tr>
-                <td>${alim.cariAdi}</td><td>${alim.sabah.toFixed(2)}</td><td>${alim.aksam.toFixed(2)}</td>
-                <td><strong>${alim.toplam.toFixed(2)}</strong></td><td>${formatCurrency(alim.fiyat)}</td><td><strong>${formatCurrency(alim.toplamTutar)}</strong></td>
+                <td>${alim.cariAdi}</td>
+                <td>${alim.aksam.toFixed(2)}</td>
+                <td>${alim.sabah.toFixed(2)}</td>
+                <td><strong>${alim.toplam.toFixed(2)}</strong></td>
+                <td>${formatCurrency(alim.fiyat)}</td>
+                <td><strong>${formatCurrency(alim.toplamTutar)}</strong></td>
                 <td class="dont-print">
                     <button class="btn btn-edit btn-sm" onclick="editSutAlimi('${doc.id}')">Düzenle</button>
                     <button class="btn btn-delete btn-sm" onclick="deleteSutAlimi('${doc.id}')">Sil</button>
@@ -1665,7 +1671,6 @@ async function renderSutAlimGecmisi() {
         body.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Geçmiş yüklenirken bir hata oluştu.</td></tr>';
     }
 }
-
 
 // --- RAPORLAMA FONKSİYONLARI ---
 async function handleHesapOzetiRaporuOlustur() {
