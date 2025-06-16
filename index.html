@@ -1762,10 +1762,12 @@ async function renderTopluSutGirisFormu() {
     }
 
     try {
-        const sutAlimSnapshot = await db.collection('sut_alimlari').where('sahipId', '==', currentUser.uid).where('tarih', '==', tarih).get();
+        const sutAlimSnapshot = await db.collection('sut_alimlari')
+            .where('sahipId', '==', currentUser.uid)
+            .where('tarih', '==', tarih)
+            .get();
         const kayitliCariIdleri = new Set(sutAlimSnapshot.docs.map(doc => doc.data().cariId));
 
-        // GÜNCELLEME: Sorguya 'cariTipi' filtresi eklendi
         let query = db.collection('cariler')
             .where('sahipId', '==', currentUser.uid)
             .where('durum', '==', 'aktif')
@@ -1774,7 +1776,10 @@ async function renderTopluSutGirisFormu() {
         if (kategori) {
             query = query.where('kategori', '==', kategori);
         }
-        const carilerSnapshot = await query.orderBy('adiSoyadi').get();
+        
+        // DEĞİŞİKLİK: Sıralama önce kategoriye, sonra ada göre yapıldı.
+        const carilerSnapshot = await query.orderBy('kategori').orderBy('adiSoyadi').get();
+        
         const gosterilecekCariler = carilerSnapshot.docs.filter(doc => !kayitliCariIdleri.has(doc.id));
 
         if (gosterilecekCariler.length === 0) {
@@ -1792,7 +1797,7 @@ async function renderTopluSutGirisFormu() {
             const cari = { id: doc.id, ...doc.data() };
             const escapedCariAdi = cari.adiSoyadi.replace(/'/g, "\\'").replace(/"/g, '\\"');
             tableHTML += `<tr id="satir-${cari.id}">
-                <td>${cari.adiSoyadi}</td>
+                <td>${cari.adiSoyadi} (${cari.kategori || 'Belirtilmemiş'})</td>
                 <td><input type="number" id="aksam-${cari.id}" class="sut-input" step="0.1" min="0" oninput="sutMiktarGuncelle('${cari.id}')"></td>
                 <td><input type="number" id="sabah-${cari.id}" class="sut-input" step="0.1" min="0" oninput="sutMiktarGuncelle('${cari.id}')"></td>
                 <td><span id="toplam-lt-${cari.id}">0.00</span></td>
@@ -1806,6 +1811,11 @@ async function renderTopluSutGirisFormu() {
 
     } catch (error) {
         console.error("Süt girişi için cariler getirilirken hata:", error);
+        if (error.code === 'failed-precondition') {
+             container.innerHTML = '<p style="text-align:center; color: red;"><b>Veritabanı Hatası:</b> Bu sorgu için bir dizin (index) oluşturmanız gerekiyor.<br>Lütfen tarayıcı konsolundaki (F12) hatayı kontrol edin ve index oluşturma linkine tıklayın.</p>';
+        } else {
+             container.innerHTML = '<p style="text-align:center; color: red;">Tedarikçiler yüklenirken bir hata oluştu.</p>';
+        }
     }
 }
 function sutMiktarGuncelle(cariId) {
