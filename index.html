@@ -1123,7 +1123,74 @@ async function populateYemSelect(selectElement, defaultText = "Yem Seçiniz...")
         console.error("Yem seçimi yüklenirken hata:", error);
     }
 }
+// Bu değişkeni, script'inizin en üstündeki diğer global değişkenlerin yanına ekleyin:
+let gunlukSutunChartInstance = null;
 
+// Bu fonksiyonu, script'inizdeki diğer fonksiyonların yanına ekleyin:
+async function renderGunlukSutGrafik() {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+
+    const ctx = document.getElementById('gunlukSutGrafik').getContext('2d');
+    if(gunlukSutunChartInstance) {
+        gunlukSutunChartInstance.destroy(); // Önceki grafiği temizle
+    }
+
+    try {
+        const tarihStr = getTodayForInput();
+        const alimlarSnapshot = await db.collection('sut_alimlari').where('sahipId', '==', currentUser.uid).where('tarih', '==', tarihStr).get();
+        
+        if (alimlarSnapshot.empty) {
+            // Eğer o gün veri yoksa boş bir grafik veya mesaj gösterilebilir. Şimdilik temizliyoruz.
+            return;
+        }
+
+        const cariKategorileri = await db.collection('cariler').where('sahipId', '==', currentUser.uid).get();
+        const kategoriMap = new Map();
+        cariKategorileri.forEach(doc => {
+            kategoriMap.set(doc.id, doc.data().kategori || 'Belirtilmemiş');
+        });
+
+        const dataByKategori = {};
+        alimlarSnapshot.forEach(doc => {
+            const alim = doc.data();
+            const kategori = kategoriMap.get(alim.cariId) || "Diğer";
+            if (!dataByKategori[kategori]) {
+                dataByKategori[kategori] = 0;
+            }
+            dataByKategori[kategori] += alim.toplam;
+        });
+
+        const labels = Object.keys(dataByKategori);
+        const data = Object.values(dataByKategori);
+
+        gunlukSutunChartInstance = new Chart(ctx, {
+            type: 'bar', // Grafik tipi: Sütun
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Toplam Süt (Lt)',
+                    data: data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y', // Barları yatay yapar, kategorilerin okunmasını kolaylaştırır
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    } catch(error) {
+        console.error("Günlük süt grafiği oluşturulurken hata:", error);
+    }
+}
 // --- KULLANICI YÖNETİMİ ---
 async function handleKullaniciKaydet(event) {
     event.preventDefault();
