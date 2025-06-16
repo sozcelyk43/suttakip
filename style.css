@@ -179,3 +179,49 @@ tfoot tr { background-color: #e9ecef; font-weight: bold; color: #2c3e50; }
 .sidebar h1 {
     margin-top: 0; /* Logonun altındaki başlığın üst boşluğunu sıfırlar */
 }
+/* KONTROL PANELİ (DASHBOARD) STİLLERİ */
+.dashboard-grid {
+    display: grid;
+    /* Ekran genişliğine göre 2 veya 3 sütunlu esnek bir yapı oluşturur */
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px; /* Kartlar arasındaki boşluk */
+    margin-top: 20px;
+}
+
+.stat-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0; /* Belirgin kenarlık */
+    border-radius: 8px;       /* Yumuşak köşeler */
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.07); /* Hafif bir gölge efekti */
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px); /* Üzerine gelince hafifçe yukarı kalkma efekti */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Gölg_değişikliğieyi artır */
+}
+
+.stat-card h4 {
+    margin: 0 0 10px 0;
+    font-size: 1em; /* 16px */
+    color: #555;
+    font-weight: 600;
+}
+
+.stat-card p {
+    margin: 0;
+    font-size: 1.8em; /* 28.8px - Rakamları büyük ve okunaklı göster */
+    font-weight: 700;
+    color: #2c3e50; /* Ana tema rengi */
+}
+
+/* Alacak ve Borç kartları için özel renkler */
+.stat-card.alacak p {
+    color: #28a745; /* Yeşil */
+}
+
+.stat-card.borc p {
+    color: #dc3545; /* Kırmızı */
+}
