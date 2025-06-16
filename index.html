@@ -814,9 +814,7 @@ async function renderCariListesi() {
 
 
 
-        // Yeni grafikler için global değişkenler
-let gunlukSutunChartInstance = null;
-let aylikSutunChartInstance = null;
+
 
 // Rastgele renk üreten yardımcı fonksiyon
 function generateRandomColors(count) {
@@ -830,102 +828,88 @@ function generateRandomColors(count) {
     return colors;
 }
 
-// GÜNLÜK PASTA GRAFİĞİ OLUŞTURMA FONKSİYONU
-async function renderGunlukPastaGrafik() {
-    const tarih = document.getElementById('pastaGunlukTarih').value;
-    if (!tarih) { alert("Lütfen günlük grafik için bir tarih seçin."); return; }
+// Yeni grafikler için global değişkenler
+let gunlukSutunChartInstance = null;
+let aylikSutunChartInstance = null;
 
+// GÜNLÜK KATEGORİ BAZLI SÜTUN GRAFİK
+async function renderGunlukSutGrafik() {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
 
-    const snapshot = await db.collection('sut_alimlari')
-        .where('sahipId', '==', currentUser.uid)
-        .where('tarih', '==', tarih)
-        .get();
+    const tarihStr = getTodayForInput();
+    const alimlarSnapshot = await db.collection('sut_alimlari').where('sahipId', '==', currentUser.uid).where('tarih', '==', tarihStr).get();
+    
+    if (alimlarSnapshot.empty) return;
 
-    const dataByCari = {};
-    snapshot.forEach(doc => {
+    const cariKategorileri = await db.collection('cariler').where('sahipId', '==', currentUser.uid).get();
+    const kategoriMap = new Map();
+    cariKategorileri.forEach(doc => kategoriMap.set(doc.id, doc.data().kategori));
+
+    const dataByKategori = {};
+    alimlarSnapshot.forEach(doc => {
         const alim = doc.data();
-        if (!dataByCari[alim.cariAdi]) {
-            dataByCari[alim.cariAdi] = 0;
-        }
-        dataByCari[alim.cariAdi] += alim.toplam;
+        const kategori = kategoriMap.get(alim.cariId) || "Diğer";
+        if (!dataByKategori[kategori]) dataByKategori[kategori] = 0;
+        dataByKategori[kategori] += alim.toplam;
     });
 
-    const labels = Object.keys(dataByCari);
-    const data = Object.values(dataByCari);
-    const colors = generateRandomColors(labels.length);
+    const labels = Object.keys(dataByKategori);
+    const data = Object.values(dataByKategori);
 
-    const ctx = document.getElementById('gunlukPastaGrafik').getContext('2d');
-    if (gunlukPastaChartInstance) gunlukPastaChartInstance.destroy();
-
-    gunlukPastaChartInstance = new Chart(ctx, {
-        type: 'pie',
+    const ctx = document.getElementById('gunlukSutGrafik').getContext('2d');
+    if(gunlukSutunChartInstance) gunlukSutunChartInstance.destroy();
+    gunlukSutunChartInstance = new Chart(ctx, {
+        type: 'bar', // Grafik tipi sütun olarak değiştirildi
         data: {
             labels: labels,
-            datasets: [{
-                label: 'Süt Miktarı (Lt)',
-                data: data,
-                backgroundColor: colors,
-            }]
+            datasets: [{ label: 'Toplam Süt (Lt)', data: data, backgroundColor: 'rgba(54, 162, 235, 0.6)' }]
+        },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
+    });
+}
+
+// AYLIK KATEGORİ BAZLI SÜTUN GRAFİK
+async function renderAylikSutGrafik() {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const startDateStr = new Date(year, month, 1).toISOString().split('T')[0];
+    const endDateStr = new Date(year, month + 1, 0).toISOString().split('T')[0];
+
+    const alimlarSnapshot = await db.collection('sut_alimlari').where('sahipId', '==', currentUser.uid).where('tarih', '>=', startDateStr).where('tarih', '<=', endDateStr).get();
+    
+    if (alimlarSnapshot.empty) return;
+
+    const cariKategorileri = await db.collection('cariler').where('sahipId', '==', currentUser.uid).get();
+    const kategoriMap = new Map();
+    cariKategorileri.forEach(doc => kategoriMap.set(doc.id, doc.data().kategori));
+
+    const dataByKategori = {};
+    alimlarSnapshot.forEach(doc => {
+        const alim = doc.data();
+        const kategori = kategoriMap.get(alim.cariId) || "Diğer";
+        if (!dataByKategori[kategori]) dataByKategori[kategori] = 0;
+        dataByKategori[kategori] += alim.toplam;
+    });
+
+    const labels = Object.keys(dataByKategori);
+    const data = Object.values(dataByKategori);
+    
+    const ctx = document.getElementById('aylikSutGrafik').getContext('2d');
+    if(aylikSutunChartInstance) aylikSutunChartInstance.destroy();
+    aylikSutunChartInstance = new Chart(ctx, {
+        type: 'bar', // Grafik tipi sütun olarak değiştirildi
+        data: {
+            labels: labels,
+            datasets: [{ label: 'Toplam Süt (Lt)', data: data, backgroundColor: 'rgba(75, 192, 192, 0.6)' }]
         },
         options: { responsive: true, maintainAspectRatio: false }
     });
 }
-
-// AYLIK PASTA GRAFİĞİ OLUŞTURMA FONKSİYONU
-async function renderAylikPastaGrafik() {
-    const ayYil = document.getElementById('pastaAylikTarih').value;
-    if (!ayYil) { alert("Lütfen aylık grafik için bir ay seçin."); return; }
-
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
-
-    const [year, month] = ayYil.split('-');
-    const startDateStr = `<span class="math-inline">\{year\}\-</span>{month}-01`;
-    const endDate = new Date(year, month, 0);
-    const endDateStr = endDate.toISOString().split('T')[0];
-
-    const snapshot = await db.collection('sut_alimlari')
-        .where('sahipId', '==', currentUser.uid)
-        .where('tarih', '>=', startDateStr)
-        .where('tarih', '<=', endDateStr)
-        .get();
-
-    const dataByCari = {};
-    snapshot.forEach(doc => {
-        const alim = doc.data();
-        if (!dataByCari[alim.cariAdi]) {
-            dataByCari[alim.cariAdi] = 0;
-        }
-        dataByCari[alim.cariAdi] += alim.toplam;
-    });
-
-    const labels = Object.keys(dataByCari);
-    const data = Object.values(dataByCari);
-    const colors = generateRandomColors(labels.length);
-
-    const ctx = document.getElementById('aylikPastaGrafik').getContext('2d');
-    if (aylikPastaChartInstance) aylikPastaChartInstance.destroy();
-
-    aylikPastaChartInstance = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Toplam Süt (Lt)',
-                data: data,
-                backgroundColor: colors,
-            }]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
-    });
-}
-
-
-
-
-        
 async function editCari(id) { 
     try {
         const doc = await db.collection('cariler').doc(id).get();
