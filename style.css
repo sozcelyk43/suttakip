@@ -68,7 +68,6 @@ tfoot tr { background-color: #e9ecef; font-weight: bold; color: #2c3e50; }
 #sifreDegistirForm button {
     width: 100%;
 }
-
 @media print {
   /* Temel yazdırma ayarları */
   body {
@@ -76,27 +75,44 @@ tfoot tr { background-color: #e9ecef; font-weight: bold; color: #2c3e50; }
     print-color-adjust: exact !important;
   }
   
-  /* Sayfa kenarlarındaki gri rengi kaldırmak için */
-  html, body {
+  /* SAYFANIN TÜM KATMANLARININ ARKA PLANINI BEYAZ YAP */
+  html, body, .main-content, .module-section, .print-section-active, .container {
+    background-color: #ffffff !important;
     background: #ffffff !important;
     margin: 0 !important;
     padding: 0 !important;
+    color: #000000 !important;
   }
 
   /* Yazdırılmayacak elemanları gizle */
-  .dont-print, .sidebar, .module-header, .form-section, .report-section > .form-grid, .report-section > hr {
+  .dont-print, .sidebar, .module-header, .form-section, .report-section > .form-grid, .report-section > hr, #raporYazdirBtn, #sutRaporuYazdirBtn, #yemRaporuYazdirBtn, #cariListesiYazdirBtn {
     display: none !important;
+  }
+  .print-only {
+    display: block !important;
   }
 
   /* Sadece yazdırılacak bölümün görünmesini sağla */
-  body.print-active > * { display: none !important; }
-  body.print-active .main-content { display: block !important; margin: 0; padding: 0; }
-  body.print-active .main-content > .module-section { display: none !important; }
-  body.print-active .main-content > .print-section-active { display: block !important; border: none; box-shadow: none; }
+  body.print-active > * {
+    display: none !important;
+  }
+  body.print-active .main-content {
+    display: block !important;
+    padding: 1cm !important; /* Sayfa kenar boşluğu */
+  }
+  body.print-active .main-content > .module-section {
+    display: none !important;
+  }
+  body.print-active .main-content > .print-section-active {
+    display: block !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
   
-  /* Rapor Tablosu Stilleri (Daha Dar Satırlar) */
-  .report-table, .summary-table {
-    font-size: 9pt; /* Okunabilirlik için font biraz büyütüldü */
+  /* Tablo stillerini yazdırma için optimize et */
+  table, .report-table, .summary-table {
+    font-size: 8pt;
+    margin-top: 5px !important;
     width: 100% !important;
     border-collapse: collapse !important;
     page-break-inside: auto;
@@ -108,36 +124,27 @@ tfoot tr { background-color: #e9ecef; font-weight: bold; color: #2c3e50; }
   thead {
       display: table-header-group;
   }
-  /* SATIRLARI DARALTMAK İÇİN PADDING AZALTILDI */
-  th, td { 
-    padding: 2px 4px !important; 
+  tfoot {
+      display: table-footer-group;
+  }
+  th, td {
+    padding: 2px 4px !important;
     border: 1px solid #333 !important;
     text-align: left;
+    word-wrap: break-word;
   }
   
-  /* ARKA PLANLARI BEYAZ YAPMAK İÇİN */
-  th, tfoot tr {
+  /* Tüm tablo satır arka planlarını BEYAZ yap */
+  th, td, tr, .report-totals-row {
     background-color: #ffffff !important;
     color: #000000 !important;
   }
 
-  /* Rapor Başlıkları */
-  h1.print-title, h3.print-title, h4#raporBaslik {
-    font-size: 12pt;
-    margin-bottom: 10px;
-    color: #000;
+  /* Rapor başlıkları */
+  h1.print-title, h3.print-title, h4, h5 {
+    color: #000000 !important;
+    background: none !important;
   }
-  .report-block {
-      page-break-inside: avoid;
-      margin-bottom: 8px;
-  }
-   .report-block h5 {
-        font-size: 10pt;
-        margin-top: 8px;
-        margin-bottom: 4px;
-        border-bottom: 1px solid #ccc;
-        padding-bottom: 2px;
-    }
 }
 @page {
     size: A4 portrait;
