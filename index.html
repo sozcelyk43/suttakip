@@ -114,12 +114,12 @@
         <th>Kategori</th>
         <th>Durum</th>
         <th>Telefon</th>
-        <th>Alınan</th>
         <th>Borç</th>
+        <th>Alınan</th>
         <th>Bakiye</th>
         <th class="dont-print">İşlemler</th>
     </tr>
-</thead>                      <tbody id="cariListesiBody"></tbody>
+</thead>                 <tbody id="cariListesiBody"></tbody>
                             <tfoot id="cariListesiFooter"></tfoot>
                         </table>
                     </div>
@@ -784,16 +784,18 @@ async function renderCariListesi() {
                 const durumText = c.durum === 'aktif' ? 'Aktif' : 'Pasif';
                 const durumStyle = c.durum === 'aktif' ? 'color:green;' : 'color:red;';
                 const bakiyeStyle = bakiye >= 0 ? 'color:green;' : 'color:red;';
-                const bakiyeText = `${formatCurrency(bakiye)} ${bakiye >= 0 ? '(Alacaklı)' : '(Borçlu)'}`;
+                // DEĞİŞİKLİK 1: Bakiye metni (A) ve (B) olarak kısaltıldı.
+                const bakiyeText = `${formatCurrency(bakiye)} ${bakiye >= 0 ? '(A)' : '(B)'}`;
                 
+                // DEĞİŞİKLİK 2: Sütun sırası (Borç, Alınan olarak) güncellendi.
                 row.innerHTML = `
                     <td>${c.kodu || ''}</td>
                     <td>${c.adiSoyadi || ''}</td>
                     <td>${c.kategori || ''}</td>
                     <td style="${durumStyle}">${durumText}</td>
                     <td>${c.telefon || ''}</td>
-                    <td>${formatCurrency(bakiyeDetay.alacak)}</td>
                     <td>${formatCurrency(bakiyeDetay.borc)}</td>
+                    <td>${formatCurrency(bakiyeDetay.alacak)}</td>
                     <td style="${bakiyeStyle}">${bakiyeText}</td>
                     <td class="dont-print">
                         <button class="btn btn-edit btn-sm" onclick="editCari('${c.id}')">Düzenle</button>
@@ -807,11 +809,11 @@ async function renderCariListesi() {
         const toplamBakiyeStyle = toplamBakiye >= 0 ? 'color:green;' : 'color:red;';
         const etiket = kategori ? `Kategori Toplamı` : 'Genel Toplam';
         
-        // Colspan değeri 7'ye güncellendi ve yeni toplamlar eklendi
+        // DEĞİŞİKLİK 3: Alt toplamların sırası güncellendi
         footerRow.innerHTML = `
             <td colspan="5"><strong>${etiket}</strong></td>
-            <td><strong>${formatCurrency(genelToplamAlacak)}</strong></td>
             <td><strong>${formatCurrency(genelToplamBorc)}</strong></td>
+            <td><strong>${formatCurrency(genelToplamAlacak)}</strong></td>
             <td style="${toplamBakiyeStyle}"><strong>${formatCurrency(toplamBakiye)}</strong></td>
             <td class="dont-print"></td>`;
 
@@ -820,6 +822,8 @@ async function renderCariListesi() {
         cariListesiBody.innerHTML = '<tr><td colspan="9" style="color:red; text-align:center;">Liste yüklenirken bir hata oluştu. Firestore index\'i gerekebilir.</td></tr>';
     }
 }
+
+        
 async function editCari(id) { 
     try {
         const doc = await db.collection('cariler').doc(id).get();
