@@ -1134,30 +1134,55 @@ function resetYemAlisForm() {
     setEditingMode(document.getElementById('yemAlisFormBaslik'), document.getElementById('yemAlisKaydetBtn'), document.getElementById('yemAlisFormTemizleBtn'), null, 'Yeni Yem Alışı');
 }
 
-     async function renderYemAlisHareketleri() {
+   async function renderYemAlisHareketleri() {
     const listBody = document.getElementById('yemAlisHareketListesiBody');
     const currentUser = auth.currentUser;
     if (!currentUser) return;
     try {
         const snapshot = await db.collection('yem_alimlari').where('sahipId', '==', currentUser.uid).orderBy('tarih', 'desc').limit(20).get();
-        if (snapshot.empty) { listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Yem alım hareketi bulunmuyor.</td></tr>'; return; }
-        
-        const yemIds = [...new Set(snapshot.docs.map(doc => doc.data().yemId))];
-        const yemMap = new Map();
-        if (yemIds.length > 0) {
-            const yemSnapshot = await db.collection('yemler').where(firebase.firestore.FieldPath.documentId(), 'in', yemIds).get();
-            yemSnapshot.forEach(doc => yemMap.set(doc.id, doc.data().ad));
+        if (snapshot.empty) {
+            listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Yem alım hareketi bulunmuyor.</td></tr>';
+            return;
         }
+        
+        // Performans için yem ve cari isimlerini toplu çek
+        const yemIds = new Set();
+        const cariIds = new Set();
+        snapshot.docs.forEach(doc => {
+            const data = doc.data();
+            yemIds.add(data.yemId);
+            if (data.cariId) { // Sadece dolu olan cariId'leri ekle
+                cariIds.add(data.cariId);
+            }
+        });
+
+        const yemMap = new Map();
+        const cariMap = new Map();
+
+        // Yem ve Cari bilgilerini getirecek sorguları hazırla
+        const yemPromise = yemIds.size > 0 ? db.collection('yemler').where(firebase.firestore.FieldPath.documentId(), 'in', Array.from(yemIds)).get() : Promise.resolve({ docs: [] });
+        const cariPromise = cariIds.size > 0 ? db.collection('cariler').where(firebase.firestore.FieldPath.documentId(), 'in', Array.from(cariIds)).get() : Promise.resolve({ docs: [] });
+
+        const [yemSnapshot, cariSnapshot] = await Promise.all([yemPromise, cariPromise]);
+        
+        yemSnapshot.forEach(doc => yemMap.set(doc.id, doc.data().ad));
+        cariSnapshot.forEach(doc => cariMap.set(doc.id, doc.data().adiSoyadi));
         
         let rows = '';
         snapshot.forEach(doc => {
             const alim = doc.data();
             const yemAdi = yemMap.get(alim.yemId) || 'Bilinmiyor';
+            // DÜZELTME: Cari ID yerine, haritadan (map) bulunan cari adını yazdırıyoruz.
+            const cariAdi = alim.cariId ? cariMap.get(alim.cariId) : 'Peşin Alış';
+
             rows += `<tr>
-                <td>${formatDate(alim.tarih)}</td><td>${yemAdi}</td><td>${alim.miktar}</td>
-                <td>${alim.cariId || ''}</td><td>${formatCurrency(alim.alisFiyati)}</td><td>${formatCurrency(alim.toplamTutar)}</td>
+                <td>${formatDate(alim.tarih)}</td>
+                <td>${yemAdi}</td>
+                <td>${alim.miktar}</td>
+                <td>${cariAdi}</td>
+                <td>${formatCurrency(alim.alisFiyati)}</td>
+                <td>${formatCurrency(alim.toplamTutar)}</td>
                 <td class="dont-print">
-                    <button class="btn btn-edit btn-sm" onclick="editYemAlisi('${doc.id}')">Düzenle</button>
                     <button class="btn btn-delete btn-sm" onclick="deleteYemAlisi('${doc.id}')">Sil</button>
                 </td>
             </tr>`;
@@ -1165,8 +1190,6 @@ function resetYemAlisForm() {
         listBody.innerHTML = rows;
     } catch(e) { console.error("Yem alış hareketleri yüklenirken hata:", e); }
 }
-
-
 async function editOdeme(id) {
     try {
         const doc = await db.collection('odemeVeTahsilatlar').doc(id).get();
