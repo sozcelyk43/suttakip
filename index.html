@@ -23,6 +23,8 @@
                 <li><a href="#hesap-ozeti" class="nav-link">📊 Cari Hesap Özeti</a></li>
                 <li><a href="#sut-alim-raporu" class="nav-link">🗓️ Aylık Süt Raporu</a></li>
                 <li><a href="#aylik-yem-raporu" class="nav-link">📈 Aylık Yem Raporu</a></li>
+                <li><a href="#hareket-dokumu" class="nav-link">📋 Hareket Dökümü</a></li>
+
                 <li><a href="#ayarlar" class="nav-link">⚙️ Ayarlar</a></li>
                 <li class="logout-link">
                     <a href="#" id="logoutButton">🚪 Çıkış Yap</a>
@@ -308,6 +310,28 @@
                 <div class="list-section"><h4>Kullanıcı Listesi</h4><table><thead><tr><th>Kullanıcı Adı</th><th>Rol</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="kullaniciListesiBody"></tbody></table></div></div>
              </div>
         </section>
+    <section id="hareket-dokumu" class="module-section hidden-section">
+            <div class="module-header"><h2>📋 Hareket Dökümü</h2></div>
+            <div class="container">
+                <div class="list-section">
+                    <h3>Tüm İşlem Geçmişi (En Yeni Üstte)</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tarih</th>
+                                <th>Cari Adı</th>
+                                <th>İşlem Türü</th>
+                                <th>Açıklama</th>
+                                <th>Tutar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hareketDokumuBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        </div> <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -437,6 +461,7 @@ function initializeApp() {
         if (targetId === 'sut-alim-raporu'){ populateCariSelect(document.getElementById('sutRaporuTedarikciSecimi')); populateCariKategoriSelect(document.getElementById('sutRaporuKategoriSecimi'), "Tümü"); if(!document.getElementById('sutRaporuAySecimi').value) document.getElementById('sutRaporuAySecimi').value = getMonthYearForInput(); }
         if (targetId === 'aylik-yem-raporu'){ if(!document.getElementById('yemRaporuAySecimi').value) document.getElementById('yemRaporuAySecimi').value = getMonthYearForInput(); }
         if (targetId === 'ayarlar') { populateCariKategoriSelect(document.getElementById('cariKategori')); renderCariKategoriListesi(); getSettings(); renderKullaniciListesi(); }
+        if (targetId === 'hareket-dokumu') {    renderHareketDokumu();}
     });
     
     logoutButton.addEventListener('click', handleLogout);
@@ -1275,7 +1300,83 @@ function closeSutDuzenleForm() {
     document.getElementById('sutDuzenleForm').reset();
 }
 
+// YENİ FONKSİYON
+async function renderHareketDokumu() {
+    const listBody = document.getElementById('hareketDokumuBody');
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
 
+    listBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Yükleniyor...</td></tr>';
+
+    try {
+        let tumHareketler = [];
+
+        // Veri kaynaklarını ve nasıl işleneceklerini tanımla
+        const kaynaklar = [
+            { koleksiyon: 'sut_alimlari', tur: 'Süt Alımı', aciklamaEk: 'Lt', tutarAlan: 'toplamTutar' },
+            { koleksiyon: 'yem_satislari', tur: 'Yem Satışı', aciklamaEk: 'Adet', tutarAlan: 'toplamTutar' },
+            { koleksiyon: 'odemeVeTahsilatlar', tur: 'islemTuru', aciklamaEk: '', tutarAlan: 'tutar' }
+        ];
+
+        // Tüm carilerin isimlerini almak için bir harita oluştur
+        const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', currentUser.uid).get();
+        const cariMap = new Map();
+        carilerSnapshot.forEach(doc => cariMap.set(doc.id, doc.data().adiSoyadi));
+
+        // Tüm veri kaynaklarından verileri çek
+        const sorguPromise_leri = kaynaklar.map(kaynak => 
+            db.collection(kaynak.koleksiyon).where('sahipId', '==', currentUser.uid).get()
+        );
+        const sonuclar = await Promise.all(sorguPromise_leri);
+
+        // Verileri standart bir formata dönüştür
+        sonuclar.forEach((snapshot, index) => {
+            const kaynak = kaynaklar[index];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                let islemTuru = kaynak.tur;
+                if(kaynak.tur === 'islemTuru') {
+                    islemTuru = data.islemTuru === 'odeme' ? 'Ödeme' : 'Tahsilat';
+                }
+                
+                let aciklama = data.aciklama || '';
+                if(kaynak.koleksiyon === 'sut_alimlari') aciklama = `${data.toplam.toFixed(2)} ${kaynak.aciklamaEk}`;
+                if(kaynak.koleksiyon === 'yem_satislari') aciklama = `${data.miktar} ${kaynak.aciklamaEk}`;
+
+                tumHareketler.push({
+                    tarih: data.tarih,
+                    cariAdi: cariMap.get(data.cariId) || 'İlişkisiz Cari',
+                    islemTuru: islemTuru,
+                    aciklama: aciklama,
+                    tutar: data[kaynak.tutarAlan]
+                });
+            });
+        });
+
+        // Tüm hareketleri tarihe göre en yeniden eskiye sırala
+        tumHareketler.sort((a, b) => new Date(b.tarih) - new Date(a.tarih));
+
+        if (tumHareketler.length === 0) {
+            listBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Hiç işlem hareketi bulunmuyor.</td></tr>';
+            return;
+        }
+
+        // HTML tablosunu oluştur
+        listBody.innerHTML = tumHareketler.map(h => `
+            <tr>
+                <td>${formatDate(h.tarih)}</td>
+                <td>${h.cariAdi}</td>
+                <td>${h.islemTuru}</td>
+                <td>${h.aciklama}</td>
+                <td>${formatCurrency(h.tutar)}</td>
+            </tr>
+        `).join('');
+
+    } catch (error) {
+        console.error("Hareket dökümü oluşturulurken hata:", error);
+        listBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Rapor yüklenirken bir hata oluştu.</td></tr>';
+    }
+}
 async function deleteSutAlimi(id) {
     if (confirm("Bu süt alım kaydını silmek istediğinizden emin misiniz?")) {
         try {
