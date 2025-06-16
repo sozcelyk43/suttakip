@@ -45,9 +45,23 @@
     <h4>Bugünkü Toplam Süt</h4>
     <p><span id="dashToplamSut">0.00</span> Lt</p>
 </div>
+    <div class="charts-container" style="margin-top: 30px;">
+    <div class="chart-card">
+        <h3>Son 7 Günlük Süt Alımı (Litre)</h3>
+        <canvas id="gunlukSutChart"></canvas>
+    </div>
+    <div class="chart-card">
+        <h3>Bu Ayın Günlere Göre Süt Alımı (Litre)</h3>
+        <canvas id="aylikSutChart"></canvas>
+    </div>
+</div>
     <div class="stat-card"><h4>Aktif Müşteri Sayısı</h4><p><span id="dashAktifMusteri">0</span></p></div>
     <div class="stat-card alacak"><h4>Toplam Alacak</h4><p><span id="dashToplamAlacak">0,00 ₺</span></p></div>
     <div class="stat-card borc"><h4>Toplam Borç</h4><p><span id="dashToplamBorc">0,00 ₺</span></p></div>
+    <div class="stat-card">
+    <h4>Toplam Bakiye</h4>
+    <p><span id="dashToplamBakiye">0,00 ₺</span></p>
+</div>
 </div>
                  
             </div>
@@ -666,12 +680,8 @@ async function updateDashboardStats() {
             sabahToplam += doc.data().sabah || 0;
             aksamToplam += doc.data().aksam || 0;
         });
-
-        // YENİ EKLENEN SATIRLAR BAŞLANGICI
         const gunlukToplamSut = sabahToplam + aksamToplam;
         document.getElementById('dashToplamSut').textContent = gunlukToplamSut.toFixed(2);
-        // YENİ EKLENEN SATIRLAR SONU
-
         document.getElementById('dashSabahSut').textContent = sabahToplam.toFixed(2);
         document.getElementById('dashAksamSut').textContent = aksamToplam.toFixed(2);
         
@@ -682,10 +692,10 @@ async function updateDashboardStats() {
     // Bakiye Toplamları
     try {
         const allCarilerSnapshot = await db.collection('cariler').where("sahipId", "==", currentUser.uid).get();
+        let toplamGenelAlacak = 0; // İşletmenin alacağı (Müşterilerin borcu)
+        let toplamGenelBorc = 0;   // İşletmenin borcu (Müşterilerin alacağı)
+        
         if(!allCarilerSnapshot.empty) {
-            let toplamGenelAlacak = 0; // İşletmenin alacağı (Müşterilerin borcu)
-            let toplamGenelBorc = 0;   // İşletmenin borcu (Müşterilerin alacağı)
-            
             const bakiyePromises = allCarilerSnapshot.docs.map(doc => calculateCariBakiyeDetayli(doc.id));
             const tumBakiyeler = await Promise.all(bakiyePromises);
             
@@ -696,11 +706,29 @@ async function updateDashboardStats() {
                     toplamGenelAlacak += Math.abs(bakiyeDetay.bakiye);
                 }
             });
-
-            document.getElementById('dashToplamAlacak').textContent = formatCurrency(toplamGenelAlacak);
-            document.getElementById('dashToplamBorc').textContent = formatCurrency(toplamGenelBorc);
         }
+        
+        const toplamBakiye = toplamGenelAlacak - toplamGenelBorc;
+        document.getElementById('dashToplamAlacak').textContent = formatCurrency(toplamGenelAlacak);
+        document.getElementById('dashToplamBorc').textContent = formatCurrency(toplamGenelBorc);
+        document.getElementById('dashToplamBakiye').textContent = formatCurrency(toplamBakiye);
+
+        // Bakiye kartına renk ver
+        const bakiyeKarti = document.getElementById('dashToplamBakiye').closest('.stat-card');
+        bakiyeKarti.classList.remove('alacak', 'borc');
+        if (toplamBakiye >= 0) {
+            bakiyeKarti.classList.add('alacak');
+        } else {
+            bakiyeKarti.classList.add('borc');
+        }
+
     } catch (e) { console.error("Dashboard bakiye toplamları alınırken hata", e); }
+
+    // Grafik fonksiyonlarını çağır
+    try {
+        if (typeof renderGunlukSutGrafik === 'function') renderGunlukSutGrafik();
+        if (typeof renderAylikSutGrafik === 'function') renderAylikSutGrafik();
+    } catch(e) { console.error("Grafikler oluşturulurken hata", e); }
 }
 
 // --- CARİ YÖNETİMİ FONKSİYONLARI ---
@@ -822,7 +850,103 @@ async function renderCariListesi() {
     }
 }
 
+        let gunlukChartInstance = null;
+let aylikChartInstance = null;
+
+async function renderGunlukSutGrafik() {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+
+    const labels = [];
+    const data = [];
+    
+    // Son 7 günün verisini çek
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const tarihStr = d.toISOString().split('T')[0];
+        labels.push(d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }));
         
+        const snapshot = await db.collection('sut_alimlari')
+            .where('sahipId', '==', currentUser.uid)
+            .where('tarih', '==', tarihStr)
+            .get();
+        
+        let gunlukToplam = 0;
+        snapshot.forEach(doc => {
+            gunlukToplam += doc.data().toplam;
+        });
+        data.push(gunlukToplam);
+    }
+
+    const ctx = document.getElementById('gunlukSutChart').getContext('2d');
+    if(gunlukChartInstance) {
+        gunlukChartInstance.destroy(); // Önceki grafiği temizle
+    }
+    gunlukChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Toplam Süt (Lt)',
+                data: data,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: { scales: { y: { beginAtZero: true } } }
+    });
+}
+
+async function renderAylikSutGrafik() {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    const startDateStr = new Date(year, month, 1).toISOString().split('T')[0];
+    const endDateStr = new Date(year, month, daysInMonth).toISOString().split('T')[0];
+
+    const snapshot = await db.collection('sut_alimlari')
+        .where('sahipId', '==', currentUser.uid)
+        .where('tarih', '>=', startDateStr)
+        .where('tarih', '<=', endDateStr)
+        .get();
+
+    const labels = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    const data = Array(daysInMonth).fill(0);
+
+    snapshot.forEach(doc => {
+        const alim = doc.data();
+        const gunIndex = new Date(alim.tarih).getUTCDate() - 1;
+        if(gunIndex >= 0 && gunIndex < daysInMonth) {
+            data[gunIndex] += alim.toplam;
+        }
+    });
+
+    const ctx = document.getElementById('aylikSutChart').getContext('2d');
+    if(aylikChartInstance) {
+        aylikChartInstance.destroy();
+    }
+    aylikChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Toplam Süt (Lt)',
+                data: data,
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+        options: { scales: { y: { beginAtZero: true } } }
+    });
+}
 async function editCari(id) { 
     try {
         const doc = await db.collection('cariler').doc(id).get();
@@ -2304,7 +2428,8 @@ window.onafterprint = () => {
         el.classList.remove('print-section-active');
     });
 };
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 // --- END: TAM VE DÜZELTİLMİŞ JAVASCRIPT KODU ---
 </script>
 </body>
