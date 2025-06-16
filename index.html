@@ -34,6 +34,7 @@
     </div>
 
     <div class="main-content">
+
         <section id="dashboard" class="module-section">
     <div class="module-header"><h2>📝 Kontrol Paneli</h2></div>
     <div class="container">
@@ -50,27 +51,27 @@
         </div>
 
         <div class="charts-container">
-    <div class="chart-card">
-        <h3>Günlük Süt Dağılımı</h3>
-        <div class="chart-filters">
-            <input type="date" id="pastaGunlukTarih">
-            <button id="pastaGunlukGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
+            <div class="chart-card">
+                <h3>Günlük Süt Dağılımı</h3>
+                <div class="chart-filters">
+                    <input type="date" id="pastaGunlukTarih">
+                    <button id="pastaGunlukGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="gunlukPastaGrafik"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>Aylık Süt Dağılımı</h3>
+                <div class="chart-filters">
+                    <input type="month" id="pastaAylikTarih">
+                    <button id="pastaAylikGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="aylikPastaGrafik"></canvas>
+                </div>
+            </div>
         </div>
-        <div class="chart-wrapper">
-            <canvas id="gunlukPastaGrafik"></canvas>
-        </div>
-    </div>
-    <div class="chart-card">
-        <h3>Aylık Süt Dağılımı</h3>
-        <div class="chart-filters">
-            <input type="month" id="pastaAylikTarih">
-            <button id="pastaAylikGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
-        </div>
-        <div class="chart-wrapper">
-            <canvas id="aylikPastaGrafik"></canvas>
-        </div>
-    </div>
-</div>
 
     </div>
 </section>
