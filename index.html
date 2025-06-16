@@ -830,99 +830,135 @@ function generateRandomColors(count) {
 }
 
 // GÜNLÜK PASTA GRAFİĞİ OLUŞTURMA FONKSİYONU
+// GÜNLÜK KATEGORİ BAZLI PASTA GRAFİĞİ
 async function renderGunlukPastaGrafik() {
     const tarih = document.getElementById('pastaGunlukTarih').value;
-    if (!tarih) { alert("Lütfen günlük grafik için bir tarih seçin."); return; }
-
+    if (!tarih) {
+        alert("Lütfen günlük grafik için bir tarih seçin.");
+        return;
+    }
+    
     const currentUser = auth.currentUser;
     if (!currentUser) return;
 
-    const snapshot = await db.collection('sut_alimlari')
-        .where('sahipId', '==', currentUser.uid)
-        .where('tarih', '==', tarih)
-        .get();
+    try {
+        // Önce tüm carileri ve kategorilerini bir haritaya alalım
+        const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', currentUser.uid).get();
+        const cariKategoriMap = new Map();
+        carilerSnapshot.forEach(doc => {
+            cariKategoriMap.set(doc.id, doc.data().kategori || 'Belirtilmemiş');
+        });
 
-    const dataByCari = {};
-    snapshot.forEach(doc => {
-        const alim = doc.data();
-        if (!dataByCari[alim.cariAdi]) {
-            dataByCari[alim.cariAdi] = 0;
-        }
-        dataByCari[alim.cariAdi] += alim.toplam;
-    });
+        // Seçilen tarihteki tüm süt alımlarını çekelim
+        const alimlarSnapshot = await db.collection('sut_alimlari')
+            .where('sahipId', '==', currentUser.uid)
+            .where('tarih', '==', tarih)
+            .get();
 
-    const labels = Object.keys(dataByCari);
-    const data = Object.values(dataByCari);
-    const colors = generateRandomColors(labels.length);
+        // Alımları kategoriye göre gruplayarak toplayalım
+        const dataByKategori = {};
+        alimlarSnapshot.forEach(doc => {
+            const alim = doc.data();
+            const kategori = cariKategoriMap.get(alim.cariId);
+            if (kategori) { // Sadece kategorisi bilinen carileri dahil et
+                if (!dataByKategori[kategori]) {
+                    dataByKategori[kategori] = 0;
+                }
+                dataByKategori[kategori] += alim.toplam;
+            }
+        });
 
-    const ctx = document.getElementById('gunlukPastaGrafik').getContext('2d');
-    if (gunlukPastaChartInstance) gunlukPastaChartInstance.destroy();
+        const labels = Object.keys(dataByKategori);
+        const data = Object.values(dataByKategori);
+        const colors = generateRandomColors(labels.length);
 
-    gunlukPastaChartInstance = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Süt Miktarı (Lt)',
-                data: data,
-                backgroundColor: colors,
-            }]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
-    });
+        const ctx = document.getElementById('gunlukPastaGrafik').getContext('2d');
+        if (gunlukPastaChartInstance) gunlukPastaChartInstance.destroy();
+        
+        gunlukPastaChartInstance = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Süt Miktarı (Lt)',
+                    data: data,
+                    backgroundColor: colors,
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    } catch (error) {
+        console.error("Günlük kategori grafiği oluşturulurken hata:", error);
+    }
 }
 
-// AYLIK PASTA GRAFİĞİ OLUŞTURMA FONKSİYONU
+// AYLIK KATEGORİ BAZLI PASTA GRAFİĞİ
 async function renderAylikPastaGrafik() {
     const ayYil = document.getElementById('pastaAylikTarih').value;
-    if (!ayYil) { alert("Lütfen aylık grafik için bir ay seçin."); return; }
+    if (!ayYil) {
+        alert("Lütfen aylık grafik için bir ay seçin.");
+        return;
+    }
 
     const currentUser = auth.currentUser;
     if (!currentUser) return;
-
+    
     const [year, month] = ayYil.split('-');
-    const startDateStr = `<span class="math-inline">\{year\}\-</span>{month}-01`;
+    const startDateStr = `${year}-${month}-01`;
     const endDate = new Date(year, month, 0);
     const endDateStr = endDate.toISOString().split('T')[0];
 
-    const snapshot = await db.collection('sut_alimlari')
-        .where('sahipId', '==', currentUser.uid)
-        .where('tarih', '>=', startDateStr)
-        .where('tarih', '<=', endDateStr)
-        .get();
+    try {
+        // Önce tüm carileri ve kategorilerini bir haritaya alalım
+        const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', currentUser.uid).get();
+        const cariKategoriMap = new Map();
+        carilerSnapshot.forEach(doc => {
+            cariKategoriMap.set(doc.id, doc.data().kategori || 'Belirtilmemiş');
+        });
 
-    const dataByCari = {};
-    snapshot.forEach(doc => {
-        const alim = doc.data();
-        if (!dataByCari[alim.cariAdi]) {
-            dataByCari[alim.cariAdi] = 0;
-        }
-        dataByCari[alim.cariAdi] += alim.toplam;
-    });
+        // Seçilen aydaki tüm süt alımlarını çekelim
+        const alimlarSnapshot = await db.collection('sut_alimlari')
+            .where('sahipId', '==', currentUser.uid)
+            .where('tarih', '>=', startDateStr)
+            .where('tarih', '<=', endDateStr)
+            .get();
 
-    const labels = Object.keys(dataByCari);
-    const data = Object.values(dataByCari);
-    const colors = generateRandomColors(labels.length);
+        // Alımları kategoriye göre gruplayarak toplayalım
+        const dataByKategori = {};
+        alimlarSnapshot.forEach(doc => {
+            const alim = doc.data();
+            const kategori = cariKategoriMap.get(alim.cariId);
+            if (kategori) {
+                if (!dataByKategori[kategori]) {
+                    dataByKategori[kategori] = 0;
+                }
+                dataByKategori[kategori] += alim.toplam;
+            }
+        });
 
-    const ctx = document.getElementById('aylikPastaGrafik').getContext('2d');
-    if (aylikPastaChartInstance) aylikPastaChartInstance.destroy();
+        const labels = Object.keys(dataByKategori);
+        const data = Object.values(dataByKategori);
+        const colors = generateRandomColors(labels.length);
 
-    aylikPastaChartInstance = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Toplam Süt (Lt)',
-                data: data,
-                backgroundColor: colors,
-            }]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
-    });
+        const ctx = document.getElementById('aylikPastaGrafik').getContext('2d');
+        if (aylikPastaChartInstance) aylikPastaChartInstance.destroy();
+        
+        aylikPastaChartInstance = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Toplam Süt (Lt)',
+                    data: data,
+                    backgroundColor: colors,
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    } catch (error) {
+        console.error("Aylık kategori grafiği oluşturulurken hata:", error);
+    }
 }
-
-
-
 
         
 async function editCari(id) { 
