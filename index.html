@@ -300,17 +300,51 @@
                     </div>
                 </div>
                 <hr>
-                <div class="settings-section"><h3>Cari Kategori/Köy Tanımları</h3><form id="cariKategoriForm" action="#">
-                    <div class="form-grid" style="grid-template-columns: 1fr auto; align-items:end;"><div class="form-group" style="margin-bottom:0;">
-                        <label for="yeniCariKategoriAdi">Yeni Ad:</label><input type="text" id="yeniCariKategoriAdi" required></div>
-                        <button type="submit" class="btn" style="height:45px;">Ekle</button></div></form><div class="list-section" style="margin-top:20px;">
-                            <h4>Tanımlı Kategoriler/Köyler</h4><ul id="cariKategoriListesiUl"></ul></div></div>
-
+                <div class="settings-section">
+                    <h3>Cari Kategori/Köy Tanımları</h3>
+                    <form id="cariKategoriForm" action="#">
+                        <div class="form-grid" style="grid-template-columns: 1fr auto; align-items:end;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label for="yeniCariKategoriAdi">Yeni Ad:</label>
+                                <input type="text" id="yeniCariKategoriAdi" required>
+                            </div>
+                            <button type="submit" class="btn" style="height:45px;">Ekle</button>
+                        </div>
                     </form>
-                <div class="list-section"><h4>Kullanıcı Listesi</h4><table><thead><tr><th>Kullanıcı Adı</th><th>Rol</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="kullaniciListesiBody"></tbody></table></div></div>
+                    <div class="list-section" style="margin-top:20px;">
+                        <h4>Tanımlı Kategoriler/Köyler</h4>
+                        <ul id="cariKategoriListesiUl"></ul>
+                    </div>
+                </div>
+                <hr class="dont-calisan">
+                <div class="settings-section dont-calisan">
+                    <h3>Kullanıcı Yönetimi</h3>
+                    <form id="kullaniciForm">
+                        <input type="hidden" id="kullaniciEditId">
+                        <div class="form-grid">
+                            <div class="form-group"><label for="kullaniciAdi">Kullanıcı E-posta:</label><input type="email" id="kullaniciAdi" required></div>
+                            <div class="form-group"><label for="kullaniciSifre">Şifre:</label><input type="password" id="kullaniciSifre" required></div>
+                        </div>
+                        <button type="submit" class="btn" id="kullaniciKaydetBtn">Çalışan Ekle</button>
+                    </form>
+                    <div class="list-section">
+                        <h4>Kullanıcı Listesi</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Kullanıcı Adı</th>
+                                    <th>Rol</th>
+                                    <th class="dont-print">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody id="kullaniciListesiBody"></tbody>
+                        </table>
+                    </div>
+                </div>
              </div>
         </section>
-    <section id="hareket-dokumu" class="module-section hidden-section">
+
+        <section id="hareket-dokumu" class="module-section hidden-section">
             <div class="module-header"><h2>📋 Hareket Dökümü</h2></div>
             <div class="container">
                 <div class="list-section">
@@ -326,15 +360,15 @@
                             </tr>
                         </thead>
                         <tbody id="hareketDokumuBody">
-                            </tbody>
+                        </tbody>
                     </table>
                 </div>
             </div>
-        </div> <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
         </section>
         
-    </div>
+    </div> ```
 
+Bu düzeltme, "Hareket Dökümü" bölümünü doğru yere yerleştirir ve hatalı etiketleri temizleyerek sayfa düzeninizin normale dönmesini sağlar.
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
