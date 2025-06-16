@@ -78,52 +78,25 @@ tfoot tr { background-color: #e9ecef; font-weight: bold; color: #2c3e50; }
   
   /* Sayfa kenarlarındaki gri rengi kaldırmak için */
   html, body {
-    background-color: #ffffff !important;
     background: #ffffff !important;
     margin: 0 !important;
     padding: 0 !important;
-    width: 100%;
-    height: 100%;
   }
 
-  /* Yazdırılmayacak ve sadece yazdırılacak elemanlar */
-  .dont-print, .logout-link, .sidebar {
+  /* Yazdırılmayacak elemanları gizle */
+  .dont-print, .sidebar, .module-header, .form-section, .report-section > .form-grid, .report-section > hr {
     display: none !important;
-  }
-  .print-only {
-    display: block !important;
   }
 
   /* Sadece yazdırılacak bölümün görünmesini sağla */
-  body.print-active > * {
-    display: none !important;
-  }
-  body.print-active .main-content {
-    display: block !important;
-    margin: 0 !important;
-    padding: 1cm !important; /* Sayfa kenar boşluğu */
-  }
-  body.print-active .main-content > .module-section {
-    display: none !important;
-  }
-  body.print-active .main-content > .print-section-active {
-    display: block !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
+  body.print-active > * { display: none !important; }
+  body.print-active .main-content { display: block !important; margin: 0; padding: 0; }
+  body.print-active .main-content > .module-section { display: none !important; }
+  body.print-active .main-content > .print-section-active { display: block !important; border: none; box-shadow: none; }
   
-  /* Rapor içindeki gereksiz başlıkları ve formları gizle */
-  .print-section-active .module-header,
-  .print-section-active .form-section,
-  .print-section-active .report-section > .form-grid,
-  .print-section-active hr {
-    display: none !important;
-  }
-
-  /* Tablo stillerini yazdırma için optimize et */
-  table {
-    font-size: 8pt;
-    margin-top: 5px !important;
+  /* Rapor Tablosu Stilleri (Daha Dar Satırlar) */
+  .report-table, .summary-table {
+    font-size: 9pt; /* Okunabilirlik için font biraz büyütüldü */
     width: 100% !important;
     border-collapse: collapse !important;
     page-break-inside: auto;
@@ -133,34 +106,39 @@ tfoot tr { background-color: #e9ecef; font-weight: bold; color: #2c3e50; }
       page-break-after: auto;
   }
   thead {
-      display: table-header-group; /* Başlıkların her sayfada tekrarlanmasını sağlar */
+      display: table-header-group;
   }
-  tfoot {
-      display: table-footer-group;
-  }
-  th, td {
-    padding: 4px 6px !important;
+  /* SATIRLARI DARALTMAK İÇİN PADDING AZALTILDI */
+  th, td { 
+    padding: 2px 4px !important; 
     border: 1px solid #333 !important;
     text-align: left;
-    word-wrap: break-word;
   }
   
-  /* --- GRİ ARKA PLAN SORUNUNUN KESİN ÇÖZÜMÜ --- */
-  /* Tablo başlıklarının (th) ve toplam satırının arka planını BEYAZ yap */
-  th, .report-totals-row {
+  /* ARKA PLANLARI BEYAZ YAPMAK İÇİN */
+  th, tfoot tr {
     background-color: #ffffff !important;
     color: #000000 !important;
   }
 
-  /* Rapor başlık stilleri */
+  /* Rapor Başlıkları */
   h1.print-title, h3.print-title, h4#raporBaslik {
     font-size: 12pt;
-    text-align: center;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     color: #000;
   }
+  .report-block {
+      page-break-inside: avoid;
+      margin-bottom: 8px;
+  }
+   .report-block h5 {
+        font-size: 10pt;
+        margin-top: 8px;
+        margin-bottom: 4px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 2px;
+    }
 }
-
 @page {
     size: A4 portrait;
     margin: 1.5cm;
