@@ -640,8 +640,6 @@ async function updateDashboardStats() {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
     const todayStr = getTodayForInput();
-
-    // Süt ve Aktif Müşteri İstatistikleri
     try {
         const sutSnapshot = await db.collection('sut_alimlari').where("sahipId", "==", currentUser.uid).where("tarih", "==", todayStr).get();
         let sabahToplam = 0, aksamToplam = 0;
@@ -649,57 +647,37 @@ async function updateDashboardStats() {
             sabahToplam += doc.data().sabah || 0;
             aksamToplam += doc.data().aksam || 0;
         });
-        const gunlukToplamSut = sabahToplam + aksamToplam;
-        document.getElementById('dashToplamSut').textContent = gunlukToplamSut.toFixed(2);
         document.getElementById('dashSabahSut').textContent = sabahToplam.toFixed(2);
         document.getElementById('dashAksamSut').textContent = aksamToplam.toFixed(2);
+        document.getElementById('dashToplamSut').textContent = (sabahToplam + aksamToplam).toFixed(2);
         
         const carilerSnapshot = await db.collection('cariler').where("sahipId", "==", currentUser.uid).where("durum", "==", "aktif").get();
         document.getElementById('dashAktifMusteri').textContent = carilerSnapshot.size;
     } catch (e) { console.error("Dashboard temel istatistikleri alınırken hata", e); }
     
-    // Bakiye Toplamları
     try {
         const allCarilerSnapshot = await db.collection('cariler').where("sahipId", "==", currentUser.uid).get();
-        let toplamGenelAlacak = 0; // İşletmenin alacağı (Müşterilerin borcu)
-        let toplamGenelBorc = 0;   // İşletmenin borcu (Müşterilerin alacağı)
-        
+        let toplamAlacak = 0, toplamBorc = 0;
         if(!allCarilerSnapshot.empty) {
             const bakiyePromises = allCarilerSnapshot.docs.map(doc => calculateCariBakiyeDetayli(doc.id));
             const tumBakiyeler = await Promise.all(bakiyePromises);
-            
-            tumBakiyeler.forEach(bakiyeDetay => {
-                if (bakiyeDetay.bakiye > 0) {
-                    toplamGenelBorc += bakiyeDetay.bakiye;
-                } else {
-                    toplamGenelAlacak += Math.abs(bakiyeDetay.bakiye);
-                }
+            tumBakiyeler.forEach(bakiye => {
+                toplamAlacak += bakiye.alacak;
+                toplamBorc += bakiye.borc;
             });
         }
-        
-        const toplamBakiye = toplamGenelAlacak - toplamGenelBorc;
-        document.getElementById('dashToplamAlacak').textContent = formatCurrency(toplamGenelAlacak);
-        document.getElementById('dashToplamBorc').textContent = formatCurrency(toplamGenelBorc);
-        document.getElementById('dashToplamBakiye').textContent = formatCurrency(toplamBakiye);
+        document.getElementById('dashToplamAlacak').textContent = formatCurrency(toplamAlacak);
+        document.getElementById('dashToplamBorc').textContent = formatCurrency(toplamBorc);
 
-        // Bakiye kartına renk ver
-        const bakiyeKarti = document.getElementById('dashToplamBakiye').closest('.stat-card');
-        bakiyeKarti.classList.remove('alacak', 'borc');
-        if (toplamBakiye >= 0) {
-            bakiyeKarti.classList.add('alacak');
-        } else {
-            bakiyeKarti.classList.add('borc');
-        }
-
+        const total = toplamAlacak + toplamBorc;
+        const alacakYuzde = total > 0 ? (toplamAlacak / total) * 100 : 0;
+        const borcYuzde = total > 0 ? (toplamBorc / total) * 100 : 0;
+        document.getElementById('alacakBar').style.width = alacakYuzde + '%';
+        document.getElementById('borcBar').style.width = borcYuzde + '%';
     } catch (e) { console.error("Dashboard bakiye toplamları alınırken hata", e); }
 
-    // Grafik fonksiyonlarını çağır
-    try {
-        if (typeof renderGunlukSutGrafik === 'function') renderGunlukSutGrafik();
-        if (typeof renderAylikSutGrafik === 'function') renderAylikSutGrafik();
-    } catch(e) { console.error("Grafikler oluşturulurken hata", e); }
+    try { await renderGunlukSutGrafik(); await renderAylikSutGrafik(); } catch(e) { console.error("Grafikler oluşturulurken hata", e); }
 }
-
 // --- CARİ YÖNETİMİ FONKSİYONLARI ---
 async function handleCariKaydet(event) {
     event.preventDefault();
