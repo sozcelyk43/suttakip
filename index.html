@@ -10,7 +10,7 @@
     <link rel="apple-touch-icon" href="/icon-192x192.png">
 </head>
 <body>
-    <div class="sidebar">
+<div class="sidebar">
         <img src="logo.png" alt="Uygulama Logosu" class="sidebar-logo">
         <nav id="sidebarNav">
             <ul>
@@ -24,7 +24,6 @@
                 <li><a href="#sut-alim-raporu" class="nav-link">🗓️ Aylık Süt Raporu</a></li>
                 <li><a href="#aylik-yem-raporu" class="nav-link">📈 Aylık Yem Raporu</a></li>
                 <li><a href="#hareket-dokumu" class="nav-link">📋 Hareket Dökümü</a></li>
-
                 <li><a href="#ayarlar" class="nav-link">⚙️ Ayarlar</a></li>
                 <li class="logout-link">
                     <a href="#" id="logoutButton">🚪 Çıkış Yap</a>
@@ -35,82 +34,48 @@
 
     <div class="main-content">
 
-        <section id="dashboard" class="module-section">
-    <div class="module-header"><h2>📝 Kontrol Paneli</h2></div>
-    <div class="container">
-
-        <h3>Genel Durum</h3>
-        <div class="dashboard-grid">
-            <div class="stat-card"><h4>Bugünkü Sabah Sütü</h4><p><span id="dashSabahSut">0.00</span> Lt</p></div>
-            <div class="stat-card"><h4>Bugünkü Akşam Sütü</h4><p><span id="dashAksamSut">0.00</span> Lt</p></div>
-            <div class="stat-card"><h4>Bugünkü Toplam Süt</h4><p><span id="dashToplamSut">0.00</span> Lt</p></div>
-            <div class="stat-card"><h4>Aktif Müşteri Sayısı</h4><p><span id="dashAktifMusteri">0</span></p></div>
-            <div class="stat-card alacak"><h4>Toplam Alacak</h4><p><span id="dashToplamAlacak">0,00 ₺</span></p></div>
-            <div class="stat-card borc"><h4>Toplam Borç</h4><p><span id="dashToplamBorc">0,00 ₺</span></p></div>
-            <div class="stat-card"><h4>Toplam Bakiye</h4><p><span id="dashToplamBakiye">0,00 ₺</span></p></div>
-        </div>
-
-        <div class="charts-container">
-    <div class="chart-card">
-        <h3>Günlük Süt Dağılımı</h3>
-        <div class="chart-filters">
-            <input type="date" id="pastaGunlukTarih">
-            <button id="pastaGunlukGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
-        </div>
-        <div class="chart-wrapper">
-            <canvas id="gunlukPastaGrafik"></canvas>
-        </div>
-    </div>
-    <div class="chart-card">
-        <h3>Aylık Süt Dağılımı</h3>
-        <div class="chart-filters">
-            <input type="month" id="pastaAylikTarih">
-            <button id="pastaAylikGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
-        </div>
-        <div class="chart-wrapper">
-            <canvas id="aylikPastaGrafik"></canvas>
-            <div class="chart-card">
-                <h3>Günlük Süt Dağılımı</h3>
-                <div class="chart-filters">
-                    <input type="date" id="pastaGunlukTarih">
-                    <button id="pastaGunlukGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
+        <section id="dashboard" class="module-section active">
+            <div class="module-header"><h2>📝 Kontrol Paneli</h2></div>
+            <div class="container">
+                <h3>Genel Durum</h3>
+                <div class="dashboard-grid">
+                    <div class="stat-card"><h4>Bugünkü Sabah Sütü</h4><p><span id="dashSabahSut">0.00</span> Lt</p></div>
+                    <div class="stat-card"><h4>Bugünkü Akşam Sütü</h4><p><span id="dashAksamSut">0.00</span> Lt</p></div>
+                    <div class="stat-card"><h4>Bugünkü Toplam Süt</h4><p><span id="dashToplamSut">0.00</span> Lt</p></div>
+                    <div class="stat-card"><h4>Aktif Müşteri Sayısı</h4><p><span id="dashAktifMusteri">0</span></p></div>
+                    <div class="stat-card alacak"><h4>Toplam Alacak</h4><p><span id="dashToplamAlacak">0,00 ₺</span></p></div>
+                    <div class="stat-card borc"><h4>Toplam Borç</h4><p><span id="dashToplamBorc">0,00 ₺</span></p></div>
+                    <div class="stat-card"><h4>Toplam Bakiye</h4><p><span id="dashToplamBakiye">0,00 ₺</span></p></div>
                 </div>
-                <div class="chart-wrapper">
-                    <canvas id="gunlukPastaGrafik"></canvas>
+
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>Günlük Süt Dağılımı</h3>
+                        <div class="chart-filters">
+                            <input type="date" id="pastaGunlukTarih">
+                            <button id="pastaGunlukGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="gunlukPastaGrafik"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Aylık Süt Dağılımı</h3>
+                        <div class="chart-filters">
+                            <input type="month" id="pastaAylikTarih">
+                            <button id="pastaAylikGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="aylikPastaGrafik"></canvas>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="chart-card">
-                <h3>Aylık Süt Dağılımı</h3>
-                <div class="chart-filters">
-                    <input type="month" id="pastaAylikTarih">
-                    <button id="pastaAylikGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
-                </div>
-                <div class="chart-wrapper">
-                    <canvas id="aylikPastaGrafik"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
-    <div class="stat-card"><h4>Aktif Müşteri Sayısı</h4><p><span id="dashAktifMusteri">0</span></p></div>
-    <div class="stat-card alacak"><h4>Toplam Alacak</h4><p><span id="dashToplamAlacak">0,00 ₺</span></p></div>
-    <div class="stat-card borc"><h4>Toplam Borç</h4><p><span id="dashToplamBorc">0,00 ₺</span></p></div>
-    <div class="stat-card">
-    <h4>Toplam Bakiye</h4>
-    <p><span id="dashToplamBakiye">0,00 ₺</span></p>
-</div>
-</div>
-
             </div>
         </section>
 
         <section id="cari-yonetimi" class="module-section">
             <div class="module-header">
                 <h2>👥 Cari Yönetimi</h2>
-
             </div>
             <div class="container">
                 <div class="form-section"><h3><span id="cariFormBaslik">Yeni Cari Kart</span></h3><form id="cariForm" action="#"><input type="hidden" id="cariEditId"><div class="form-grid">
@@ -118,26 +83,26 @@
                     <div class="form-group"><label for="cariAdiSoyadi">Adı Soyadı / Firma Adı:</label><input type="text" id="cariAdiSoyadi" required></div>
                     <div class="form-group"><label for="cariKategori">Kategori/Köy:</label><select id="cariKategori" required><option value="">Seçiniz...</option></select></div>
                     <div class="form-group">
-    <label for="cariAcilisBakiye">Açılış Bakiyesi:</label>
-    <input type="number" id="cariAcilisBakiye" placeholder="Örn: 500" step="0.01">
-</div>
-<div class="form-group">
-    <label for="cariAcilisBakiyeTuru">Bakiye Türü:</label>
-    <select id="cariAcilisBakiyeTuru">
-        <option value="yok">Yok</option>
-        <option value="borc">Cari Borçlu</option>
-        <option value="alacak">Cari Alacaklı</option>
-    </select>
-</div>
+                        <label for="cariAcilisBakiye">Açılış Bakiyesi:</label>
+                        <input type="number" id="cariAcilisBakiye" placeholder="Örn: 500" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="cariAcilisBakiyeTuru">Bakiye Türü:</label>
+                        <select id="cariAcilisBakiyeTuru">
+                            <option value="yok">Yok</option>
+                            <option value="borc">Cari Borçlu</option>
+                            <option value="alacak">Cari Alacaklı</option>
+                        </select>
+                    </div>
                     <div class="form-group"><label for="cariDurum">Durum:</label><select id="cariDurum"><option value="aktif">Aktif</option><option value="pasif">Pasif</option></select></div>
                    <div class="form-group">
-    <label for="cariTipi">Cari Tipi:</label>
-    <select id="cariTipi">
-        <option value="sut_ve_yem">Süt ve Yem</option>
-        <option value="sadece_sut">Sadece Süt</option>
-        <option value="sadece_yem">Sadece Yem</option>
-    </select>
-</div>
+                        <label for="cariTipi">Cari Tipi:</label>
+                        <select id="cariTipi">
+                            <option value="sut_ve_yem">Süt ve Yem</option>
+                            <option value="sadece_sut">Sadece Süt</option>
+                            <option value="sadece_yem">Sadece Yem</option>
+                        </select>
+                    </div>
                     <div class="form-group"><label for="cariTelefon">Telefon:</label><input type="tel" id="cariTelefon"></div>
                     <div class="form-group"><label for="cariEposta">E-posta:</label><input type="email" id="cariEposta"></div>
                     <div class="form-group" style="grid-column: span 2;"><label for="cariAdres">Adres:</label><textarea id="cariAdres"></textarea></div>
@@ -153,26 +118,26 @@
                     <div class="list-section">
                         <div class="list-header-with-filter">
                             <h3>Cari Listesi</h3>
-        <div class="search-container dont-calisan"> <input type="text" id="cariSearchInput" placeholder="Cari Ara..." aria-label="Cari Arama Kutusu"> </div>
-
+                            <div class="search-container dont-calisan"> <input type="text" id="cariSearchInput" placeholder="Cari Ara..." aria-label="Cari Arama Kutusu"> </div>
                             <select id="cariKategoriFiltre">
                                 <option value="">Tüm Kategoriler</option>
                             </select>
                         </div>
                         <table>
-<thead>
-    <tr>
-        <th>Kod</th>
-        <th>Ad/Firma</th>
-        <th>Kategori</th>
-        <th>Durum</th>
-        <th>Telefon</th>
-        <th>Borç</th>
-        <th>Alınan</th>
-        <th>Bakiye</th>
-        <th class="dont-print">İşlemler</th>
-    </tr>
-</thead>                 <tbody id="cariListesiBody"></tbody>
+                            <thead>
+                                <tr>
+                                    <th>Kod</th>
+                                    <th>Ad/Firma</th>
+                                    <th>Kategori</th>
+                                    <th>Durum</th>
+                                    <th>Telefon</th>
+                                    <th>Borç</th>
+                                    <th>Alınan</th>
+                                    <th>Bakiye</th>
+                                    <th class="dont-print">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cariListesiBody"></tbody>
                             <tfoot id="cariListesiFooter"></tfoot>
                         </table>
                     </div>
@@ -199,25 +164,25 @@
                 <hr style="margin: 40px 0;">
                 <div class="list-section">
                     <div id="sutDuzenleFormAlani" style="display:none; margin-bottom: 20px;">
-    <h4>Süt Alımını Düzenle</h4>
-    <form id="sutDuzenleForm" class="form-grid" style="grid-template-columns: 1fr 1fr 1fr auto auto;">
-        <input type="hidden" id="sutDuzenleId">
-        <div class="form-group">
-            <label>Sabah (Lt)</label>
-            <input type="number" id="sutDuzenleSabah" class="sut-input" step="0.1" min="0">
-        </div>
-        <div class="form-group">
-            <label>Akşam (Lt)</label>
-            <input type="number" id="sutDuzenleAksam" class="sut-input" step="0.1" min="0">
-        </div>
-        <div class="form-group">
-            <label>Fiyat</label>
-            <input type="number" id="sutDuzenleFiyat" class="sut-input" step="0.01" min="0">
-        </div>
-        <button type="submit" class="btn btn-primary" style="height: 45px; align-self: end;">Güncelle</button>
-        <button type="button" class="btn" style="height: 45px; align-self: end;" onclick="closeSutDuzenleForm()">İptal</button>
-    </form>
-</div>
+                        <h4>Süt Alımını Düzenle</h4>
+                        <form id="sutDuzenleForm" class="form-grid" style="grid-template-columns: 1fr 1fr 1fr auto auto;">
+                            <input type="hidden" id="sutDuzenleId">
+                            <div class="form-group">
+                                <label>Sabah (Lt)</label>
+                                <input type="number" id="sutDuzenleSabah" class="sut-input" step="0.1" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Akşam (Lt)</label>
+                                <input type="number" id="sutDuzenleAksam" class="sut-input" step="0.1" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Fiyat</label>
+                                <input type="number" id="sutDuzenleFiyat" class="sut-input" step="0.01" min="0">
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="height: 45px; align-self: end;">Güncelle</button>
+                            <button type="button" class="btn" style="height: 45px; align-self: end;" onclick="closeSutDuzenleForm()">İptal</button>
+                        </form>
+                    </div>
                     <h3>Süt Alım Geçmişi (Seçili Tarih: <span id="gecmisTarihSpan"></span>)</h3>
                     <table>
                         <thead id="sutAlimGecmisiHeader"></thead>
@@ -251,6 +216,7 @@
                 <div class="list-section"><h3>Yem Alış Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Yem</th><th>Miktar</th><th>Cari</th><th>Alış F.</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemAlisHareketListesiBody"></tbody></table></div>
              </div>
         </section>
+
         <section id="yem-satisi" class="module-section hidden-section">
              <div class="module-header"><h2>🌾 Yem Satışı</h2></div>
              <div class="container">
@@ -265,6 +231,7 @@
                 <div class="list-section"><h3>Yem Satış Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Alan Cari</th><th>Yem</th><th>Miktar</th><th>Fiyat</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemSatisListesiBody"></tbody></table></div>
              </div>
         </section>
+
         <section id="tahsilat-ve-odemeler" class="module-section hidden-section">
             <div class="module-header"><h2>💳 Tahsilat ve Ödemeler</h2></div>
             <div class="container">
@@ -278,6 +245,7 @@
                  <div class="list-section"><h3>İşlem Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Cari</th><th>İşlem Türü</th><th>Tutar</th><th>Açıklama</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="odemeListesiBody"></tbody></table></div>
             </div>
         </section>
+
         <section id="hesap-ozeti" class="module-section">
             <div class="module-header dont-print"><h2>📊 Cari Hesap Özeti</h2></div>
             <div class="container">
@@ -297,6 +265,7 @@
                 </div>
             </div>
         </section>
+
         <section id="sut-alim-raporu" class="module-section">
              <div class="module-header dont-print"><h2>🗓️ Aylık Süt Raporu</h2></div>
             <div class="container">
@@ -321,6 +290,7 @@
                  </div>
             </div>
         </section>
+
         <section id="aylik-yem-raporu" class="module-section">
              <div class="module-header"><h2>📈 Aylık Yem Raporu</h2></div>
              <div class="container">
@@ -340,6 +310,7 @@
                  </div>
              </div>
         </section>
+
         <section id="ayarlar" class="module-section hidden-section">
              <div class="module-header"><h2>⚙️ Ayarlar</h2></div>
              <div class="container">
@@ -430,8 +401,7 @@
                 </div>
             </div>
         </section>
-
-    </div> 
+    </div>
    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
