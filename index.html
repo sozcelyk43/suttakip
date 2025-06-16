@@ -871,7 +871,6 @@ async function renderCariListesi() {
         cariListesiFooter.innerHTML = '';
         
         if (cariler.length === 0) {
-            // Colspan 10'a güncellendi
             cariListesiBody.innerHTML = '<tr><td colspan="10" style="text-align:center;">Kayıtlı cari bulunmuyor.</td></tr>';
             return;
         }
@@ -895,12 +894,14 @@ async function renderCariListesi() {
                 const bakiyeStyle = bakiye >= 0 ? 'color:green;' : 'color:red;';
                 const bakiyeText = `${formatCurrency(bakiye)} ${bakiye >= 0 ? '(A)' : '(B)'}`;
                 
-                // YENİ ROTA SIRASI SÜTUNU EKLENDİ
+                // DEĞİŞİKLİK: Rota sırası metni, kategori ile birleştirilerek oluşturuluyor.
+                const rotaSirasiText = c.kategori ? `${c.kategori} - ${c.rotaSirasi || ''}` : (c.rotaSirasi || '');
+
                 row.innerHTML = `
                     <td>${c.kodu || ''}</td>
                     <td>${c.adiSoyadi || ''}</td>
                     <td>${c.kategori || ''}</td>
-                    <td>${c.rotaSirasi || ''}</td>
+                    <td>${rotaSirasiText}</td>
                     <td style="${durumStyle}">${durumText}</td>
                     <td>${c.telefon || ''}</td>
                     <td>${formatCurrency(bakiyeDetay.borc)}</td>
@@ -918,7 +919,6 @@ async function renderCariListesi() {
         const toplamBakiyeStyle = toplamBakiye >= 0 ? 'color:green;' : 'color:red;';
         const etiket = kategori ? `Kategori Toplamı` : 'Genel Toplam';
         
-        // Colspan değeri 6'ya güncellendi
         footerRow.innerHTML = `
             <td colspan="6"><strong>${etiket}</strong></td>
             <td><strong>${formatCurrency(genelToplamBorc)}</strong></td>
