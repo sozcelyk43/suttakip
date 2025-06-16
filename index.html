@@ -739,33 +739,46 @@ async function handleCariKaydet(event) {
     const currentUser = auth.currentUser;
     if (!currentUser) { alert("Lütfen giriş yapın."); return; }
     
-    const formData = {
-        kodu: document.getElementById('cariKodu').value,
-        adiSoyadi: document.getElementById('cariAdiSoyadi').value,
-        kategori: document.getElementById('cariKategori').value,
-        durum: document.getElementById('cariDurum').value,
-        cariTipi: document.getElementById('cariTipi').value, // YENİ EKLENDİ
-        telefon: document.getElementById('cariTelefon').value,
-        eposta: document.getElementById('cariEposta').value,
-        adres: document.getElementById('cariAdres').value,
-        bankaAdi: document.getElementById('cariBankaAdi').value,
-        iban: document.getElementById('cariIban').value,
-        vergiDairesi: document.getElementById('cariVergiDairesi').value,
-        vergiNo: document.getElementById('cariVergiNo').value,
-        notlar: document.getElementById('cariNotlar').value,
-        sahipId: currentUser.uid
-    };
+    const cariAdi = document.getElementById('cariAdiSoyadi').value;
+    if (!cariAdi) { alert("Adı Soyadı / Firma Adı alanı zorunludur."); return; }
 
+    const formData = {
+        kodu: document.getElementById('cariKodu').value, adiSoyadi: cariAdi,
+        kategori: document.getElementById('cariKategori').value, durum: document.getElementById('cariDurum').value,
+        cariTipi: document.getElementById('cariTipi').value, telefon: document.getElementById('cariTelefon').value,
+        eposta: document.getElementById('cariEposta').value, adres: document.getElementById('cariAdres').value,
+        bankaAdi: document.getElementById('cariBankaAdi').value, iban: document.getElementById('cariIban').value,
+        vergiDairesi: document.getElementById('cariVergiDairesi').value, vergiNo: document.getElementById('cariVergiNo').value,
+        notlar: document.getElementById('cariNotlar').value, sahipId: currentUser.uid
+    };
     try {
+        let cariId = editingCariId;
         if (editingCariId) {
             await db.collection('cariler').doc(editingCariId).set(formData, { merge: true });
         } else {
-            await db.collection('cariler').add(formData);
+            const docRef = await db.collection('cariler').add(formData);
+            cariId = docRef.id;
+            
+            const acilisBakiye = parseFloat(document.getElementById('cariAcilisBakiye').value) || 0;
+            const bakiyeTuru = document.getElementById('cariAcilisBakiyeTuru').value;
+
+            if (acilisBakiye > 0 && bakiyeTuru !== 'yok') {
+                const bakiyeData = {
+                    aciklama: "Açılış Bakiyesi", cariId: cariId,
+                    islemTuru: bakiyeTuru, // 'borc' veya 'alacak'
+                    sahipId: currentUser.uid, tarih: new Date(1990, 0, 1).toISOString().split('T')[0], // Çok eski bir tarih
+                    tutar: acilisBakiye
+                };
+                await db.collection('odemeVeTahsilatlar').add(bakiyeData);
+            }
         }
         resetCariForm();
         await renderCariListesi();
     } catch(error) { console.error("Hata: ", error); alert("Cari kaydedilirken bir hata oluştu."); }
 }
+
+
+        
 async function renderCariListesi() {
     const cariListesiBody = document.getElementById('cariListesiBody');
     const cariListesiFooter = document.getElementById('cariListesiFooter');
@@ -855,8 +868,8 @@ async function renderCariListesi() {
 
 
         // Yeni grafikler için global değişkenler
-let gunlukPastaChartInstance = null;
-let aylikPastaChartInstance = null;
+let gunlukSutunChartInstance = null;
+let aylikSutunChartInstance = null;
 
 // Rastgele renk üreten yardımcı fonksiyon
 function generateRandomColors(count) {
@@ -871,100 +884,83 @@ function generateRandomColors(count) {
 }
 
 // GÜNLÜK PASTA GRAFİĞİ OLUŞTURMA FONKSİYONU
-async function renderGunlukPastaGrafik() {
-    const tarih = document.getElementById('pastaGunlukTarih').value;
-    if (!tarih) { alert("Lütfen günlük grafik için bir tarih seçin."); return; }
-
+async function renderGunlukSutGrafik() {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
 
-    const snapshot = await db.collection('sut_alimlari')
-        .where('sahipId', '==', currentUser.uid)
-        .where('tarih', '==', tarih)
-        .get();
+    const tarihStr = getTodayForInput();
+    const alimlarSnapshot = await db.collection('sut_alimlari').where('sahipId', '==', currentUser.uid).where('tarih', '==', tarihStr).get();
+    
+    if (alimlarSnapshot.empty) return;
 
-    const dataByCari = {};
-    snapshot.forEach(doc => {
+    const cariKategorileri = await db.collection('cariler').where('sahipId', '==', currentUser.uid).get();
+    const kategoriMap = new Map();
+    cariKategorileri.forEach(doc => kategoriMap.set(doc.id, doc.data().kategori));
+
+    const dataByKategori = {};
+    alimlarSnapshot.forEach(doc => {
         const alim = doc.data();
-        if (!dataByCari[alim.cariAdi]) {
-            dataByCari[alim.cariAdi] = 0;
-        }
-        dataByCari[alim.cariAdi] += alim.toplam;
+        const kategori = kategoriMap.get(alim.cariId) || "Diğer";
+        if (!dataByKategori[kategori]) dataByKategori[kategori] = 0;
+        dataByKategori[kategori] += alim.toplam;
     });
 
-    const labels = Object.keys(dataByCari);
-    const data = Object.values(dataByCari);
-    const colors = generateRandomColors(labels.length);
+    const labels = Object.keys(dataByKategori);
+    const data = Object.values(dataByKategori);
 
-    const ctx = document.getElementById('gunlukPastaGrafik').getContext('2d');
-    if (gunlukPastaChartInstance) gunlukPastaChartInstance.destroy();
-
-    gunlukPastaChartInstance = new Chart(ctx, {
-        type: 'pie',
+    const ctx = document.getElementById('gunlukSutGrafik').getContext('2d');
+    if(gunlukSutunChartInstance) gunlukSutunChartInstance.destroy();
+    gunlukSutunChartInstance = new Chart(ctx, {
+        type: 'bar', // Grafik tipi sütun olarak değiştirildi
         data: {
             labels: labels,
-            datasets: [{
-                label: 'Süt Miktarı (Lt)',
-                data: data,
-                backgroundColor: colors,
-            }]
+            datasets: [{ label: 'Toplam Süt (Lt)', data: data, backgroundColor: 'rgba(54, 162, 235, 0.6)' }]
+        },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
+    });
+}
+
+// AYLIK KATEGORİ BAZLI SÜTUN GRAFİK
+async function renderAylikSutGrafik() {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const startDateStr = new Date(year, month, 1).toISOString().split('T')[0];
+    const endDateStr = new Date(year, month + 1, 0).toISOString().split('T')[0];
+
+    const alimlarSnapshot = await db.collection('sut_alimlari').where('sahipId', '==', currentUser.uid).where('tarih', '>=', startDateStr).where('tarih', '<=', endDateStr).get();
+    
+    if (alimlarSnapshot.empty) return;
+
+    const cariKategorileri = await db.collection('cariler').where('sahipId', '==', currentUser.uid).get();
+    const kategoriMap = new Map();
+    cariKategorileri.forEach(doc => kategoriMap.set(doc.id, doc.data().kategori));
+
+    const dataByKategori = {};
+    alimlarSnapshot.forEach(doc => {
+        const alim = doc.data();
+        const kategori = kategoriMap.get(alim.cariId) || "Diğer";
+        if (!dataByKategori[kategori]) dataByKategori[kategori] = 0;
+        dataByKategori[kategori] += alim.toplam;
+    });
+
+    const labels = Object.keys(dataByKategori);
+    const data = Object.values(dataByKategori);
+    
+    const ctx = document.getElementById('aylikSutGrafik').getContext('2d');
+    if(aylikSutunChartInstance) aylikSutunChartInstance.destroy();
+    aylikSutunChartInstance = new Chart(ctx, {
+        type: 'bar', // Grafik tipi sütun olarak değiştirildi
+        data: {
+            labels: labels,
+            datasets: [{ label: 'Toplam Süt (Lt)', data: data, backgroundColor: 'rgba(75, 192, 192, 0.6)' }]
         },
         options: { responsive: true, maintainAspectRatio: false }
     });
 }
-
-// AYLIK PASTA GRAFİĞİ OLUŞTURMA FONKSİYONU
-async function renderAylikPastaGrafik() {
-    const ayYil = document.getElementById('pastaAylikTarih').value;
-    if (!ayYil) { alert("Lütfen aylık grafik için bir ay seçin."); return; }
-
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
-
-    const [year, month] = ayYil.split('-');
-    const startDateStr = `<span class="math-inline">\{year\}\-</span>{month}-01`;
-    const endDate = new Date(year, month, 0);
-    const endDateStr = endDate.toISOString().split('T')[0];
-
-    const snapshot = await db.collection('sut_alimlari')
-        .where('sahipId', '==', currentUser.uid)
-        .where('tarih', '>=', startDateStr)
-        .where('tarih', '<=', endDateStr)
-        .get();
-
-    const dataByCari = {};
-    snapshot.forEach(doc => {
-        const alim = doc.data();
-        if (!dataByCari[alim.cariAdi]) {
-            dataByCari[alim.cariAdi] = 0;
-        }
-        dataByCari[alim.cariAdi] += alim.toplam;
-    });
-
-    const labels = Object.keys(dataByCari);
-    const data = Object.values(dataByCari);
-    const colors = generateRandomColors(labels.length);
-
-    const ctx = document.getElementById('aylikPastaGrafik').getContext('2d');
-    if (aylikPastaChartInstance) aylikPastaChartInstance.destroy();
-
-    aylikPastaChartInstance = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Toplam Süt (Lt)',
-                data: data,
-                backgroundColor: colors,
-            }]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
-    });
-}
-
-
-
-
         
 async function editCari(id) { 
     try {
@@ -1699,46 +1695,33 @@ function resetYemSatisForm() {
     setEditingMode(document.getElementById('yemSatisFormBaslik'), document.getElementById('yemSatisKaydetBtn'), document.getElementById('yemSatisFormTemizleBtn'), null, 'Yeni Yem Satışı');
 }
 async function calculateCariBakiyeDetayli(cariId) {
-    let alacak = 0; // İşletmenin cariye borcu (Süt alımı, Cari Alacaklı Bakiye)
-    let borc = 0;   // Cariyenin işletmeye borcu (Yem satışı, Cari Borçlu Bakiye)
-
+    let alacak = 0, borc = 0;
     const currentUser = auth.currentUser;
     if (!currentUser) return { alacak: 0, borc: 0, bakiye: 0 };
-
     try {
         const sutQuery = db.collection('sut_alimlari').where('sahipId', '==', currentUser.uid).where('cariId', '==', cariId).get();
         const yemQuery = db.collection('yem_satislari').where('sahipId', '==', currentUser.uid).where('cariId', '==', cariId).get();
         const odemeQuery = db.collection('odemeVeTahsilatlar').where('sahipId', '==', currentUser.uid).where('cariId', '==', cariId).get();
 
-        const [sutSnapshot, yemSnapshot, odemeSnapshot] = await Promise.all([
-            sutQuery, yemQuery, odemeQuery
-        ]);
+        const [sutSnapshot, yemSnapshot, odemeSnapshot] = await Promise.all([sutQuery, yemQuery, odemeQuery]);
 
         sutSnapshot.forEach(doc => alacak += doc.data().toplamTutar);
         yemSnapshot.forEach(doc => borc += doc.data().toplamTutar);
         
         odemeSnapshot.forEach(doc => {
             const data = doc.data();
-            // Cari Alacaklı ise -> İşletmenin borcu artar (alacak)
-            if (data.islemTuru === 'odeme') { 
+            if (data.islemTuru === 'odeme' || data.islemTuru === 'alacak') { // 'alacak' açılış bakiyesi
                 alacak += data.tutar;
-            } 
-            // Cari Borçlu ise -> İşletmenin alacağı artar (borç)
-            else if (data.islemTuru === 'tahsilat') {
+            } else if (data.islemTuru === 'tahsilat' || data.islemTuru === 'borc') { // 'borc' açılış bakiyesi
                 borc += data.tutar;
             }
         });
-
-        // Bakiye > 0 ise İşletme Borçlu, Cari Alacaklı
-        // Bakiye < 0 ise İşletme Alacaklı, Cari Borçlu
         return { alacak, borc, bakiye: alacak - borc };
-
     } catch (error) {
         console.error(`Bakiye hesaplanırken hata (Cari ID: ${cariId}):`, error);
         return { alacak: 0, borc: 0, bakiye: 0 };
     }
 }
-
         
 async function renderYemSatisListesi() {
     const listBody = document.getElementById('yemSatisListesiBody');
@@ -1974,11 +1957,13 @@ function sutMiktarGuncelle(cariId) {
 async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
     const sabahInput = document.getElementById(`sabah-${cariId}`);
     const aksamInput = document.getElementById(`aksam-${cariId}`);
+    const fiyatInput = document.getElementById(`fiyat-${cariId}`);
     const satir = document.getElementById(`satir-${cariId}`);
-    const currentUser = auth.currentUser;
 
     const sabahMiktar = parseFloat(sabahInput.value) || 0;
     const aksamMiktar = parseFloat(aksamInput.value) || 0;
+    // DÜZELTME: Fiyat input'tan okunuyor
+    const birimFiyat = parseFloat(fiyatInput.value) || globalSettings.defaultMilkPrice || 0;
     const toplamMiktar = sabahMiktar + aksamMiktar;
 
     if (toplamMiktar <= 0) { return; }
@@ -1986,9 +1971,9 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
     const sutAlimData = {
         tarih: tarih, cariId: cariId, cariAdi: cariAdi,
         sabah: sabahMiktar, aksam: aksamMiktar, toplam: toplamMiktar,
-        fiyat: globalSettings.defaultMilkPrice || 0,
-        toplamTutar: toplamMiktar * (globalSettings.defaultMilkPrice || 0),
-        sahipId: currentUser.uid
+        fiyat: birimFiyat, // Düzeltilmiş fiyat kullanılıyor
+        toplamTutar: toplamMiktar * birimFiyat, // Düzeltilmiş tutar
+        sahipId: auth.currentUser.uid
     };
 
     try {
@@ -1999,7 +1984,6 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
         console.error("Süt alımı kaydedilirken hata:", error);
     }
 }
-
 function hesaplaToplamTutar(miktarInputId, fiyatInputId, toplamInputId) {
     const miktarInput = document.getElementById(miktarInputId);
     const fiyatInput = document.getElementById(fiyatInputId);
