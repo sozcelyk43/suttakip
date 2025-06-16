@@ -47,28 +47,22 @@
                 <div class="stat-card borc"><h4>Toplam Borç</h4><p><span id="dashToplamBorc">0,00 ₺</span></p></div>
                 <div class="stat-card"><h4>Toplam Bakiye</h4><p><span id="dashToplamBakiye">0,00 ₺</span></p></div>
             </div>
-            <div class="charts-container">
-                <div class="chart-card">
-                    <h3>Günlük Süt Dağılımı</h3>
-                    <div class="chart-filters">
-                        <input type="date" id="pastaGunlukTarih">
-                        <button id="pastaGunlukGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="gunlukPastaGrafik"></canvas>
-                    </div>
-                </div>
-                <div class="chart-card">
-                    <h3>Aylık Süt Dağılımı</h3>
-                    <div class="chart-filters">
-                        <input type="month" id="pastaAylikTarih">
-                        <button id="pastaAylikGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="aylikPastaGrafik"></canvas>
-                    </div>
-                </div>
-            </div>
+           
+<div class="charts-container-vertical">
+    <div class="chart-card">
+        <h3>Bugünkü Süt Alım Dağılımı (Kategori Bazlı)</h3>
+        <div class="chart-wrapper">
+            <canvas id="gunlukSutGrafik"></canvas>
+        </div>
+    </div>
+    <div class="chart-card">
+        <h3>Bu Ayki Süt Alım Dağılımı (Kategori Bazlı)</h3>
+        <div class="chart-wrapper">
+            <canvas id="aylikSutGrafik"></canvas>
+        </div>
+    </div>
+</div>
+            
         </div>
     </section>
 
