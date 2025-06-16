@@ -110,6 +110,10 @@
             <div class="container">
                 <div class="form-section"><h3><span id="cariFormBaslik">Yeni Cari Kart</span></h3><form id="cariForm" action="#"><input type="hidden" id="cariEditId"><div class="form-grid">
                     <div class="form-group"><label for="cariKodu">Cari Kodu:</label><input type="text" id="cariKodu" placeholder="Örn: C001"></div>
+<div class="form-group">
+    <label for="cariRotaSirasi">Rota Sırası:</label>
+    <input type="number" id="cariRotaSirasi" placeholder="Örn: 1, 2, 3...">
+</div>
                     <div class="form-group"><label for="cariAdiSoyadi">Adı Soyadı / Firma Adı:</label><input type="text" id="cariAdiSoyadi" required></div>
                     <div class="form-group"><label for="cariKategori">Kategori/Köy:</label><select id="cariKategori" required><option value="">Seçiniz...</option></select></div>
                     <div class="form-group">
@@ -795,13 +799,21 @@ async function handleCariKaydet(event) {
     if (!cariAdi) { alert("Adı Soyadı / Firma Adı alanı zorunludur."); return; }
 
     const formData = {
-        kodu: document.getElementById('cariKodu').value, adiSoyadi: cariAdi,
-        kategori: document.getElementById('cariKategori').value, durum: document.getElementById('cariDurum').value,
-        cariTipi: document.getElementById('cariTipi').value, telefon: document.getElementById('cariTelefon').value,
-        eposta: document.getElementById('cariEposta').value, adres: document.getElementById('cariAdres').value,
-        bankaAdi: document.getElementById('cariBankaAdi').value, iban: document.getElementById('cariIban').value,
-        vergiDairesi: document.getElementById('cariVergiDairesi').value, vergiNo: document.getElementById('cariVergiNo').value,
-        notlar: document.getElementById('cariNotlar').value, sahipId: currentUser.uid
+        kodu: document.getElementById('cariKodu').value,
+        rotaSirasi: parseInt(document.getElementById('cariRotaSirasi').value) || 999, // YENİ EKLENDİ
+        adiSoyadi: document.getElementById('cariAdiSoyadi').value,
+        kategori: document.getElementById('cariKategori').value,
+        durum: document.getElementById('cariDurum').value,
+        cariTipi: document.getElementById('cariTipi').value,
+        telefon: document.getElementById('cariTelefon').value,
+        eposta: document.getElementById('cariEposta').value,
+        adres: document.getElementById('cariAdres').value,
+        bankaAdi: document.getElementById('cariBankaAdi').value,
+        iban: document.getElementById('cariIban').value,
+        vergiDairesi: document.getElementById('cariVergiDairesi').value,
+        vergiNo: document.getElementById('cariVergiNo').value,
+        notlar: document.getElementById('cariNotlar').value,
+        sahipId: currentUser.uid
     };
     try {
         let cariId = editingCariId;
@@ -1080,6 +1092,7 @@ async function editCari(id) {
         editingCariId = id; 
         document.getElementById('cariEditId').value = id; 
         document.getElementById('cariKodu').value = cari.kodu || ''; 
+        document.getElementById('cariRotaSirasi').value = cari.rotaSirasi || null; 
         document.getElementById('cariAdiSoyadi').value = cari.adiSoyadi || ''; 
         document.getElementById('cariKategori').value = cari.kategori || ''; 
         document.getElementById('cariDurum').value = cari.durum || 'aktif';
@@ -2079,7 +2092,7 @@ async function renderTopluSutGirisFormu() {
         }
         
         // DEĞİŞİKLİK: Sıralama önce kategoriye, sonra ada göre yapıldı.
-        const carilerSnapshot = await query.orderBy('kategori').orderBy('adiSoyadi').get();
+           const carilerSnapshot = await query.orderBy('kategori').orderBy('rotaSirasi').get();
         
         const gosterilecekCariler = carilerSnapshot.docs.filter(doc => !kayitliCariIdleri.has(doc.id));
 
