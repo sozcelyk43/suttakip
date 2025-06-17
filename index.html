@@ -6,12 +6,13 @@
     <title>Süt Takip Programı - Tam Sürüm</title>
     <link rel="stylesheet" href="style.css">
     <meta name="theme-color" content="#2c3e50">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/icon-192x192.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192x192.png">
 </head>
 <body>
     <div class="sidebar">
         <img src="logo.png" alt="Uygulama Logosu" class="sidebar-logo">
+        <h1>Süt Takip Programı</h1>
         <nav id="sidebarNav">
             <ul>
                 <li><a href="#dashboard" class="nav-link active">📝 Kontrol Paneli</a></li>
@@ -38,145 +39,97 @@
             <div class="module-header"><h2>📝 Kontrol Paneli</h2></div>
             <div class="container">
                 <h3>Genel Durum</h3>
-
-
-
-
                 <div class="dashboard-grid">
                     <div class="stat-card"><h4>☀️ Bugünkü Sabah Sütü</h4><p><span id="dashSabahSut">0.00</span> Lt</p></div>
-            <div class="stat-card"><h4>🌙 Bugünkü Akşam Sütü</h4><p><span id="dashAksamSut">0.00</span> Lt</p></div>
-            <div class="stat-card">
-                <h4>📈 Bugünkü Toplam Süt</h4>
-                <p><span id="dashToplamSut">0.00</span> Lt</p>
-                <small id="dunKarsilastirma">(Düne göre...)</small>
-            </div>
-            <div class="stat-card"><h4>👥 Aktif Müşteri Sayısı</h4><p><span id="dashAktifMusteri">0</span></p></div>
-        
-
-
+                    <div class="stat-card"><h4>🌙 Bugünkü Akşam Sütü</h4><p><span id="dashAksamSut">0.00</span> Lt</p></div>
+                    <div class="stat-card">
+                        <h4>📈 Bugünkü Toplam Süt</h4>
+                        <p><span id="dashToplamSut">0.00</span> Lt</p>
+                        <small id="dunKarsilastirma">(Düne göre...)</small>
+                    </div>
+                    <div class="stat-card"><h4>👥 Aktif Müşteri Sayısı</h4><p><span id="dashAktifMusteri">0</span></p></div>
                 </div>
-
-
-<div class="balance-bars">
-            <div class="balance-bar-item">
-                <div class="balance-bar-header">
-                    <span>Toplam Alacak (Müşteri Borcu)</span>
-                    <strong id="dashToplamAlacak">0,00 ₺</strong>
-                </div>
-                <div class="progress-bar-container">
-                    <div id="alacakBar" class="progress-bar alacak" style="width: 0%;"></div>
-                </div>
-            </div>
-            <div class="balance-bar-item">
-                <div class="balance-bar-header">
-                    <span>Toplam Borç (Müşteri Alacağı)</span>
-                    <strong id="dashToplamBorc">0,00 ₺</strong>
-                </div>
-                <div class="progress-bar-container">
-                    <div id="borcBar" class="progress-bar borc" style="width: 0%;"></div>
-                </div>
-            </div>
-        </div>
-
-                <div class="charts-container">
-                    <div class="chart-card">
-                        <h3>Günlük Süt Dağılımı</h3>
-                        <div class="chart-filters">
-                            <input type="date" id="pastaGunlukTarih">
-                            <button id="pastaGunlukGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
+                <div class="balance-bars">
+                    <div class="balance-bar-item">
+                        <div class="balance-bar-header">
+                            <span>Toplam Alacak (Müşteri Borcu)</span>
+                            <strong id="dashToplamAlacak">0,00 ₺</strong>
                         </div>
+                        <div class="progress-bar-container"><div id="alacakBar" class="progress-bar alacak" style="width: 0%;"></div></div>
+                    </div>
+                    <div class="balance-bar-item">
+                        <div class="balance-bar-header">
+                            <span>Toplam Borç (Müşteri Alacağı)</span>
+                            <strong id="dashToplamBorc">0,00 ₺</strong>
+                        </div>
+                        <div class="progress-bar-container"><div id="borcBar" class="progress-bar borc" style="width: 0%;"></div></div>
+                    </div>
+                </div>
+                <div class="charts-container-vertical">
+                    <div class="chart-card">
+                        <h3>Bugünkü Süt Alım Dağılımı (Kategori Bazlı)</h3>
                         <div class="chart-wrapper">
-                            <canvas id="gunlukPastaGrafik"></canvas>
+                            <canvas id="gunlukSutGrafik"></canvas>
                         </div>
                     </div>
                     <div class="chart-card">
-                        <h3>Aylık Süt Dağılımı</h3>
-                        <div class="chart-filters">
-                            <input type="month" id="pastaAylikTarih">
-                            <button id="pastaAylikGosterBtn" class="btn btn-sm">Grafik Oluştur</button>
-                        </div>
-                        <div class="chart-wrapper">
-                            <canvas id="aylikPastaGrafik"></canvas>
-                        </div>
-                    </div>
+    <h3>Aylık Süt Dağılımı (Kategori Bazlı)</h3>
+    <div class="chart-filters">
+        <input type="month" id="aylikChartAySecimi">
+        <button id="aylikChartGosterBtn" class="btn btn-sm">Grafiği Göster</button>
+    </div>
+    <div class="chart-wrapper">
+        <canvas id="aylikSutGrafik"></canvas>
+    </div>
+</div>
                 </div>
             </div>
         </section>
 
-        <section id="cari-yonetimi" class="module-section">
-            <div class="module-header">
-                <h2>👥 Cari Yönetimi</h2>
-            </div>
+        <section id="cari-yonetimi" class="module-section hidden-section">
+            <div class="module-header"><h2>👥 Cari Yönetimi</h2></div>
             <div class="container">
-                <div class="form-section"><h3><span id="cariFormBaslik">Yeni Cari Kart</span></h3><form id="cariForm" action="#"><input type="hidden" id="cariEditId"><div class="form-grid">
-                    <div class="form-group"><label for="cariKodu">Cari Kodu:</label><input type="text" id="cariKodu" placeholder="Örn: C001"></div>
-<div class="form-group">
-    <label for="cariRotaSirasi">Rota Sırası:</label>
-    <input type="number" id="cariRotaSirasi" placeholder="Örn: 1, 2, 3...">
-</div>
-                    <div class="form-group"><label for="cariAdiSoyadi">Adı Soyadı / Firma Adı:</label><input type="text" id="cariAdiSoyadi" required></div>
-                    <div class="form-group"><label for="cariKategori">Kategori/Köy:</label><select id="cariKategori" required><option value="">Seçiniz...</option></select></div>
-                    <div class="form-group">
-                        <label for="cariAcilisBakiye">Açılış Bakiyesi:</label>
-                        <input type="number" id="cariAcilisBakiye" placeholder="Örn: 500" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label for="cariAcilisBakiyeTuru">Bakiye Türü:</label>
-                        <select id="cariAcilisBakiyeTuru">
-                            <option value="yok">Yok</option>
-                            <option value="borc">Cari Borçlu</option>
-                            <option value="alacak">Cari Alacaklı</option>
-                        </select>
-                    </div>
-                    <div class="form-group"><label for="cariDurum">Durum:</label><select id="cariDurum"><option value="aktif">Aktif</option><option value="pasif">Pasif</option></select></div>
-                    <div class="form-group">
-                        <label for="cariTipi">Cari Tipi:</label>
-                        <select id="cariTipi">
-                            <option value="sut_ve_yem">Süt ve Yem</option>
-                            <option value="sadece_sut">Sadece Süt</option>
-                            <option value="sadece_yem">Sadece Yem</option>
-                        </select>
-                    </div>
-                    <div class="form-group"><label for="cariTelefon">Telefon:</label><input type="tel" id="cariTelefon"></div>
-                    <div class="form-group"><label for="cariEposta">E-posta:</label><input type="email" id="cariEposta"></div>
-                    <div class="form-group" style="grid-column: span 2;"><label for="cariAdres">Adres:</label><textarea id="cariAdres"></textarea></div>
-                    <div class="form-group"><label for="cariBankaAdi">Banka Adı:</label><input type="text" id="cariBankaAdi"></div>
-                    <div class="form-group"><label for="cariIban">IBAN:</label><input type="text" id="cariIban"></div>
-                    <div class="form-group"><label for="cariVergiDairesi">Vergi Dairesi:</label><input type="text" id="cariVergiDairesi"></div>
-                    <div class="form-group"><label for="cariVergiNo">Vergi No / T.C.:</label><input type="text" id="cariVergiNo"></div>
-                    <div class="form-group" style="grid-column: span 2;"><label for="cariNotlar">Özel Notlar:</label><textarea id="cariNotlar"></textarea></div>
-                </div><button type="submit" class="btn btn-primary" id="cariKaydetBtn">Kaydet</button><button type="button" class="btn dont-calisan" id="cariFormTemizleBtn" style="display:none;">Yeni Kayıt</button></form></div>
-                <div id="cari-list-printable-area" class="dont-calisan">
-                    <h3 class="print-only print-title" id="cariListeRaporBaslik">Cari Listesi Raporu</h3>
+                <div class="form-section">
+                    <h3><span id="cariFormBaslik">Yeni Cari Kart</span></h3>
+                    <form id="cariForm" action="#">
+                        <input type="hidden" id="cariEditId">
+                        <div class="form-grid">
+                            <div class="form-group"><label for="cariKodu">Cari Kodu:</label><input type="text" id="cariKodu" placeholder="Örn: C001"></div>
+                            <div class="form-group"><label for="cariRotaSirasi">Rota Sırası:</label><input type="number" id="cariRotaSirasi" placeholder="Örn: 1, 2, 3..."></div>
+                            <div class="form-group"><label for="cariAdiSoyadi">Adı Soyadı / Firma Adı:</label><input type="text" id="cariAdiSoyadi" required></div>
+                            <div class="form-group"><label for="cariKategori">Kategori/Köy:</label><select id="cariKategori" required><option value="">Seçiniz...</option></select></div>
+                            <div class="form-group"><label for="cariDurum">Durum:</label><select id="cariDurum"><option value="aktif">Aktif</option><option value="pasif">Pasif</option></select></div>
+                            <div class="form-group"><label for="cariTipi">Cari Tipi:</label><select id="cariTipi"><option value="sut_ve_yem">Süt ve Yem</option><option value="sadece_sut">Sadece Süt</option><option value="sadece_yem">Sadece Yem</option></select></div>
+                            <div class="form-group"><label for="cariAcilisBakiye">Açılış Bakiyesi:</label><input type="number" id="cariAcilisBakiye" placeholder="Örn: 500" step="0.01"></div>
+                            <div class="form-group"><label for="cariAcilisBakiyeTuru">Bakiye Türü:</label><select id="cariAcilisBakiyeTuru"><option value="yok">Yok</option><option value="borc">Cari Borçlu</option><option value="alacak">Cari Alacaklı</option></select></div>
+                            <div class="form-group"><label for="cariTelefon">Telefon:</label><input type="tel" id="cariTelefon"></div>
+                            <div class="form-group"><label for="cariEposta">E-posta:</label><input type="email" id="cariEposta"></div>
+                            <div class="form-group" style="grid-column: span 2;"><label for="cariAdres">Adres:</label><textarea id="cariAdres"></textarea></div>
+                            <div class="form-group"><label for="cariBankaAdi">Banka Adı:</label><input type="text" id="cariBankaAdi"></div>
+                            <div class="form-group"><label for="cariIban">IBAN:</label><input type="text" id="cariIban"></div>
+                            <div class="form-group"><label for="cariVergiDairesi">Vergi Dairesi:</label><input type="text" id="cariVergiDairesi"></div>
+                            <div class="form-group"><label for="cariVergiNo">Vergi No / T.C.:</label><input type="text" id="cariVergiNo"></div>
+                            <div class="form-group" style="grid-column: span 2;"><label for="cariNotlar">Özel Notlar:</label><textarea id="cariNotlar"></textarea></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="cariKaydetBtn">Kaydet</button>
+                        <button type="button" class="btn" id="cariFormTemizleBtn" style="display:none;">Yeni Kayıt</button>
+                    </form>
+                </div>
+                <div id="cari-list-printable-area">
                     <div class="list-section">
                         <div class="list-header-with-filter">
                             <h3>Cari Listesi</h3>
-                            <div class="search-container dont-calisan"> <input type="text" id="cariSearchInput" placeholder="Cari Ara..." aria-label="Cari Arama Kutusu"> </div>
-                            <select id="cariKategoriFiltre">
-                                <option value="">Tüm Kategoriler</option>
-                            </select>
+                            <div class="search-container"><input type="text" id="cariSearchInput" placeholder="Cari Ara..." aria-label="Cari Arama Kutusu"></div>
+                            <select id="cariKategoriFiltre"><option value="">Tüm Kategoriler</option></select>
                         </div>
                         <table>
-                            <thead>
-    <tr>
-        <th>Kod</th>
-        <th>Ad/Firma</th>
-        <th>Kategori</th>
-        <th>Rota Sırası</th>
-        <th>Durum</th>
-        <th>Telefon</th>
-        <th>Borç</th>
-        <th>Alınan</th>
-        <th>Bakiye</th>
-        <th class="dont-print">İşlemler</th>
-    </tr>
-</thead>
+                            <thead><tr><th>Kod</th><th>Ad/Firma</th><th>Kategori</th><th>Rota Sırası</th><th>Durum</th><th>Telefon</th><th>Borç</th><th>Alınan</th><th>Bakiye</th><th class="dont-print">İşlemler</th></tr></thead>
                             <tbody id="cariListesiBody"></tbody>
                             <tfoot id="cariListesiFooter"></tfoot>
                         </table>
                     </div>
                 </div>
-                <button type="button" class="btn btn-secondary dont-print dont-calisan" id="cariListesiYazdirBtn" style="margin-top: 20px;">Listeyi Yazdır</button>
+                <button type="button" class="btn btn-secondary dont-print" id="cariListesiYazdirBtn" style="margin-top: 20px;">Listeyi Yazdır</button>
             </div>
         </section>
 
@@ -193,30 +146,21 @@
                 <div class="list-section">
                     <h3>Günlük Süt Girişi</h3>
                     <div id="topluSutGirisTablosuAlani"></div>
-                    <p id="topluGirisTedarikciYokMesaji" style="text-align:center; display:none;">Bu kategoride süt girişi beklenen aktif cari bulunmuyor.</p>
+                    <p id="topluGirisTedarikciYokMesaji" style="text-align:center; display:none;">Bu kriterlere uygun, süt girişi bekleyen cari bulunmuyor.</p>
                 </div>
                 <hr style="margin: 40px 0;">
+                <div id="sutDuzenleFormAlani" style="display:none; margin-bottom: 20px;">
+                    <h4>Süt Alımını Düzenle</h4>
+                    <form id="sutDuzenleForm" class="form-grid" style="grid-template-columns: 1fr 1fr 1fr auto auto;">
+    <input type="hidden" id="sutDuzenleId">
+    <div class="form-group"><label>Akşam (Lt)</label><input type="number" id="sutDuzenleAksam" class="sut-input" step="0.1" min="0"></div>
+    <div class="form-group"><label>Sabah (Lt)</label><input type="number" id="sutDuzenleSabah" class="sut-input" step="0.1" min="0"></div>
+    <div class="form-group"><label>Fiyat</label><input type="number" id="sutDuzenleFiyat" class="sut-input" step="0.01" min="0"></div>
+    <button type="submit" class="btn btn-primary" style="height: 45px; align-self: end;">Güncelle</button>
+    <button type="button" class="btn" style="height: 45px; align-self: end;" onclick="closeSutDuzenleForm()">İptal</button>
+</form>
+                </div>
                 <div class="list-section">
-                    <div id="sutDuzenleFormAlani" style="display:none; margin-bottom: 20px;">
-                        <h4>Süt Alımını Düzenle</h4>
-                        <form id="sutDuzenleForm" class="form-grid" style="grid-template-columns: 1fr 1fr 1fr auto auto;">
-                            <input type="hidden" id="sutDuzenleId">
-                            <div class="form-group">
-                                <label>Sabah (Lt)</label>
-                                <input type="number" id="sutDuzenleSabah" class="sut-input" step="0.1" min="0">
-                            </div>
-                            <div class="form-group">
-                                <label>Akşam (Lt)</label>
-                                <input type="number" id="sutDuzenleAksam" class="sut-input" step="0.1" min="0">
-                            </div>
-                            <div class="form-group">
-                                <label>Fiyat</label>
-                                <input type="number" id="sutDuzenleFiyat" class="sut-input" step="0.01" min="0">
-                            </div>
-                            <button type="submit" class="btn btn-primary" style="height: 45px; align-self: end;">Güncelle</button>
-                            <button type="button" class="btn" style="height: 45px; align-self: end;" onclick="closeSutDuzenleForm()">İptal</button>
-                        </form>
-                    </div>
                     <h3>Süt Alım Geçmişi (Seçili Tarih: <span id="gecmisTarihSpan"></span>)</h3>
                     <table>
                         <thead id="sutAlimGecmisiHeader"></thead>
@@ -225,34 +169,35 @@
                 </div>
             </div>
         </section>
-
+        
         <section id="yem-stok-yonetimi" class="module-section hidden-section">
             <div class="module-header"><h2>📦 Yem Stok Yönetimi</h2></div>
             <div class="container">
-                <div class="form-section"><h3><span id="yemTanimFormBaslik">Yeni Yem Tanımla</span></h3><form id="yemTanimForm" action="#"><input type="hidden" id="yemTanimEditId"><div class="form-grid">
-                    <div class="form-group"><label for="yemKodu">Kod:</label><input type="text" id="yemKodu" required></div>
-                    <div class="form-group"><label for="yemAdi">Ad:</label><input type="text" id="yemAdi" required></div>
-                    <div class="form-group"><label for="yemKategorisi">Kategori:</label><select id="yemKategorisi"><option value="buyukbas">Büyükbaş</option><option value="kucukbas">Küçükbaş</option></select></div>
-                    <div class="form-group"><label for="yemBirimi">Birim:</label><input type="text" id="yemBirimi" value="Çuval"></div>
-                    <div class="form-group"><label for="yemAlisFiyati">Alış Fiyatı:</label><input type="number" id="yemAlisFiyati" step="0.01"></div>
-                    <div class="form-group"><label for="yemSatisFiyati">Satış Fiyatı:</label><input type="number" id="yemSatisFiyati" step="0.01"></div>
-                </div><button type="submit" class="btn btn-primary" id="yemTanimKaydetBtn">Kaydet</button><button type="button" class="btn" id="yemTanimFormTemizleBtn" style="display:none;">Yeni</button></form></div>
-                <div class="list-section"><h3>Tanımlı Yemler & Stok</h3><table><thead><tr><th>Kod</th><th>Ad</th><th>Kategori</th><th>Birim</th><th>Alış F.</th><th>Satış F.</th><th>Stok</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemStokListesiBody"></tbody></table></div>
-                <hr>
-                <div class="form-section"><h3><span id="yemAlisFormBaslik">Yeni Yem Alışı</span></h3><form id="yemAlisForm" action="#"><input type="hidden" id="yemAlisEditId"><div class="form-grid">
-                    <div class="form-group"><label for="yemAlisTarih">Tarih:</label><input type="date" id="yemAlisTarih" required></div>
-                    <div class="form-group"><label for="yemSecimiAlis">Yem:</label><select id="yemSecimiAlis" required><option value="">Seçiniz...</option></select></div>
-                    <div class="form-group"><label for="yemAlisMiktar">Miktar:</label><input type="number" id="yemAlisMiktar" step="1" required></div>
-                    <div class="form-group"><label for="yemAlisTedarikci">Cari:</label><select id="yemAlisTedarikci"><option value="">Seçiniz...</option></select></div>
-                    <div class="form-group"><label for="yemAlisBirimFiyati">Alış Fiyatı:</label><input type="number" id="yemAlisBirimFiyati" step="0.01" required></div>
-                    <div class="form-group"><label for="yemAlisToplamTutar">Toplam Tutar:</label><input type="text" id="yemAlisToplamTutar" readonly></div>
-                </div><button type="submit" class="btn btn-primary" id="yemAlisKaydetBtn">Alışı Kaydet</button><button type="button" class="btn" id="yemAlisFormTemizleBtn" style="display:none;">Yeni</button></form></div>
-                <div class="list-section"><h3>Yem Alış Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Yem</th><th>Miktar</th><th>Cari</th><th>Alış F.</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemAlisHareketListesiBody"></tbody></table></div>
+               <div class="form-section"><h3><span id="yemTanimFormBaslik">Yeni Yem Tanımla</span></h3><form id="yemTanimForm" action="#"><input type="hidden" id="yemTanimEditId"><div class="form-grid">
+                   <div class="form-group"><label for="yemKodu">Kod:</label><input type="text" id="yemKodu" required></div>
+                   <div class="form-group"><label for="yemAdi">Ad:</label><input type="text" id="yemAdi" required></div>
+                   <div class="form-group"><label for="yemKategorisi">Kategori:</label><select id="yemKategorisi"><option value="buyukbas">Büyükbaş</option><option value="kucukbas">Küçükbaş</option></select></div>
+                   <div class="form-group"><label for="yemBirimi">Birim:</label><input type="text" id="yemBirimi" value="Çuval"></div>
+                   <div class="form-group"><label for="yemAlisFiyati">Alış Fiyatı:</label><input type="number" id="yemAlisFiyati" step="0.01"></div>
+                   <div class="form-group"><label for="yemSatisFiyati">Satış Fiyatı:</label><input type="number" id="yemSatisFiyati" step="0.01"></div>
+               </div><button type="submit" class="btn btn-primary" id="yemTanimKaydetBtn">Kaydet</button><button type="button" class="btn" id="yemTanimFormTemizleBtn" style="display:none;">Yeni</button></form></div>
+               <div class="list-section"><h3>Tanımlı Yemler & Stok</h3><table><thead><tr><th>Kod</th><th>Ad</th><th>Kategori</th><th>Birim</th><th>Alış F.</th><th>Satış F.</th><th>Stok</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemStokListesiBody"></tbody></table></div>
+               <hr>
+               <div class="form-section"><h3><span id="yemAlisFormBaslik">Yeni Yem Alışı</span></h3><form id="yemAlisForm" action="#"><input type="hidden" id="yemAlisEditId"><div class="form-grid">
+                   <div class="form-group"><label for="yemAlisTarih">Tarih:</label><input type="date" id="yemAlisTarih" required></div>
+                   <div class="form-group"><label for="yemSecimiAlis">Yem:</label><select id="yemSecimiAlis" required><option value="">Seçiniz...</option></select></div>
+                   <div class="form-group"><label for="yemAlisMiktar">Miktar:</label><input type="number" id="yemAlisMiktar" step="1" required></div>
+                   <div class="form-group"><label for="yemAlisTedarikci">Cari:</label><select id="yemAlisTedarikci"><option value="">Seçiniz...</option></select></div>
+                   <div class="form-group"><label for="yemAlisBirimFiyati">Alış Fiyatı:</label><input type="number" id="yemAlisBirimFiyati" step="0.01" required></div>
+                   <div class="form-group"><label for="yemAlisToplamTutar">Toplam Tutar:</label><input type="text" id="yemAlisToplamTutar" readonly></div>
+               </div><button type="submit" class="btn btn-primary" id="yemAlisKaydetBtn">Alışı Kaydet</button><button type="button" class="btn" id="yemAlisFormTemizleBtn" style="display:none;">Yeni</button></form></div>
+               <div class="list-section"><h3>Yem Alış Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Yem</th><th>Miktar</th><th>Cari</th><th>Alış F.</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemAlisHareketListesiBody"></tbody></table></div>
             </div>
         </section>
+        
         <section id="yem-satisi" class="module-section hidden-section">
-            <div class="module-header"><h2>🌾 Yem Satışı</h2></div>
-            <div class="container">
+             <div class="module-header"><h2>🌾 Yem Satışı</h2></div>
+             <div class="container">
                 <div class="form-section"><h3><span id="yemSatisFormBaslik">Yeni Yem Satışı</span></h3><form id="yemSatisForm" action="#"><input type="hidden" id="yemSatisEditId"><div class="form-grid">
                     <div class="form-group"><label for="yemSatisTarih">Tarih:</label><input type="date" id="yemSatisTarih" required></div>
                     <div class="form-group"><label for="yemAlanTedarikci">Alan Cari:</label><select id="yemAlanTedarikci" required><option value="">Seçiniz...</option></select></div>
@@ -262,22 +207,24 @@
                     <div class="form-group"><label for="yemSatisToplamTutar">Toplam Tutar:</label><input type="text" id="yemSatisToplamTutar" readonly></div>
                 </div><button type="submit" class="btn btn-primary" id="yemSatisKaydetBtn">Satışı Kaydet</button><button type="button" class="btn" id="yemSatisFormTemizleBtn" style="display:none;">Yeni</button></form></div>
                 <div class="list-section"><h3>Yem Satış Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Alan Cari</th><th>Yem</th><th>Miktar</th><th>Fiyat</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemSatisListesiBody"></tbody></table></div>
-            </div>
+             </div>
         </section>
+        
         <section id="tahsilat-ve-odemeler" class="module-section hidden-section">
             <div class="module-header"><h2>💳 Tahsilat ve Ödemeler</h2></div>
             <div class="container">
-                <div class="form-section"><h3><span id="odemeFormBaslik">Yeni Hareket Girişi</span></h3><form id="odemeForm" action="#"><input type="hidden" id="odemeEditId"><div class="form-grid">
+                 <div class="form-section"><h3><span id="odemeFormBaslik">Yeni Hareket Girişi</span></h3><form id="odemeForm" action="#"><input type="hidden" id="odemeEditId"><div class="form-grid">
                     <div class="form-group"><label for="islemTuru">İşlem Türü:</label><select id="islemTuru" required><option value="odeme">Ödeme</option><option value="tahsilat">Tahsilat</option></select></div>
                     <div class="form-group"><label for="odemeTarih">Tarih:</label><input type="date" id="odemeTarih" required></div>
                     <div class="form-group"><label for="odemeYapilanTedarikci">Cari:</label><select id="odemeYapilanTedarikci" required><option value="">Seçiniz...</option></select></div>
                     <div class="form-group"><label for="odemeTutari">Tutar (TL):</label><input type="number" id="odemeTutari" step="0.01" required></div>
                     <div class="form-group" style="grid-column: span 2;"><label for="odemeAciklama">Açıklama:</label><textarea id="odemeAciklama" rows="2"></textarea></div>
-                </div><button type="submit" class="btn btn-primary" id="odemeKaydetBtn">Kaydet</button><button type="button" class="btn" id="odemeFormTemizleBtn" style="display:none;">Yeni</button></form></div>
-                <div class="list-section"><h3>İşlem Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Cari</th><th>İşlem Türü</th><th>Tutar</th><th>Açıklama</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="odemeListesiBody"></tbody></table></div>
+                 </div><button type="submit" class="btn btn-primary" id="odemeKaydetBtn">Kaydet</button><button type="button" class="btn" id="odemeFormTemizleBtn" style="display:none;">Yeni</button></form></div>
+                 <div class="list-section"><h3>İşlem Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Cari</th><th>İşlem Türü</th><th>Tutar</th><th>Açıklama</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="odemeListesiBody"></tbody></table></div>
             </div>
         </section>
-        <section id="hesap-ozeti" class="module-section">
+        
+        <section id="hesap-ozeti" class="module-section hidden-section">
             <div class="module-header dont-print"><h2>📊 Cari Hesap Özeti</h2></div>
             <div class="container">
                 <div class="report-section">
@@ -296,10 +243,11 @@
                 </div>
             </div>
         </section>
-        <section id="sut-alim-raporu" class="module-section">
-            <div class="module-header dont-print"><h2>🗓️ Aylık Süt Raporu</h2></div>
+        
+        <section id="sut-alim-raporu" class="module-section hidden-section">
+             <div class="module-header dont-print"><h2>🗓️ Aylık Süt Raporu</h2></div>
             <div class="container">
-                <div class="report-section">
+                 <div class="report-section">
                     <h3>Detaylı Süt Alım Raporu</h3>
                     <div class="form-grid dont-print" style="grid-template-columns: repeat(4, 1fr); align-items: end; gap: 10px;">
                         <div class="form-group"><label for="sutRaporuTedarikciSecimi">Cari Seçin:</label><select id="sutRaporuTedarikciSecimi"><option value="">Seçiniz...</option></select></div>
@@ -317,13 +265,14 @@
                         <div id="sutRaporuDetayAlani"></div>
                     </div>
                     <button type="button" class="btn btn-secondary dont-print" id="sutRaporuYazdirBtn" style="margin-top:20px;">Raporu Yazdır</button>
-                </div>
+                 </div>
             </div>
         </section>
-        <section id="aylik-yem-raporu" class="module-section">
-            <div class="module-header"><h2>📈 Aylık Yem Raporu</h2></div>
-            <div class="container">
-                <div class="report-section">
+        
+        <section id="aylik-yem-raporu" class="module-section hidden-section">
+             <div class="module-header"><h2>📈 Aylık Yem Raporu</h2></div>
+             <div class="container">
+                 <div class="report-section">
                     <h3>Aylık Yem Satış Kârlılık Raporu</h3>
                     <div class="form-grid dont-print" style="grid-template-columns: 1fr auto; align-items: end;">
                         <div class="form-group">
@@ -336,12 +285,26 @@
                     <div id="yemRaporuAlani" class="printable-content format-a4">
                     </div>
                     <button type="button" class="btn btn-secondary dont-print" id="yemRaporuYazdirBtn" style="margin-top:20px;">Raporu Yazdır</button>
+                 </div>
+             </div>
+        </section>
+        
+        <section id="hareket-dokumu" class="module-section hidden-section">
+            <div class="module-header"><h2>📋 Hareket Dökümü</h2></div>
+            <div class="container">
+                <div class="list-section">
+                    <h3>Tüm İşlem Geçmişi (En Yeni Üstte)</h3>
+                    <table>
+                        <thead><tr><th>Tarih</th><th>Cari Adı</th><th>İşlem Türü</th><th>Açıklama</th><th>Tutar</th></tr></thead>
+                        <tbody id="hareketDokumuBody"></tbody>
+                    </table>
                 </div>
             </div>
         </section>
+        
         <section id="ayarlar" class="module-section hidden-section">
-            <div class="module-header"><h2>⚙️ Ayarlar</h2></div>
-            <div class="container">
+             <div class="module-header"><h2>⚙️ Ayarlar</h2></div>
+             <div class="container">
                 <div class="ayarlar-ust-bolum">
                     <div class="settings-section">
                         <h3>Genel Ayarlar</h3>
@@ -394,55 +357,27 @@
                     <div class="list-section">
                         <h4>Kullanıcı Listesi</h4>
                         <table>
-                            <thead>
-                                <tr>
-                                    <th>Kullanıcı Adı</th>
-                                    <th>Rol</th>
-                                    <th class="dont-print">İşlemler</th>
-                                </tr>
-                            </thead>
+                            <thead><tr><th>Kullanıcı Adı</th><th>Rol</th><th class="dont-print">İşlemler</th></tr></thead>
                             <tbody id="kullaniciListesiBody"></tbody>
                         </table>
                     </div>
                 </div>
-            </div>
+             </div>
         </section>
 
-        <section id="hareket-dokumu" class="module-section hidden-section">
-            <div class="module-header"><h2>📋 Hareket Dökümü</h2></div>
-            <div class="container">
-                <div class="list-section">
-                    <h3>Tüm İşlem Geçmişi (En Yeni Üstte)</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Tarih</th>
-                                <th>Cari Adı</th>
-                                <th>İşlem Türü</th>
-                                <th>Açıklama</th>
-                                <th>Tutar</th>
-                            </tr>
-                        </thead>
-                        <tbody id="hareketDokumuBody">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-    </div> 
-
-   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </div> <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script>
+        // TÜM JAVASCRIPT KODU BURAYA GELECEK
 
 const firebaseConfig = {
     apiKey: "AIzaSyCWG4nFwpXRffr_3MO8-Us9mWK6Wsfn0mY",
     authDomain: "sut-takip-projem.firebaseapp.com",
     projectId: "sut-takip-projem",
-    storageBucket: "sut-takip-projem.appspot.com", // Düzeltildi
+    storageBucket: "sut-takip-projem.appspot.com",
     messagingSenderId: "512756958486",
     appId: "1:512756958486:web:13cceb6835e2c575e9fc37",
     measurementId: "G-LYLT9WFVNK"
@@ -452,22 +387,21 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// --- Global Değişkenler ---
 let currentUserRole = '';
 let currentUserId = '';
 let globalSettings = { defaultMilkPrice: 15.00 };
 let editingCariId = null, editingYemTanimId = null, editingYemAlisId = null, editingYemSatisId = null, editingOdemeId = null;
+let gunlukSutunChartInstance = null;
+let aylikSutunChartInstance = null;
 
-// --- Service Worker ---
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-            .then(registration => console.log('Service Worker registered.'))
-            .catch(err => console.error('Service Worker registration failed: ', err));
+        navigator.serviceWorker.register('sw.js').catch(err => console.error('Service Worker registration failed: ', err));
     });
 }
 
-// --- OTURUM YÖNETİMİ ---
+Chart.register(ChartDataLabels);
+
 auth.onAuthStateChanged(async (user) => {
     if (user) {
         currentUserId = user.uid;
@@ -490,7 +424,6 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 
-// --- UYGULAMA BAŞLATMA ---
 function initializeApp() {
     const sidebarNav = document.getElementById('sidebarNav');
     const moduleSections = document.querySelectorAll('.main-content .module-section');
@@ -501,17 +434,7 @@ function initializeApp() {
     const yemTanimFormTemizleBtn = document.getElementById('yemTanimFormTemizleBtn');
     const yemAlisForm = document.getElementById('yemAlisForm');
     const yemAlisFormTemizleBtn = document.getElementById('yemAlisFormTemizleBtn');
-    const yemSatisForm = document.getElementById('yemSatisForm'); document.getElementById('yemSecimiSatis').addEventListener('change', (event) => {
-    const yemId = event.target.value;
-    const fiyatInput = document.getElementById('yemSatisBirimFiyati');
-    if (yemId && window.yemDataMap && window.yemDataMap.has(yemId)) {
-        fiyatInput.value = window.yemDataMap.get(yemId).satisFiyati || 0;
-    } else {
-        fiyatInput.value = '';
-    }
-    // Toplam tutarı yeniden hesapla
-    hesaplaToplamTutar('yemSatisMiktar', 'yemSatisBirimFiyati', 'yemSatisToplamTutar');
-});
+    const yemSatisForm = document.getElementById('yemSatisForm');
     const yemSatisFormTemizleBtn = document.getElementById('yemSatisFormTemizleBtn');
     const odemeForm = document.getElementById('odemeForm');
     const odemeFormTemizleBtn = document.getElementById('odemeFormTemizleBtn');
@@ -532,7 +455,8 @@ function initializeApp() {
     const sutRaporuYazdirBtn = document.getElementById('sutRaporuYazdirBtn');
     const yemRaporuOlusturBtn = document.getElementById('yemRaporuOlusturBtn');
     const yemRaporuYazdirBtn = document.getElementById('yemRaporuYazdirBtn');
-
+    const sutDuzenleForm = document.getElementById('sutDuzenleForm');
+    
     applyRolePermissions();
     loadAndRenderAllData();
     
@@ -550,6 +474,7 @@ function initializeApp() {
         if(activeSection) activeSection.style.display = 'block';
         
         if (targetId === 'dashboard') { updateDashboardStats(); }
+	if (document.getElementById('aylikChartGosterBtn')) {	document.getElementById('aylikChartGosterBtn').addEventListener('click', renderAylikSutunGrafik);}
         if (targetId === 'cari-yonetimi') { populateCariKategoriFiltre(); renderCariListesi(); populateCariKategoriSelect(document.getElementById('cariKategori')); }
         if (targetId === 'sut-alimi') { if(topluGirisTarihInput) topluGirisTarihInput.value = getTodayForInput(); populateCariKategoriSelect(topluGirisKategori); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); }
         if (targetId === 'yem-stok-yonetimi') { populateCariSelect(document.getElementById('yemAlisTedarikci')); populateYemSelect(document.getElementById('yemSecimiAlis')); renderYemAlisHareketleri(); renderYemStokListesi(); }
@@ -558,18 +483,11 @@ function initializeApp() {
         if (targetId === 'hesap-ozeti'){ populateCariSelect(document.getElementById('raporCariSecimi')); if(!document.getElementById('raporTarihAraligi').value) document.getElementById('raporTarihAraligi').value = getMonthYearForInput(); }
         if (targetId === 'sut-alim-raporu'){ populateCariSelect(document.getElementById('sutRaporuTedarikciSecimi')); populateCariKategoriSelect(document.getElementById('sutRaporuKategoriSecimi'), "Tümü"); if(!document.getElementById('sutRaporuAySecimi').value) document.getElementById('sutRaporuAySecimi').value = getMonthYearForInput(); }
         if (targetId === 'aylik-yem-raporu'){ if(!document.getElementById('yemRaporuAySecimi').value) document.getElementById('yemRaporuAySecimi').value = getMonthYearForInput(); }
+        if (targetId === 'hareket-dokumu') { renderHareketDokumu(); }
         if (targetId === 'ayarlar') { populateCariKategoriSelect(document.getElementById('cariKategori')); renderCariKategoriListesi(); getSettings(); renderKullaniciListesi(); }
-        if (targetId === 'hareket-dokumu') {    renderHareketDokumu();}
     });
     
     logoutButton.addEventListener('click', handleLogout);
-document.getElementById('yemAlisMiktar').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
-    document.getElementById('yemAlisBirimFiyati').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
-document.getElementById('sutDuzenleForm').addEventListener('submit', handleSutAlimiGuncelle);
-document.getElementById('pastaGunlukGosterBtn').addEventListener('click', renderGunlukPastaGrafik);
-document.getElementById('pastaAylikGosterBtn').addEventListener('click', renderAylikPastaGrafik);
-    document.getElementById('yemSatisMiktar').addEventListener('input', () => hesaplaToplamTutar('yemSatisMiktar', 'yemSatisBirimFiyati', 'yemSatisToplamTutar'));
-    document.getElementById('yemSatisBirimFiyati').addEventListener('input', () => hesaplaToplamTutar('yemSatisMiktar', 'yemSatisBirimFiyati', 'yemSatisToplamTutar'));
     cariForm.addEventListener('submit', handleCariKaydet);
     if(cariFormTemizleBtn) cariFormTemizleBtn.addEventListener('click', resetCariForm);
     yemTanimForm.addEventListener('submit', handleYemTanimKaydet);
@@ -584,6 +502,7 @@ document.getElementById('pastaAylikGosterBtn').addEventListener('click', renderA
     cariKategoriForm.addEventListener('submit', handleCariKategoriEkle);
     if(kullaniciForm) kullaniciForm.addEventListener('submit', handleKullaniciKaydet);
     sifreDegistirForm.addEventListener('submit', handleSifreDegistir);
+    if(sutDuzenleForm) sutDuzenleForm.addEventListener('submit', handleSutAlimiGuncelle);
 
     cariSearchInput.addEventListener('input', renderCariListesi);
     cariKategoriFiltre.addEventListener('change', renderCariListesi);
@@ -599,21 +518,35 @@ document.getElementById('pastaAylikGosterBtn').addEventListener('click', renderA
     sutRaporuYazdirBtn.addEventListener('click', () => handleYazdir('sut-alim-raporu'));
     yemRaporuOlusturBtn.addEventListener('click', handleYemKarRaporuOlustur);
     yemRaporuYazdirBtn.addEventListener('click', () => handleYazdir('aylik-yem-raporu'));
+    
+    document.getElementById('yemAlisMiktar').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
+    document.getElementById('yemAlisBirimFiyati').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
+    document.getElementById('yemSatisMiktar').addEventListener('input', () => hesaplaToplamTutar('yemSatisMiktar', 'yemSatisBirimFiyati', 'yemSatisToplamTutar'));
+    document.getElementById('yemSatisBirimFiyati').addEventListener('input', () => hesaplaToplamTutar('yemSatisMiktar', 'yemSatisBirimFiyati', 'yemSatisToplamTutar'));
+    document.getElementById('yemSecimiSatis').addEventListener('change', (event) => {
+        const yemId = event.target.value;
+        const fiyatInput = document.getElementById('yemSatisBirimFiyati');
+        if (yemId && window.yemDataMap && window.yemDataMap.has(yemId)) {
+            fiyatInput.value = window.yemDataMap.get(yemId).satisFiyati || 0;
+        } else {
+            fiyatInput.value = '';
+        }
+        hesaplaToplamTutar('yemSatisMiktar', 'yemSatisBirimFiyati', 'yemSatisToplamTutar');
+    });
 }
 
 async function loadAndRenderAllData() {
     console.log("Veri yükleme fonksiyonları kontrollü bir şekilde başlatılıyor...");
-    try { await renderCariListesi(); } catch (e) { console.warn("Cari listesi yüklenemedi (koleksiyon henüz oluşturulmamış veya index eksik olabilir).", e); }
-    try { await renderYemStokListesi(); } catch (e) { console.warn("Yem stoku yüklenemedi (koleksiyon henüz oluşturulmamış veya index eksik olabilir).", e); }
-    try { await renderOdemeListesi(); } catch (e) { console.warn("Ödeme listesi yüklenemedi (koleksiyon henüz oluşturulmamış veya index eksik olabilir).", e); }
-    try { await renderCariKategoriListesi(); } catch (e) { console.warn("Cari kategori listesi yüklenemedi (koleksiyon henüz oluşturulmamış veya index eksik olabilir).", e); }
+    try { await renderCariListesi(); } catch (e) { console.warn("Cari listesi yüklenemedi.", e); }
+    try { await renderYemStokListesi(); } catch (e) { console.warn("Yem stoku yüklenemedi.", e); }
+    try { await renderOdemeListesi(); } catch (e) { console.warn("Ödeme listesi yüklenemedi.", e); }
+    try { await renderCariKategoriListesi(); } catch (e) { console.warn("Cari kategori listesi yüklenemedi.", e); }
     try { await populateCariKategoriFiltre(); } catch (e) { console.warn("Cari kategori filtresi doldurulamadı.", e); }
     try { await populateCariKategoriSelect(document.getElementById('topluGirisKategori')); } catch (e) { console.warn("Toplu giriş kategorisi doldurulamadı.", e); }
     try { await updateDashboardStats(); } catch (e) { console.warn("Panel istatistikleri güncellenemedi.", e); }
-    console.log("Veri yükleme denemeleri tamamlandı. Arayüz şimdi kullanılabilir olmalı.");
+    console.log("Veri yükleme denemeleri tamamlandı.");
 }
 
-// --- YARDIMCI FONKSİYONLAR ---
 function generateId() { return db.collection('_').doc().id; }
 function formatDate(dateString) { if (!dateString) return ''; const date = new Date(dateString); const userTimezoneOffset = date.getTimezoneOffset() * 60000; return new Date(date.getTime() + userTimezoneOffset).toLocaleDateString('tr-TR'); }
 function getTodayForInput() { return new Date().toISOString().split('T')[0]; }
@@ -638,7 +571,6 @@ function applyRolePermissions() {
 }
 function handleLogout() { auth.signOut().then(() => { window.location.href = 'login.html'; }).catch(error => console.error("Logout error", error)); }
 
-// --- AYARLAR FONKSİYONLARI ---
 async function getSettings() {
     const varsayilanSutFiyatiInput = document.getElementById('varsayilanSutFiyati');
     const currentUser = auth.currentUser;
@@ -666,11 +598,24 @@ async function handleAyarlarKaydet(event) {
     if (!currentUser) { alert("Lütfen giriş yapın."); return; }
     const varsayilanSutFiyatiInput = document.getElementById('varsayilanSutFiyati');
     const yeniFiyat = parseFloat(varsayilanSutFiyatiInput.value);
+    
     if (!isNaN(yeniFiyat) && yeniFiyat >= 0) {
         try {
+            // Ayarları veritabanına kaydet
             await db.collection('ayarlar').doc(currentUser.uid).set({ defaultMilkPrice: yeniFiyat, sahipId: currentUser.uid }, { merge: true });
+            // Global ayar değişkenini güncelle
             globalSettings.defaultMilkPrice = yeniFiyat;
             alert('Genel ayarlar kaydedildi.');
+
+            // --- YENİ EKLENEN KOD ---
+            // Eğer "Günlük Süt Alımı" sekmesi o anda açıksa, yeni fiyatı yansıtmak için listeyi yenile.
+            const sutAlimiSekmesi = document.getElementById('sut-alimi');
+            if (sutAlimiSekmesi && sutAlimiSekmesi.style.display === 'block') {
+                await renderTopluSutGirisFormu();
+                console.log('Süt alım formu yeni fiyatla güncellendi.');
+            }
+            // --- YENİ KOD SONU ---
+
         } catch (error) {
             console.error("Ayarlar kaydedilirken hata:", error);
             alert("Ayarlar kaydedilemedi.");
@@ -679,6 +624,7 @@ async function handleAyarlarKaydet(event) {
         alert('Lütfen geçerli bir süt fiyatı giriniz.');
     }
 }
+
 
 async function handleSifreDegistir(event) {
     event.preventDefault();
@@ -704,9 +650,6 @@ async function handleSifreDegistir(event) {
     }
 }
 
-
-
-// --- DASHBOARD FONKSİYONLARI ---
 async function updateDashboardStats() {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
@@ -759,8 +702,8 @@ async function updateDashboardStats() {
     // --- Bakiye Toplamları ve İlerleme Çubukları ---
     try {
         const allCarilerSnapshot = await db.collection('cariler').where("sahipId", "==", currentUser.uid).get();
-        let toplamMusteriBorcu = 0; // İşletmenin alacağı
-        let toplamMusteriAlacagi = 0;   // İşletmenin borcu
+        let toplamMusteriBorcu = 0;
+        let toplamMusteriAlacagi = 0;
         
         if(!allCarilerSnapshot.empty) {
             const bakiyePromises = allCarilerSnapshot.docs.map(doc => calculateCariBakiyeDetayli(doc.id));
@@ -785,12 +728,25 @@ async function updateDashboardStats() {
 
     } catch (e) { console.error("Dashboard bakiye toplamları alınırken hata", e); }
 
-    // --- Grafikleri Oluşturma ---
+    // --- Grafikler ---
     try {
+        // Günlük grafiği yükle (mevcut kod)
         if (typeof renderGunlukSutGrafik === 'function') await renderGunlukSutGrafik();
-        if (typeof renderAylikSutGrafik === 'function') await renderAylikSutGrafik();
-    } catch(e) { console.error("Grafikler oluşturulurken hata", e); }
-}// --- CARİ YÖNETİMİ FONKSİYONLARI ---
+
+        // --- YENİ EKLENEN BÖLÜM ---
+        // Aylık grafik için varsayılan olarak bu ayı ayarla
+        const aylikChartInput = document.getElementById('aylikChartAySecimi');
+        if (aylikChartInput) {
+            aylikChartInput.value = getMonthYearForInput(); // Mevcut ayı input'a ata
+        }
+        // Aylık grafiği otomatik olarak yükle
+        if (typeof renderAylikSutunGrafik === 'function') await renderAylikSutunGrafik();
+        // --- YENİ BÖLÜM SONU ---
+        
+    } catch(e) { console.error("Kontrol paneli grafikleri oluşturulurken hata", e); }
+}
+
+// --- CARİ YÖNETİMİ FONKSİYONLARI ---
 async function handleCariKaydet(event) {
     event.preventDefault();
     const currentUser = auth.currentUser;
@@ -799,9 +755,12 @@ async function handleCariKaydet(event) {
     const cariAdi = document.getElementById('cariAdiSoyadi').value;
     if (!cariAdi) { alert("Adı Soyadı / Firma Adı alanı zorunludur."); return; }
 
+    const yeniRotaSirasiInput = document.getElementById('cariRotaSirasi').value;
+    const yeniRotaSirasi = yeniRotaSirasiInput ? parseInt(yeniRotaSirasiInput) : null;
+
     const formData = {
         kodu: document.getElementById('cariKodu').value,
-        rotaSirasi: parseInt(document.getElementById('cariRotaSirasi').value) || 999, // YENİ EKLENDİ
+        rotaSirasi: yeniRotaSirasi,
         adiSoyadi: document.getElementById('cariAdiSoyadi').value,
         kategori: document.getElementById('cariKategori').value,
         durum: document.getElementById('cariDurum').value,
@@ -816,35 +775,79 @@ async function handleCariKaydet(event) {
         notlar: document.getElementById('cariNotlar').value,
         sahipId: currentUser.uid
     };
-    try {
-        let cariId = editingCariId;
-        if (editingCariId) {
-            await db.collection('cariler').doc(editingCariId).set(formData, { merge: true });
-        } else {
-            const docRef = await db.collection('cariler').add(formData);
-            cariId = docRef.id;
-            
-            const acilisBakiye = parseFloat(document.getElementById('cariAcilisBakiye').value) || 0;
-            const bakiyeTuru = document.getElementById('cariAcilisBakiyeTuru').value;
 
-            if (acilisBakiye > 0 && bakiyeTuru !== 'yok') {
-                const bakiyeData = {
-                    aciklama: "Açılış Bakiyesi", cariId: cariId,
-                    islemTuru: bakiyeTuru, // 'borc' veya 'alacak'
-                    sahipId: currentUser.uid, tarih: new Date(1990, 0, 1).toISOString().split('T')[0], // Çok eski bir tarih
-                    tutar: acilisBakiye
-                };
-                await db.collection('odemeVeTahsilatlar').add(bakiyeData);
+    try {
+        // Sadece YENİ bir kayıt yapılıyorsa VE rota sırası belirtilmişse bu blok çalışır.
+        if (!editingCariId && yeniRotaSirasi) {
+            
+            // ADIM 1: GÜNCELLENECEK DOKÜMANLARI TRANSACTION DIŞINDA SORGULA
+            const carilerToUpdateQuery = db.collection('cariler')
+                .where('sahipId', '==', currentUser.uid)
+                .where('rotaSirasi', '>=', yeniRotaSirasi);
+            
+            const snapshot = await carilerToUpdateQuery.get();
+
+            // ADIM 2: TÜM YAZMA İŞLEMLERİNİ TRANSACTION İÇİNDE YAP
+            await db.runTransaction(async (transaction) => {
+                // Sorgu sonucundaki her carinin rota sırasını 1 artır
+                snapshot.forEach(doc => {
+                    const mevcutSira = doc.data().rotaSirasi;
+                    transaction.update(doc.ref, { rotaSirasi: mevcutSira + 1 });
+                });
+
+                // Diğerlerini kaydırdıktan sonra yeni cariyi araya ekle
+                const newCariRef = db.collection('cariler').doc(); // Yeni bir doküman referansı oluştur
+                transaction.set(newCariRef, formData);
+
+                // Açılış bakiyesini de transaction içinde hallet
+                const acilisBakiye = parseFloat(document.getElementById('cariAcilisBakiye').value) || 0;
+                const bakiyeTuru = document.getElementById('cariAcilisBakiyeTuru').value;
+                if (acilisBakiye > 0 && bakiyeTuru !== 'yok') {
+                    const bakiyeData = {
+                        aciklama: "Açılış Bakiyesi", cariId: newCariRef.id,
+                        islemTuru: bakiyeTuru, sahipId: currentUser.uid, 
+                        tarih: new Date(1990, 0, 1).toISOString().split('T')[0],
+                        tutar: acilisBakiye
+                    };
+                    const odemeRef = db.collection('odemeVeTahsilatlar').doc();
+                    transaction.set(odemeRef, bakiyeData);
+                }
+            });
+            console.log("Rota sırası güncellenerek yeni cari eklendi.");
+
+        } else { // Düzenleme yapılıyorsa veya rota sırası belirtilmemişse eski yöntemle devam et
+            let cariId = editingCariId;
+            if (editingCariId) {
+                await db.collection('cariler').doc(editingCariId).set(formData, { merge: true });
+            } else {
+                const docRef = await db.collection('cariler').add(formData);
+                cariId = docRef.id;
+                
+                const acilisBakiye = parseFloat(document.getElementById('cariAcilisBakiye').value) || 0;
+                const bakiyeTuru = document.getElementById('cariAcilisBakiyeTuru').value;
+
+                if (acilisBakiye > 0 && bakiyeTuru !== 'yok') {
+                    const bakiyeData = {
+                        aciklama: "Açılış Bakiyesi", cariId: cariId,
+                        islemTuru: bakiyeTuru, sahipId: currentUser.uid, 
+                        tarih: new Date(1990, 0, 1).toISOString().split('T')[0],
+                        tutar: acilisBakiye
+                    };
+                    await db.collection('odemeVeTahsilatlar').add(bakiyeData);
+                }
             }
         }
+        
         resetCariForm();
         await renderCariListesi();
-    } catch(error) { console.error("Hata: ", error); alert("Cari kaydedilirken bir hata oluştu."); }
-}
 
+    } catch(error) { 
+        console.error("Cari kaydedilirken hata: ", error); 
+        alert("Cari kaydedilirken bir hata oluştu. Lütfen konsolu kontrol edin."); 
+    }
+}      
 
-
-        
+  
 async function renderCariListesi() {
     const cariListesiBody = document.getElementById('cariListesiBody');
     const cariListesiFooter = document.getElementById('cariListesiFooter');
@@ -859,8 +862,11 @@ async function renderCariListesi() {
     if (kategori) {
         query = query.where("kategori", "==", kategori);
     }
+    // Rota sırası olmayanları (null) sona atmak için önce rota sırasına, sonra ada göre sırala
+    query = query.orderBy('rotaSirasi').orderBy('adiSoyadi');
+
     try {
-        const snapshot = await query.orderBy('adiSoyadi').get();
+        const snapshot = await query.get();
         let cariler = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         if (searchTerm) {
@@ -894,14 +900,13 @@ async function renderCariListesi() {
                 const bakiyeStyle = bakiye >= 0 ? 'color:green;' : 'color:red;';
                 const bakiyeText = `${formatCurrency(bakiye)} ${bakiye >= 0 ? '(A)' : '(B)'}`;
                 
-                // DEĞİŞİKLİK: Rota sırası metni, kategori ile birleştirilerek oluşturuluyor.
-                const rotaSirasiText = c.kategori ? `${c.kategori} - ${c.rotaSirasi || ''}` : (c.rotaSirasi || '');
-
                 row.innerHTML = `
                     <td>${c.kodu || ''}</td>
                     <td>${c.adiSoyadi || ''}</td>
                     <td>${c.kategori || ''}</td>
-                    <td>${rotaSirasiText}</td>
+                    
+                    <td>${c.rotaSirasi || ''}</td>
+                    
                     <td style="${durumStyle}">${durumText}</td>
                     <td>${c.telefon || ''}</td>
                     <td>${formatCurrency(bakiyeDetay.borc)}</td>
@@ -932,11 +937,6 @@ async function renderCariListesi() {
     }
 }
 
-        // Yeni grafikler için global değişkenler
-let gunlukPastaChartInstance = null;
-let aylikPastaChartInstance = null;
-
-// Rastgele renk üreten yardımcı fonksiyon
 function generateRandomColors(count) {
     const colors = [];
     for (let i = 0; i < count; i++) {
@@ -948,134 +948,101 @@ function generateRandomColors(count) {
     return colors;
 }
 
-// GÜNLÜK PASTA GRAFİĞİ OLUŞTURMA FONKSİYONU
-// GÜNLÜK KATEGORİ BAZLI PASTA GRAFİĞİ
-async function renderGunlukPastaGrafik() {
-    const tarih = document.getElementById('pastaGunlukTarih').value;
-    if (!tarih) {
-        alert("Lütfen günlük grafik için bir tarih seçin.");
-        return;
+async function renderAylikSutunGrafik() {
+    const ayYil = document.getElementById('aylikChartAySecimi').value;
+    const ctx = document.getElementById('aylikSutGrafik').getContext('2d');
+
+    if (aylikSutunChartInstance) {
+        aylikSutunChartInstance.destroy();
     }
     
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
+    // Her işlemden önce tuvali temizle
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    try {
-        // Önce tüm carileri ve kategorilerini bir haritaya alalım
-        const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', currentUser.uid).get();
-        const cariKategoriMap = new Map();
-        carilerSnapshot.forEach(doc => {
-            cariKategoriMap.set(doc.id, doc.data().kategori || 'Belirtilmemiş');
-        });
-
-        // Seçilen tarihteki tüm süt alımlarını çekelim
-        const alimlarSnapshot = await db.collection('sut_alimlari')
-            .where('sahipId', '==', currentUser.uid)
-            .where('tarih', '==', tarih)
-            .get();
-
-        // Alımları kategoriye göre gruplayarak toplayalım
-        const dataByKategori = {};
-        alimlarSnapshot.forEach(doc => {
-            const alim = doc.data();
-            const kategori = cariKategoriMap.get(alim.cariId);
-            if (kategori) { // Sadece kategorisi bilinen carileri dahil et
-                if (!dataByKategori[kategori]) {
-                    dataByKategori[kategori] = 0;
-                }
-                dataByKategori[kategori] += alim.toplam;
-            }
-        });
-
-        const labels = Object.keys(dataByKategori);
-        const data = Object.values(dataByKategori);
-        const colors = generateRandomColors(labels.length);
-
-        const ctx = document.getElementById('gunlukPastaGrafik').getContext('2d');
-        if (gunlukPastaChartInstance) gunlukPastaChartInstance.destroy();
-        
-        gunlukPastaChartInstance = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Süt Miktarı (Lt)',
-                    data: data,
-                    backgroundColor: colors,
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
-    } catch (error) {
-        console.error("Günlük kategori grafiği oluşturulurken hata:", error);
-    }
-}
-
-// AYLIK KATEGORİ BAZLI PASTA GRAFİĞİ
-async function renderAylikPastaGrafik() {
-    const ayYil = document.getElementById('pastaAylikTarih').value;
     if (!ayYil) {
-        alert("Lütfen aylık grafik için bir ay seçin.");
+        ctx.font = "16px Segoe UI";
+        ctx.fillStyle = "#666";
+        ctx.textAlign = "center";
+        ctx.fillText("Lütfen bir ay seçip 'Grafiği Göster' butonuna basın.", ctx.canvas.width / 2, ctx.canvas.height / 2);
         return;
     }
 
     const currentUser = auth.currentUser;
     if (!currentUser) return;
     
-    const [year, month] = ayYil.split('-');
-    const startDateStr = `${year}-${month}-01`;
-    const endDate = new Date(year, month, 0);
-    const endDateStr = endDate.toISOString().split('T')[0];
+    ctx.font = "16px Segoe UI";
+    ctx.fillStyle = "#666";
+    ctx.textAlign = "center";
+    ctx.fillText("Grafik oluşturuluyor...", ctx.canvas.width / 2, ctx.canvas.height / 2);
 
     try {
-        // Önce tüm carileri ve kategorilerini bir haritaya alalım
-        const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', currentUser.uid).get();
-        const cariKategoriMap = new Map();
-        carilerSnapshot.forEach(doc => {
-            cariKategoriMap.set(doc.id, doc.data().kategori || 'Belirtilmemiş');
-        });
+        const [year, month] = ayYil.split('-');
+        const startDateStr = new Date(year, month - 1, 1).toISOString().split('T')[0];
+        const endDateStr = new Date(year, month, 0).toISOString().split('T')[0];
 
-        // Seçilen aydaki tüm süt alımlarını çekelim
         const alimlarSnapshot = await db.collection('sut_alimlari')
             .where('sahipId', '==', currentUser.uid)
             .where('tarih', '>=', startDateStr)
             .where('tarih', '<=', endDateStr)
             .get();
 
-        // Alımları kategoriye göre gruplayarak toplayalım
+        // --- İSTEDİĞİNİZ KONTROL VE MESAJ ---
+        if (alimlarSnapshot.empty) {
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.fillText("Bu ayda süt alımı yok.", ctx.canvas.width / 2, ctx.canvas.height / 2);
+            return; // Fonksiyonu burada sonlandır.
+        }
+        
+        // --- Veri Varsa Grafik Çizim Kodları ---
+        const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', currentUser.uid).get();
+        const kategoriMap = new Map();
+        carilerSnapshot.forEach(doc => {
+            kategoriMap.set(doc.id, doc.data().kategori || 'Belirtilmemiş');
+        });
+
         const dataByKategori = {};
         alimlarSnapshot.forEach(doc => {
             const alim = doc.data();
-            const kategori = cariKategoriMap.get(alim.cariId);
-            if (kategori) {
-                if (!dataByKategori[kategori]) {
-                    dataByKategori[kategori] = 0;
-                }
-                dataByKategori[kategori] += alim.toplam;
+            const kategori = kategoriMap.get(alim.cariId) || "Diğer";
+            if (!dataByKategori[kategori]) {
+                dataByKategori[kategori] = 0;
             }
+            dataByKategori[kategori] += alim.toplam;
         });
 
         const labels = Object.keys(dataByKategori);
         const data = Object.values(dataByKategori);
-        const colors = generateRandomColors(labels.length);
-
-        const ctx = document.getElementById('aylikPastaGrafik').getContext('2d');
-        if (aylikPastaChartInstance) aylikPastaChartInstance.destroy();
         
-        aylikPastaChartInstance = new Chart(ctx, {
-            type: 'pie',
+        aylikSutunChartInstance = new Chart(ctx, {
+            type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
                     label: 'Toplam Süt (Lt)',
                     data: data,
-                    backgroundColor: colors,
+                    backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
                 }]
             },
-            options: { responsive: true, maintainAspectRatio: false }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                 plugins: {
+                    legend: { display: false },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'end',
+                        formatter: (value) => value.toFixed(0) + ' Lt',
+                        color: '#333',
+                        font: { weight: 'bold' }
+                    }
+                },
+                scales: { y: { beginAtZero: true } }
+            }
         });
     } catch (error) {
-        console.error("Aylık kategori grafiği oluşturulurken hata:", error);
+        console.error("Aylık süt grafiği oluşturulurken hata:", error);
     }
 }
 
@@ -1088,7 +1055,7 @@ async function editCari(id) {
 
         const cariKoduInput = document.getElementById('cariKodu');
         cariKoduInput.readOnly = false;
-        
+
         editingCariId = id; 
         document.getElementById('cariEditId').value = id; 
         document.getElementById('cariKodu').value = cari.kodu || ''; 
@@ -1096,7 +1063,7 @@ async function editCari(id) {
         document.getElementById('cariAdiSoyadi').value = cari.adiSoyadi || ''; 
         document.getElementById('cariKategori').value = cari.kategori || ''; 
         document.getElementById('cariDurum').value = cari.durum || 'aktif';
-        document.getElementById('cariTipi').value = cari.cariTipi || 'sut_ve_yem'; // YENİ EKLENDİ
+        document.getElementById('cariTipi').value = cari.cariTipi || 'sut_ve_yem';
         document.getElementById('cariTelefon').value = cari.telefon || ''; 
         document.getElementById('cariEposta').value = cari.eposta || ''; 
         document.getElementById('cariAdres').value = cari.adres || ''; 
@@ -1105,38 +1072,94 @@ async function editCari(id) {
         document.getElementById('cariVergiDairesi').value = cari.vergiDairesi || ''; 
         document.getElementById('cariVergiNo').value = cari.vergiNo || ''; 
         document.getElementById('cariNotlar').value = cari.notlar || ''; 
-        setEditingMode(document.getElementById('cariFormBaslik'), document.getElementById('cariKaydetBtn'), document.getElementById('cariFormTemizleBtn'), editingCariId, 'Cari Kart');
-        document.getElementById('cariForm').scrollIntoView();
-    } catch (error) {
-        console.error("Cari düzenleme için getirilirken hata:", error);
+
+        setEditingMode(
+            document.getElementById('cariFormBaslik'),
+            document.getElementById('cariKaydetBtn'),
+            document.getElementById('cariFormTemizleBtn'),
+            editingCariId,
+            'Cari'
+        );
+    } catch (e) {
+        console.error("Cari bilgileri yüklenirken hata:", e);
     }
 }
-async function deleteCari(id) { 
+
+async function deleteCari(id) {
     if (confirm('Bu cariyi ve ilgili tüm hareketlerini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!')) {
         const currentUser = auth.currentUser;
-        if (!currentUser) return;
-        const batch = db.batch();
-        batch.delete(db.collection('cariler').doc(id));
-        const hareketler = ['sut_alimlari', 'yem_alimlari', 'yem_satislari', 'odemeVeTahsilatlar'];
+        if (!currentUser) {
+            alert("Lütfen giriş yapın.");
+            return;
+        }
+
         try {
-            for(const koleksiyon of hareketler) {
-                const snapshot = await db.collection(koleksiyon).where('cariId', '==', id).where('sahipId', '==', currentUser.uid).get();
-                snapshot.forEach(doc => batch.delete(doc.ref));
+            // --- ADIM 1: SİLİNECEK VE GÜNCELLENECEK TÜM BİLGİLERİ TRANSACTION DIŞINDA OKU/SORGULA ---
+
+            const cariRef = db.collection('cariler').doc(id);
+            const cariDoc = await cariRef.get();
+
+            if (!cariDoc.exists) {
+                throw "Silinecek cari bulunamadı!";
             }
-            await batch.commit();
-            await renderCariListesi();
-        } catch(error) {
+            const silinenRotaSirasi = cariDoc.data().rotaSirasi;
+
+            // Silinecek cariyle ilişkili tüm hareketleri sorgula
+            const hareketler = ['sut_alimlari', 'yem_alimlari', 'yem_satislari', 'odemeVeTahsilatlar'];
+            const hareketSnapshots = []; // Tüm sorgu sonuçlarını burada biriktireceğiz
+            for (const koleksiyon of hareketler) {
+                const q = db.collection(koleksiyon).where('cariId', '==', id).where('sahipId', '==', currentUser.uid);
+                const snapshot = await q.get();
+                hareketSnapshots.push(snapshot);
+            }
+
+            // Rota sırası güncellenecek carileri sorgula (eğer silinenin bir sırası varsa)
+            let carilerToUpdateSnapshot = null;
+            if (silinenRotaSirasi) {
+                const carilerToUpdateQuery = db.collection('cariler')
+                    .where('sahipId', '==', currentUser.uid)
+                    .where('rotaSirasi', '>', silinenRotaSirasi);
+                carilerToUpdateSnapshot = await carilerToUpdateQuery.get();
+            }
+
+            // --- ADIM 2: TÜM YAZMA/SİLME İŞLEMLERİNİ TRANSACTION İÇİNDE GÜVENLE YAP ---
+            await db.runTransaction(async (transaction) => {
+                // Okuduğumuz ilişkili hareketleri sil
+                hareketSnapshots.forEach(snapshot => {
+                    snapshot.forEach(doc => {
+                        transaction.delete(doc.ref);
+                    });
+                });
+
+                // Rota sıralarını güncelle
+                if (carilerToUpdateSnapshot) {
+                    carilerToUpdateSnapshot.forEach(doc => {
+                        const mevcutSira = doc.data().rotaSirasi;
+                        transaction.update(doc.ref, { rotaSirasi: mevcutSira - 1 });
+                    });
+                }
+                
+                // Son olarak ana cariyi sil
+                transaction.delete(cariRef);
+            });
+
+            console.log("Cari başarıyla silindi ve rota sıraları güncellendi.");
+            await renderCariListesi(); // Listeyi yenile
+
+        } catch (error) {
             console.error("Cari silinirken hata:", error);
-            alert("İlişkili hareketler silinirken bir hata oluştu.");
+            alert("Cari silinirken bir hata oluştu: " + error);
         }
     }
 }
+
 function resetCariForm(){ 
     document.getElementById('cariForm').reset(); 
     editingCariId = null; 
     document.getElementById('cariEditId').value = ''; 
     setEditingMode(document.getElementById('cariFormBaslik'), document.getElementById('cariKaydetBtn'), document.getElementById('cariFormTemizleBtn'), null, 'Cari Kart');
 }
+
 async function handleCariKategoriEkle(event) {
     event.preventDefault();
     const yeniCariKategoriAdiInput = document.getElementById('yeniCariKategoriAdi');
@@ -1158,6 +1181,7 @@ async function handleCariKategoriEkle(event) {
         alert("Kategori eklenemedi. Konsolu kontrol edin.");
     }
 }
+
 async function renderCariKategoriListesi() {
     const cariKategoriListesiUl = document.getElementById('cariKategoriListesiUl');
     const currentUser = auth.currentUser;
@@ -1170,6 +1194,7 @@ async function renderCariKategoriListesi() {
         kategoriler.forEach(kat => { const li = document.createElement('li'); li.textContent = kat.ad; const deleteBtn = document.createElement('button'); deleteBtn.textContent = 'Sil'; deleteBtn.classList.add('btn', 'btn-delete', 'btn-sm', 'dont-print'); deleteBtn.onclick = () => deleteCariKategori(kat.id); li.appendChild(deleteBtn); cariKategoriListesiUl.appendChild(li); });
     } catch(error) { console.error("Kategoriler listelenirken hata:", error); }
 }
+
 async function deleteCariKategori(id) { 
     if (confirm('Bu kategoriyi/köyü silmek istediğinizden emin misiniz?')) { 
         try {
@@ -1179,7 +1204,8 @@ async function deleteCariKategori(id) {
     }
 }
 
-// --- POPULATE (DOLDURMA) FONKSİYONLARI ---
+
+
 async function populateCariKategoriFiltre() { 
     const selectElement = document.getElementById('cariKategoriFiltre');
     const currentUser = auth.currentUser;
@@ -1193,6 +1219,7 @@ async function populateCariKategoriFiltre() {
         selectElement.value = currentValue; 
     } catch(error) { console.error("Kategori filtresi yüklenirken hata:", error); }
 }
+
 async function populateCariKategoriSelect(selectElement, defaultOptionText = "Seçiniz...") { 
     if(!selectElement) return;
     const currentUser = auth.currentUser;
@@ -1206,6 +1233,7 @@ async function populateCariKategoriSelect(selectElement, defaultOptionText = "Se
         if (kategoriler.some(kat => kat.ad === currentValue)) { selectElement.value = currentValue; }
     } catch(error) { console.error("Kategori seçimi yüklenirken hata:", error); }
 }
+
 async function populateCariSelect(selectElement, defaultText = "Seçiniz...") { 
     if(!selectElement) return;
     const currentUser = auth.currentUser;
@@ -1220,6 +1248,7 @@ async function populateCariSelect(selectElement, defaultText = "Seçiniz...") {
         if (cariler.some(c => c.id === currentValue)) { selectElement.value = currentValue; }
     } catch(error) { console.error("Cari seçimi yüklenirken hata:", error); }
 }
+
 async function populateYemSelect(selectElement, defaultText = "Yem Seçiniz...") {
     if(!selectElement) return;
     const currentUser = auth.currentUser;
@@ -1243,31 +1272,34 @@ async function populateYemSelect(selectElement, defaultText = "Yem Seçiniz...")
         console.error("Yem seçimi yüklenirken hata:", error);
     }
 }
-// Bu değişkeni, script'inizin en üstündeki diğer global değişkenlerin yanına ekleyin:
-let gunlukSutunChartInstance = null;
 
-// Bu fonksiyonu, script'inizdeki diğer fonksiyonların yanına ekleyin:
+
 async function renderGunlukSutGrafik() {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
 
     const ctx = document.getElementById('gunlukSutGrafik').getContext('2d');
     if(gunlukSutunChartInstance) {
-        gunlukSutunChartInstance.destroy(); // Önceki grafiği temizle
+        gunlukSutunChartInstance.destroy();
     }
 
     try {
         const tarihStr = getTodayForInput();
         const alimlarSnapshot = await db.collection('sut_alimlari').where('sahipId', '==', currentUser.uid).where('tarih', '==', tarihStr).get();
         
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
         if (alimlarSnapshot.empty) {
-            // Eğer o gün veri yoksa boş bir grafik veya mesaj gösterilebilir. Şimdilik temizliyoruz.
+            ctx.font = "16px Segoe UI";
+            ctx.fillStyle = "#666";
+            ctx.textAlign = "center";
+            ctx.fillText("Bugün için süt alım verisi bulunmuyor.", ctx.canvas.width / 2, ctx.canvas.height / 2);
             return;
         }
 
-        const cariKategorileri = await db.collection('cariler').where('sahipId', '==', currentUser.uid).get();
+        const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', currentUser.uid).get();
         const kategoriMap = new Map();
-        cariKategorileri.forEach(doc => {
+        carilerSnapshot.forEach(doc => {
             kategoriMap.set(doc.id, doc.data().kategori || 'Belirtilmemiş');
         });
 
@@ -1285,23 +1317,37 @@ async function renderGunlukSutGrafik() {
         const data = Object.values(dataByKategori);
 
         gunlukSutunChartInstance = new Chart(ctx, {
-            type: 'bar', // Grafik tipi: Sütun
+            type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
                     label: 'Toplam Süt (Lt)',
                     data: data,
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 1
                 }]
             },
             options: {
-                indexAxis: 'y', // Barları yatay yapar, kategorilerin okunmasını kolaylaştırır
+                // indexAxis: 'y' satırı kaldırılarak grafik dikey hale getirildi.
                 responsive: true,
                 maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'end',
+                        formatter: (value) => value.toFixed(1) + ' Lt',
+                        color: '#111',
+                        font: {
+                            weight: 'bold'
+                        }
+                    }
+                },
                 scales: {
-                    x: {
+                    y: { // Değerler artık Y ekseninde
                         beginAtZero: true
                     }
                 }
@@ -1311,11 +1357,14 @@ async function renderGunlukSutGrafik() {
         console.error("Günlük süt grafiği oluşturulurken hata:", error);
     }
 }
-// --- KULLANICI YÖNETİMİ ---
+
+
+
 async function handleKullaniciKaydet(event) {
     event.preventDefault();
     alert("Bu özellik güvenlik nedeniyle doğrudan yeni kullanıcı oluşturmaz. Lütfen önce Firebase Authentication panelinden kullanıcıyı e-posta/şifre ile oluşturun, ardından bu panelden o kullanıcıya ait bir profil (rol ataması) oluşturabilirsiniz.");
 }
+
 async function deleteKullanici(id) {
     if(confirm("Kullanıcıyı silmek istiyor musunuz?")) {
         try {
@@ -1326,6 +1375,7 @@ async function deleteKullanici(id) {
         }
     }
 }
+
 async function renderKullaniciListesi() {
     const kullaniciListesiBody = document.getElementById('kullaniciListesiBody');
     const currentUser = auth.currentUser;
@@ -1342,9 +1392,6 @@ async function renderKullaniciListesi() {
     } catch(error) { console.error("Kullanıcılar listelenirken hata", error); }
 }
 
-// --- YEM YÖNETİMİ ---
-
-// Yem Alış Hareketleri için Düzenleme
 async function editYemAlisi(id) {
     try {
         const doc = await db.collection('yem_alimlari').doc(id).get();
@@ -1369,7 +1416,7 @@ async function editYemAlisi(id) {
         console.error("Yem alışı düzenleme için getirilirken hata:", error);
     }
 }
-// Yem Satış Hareketleri için Düzenleme
+
 async function editYemSatisi(id) {
     try {
         const doc = await db.collection('yem_satislari').doc(id).get();
@@ -1391,11 +1438,6 @@ async function editYemSatisi(id) {
         console.error("Yem satışı düzenleme için getirilirken hata:", error);
     }
 }
-
-
-
-
-
 
 async function handleYemTanimKaydet(event) {
     event.preventDefault();
@@ -1475,7 +1517,8 @@ async function renderYemStokListesi() {
     } catch (error) { console.error("Yem stok listesi yüklenirken hata:", error); }
 }
 
-// --- YEM ALIŞ-SATIŞ ---
+
+
 async function handleYemAlisKaydet(event) {
     event.preventDefault();
     const currentUser = auth.currentUser;
@@ -1553,6 +1596,7 @@ async function handleYemAlisKaydet(event) {
         }
     }
 }
+
 async function deleteYemTanimi(id) {
     if (!confirm("Bu yem tanımını silmek istediğinizden emin misiniz? Eğer bu yem ile ilgili bir alış veya satış yapıldıysa, silme işlemi engellenecektir.")) return;
     try {
@@ -1600,7 +1644,7 @@ function resetYemAlisForm() {
     setEditingMode(document.getElementById('yemAlisFormBaslik'), document.getElementById('yemAlisKaydetBtn'), document.getElementById('yemAlisFormTemizleBtn'), null, 'Yeni Yem Alışı');
 }
 
-   async function renderYemAlisHareketleri() {
+async function renderYemAlisHareketleri() {
     const listBody = document.getElementById('yemAlisHareketListesiBody');
     const currentUser = auth.currentUser;
     if (!currentUser) return;
@@ -1656,6 +1700,7 @@ function resetYemAlisForm() {
         listBody.innerHTML = rows;
     } catch(e) { console.error("Yem alış hareketleri yüklenirken hata:", e); }
 }
+
 async function editOdeme(id) {
     try {
         const doc = await db.collection('odemeVeTahsilatlar').doc(id).get();
@@ -1680,7 +1725,8 @@ async function editOdeme(id) {
     }
 }
 
-// Ödeme/Tahsilat kaydını siler
+
+
 async function deleteOdeme(id) {
     if (confirm("Bu işlem hareketini silmek istediğinizden emin misiniz?")) {
         try {
@@ -1698,7 +1744,8 @@ function closeSutDuzenleForm() {
     document.getElementById('sutDuzenleForm').reset();
 }
 
-// YENİ FONKSİYON
+
+
 async function renderHareketDokumu() {
     const listBody = document.getElementById('hareketDokumuBody');
     const currentUser = auth.currentUser;
@@ -1775,6 +1822,7 @@ async function renderHareketDokumu() {
         listBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Rapor yüklenirken bir hata oluştu.</td></tr>';
     }
 }
+
 async function deleteSutAlimi(id) {
     if (confirm("Bu süt alım kaydını silmek istediğinizden emin misiniz?")) {
         try {
@@ -1880,6 +1928,7 @@ function resetYemSatisForm() {
     document.getElementById('yemSatisEditId').value = '';
     setEditingMode(document.getElementById('yemSatisFormBaslik'), document.getElementById('yemSatisKaydetBtn'), document.getElementById('yemSatisFormTemizleBtn'), null, 'Yeni Yem Satışı');
 }
+
 async function calculateCariBakiyeDetayli(cariId) {
     let alacak = 0, borc = 0;
     const currentUser = auth.currentUser;
@@ -1984,12 +2033,14 @@ async function handleOdemeKaydet(event) {
         alert("İşlem kaydedilirken bir hata oluştu.");
     }
 }
+
 function resetOdemeForm() {
     document.getElementById('odemeForm').reset();
     editingOdemeId = null;
     document.getElementById('odemeEditId').value = '';
     setEditingMode(document.getElementById('odemeFormBaslik'), document.getElementById('odemeKaydetBtn'), document.getElementById('odemeFormTemizleBtn'), null, 'Yeni Hareket Girişi');
 }
+
 async function renderOdemeListesi() {
     const listBody = document.getElementById('odemeListesiBody');
     const currentUser = auth.currentUser;
@@ -2062,7 +2113,7 @@ async function deleteYemSatisi(id) {
 }
 
         
-// --- SÜT ALIM FONKSİYONLARI ---
+
 async function renderTopluSutGirisFormu() {
     const tarih = document.getElementById('topluGirisTarih').value;
     const kategori = document.getElementById('topluGirisKategori').value;
@@ -2132,6 +2183,7 @@ async function renderTopluSutGirisFormu() {
         }
     }
 }
+
 function sutMiktarGuncelle(cariId) {
     const sabah = parseFloat(document.getElementById(`sabah-${cariId}`).value) || 0;
     const aksam = parseFloat(document.getElementById(`aksam-${cariId}`).value) || 0;
@@ -2230,7 +2282,6 @@ async function renderSutAlimGecmisi() {
     }
 }
 
-// --- RAPORLAMA FONKSİYONLARI ---
 
 async function handleHesapOzetiRaporuOlustur() {
     const cariId = document.getElementById('raporCariSecimi').value;
@@ -2348,7 +2399,8 @@ async function handleHesapOzetiRaporuOlustur() {
     }
 }
         
-        async function handleSutAlimRaporuOlustur(options) {
+
+async function handleSutAlimRaporuOlustur(options) {
     const cariId = document.getElementById('sutRaporuTedarikciSecimi').value;
     const ayYil = document.getElementById('sutRaporuAySecimi').value;
     const kategori = document.getElementById('sutRaporuKategoriSecimi').value;
@@ -2394,7 +2446,8 @@ async function handleHesapOzetiRaporuOlustur() {
                 return;
             }
 
-            let tableHTML = `<table class="report-table"><thead><tr><th>Tarih</th><th>Sabah</th><th>Akşam</th><th>Toplam (Lt)</th><th>Fiyat</th><th>Tutar</th></tr></thead><tbody>`;
+            // Değişiklik: Başlık sırası Akşam -> Sabah olarak güncellendi.
+            let tableHTML = `<table class="report-table"><thead><tr><th>Tarih</th><th>Akşam</th><th>Sabah</th><th>Toplam (Lt)</th><th>Fiyat</th><th>Tutar</th></tr></thead><tbody>`;
             let toplamSabah = 0, toplamAksam = 0, toplamLitre = 0, toplamTutar = 0;
 
             snapshot.forEach(doc => {
@@ -2403,15 +2456,16 @@ async function handleHesapOzetiRaporuOlustur() {
                 toplamAksam += alim.aksam;
                 toplamLitre += alim.toplam;
                 toplamTutar += alim.toplamTutar;
-                tableHTML += `<tr><td>${formatDate(alim.tarih)}</td><td>${alim.sabah.toFixed(2)}</td><td>${alim.aksam.toFixed(2)}</td><td>${alim.toplam.toFixed(2)}</td><td>${formatCurrency(alim.fiyat)}</td><td>${formatCurrency(alim.toplamTutar)}</td></tr>`;
+                // Değişiklik: Veri sırası Akşam -> Sabah olarak güncellendi.
+                tableHTML += `<tr><td>${formatDate(alim.tarih)}</td><td>${alim.aksam.toFixed(2)}</td><td>${alim.sabah.toFixed(2)}</td><td>${alim.toplam.toFixed(2)}</td><td>${formatCurrency(alim.fiyat)}</td>			<td>${formatCurrency(alim.toplamTutar)}</td></tr>`;
             });
 
             const ortalamaFiyat = toplamLitre > 0 ? (toplamTutar / toplamLitre) : 0;
-            // DÜZELTME: Inline style yerine class verildi
+            // Değişiklik: Toplamlar satırı sırası Akşam -> Sabah olarak güncellendi.
             tableHTML += `</tbody><tfoot><tr class="report-totals-row">
                             <td>AYLIK TOPLAM</td>
-                            <td>${toplamSabah.toFixed(2)}</td>
                             <td>${toplamAksam.toFixed(2)}</td>
+                            <td>${toplamSabah.toFixed(2)}</td>
                             <td>${toplamLitre.toFixed(2)}</td>
                             <td>${formatCurrency(ortalamaFiyat)}</td>
                             <td>${formatCurrency(toplamTutar)}</td>
@@ -2451,12 +2505,14 @@ async function handleHesapOzetiRaporuOlustur() {
                 raporData[alim.cariId].toplamTutar += alim.toplamTutar;
             });
 
-            let tableHTML = `<table class="report-table"><thead><tr><th>Cari Adı</th><th>Toplam Sabah</th><th>Toplam Akşam</th><th>Toplam Litre</th><th>Ortalama Fiyat</th><th>Toplam Tutar</th></tr></thead><tbody>`;
+            // Değişiklik: Başlık sırası Akşam -> Sabah olarak güncellendi.
+            let tableHTML = `<table class="report-table"><thead><tr><th>Cari Adı</th><th>Toplam Akşam</th><th>Toplam Sabah</th><th>Toplam Litre</th><th>Ortalama Fiyat</th><th>Toplam Tutar</th></tr></thead><tbody>`;
             let genelToplamSabah = 0, genelToplamAksam = 0, genelToplamLitre = 0, genelToplamTutar = 0;
 
             Object.values(raporData).sort((a,b) => a.cariAdi.localeCompare(b.cariAdi)).forEach(data => {
                 const ortalamaFiyat = data.toplamLitre > 0 ? (data.toplamTutar / data.toplamLitre) : 0;
-                tableHTML += `<tr><td>${data.cariAdi}</td><td>${data.toplamSabah.toFixed(2)}</td><td>${data.toplamAksam.toFixed(2)}</td><td><strong>${data.toplamLitre.toFixed(2)}</strong></td><td>${formatCurrency(ortalamaFiyat)}</td><td><strong>${formatCurrency(data.toplamTutar)}</strong></td></tr>`;
+                // Değişiklik: Veri sırası Akşam -> Sabah olarak güncellendi.
+                tableHTML += `<tr><td>${data.cariAdi}</td><td>${data.toplamAksam.toFixed(2)}</td><td>${data.toplamSabah.toFixed(2)}</td><td><strong>${data.toplamLitre.toFixed(2)}</strong></td><td>${formatCurrency(ortalamaFiyat)}</td>	<td><strong>${formatCurrency(data.toplamTutar)}</strong></td></tr>`;
                 genelToplamSabah += data.toplamSabah;
                 genelToplamAksam += data.toplamAksam;
                 genelToplamLitre += data.toplamLitre;
@@ -2464,11 +2520,11 @@ async function handleHesapOzetiRaporuOlustur() {
             });
             
             const genelOrtalamaFiyat = genelToplamLitre > 0 ? (genelToplamTutar / genelToplamLitre) : 0;
-            // DÜZELTME: Inline style yerine class verildi
+            // Değişiklik: Toplamlar satırı sırası Akşam -> Sabah olarak güncellendi.
             tableHTML += `</tbody><tfoot><tr class="report-totals-row">
                             <td>GENEL TOPLAM</td>
-                            <td>${genelToplamSabah.toFixed(2)}</td>
                             <td>${genelToplamAksam.toFixed(2)}</td>
+                            <td>${genelToplamSabah.toFixed(2)}</td>
                             <td>${genelToplamLitre.toFixed(2)}</td>
                             <td>${formatCurrency(genelOrtalamaFiyat)}</td>
                             <td>${formatCurrency(genelToplamTutar)}</td>
@@ -2481,7 +2537,8 @@ async function handleHesapOzetiRaporuOlustur() {
     }
 }
 
-        async function deleteYemAlisi(id) {
+
+async function deleteYemAlisi(id) {
     if (confirm("Bu yem alışını silmek istediğinizden emin misiniz? Bu işlem, alınan yemi stoktan düşecektir.")) {
         const currentUser = auth.currentUser;
         if (!currentUser) {
@@ -2520,7 +2577,7 @@ async function handleHesapOzetiRaporuOlustur() {
     }
 }
 
-        async function handleYemKarRaporuOlustur() {
+async function handleYemKarRaporuOlustur() {
     const ayYil = document.getElementById('yemRaporuAySecimi').value;
     const raporAlani = document.getElementById('yemRaporuAlani');
     const currentUser = auth.currentUser;
@@ -2562,7 +2619,7 @@ async function handleHesapOzetiRaporuOlustur() {
         });
 
         let genelToplamSatis = 0, genelToplamMaliyet = 0, genelToplamKar = 0;
-        let tableHTML = `<h3 class="print-only print-title">Aylık Yem Satış Kârlılık Raporu - ${formatMonthYear(ayYil)}</h3><table class="report-table"><thead><tr><th>Yem Adı</th><th>Satılan Miktar (Birim)</th><th>Toplam Satış Tutarı</th><th>Toplam Maliyet</th><th>Toplam Kâr</th></tr></thead><tbody>`;
+        let tableHTML = `<h3 class="print-only print-title">Aylık Yem Satış Kârlılık Raporu - ${formatMonthYear(ayYil)}</h3><table class="report-table"><thead><tr><th>Yem Adı</th><th>Satılan Miktar (Birim)</th><th>Toplam Satış 	Tutarı</th><th>Toplam Maliyet</th><th>Toplam Kâr</th></tr></thead><tbody>`;
 
         for (const yemId in raporVerisi) {
             const veri = raporVerisi[yemId];
@@ -2617,16 +2674,13 @@ function handleYazdir(sectionId) {
 
 
 window.onafterprint = () => {
-        const bodyElement = document.body;
-        bodyElement.classList.remove('print-active', 'format-a4', 'format-a5');
-        document.querySelectorAll('.print-section-active').forEach(el => {
-            el.classList.remove('print-section-active');
-        });
-    };
+    const bodyElement = document.body;
+    bodyElement.classList.remove('print-active', 'format-a4', 'format-a5');
+    document.querySelectorAll('.print-section-active').forEach(el => {
+        el.classList.remove('print-section-active');
+    });
+};
 
-// --- END: TAM VE DÜZELTİLMİŞ JAVASCRIPT KODU ---
 </script>
-
 </body>
 </html>
-
