@@ -363,3 +363,58 @@ tfoot tr, .report-totals-row { background-color: #e9ecef; font-weight: bold; col
     box-sizing: border-box;
     transition: width 0.8s ease-out;
 }
+.menu-toggle-btn {
+    position: fixed; /* Ekran kaydırılsa bile sabit kalır */
+    top: 15px;
+    left: 15px;
+    z-index: 1000; /* Diğer elementlerin üzerinde kalması için */
+    background-color: #34495e;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 12px;
+    font-size: 20px;
+    cursor: pointer;
+    display: none; /* Varsayılan olarak gizli, sadece küçük ekranlarda görünecek */
+}
+
+/* Kenar Çubuğu (Sidebar) için Geçiş Efekti */
+.sidebar {
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Kenar Çubuğu kapalıyken uygulanacak stil */
+.sidebar.collapsed {
+    transform: translateX(-100%); /* Ekrranın soluna doğru tamamen gizle */
+}
+
+/* Ana İçerik Alanı için Geçiş Efekti */
+.main-content {
+    transition: margin-left 0.3s ease-in-out;
+}
+
+/* Sadece 1024px'den küçük ekranlarda geçerli olacak kurallar */
+@media (max-width: 1024px) {
+    .menu-toggle-btn {
+        display: block; /* Butonu görünür yap */
+    }
+
+    .sidebar {
+        position: fixed; /* Menüyü sayfa akışından çıkar, sabit yap */
+        height: 100%;
+        z-index: 999;
+        transform: translateX(-100%); /* Varsayılan olarak kapalı gelsin */
+    }
+
+    .sidebar.collapsed {
+        transform: translateX(-100%); /* Zaten kapalı */
+    }
+    
+    .sidebar:not(.collapsed) {
+        transform: translateX(0); /* Açıkken normal pozisyonuna gelsin */
+    }
+
+    .main-content {
+        margin-left: 0; /* Ana içerik tüm alanı kapsasın */
+    }
+}
