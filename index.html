@@ -39,6 +39,7 @@
             <div class="module-header"><h2>📝 Kontrol Paneli</h2></div>
             <div class="container">
                 <h3>Genel Durum</h3>
+
                 <div class="dashboard-grid">
                     <div class="stat-card"><h4>☀️ Bugünkü Sabah Sütü</h4><p><span id="dashSabahSut">0.00</span> Lt</p></div>
                     <div class="stat-card"><h4>🌙 Bugünkü Akşam Sütü</h4><p><span id="dashAksamSut">0.00</span> Lt</p></div>
@@ -48,6 +49,15 @@
                         <small id="dunKarsilastirma">(Düne göre...)</small>
                     </div>
                     <div class="stat-card"><h4>👥 Aktif Müşteri Sayısı</h4><p><span id="dashAktifMusteri">0</span></p></div>
+
+ <div class="stat-card" id="bakiyeDurumKarti">
+        <h4>💰 Toplam Bakiye</h4>
+        <p><span id="dashToplamBakiye">0,00</span> ₺</p>
+        <small id="bakiyeDurumUyarisi" style="font-weight: bold;"></small>
+    </div>
+
+
+
                 </div>
                 <div class="balance-bars">
                     <div class="balance-bar-item">
@@ -213,13 +223,39 @@
         <section id="tahsilat-ve-odemeler" class="module-section hidden-section">
             <div class="module-header"><h2>💳 Tahsilat ve Ödemeler</h2></div>
             <div class="container">
-                 <div class="form-section"><h3><span id="odemeFormBaslik">Yeni Hareket Girişi</span></h3><form id="odemeForm" action="#"><input type="hidden" id="odemeEditId"><div class="form-grid">
-                    <div class="form-group"><label for="islemTuru">İşlem Türü:</label><select id="islemTuru" required><option value="odeme">Ödeme</option><option value="tahsilat">Tahsilat</option></select></div>
-                    <div class="form-group"><label for="odemeTarih">Tarih:</label><input type="date" id="odemeTarih" required></div>
-                    <div class="form-group"><label for="odemeYapilanTedarikci">Cari:</label><select id="odemeYapilanTedarikci" required><option value="">Seçiniz...</option></select></div>
-                    <div class="form-group"><label for="odemeTutari">Tutar (TL):</label><input type="number" id="odemeTutari" step="0.01" required></div>
-                    <div class="form-group" style="grid-column: span 2;"><label for="odemeAciklama">Açıklama:</label><textarea id="odemeAciklama" rows="2"></textarea></div>
-                 </div><button type="submit" class="btn btn-primary" id="odemeKaydetBtn">Kaydet</button><button type="button" class="btn" id="odemeFormTemizleBtn" style="display:none;">Yeni</button></form></div>
+                 <div class="form-section"><h3><span id="odemeFormBaslik">Yeni Hareket Girişi</span></h3>
+
+		<form id="odemeForm" action="#">
+    <input type="hidden" id="odemeEditId">
+    <div class="form-grid">
+        <div class="form-group"><label for="islemTuru">İşlem Türü:</label><select id="islemTuru" required><option value="odeme">Ödeme</option><option value="tahsilat">Tahsilat</option></select></div>
+        <div class="form-group"><label for="odemeTarih">Tarih:</label><input type="date" id="odemeTarih" required></div>
+        <div class="form-group">
+            <label for="odemeYapilanTedarikci">Cari:</label>
+            <select id="odemeYapilanTedarikci" required><option value="">Seçiniz...</option></select>
+            <small id="cariBakiyeBilgisi" style="display: block; margin-top: 5px; font-weight: bold;"></small>
+        </div>
+        
+        <div class="form-group">
+            <label for="odemeTuru">Ödeme Türü:</label>
+            <select id="odemeTuru" required>
+                <option value="Kasa">Kasa</option>
+                <option value="Banka">Banka</option>
+                <option value="Pos">Pos</option>
+                <option value="Çek">Çek</option>
+                <option value="Senet">Senet</option>
+            </select>
+        </div>
+
+        <div class="form-group"><label for="odemeTutari">Tutar (TL):</label><input type="number" id="odemeTutari" step="0.01" required></div>
+        
+        <div class="form-group" style="grid-column: span 3;"><label for="odemeAciklama">Açıklama:</label><textarea id="odemeAciklama" rows="2"></textarea></div>
+    </div>
+    <button type="submit" class="btn btn-primary" id="odemeKaydetBtn">Kaydet</button>
+    <button type="button" class="btn" id="odemeFormTemizleBtn" style="display:none;">Yeni</button>
+</form>
+
+</div>
                  <div class="list-section"><h3>İşlem Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Cari</th><th>İşlem Türü</th><th>Tutar</th><th>Açıklama</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="odemeListesiBody"></tbody></table></div>
             </div>
         </section>
@@ -456,7 +492,41 @@ function initializeApp() {
     const yemRaporuOlusturBtn = document.getElementById('yemRaporuOlusturBtn');
     const yemRaporuYazdirBtn = document.getElementById('yemRaporuYazdirBtn');
     const sutDuzenleForm = document.getElementById('sutDuzenleForm');
-    
+    const odemeCariSecimi = document.getElementById('odemeYapilanTedarikci');
+if(odemeCariSecimi) {
+    odemeCariSecimi.addEventListener('change', async (event) => {
+        const cariId = event.target.value;
+        const bakiyeBilgiAlani = document.getElementById('cariBakiyeBilgisi');
+        
+        if (!cariId) {
+            bakiyeBilgiAlani.textContent = '';
+            return;
+        }
+
+        try {
+            bakiyeBilgiAlani.textContent = 'Bakiye hesaplanıyor...';
+            const bakiyeDetay = await calculateCariBakiyeDetayli(cariId);
+            const bakiye = bakiyeDetay.bakiye;
+            
+            if (bakiye < 0) {
+                bakiyeBilgiAlani.textContent = `Bakiye: ${formatCurrency(bakiye)} (Cari Borçlu)`;
+                bakiyeBilgiAlani.style.color = 'red';
+            } else {
+                bakiyeBilgiAlani.textContent = `Bakiye: ${formatCurrency(bakiye)} (Cari Alacaklı)`;
+                bakiyeBilgiAlani.style.color = 'green';
+            }
+        } catch (error) {
+            console.error("Bakiye bilgisi alınırken hata:", error);
+            bakiyeBilgiAlani.textContent = 'Bakiye alınamadı.';
+            bakiyeBilgiAlani.style.color = 'black';
+        }
+    });
+}
+
+
+
+
+
     applyRolePermissions();
     loadAndRenderAllData();
     
@@ -728,6 +798,26 @@ async function updateDashboardStats() {
         
         document.getElementById('dashToplamAlacak').textContent = formatCurrency(toplamMusteriBorcu);
         document.getElementById('dashToplamBorc').textContent = formatCurrency(toplamMusteriAlacagi);
+
+       const toplamBakiye = toplamMusteriAlacagi - toplamMusteriBorcu; // Cari gözünden bakiye (Alacak - Borç)
+        const toplamBakiyeSpan = document.getElementById('dashToplamBakiye');
+        const bakiyeUyariSpan = document.getElementById('bakiyeDurumUyarisi');
+        const bakiyeKarti = document.getElementById('bakiyeDurumKarti');
+
+        toplamBakiyeSpan.textContent = formatCurrency(toplamBakiye);
+        
+        if (toplamBakiye < 0) {
+            bakiyeUyariSpan.textContent = "Genel Bakiye Borçlu!";
+            bakiyeUyariSpan.style.color = 'red';
+            toplamBakiyeSpan.style.color = 'red';
+            bakiyeKarti.style.borderColor = 'red';
+        } else {
+            bakiyeUyariSpan.textContent = "Genel Bakiye Alacaklı";
+            bakiyeUyariSpan.style.color = 'green';
+            toplamBakiyeSpan.style.color = 'green';
+            bakiyeKarti.style.borderColor = '#ddd'; // Varsayılan renk
+        }
+
 
         const total = toplamMusteriBorcu + toplamMusteriAlacagi;
         const alacakYuzde = total > 0 ? (toplamMusteriBorcu / total) * 100 : 0;
@@ -1723,6 +1813,8 @@ async function editOdeme(id) {
         document.getElementById('islemTuru').value = data.islemTuru;
         document.getElementById('odemeTarih').value = data.tarih;
         document.getElementById('odemeYapilanTedarikci').value = data.cariId;
+        document.getElementById('odemeTuru').value = data.odemeTuru || 'Kasa'; // YENİ EKLENDİ
+
         document.getElementById('odemeTutari').value = data.tutar;
         document.getElementById('odemeAciklama').value = data.aciklama;
         
@@ -2025,6 +2117,7 @@ async function handleOdemeKaydet(event) {
         tarih: document.getElementById('odemeTarih').value,
         cariId: cariId,
         islemTuru: document.getElementById('islemTuru').value,
+	odemeTuru: document.getElementById('odemeTuru').value,
         tutar: tutar,
         aciklama: document.getElementById('odemeAciklama').value.trim(),
         sahipId: currentUser.uid
@@ -2054,12 +2147,36 @@ async function renderOdemeListesi() {
     const listBody = document.getElementById('odemeListesiBody');
     const currentUser = auth.currentUser;
     if (!currentUser) return;
+
+    // Tablo başlığını dinamik olarak güncelle (yeni "Ödeme Türü" sütunu için)
+    const thead = listBody.parentElement.querySelector('thead');
+    if (thead) {
+        thead.innerHTML = `
+            <tr>
+                <th>Tarih</th>
+                <th>Cari</th>
+                <th>İşlem Türü</th>
+                <th>Ödeme Türü</th>
+                <th>Tutar</th>
+                <th>Açıklama</th>
+                <th class="dont-print">İşlemler</th>
+            </tr>`;
+    }
+    
     try {
-        const snapshot = await db.collection('odemeVeTahsilatlar').where('sahipId', '==', currentUser.uid).orderBy('tarih', 'desc').limit(30).get();
+        const snapshot = await db.collection('odemeVeTahsilatlar')
+            .where('sahipId', '==', currentUser.uid)
+            .orderBy('tarih', 'desc')
+            .limit(30) // Performans için son 30 hareketi göster
+            .get();
+        
         if(snapshot.empty){
-            listBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">İşlem hareketi bulunmuyor.</td></tr>';
+            // Yeni sütun eklendiği için colspan 7'ye güncellendi
+            listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">İşlem hareketi bulunmuyor.</td></tr>';
             return;
         }
+
+        // Performans için tüm cari isimlerini tek seferde çek
         const cariIds = [...new Set(snapshot.docs.map(doc => doc.data().cariId))];
         const cariMap = new Map();
         if (cariIds.length > 0) {
@@ -2071,11 +2188,21 @@ async function renderOdemeListesi() {
         snapshot.forEach(doc => {
             const islem = doc.data();
             const cariAdi = cariMap.get(islem.cariId) || 'Bilinmiyor';
-            const islemTuruText = islem.islemTuru === 'odeme' ? 'Ödeme' : 'Tahsilat';
+            
+            // "islemTuru" alanını daha okunaklı hale getir
+            let islemTuruText = islem.islemTuru;
+            if(islem.islemTuru === 'odeme') islemTuruText = 'Ödeme';
+            if(islem.islemTuru === 'tahsilat') islemTuruText = 'Tahsilat';
+            // Açılış bakiyesinden gelen eski kayıtlar için de kontrol
+            if(islem.islemTuru === 'borc') islemTuruText = 'Açılış Borcu';
+            if(islem.islemTuru === 'alacak') islemTuruText = 'Açılış Alacağı';
+
+
             rows += `<tr>
                 <td>${formatDate(islem.tarih)}</td>
                 <td>${cariAdi}</td>
                 <td>${islemTuruText}</td>
+                <td>${islem.odemeTuru || '-'}</td>
                 <td>${formatCurrency(islem.tutar)}</td>
                 <td>${islem.aciklama}</td>
                 <td class="dont-print">
@@ -2085,8 +2212,13 @@ async function renderOdemeListesi() {
             </tr>`;
         });
         listBody.innerHTML = rows;
-    } catch (e) { console.error("Ödeme listesi yüklenirken hata:", e); }
+
+    } catch (e) { 
+        console.error("Ödeme listesi yüklenirken hata:", e);
+        listBody.innerHTML = '<tr><td colspan="7" style="color: red; text-align:center;">Ödeme listesi yüklenirken bir hata oluştu.</td></tr>';
+    }
 }
+
 
 async function deleteYemSatisi(id) {
     if (confirm("Bu yem satışını silmek istediğinizden emin misiniz? Bu işlem, satılan yemi stoğa geri ekleyecektir.")) {
