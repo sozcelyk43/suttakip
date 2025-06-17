@@ -34,6 +34,7 @@
     </div>
 
     <div class="main-content">
+<button id="menuToggleBtn" class="menu-toggle-btn">☰</button>
 
         <section id="dashboard" class="module-section">
             <div class="module-header"><h2>📝 Kontrol Paneli</h2></div>
@@ -488,6 +489,24 @@ function initializeApp() {
     const sutRaporuOlusturBtn = document.getElementById('sutRaporuOlusturBtn');
     const sutRaporuTumunuGosterBtn = document.getElementById('sutRaporuTumunuGosterBtn');
     const sutRaporuKategoriGosterBtn = document.getElementById('sutRaporuKategoriGosterBtn');
+const menuToggleBtn = document.getElementById('menuToggleBtn');
+const sidebar = document.querySelector('.sidebar');
+const mainContent = document.querySelector('.main-content');
+
+if (menuToggleBtn && sidebar) {
+    menuToggleBtn.addEventListener('click', () => {
+        // 'collapsed' sınıfını ekleyip kaldırarak menüyü aç/kapat
+        sidebar.classList.toggle('collapsed');
+    });
+
+    // Küçük ekranda bir menü linkine tıklandığında menünün otomatik kapanmasını sağla
+    sidebar.addEventListener('click', (event) => {
+        if (window.innerWidth <= 1024 && event.target.closest('a.nav-link')) {
+            sidebar.classList.add('collapsed');
+        }
+    });
+}
+
     const sutRaporuYazdirBtn = document.getElementById('sutRaporuYazdirBtn');
     const yemRaporuOlusturBtn = document.getElementById('yemRaporuOlusturBtn');
     const yemRaporuYazdirBtn = document.getElementById('yemRaporuYazdirBtn');
