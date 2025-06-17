@@ -418,3 +418,60 @@ tfoot tr, .report-totals-row { background-color: #e9ecef; font-weight: bold; col
         margin-left: 0; /* Ana içerik tüm alanı kapsasın */
     }
 }
+@media print {
+
+    /* Yazdırma sırasında görünmemesi gereken her şeyi gizle */
+    .sidebar,
+    .menu-toggle-btn,
+    .dont-print {
+        display: none !important;
+    }
+
+    /* Sayfa gövdesindeki tüm dolguları ve kenar boşluklarını sıfırla */
+    body.print-active {
+        margin: 0 !important;
+        padding: 0 !important;
+        background-color: white !important;
+    }
+
+    /* Yazdırılacak bölüm dışındaki her şeyi gizle */
+    body.print-active .module-section:not(.print-section-active) {
+        display: none !important;
+    }
+    
+    /* Yazdırılacak bölümün ve içeriğinin tüm alanı kaplamasını sağla */
+    body.print-active .print-section-active,
+    body.print-active .print-section-active .container,
+    body.print-active .print-section-active .report-section {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        float: none !important;
+    }
+
+    /* Rapor başlıklarının yazdırmada daha iyi görünmesini sağla */
+    .print-title {
+        margin-bottom: 20px;
+        font-size: 18pt;
+    }
+
+    /* Tabloların yazdırma stili */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 9pt; /* Yazdırma için puntoyu küçült */
+    }
+
+    th, td {
+        border: 1px solid #ccc;
+        padding: 6px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+}
