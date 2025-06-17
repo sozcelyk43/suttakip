@@ -389,7 +389,7 @@ const db = firebase.firestore();
 
 let currentUserRole = '';
 let currentUserId = '';
-let globalSettings = { defaultMilkPrice: 15.00 };
+let globalSettings = { defaultMilkPrice: 15.50 };
 let editingCariId = null, editingYemTanimId = null, editingYemAlisId = null, editingYemSatisId = null, editingOdemeId = null;
 let gunlukSutunChartInstance = null;
 let aylikSutunChartInstance = null;
@@ -474,10 +474,19 @@ function initializeApp() {
         if(activeSection) activeSection.style.display = 'block';
         
         if (targetId === 'dashboard') { updateDashboardStats(); }
-	if (document.getElementById('aylikChartGosterBtn')) {	document.getElementById('aylikChartGosterBtn').addEventListener('click', renderAylikSutunGrafik);}
+	    if (document.getElementById('aylikChartGosterBtn')) {	document.getElementById('aylikChartGosterBtn').addEventListener('click', renderAylikSutunGrafik);}
         if (targetId === 'cari-yonetimi') { populateCariKategoriFiltre(); renderCariListesi(); populateCariKategoriSelect(document.getElementById('cariKategori')); }
         if (targetId === 'sut-alimi') { if(topluGirisTarihInput) topluGirisTarihInput.value = getTodayForInput(); populateCariKategoriSelect(topluGirisKategori); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); }
-        if (targetId === 'yem-stok-yonetimi') { populateCariSelect(document.getElementById('yemAlisTedarikci')); populateYemSelect(document.getElementById('yemSecimiAlis')); renderYemAlisHareketleri(); renderYemStokListesi(); }
+        
+        // --- DOĞRU VE TAM KOD BURASI ---
+        // Yem stok yönetimi sekmesine tıklandığında hem select kutularını doldur, hem alış geçmişini getir, hem de stok listesini güncelle.
+        if (targetId === 'yem-stok-yonetimi') { 
+            populateCariSelect(document.getElementById('yemAlisTedarikci')); 
+            populateYemSelect(document.getElementById('yemSecimiAlis')); 
+            renderYemAlisHareketleri(); // Alış hareketlerini yükler.
+            renderYemStokListesi();     // Stok listesini yükler.
+        }
+        
         if (targetId === 'yem-satisi') { populateCariSelect(document.getElementById('yemAlanTedarikci')); populateYemSelect(document.getElementById('yemSecimiSatis')); renderYemSatisListesi(); }
         if (targetId === 'tahsilat-ve-odemeler') { populateCariSelect(document.getElementById('odemeYapilanTedarikci')); renderOdemeListesi(); }
         if (targetId === 'hesap-ozeti'){ populateCariSelect(document.getElementById('raporCariSecimi')); if(!document.getElementById('raporTarihAraligi').value) document.getElementById('raporTarihAraligi').value = getMonthYearForInput(); }
@@ -587,7 +596,7 @@ async function getSettings() {
         if (globalSettings && globalSettings.defaultMilkPrice) {
             varsayilanSutFiyatiInput.value = globalSettings.defaultMilkPrice.toFixed(2);
         } else {
-            varsayilanSutFiyatiInput.value = (15.00).toFixed(2);
+            varsayilanSutFiyatiInput.value = (15.50).toFixed(2);
         }
     } catch(e) { console.error("Ayarlar alınırken hata: ", e); }
 }
@@ -2157,7 +2166,7 @@ async function renderTopluSutGirisFormu() {
         
         let tableHTML = `<table><thead><tr><th>Cari Adı</th><th>Akşam (Lt)</th><th>Sabah (Lt)</th><th>Toplam (Lt)</th><th>Fiyat</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr></thead><tbody>`;
 
-        const defaultFiyat = (globalSettings.defaultMilkPrice || 15.00).toFixed(2);
+        const defaultFiyat = (globalSettings.defaultMilkPrice || 15.50).toFixed(2);
         gosterilecekCariler.forEach(doc => {
             const cari = { id: doc.id, ...doc.data() };
             const escapedCariAdi = cari.adiSoyadi.replace(/'/g, "\\'").replace(/"/g, '\\"');
