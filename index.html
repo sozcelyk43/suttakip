@@ -226,42 +226,51 @@
     </div>
 </section>
         <section id="sut-alimi" class="module-section hidden-section">
-            <div class="module-header"><h2>🥛 Günlük Süt Alımı</h2></div>
-            <div class="container">
-                <div class="form-section">
-                    <h3>Giriş Filtreleri</h3>
-                    <div class="form-grid" id="sutGirisFiltreler" style="grid-template-columns: 1fr 1fr;">
-                        <div class="form-group"><label for="topluGirisTarih">Giriş Tarihi:</label><input type="date" id="topluGirisTarih" required></div>
-                        <div class="form-group"><label for="topluGirisKategori">Kategori/Köy Seçin:</label><select id="topluGirisKategori" required><option value="">Tüm Kategoriler</option></select></div>
-                    </div>
+    <div class="module-header"><h2>🥛 Günlük Süt Alımı</h2></div>
+    <div class="container">
+        <div class="form-section">
+            <h3>Giriş Filtreleri</h3>
+            <div class="form-grid" id="sutGirisFiltreler" style="grid-template-columns: 1fr 1fr;">
+                <div class="form-group">
+                    <label for="topluGirisTarih">Giriş Tarihi:</label>
+                    <input type="date" id="topluGirisTarih" required>
+                    <small style="display: block; margin-top: 5px; font-style: italic;">
+                        Not: Seçeceğiniz tarih, **akşam sütünün** alındığı gün olmalıdır.
+                    </small>
                 </div>
-                <div class="list-section">
-                    <h3>Günlük Süt Girişi</h3>
-                    <div id="topluSutGirisTablosuAlani"></div>
-                    <p id="topluGirisTedarikciYokMesaji" style="text-align:center; display:none;">Bu kriterlere uygun, süt girişi bekleyen cari bulunmuyor.</p>
-                </div>
-                <hr style="margin: 40px 0;">
-                <div id="sutDuzenleFormAlani" style="display:none; margin-bottom: 20px;">
-                    <h4>Süt Alımını Düzenle</h4>
-                    <form id="sutDuzenleForm" class="form-grid" style="grid-template-columns: 1fr 1fr 1fr auto auto;">
-    <input type="hidden" id="sutDuzenleId">
-    <div class="form-group"><label>Akşam (Lt)</label><input type="number" id="sutDuzenleAksam" class="sut-input" step="0.1" min="0"></div>
-    <div class="form-group"><label>Sabah (Lt)</label><input type="number" id="sutDuzenleSabah" class="sut-input" step="0.1" min="0"></div>
-    <div class="form-group"><label>Fiyat</label><input type="number" id="sutDuzenleFiyat" class="sut-input" step="0.01" min="0"></div>
-    <button type="submit" class="btn btn-primary" style="height: 45px; align-self: end;">Güncelle</button>
-    <button type="button" class="btn" style="height: 45px; align-self: end;" onclick="closeSutDuzenleForm()">İptal</button>
-</form>
-                </div>
-                <div class="list-section">
-                    <h3>Süt Alım Geçmişi (Seçili Tarih: <span id="gecmisTarihSpan"></span>)</h3>
-                    <table>
-                        <thead id="sutAlimGecmisiHeader"></thead>
-                        <tbody id="sutAlimGecmisiBody"></tbody>
-                        <tfoot id="sutAlimGecmisiFooter"></tfoot>
-                    </table>
+                <div class="form-group">
+                    <label for="topluGirisKategori">Kategori/Köy Seçin:</label>
+                    <select id="topluGirisKategori" required><option value="">Tüm Kategoriler</option></select>
                 </div>
             </div>
-        </section>
+        </div>
+        <div class="list-section">
+            <h3>Günlük Süt Girişi</h3>
+            <div id="topluSutGirisTablosuAlani"></div>
+            <p id="topluGirisTedarikciYokMesaji" style="text-align:center; display:none;">Bu kriterlere uygun, süt girişi bekleyen cari bulunmuyor.</p>
+        </div>
+        <hr style="margin: 40px 0;">
+        <div id="sutDuzenleFormAlani" style="display:none; margin-bottom: 20px;">
+            <h4>Süt Alımını Düzenle</h4>
+            <form id="sutDuzenleForm" class="form-grid" style="grid-template-columns: 1fr 1fr 1fr auto auto;">
+                <input type="hidden" id="sutDuzenleId">
+                <div class="form-group"><label>Akşam (Lt)</label><input type="number" id="sutDuzenleAksam" class="sut-input" step="0.1" min="0"></div>
+                <div class="form-group"><label>Sabah (Lt)</label><input type="number" id="sutDuzenleSabah" class="sut-input" step="0.1" min="0"></div>
+                <div class="form-group"><label>Fiyat</label><input type="number" id="sutDuzenleFiyat" class="sut-input" step="0.01" min="0"></div>
+                <button type="submit" class="btn btn-primary" style="height: 45px; align-self: end;">Güncelle</button>
+                <button type="button" class="btn" style="height: 45px; align-self: end;" onclick="closeSutDuzenleForm()">İptal</button>
+            </form>
+                </div>
+        <div class="list-section">
+            <h3>Süt Alım Geçmişi (Seçili Tarih: <span id="gecmisTarihSpan"></span>)</h3>
+            <table>
+                <thead id="sutAlimGecmisiHeader"></thead>
+                <tbody id="sutAlimGecmisiBody"></tbody>
+                <tfoot id="sutAlimGecmisiFooter"></tfoot>
+            </table>
+        </div>
+    </div>
+</section>
         
         <section id="yem-stok-yonetimi" class="module-section hidden-section">
             <div class="module-header"><h2>📦 Yem Stok Yönetimi</h2></div>
