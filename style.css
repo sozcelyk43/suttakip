@@ -458,7 +458,9 @@ tfoot tr, .report-totals-row { background-color: #e9ecef; font-weight: bold; col
         font-size: 18pt;
     }
 
-    /* Tabloların yazdırma stili */
+ .print-only {
+        display: block !important; /* Sadece yazdırma sırasında bu başlığı göster */
+    }
     table {
         width: 100%;
         border-collapse: collapse;
