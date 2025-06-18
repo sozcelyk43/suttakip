@@ -104,12 +104,25 @@
                     </div>
                     <div class="stat-card"><h4>👥 Aktif Müşteri Sayısı</h4><p><span id="dashAktifMusteri">0</span></p></div>
 
- <div class="stat-card" id="bakiyeDurumKarti">
-        <h4>💰 Toplam Bakiye</h4>
-        <p><span id="dashToplamBakiye">0,00</span> ₺</p>
-        <small id="bakiyeDurumUyarisi" style="font-weight: bold;"></small>
-    </div>
 
+		<div class="stat-card" id="bakiyeDurumKarti">
+                        <h4>💰 Toplam Bakiye</h4>
+                        <p><span id="dashToplamBakiye">0,00</span> ₺</p>
+                        <small id="bakiyeDurumUyarisi" style="font-weight: bold;"></small>
+                    </div>
+
+                   <div class="stat-card" style="border-left: 5px solid #3498db; grid-column: span 1;">
+                        <h4>Bu Ayki Süt Üretimi</h4>
+                        <p style="font-size: 2.2em; color: #2980b9;"><span id="dashBuAykiToplamSut">0</span> Lt</p>
+                        <small>(<span id="aylikGunOrtalamasi">0</span> Lt/Gün Ort.)</small>
+                    </div>
+
+                    <div class="stat-card" style="border-left: 5px solid #1abc9c; grid-column: span 1;">
+                        <h4>Üretimin Parasal Değeri</h4>
+                        <p style="font-size: 2.2em; color: #16a085;"><span id="dashBuAykiSutDegeri">0,00</span> ₺</p>
+                        <small>(Potansiyel Gelir)</small>
+                    </div>
+                 
 
 
                 </div>
@@ -150,56 +163,68 @@
             </div>
         </section>
 
-        <section id="cari-yonetimi" class="module-section hidden-section">
-            <div class="module-header"><h2>👥 Cari Yönetimi</h2></div>
-            <div class="container">
-                <div class="form-section">
-                    <h3><span id="cariFormBaslik">Yeni Cari Kart</span></h3>
-                    <form id="cariForm" action="#">
-                        <input type="hidden" id="cariEditId">
-                        <div class="form-grid">
-                            <div class="form-group"><label for="cariKodu">Cari Kodu:</label><input type="text" id="cariKodu" placeholder="Örn: C001"></div>
-                            <div class="form-group"><label for="cariRotaSirasi">Rota Sırası:</label><input type="number" id="cariRotaSirasi" placeholder="Örn: 1, 2, 3..."></div>
-                            <div class="form-group"><label for="cariAdiSoyadi">Adı Soyadı / Firma Adı:</label><input type="text" id="cariAdiSoyadi" required></div>
-                            <div class="form-group"><label for="cariKategori">Kategori/Köy:</label><select id="cariKategori" required><option value="">Seçiniz...</option></select></div>
-                            <div class="form-group"><label for="cariDurum">Durum:</label><select id="cariDurum"><option value="aktif">Aktif</option><option value="pasif">Pasif</option></select></div>
-                            <div class="form-group"><label for="cariTipi">Cari Tipi:</label><select id="cariTipi"><option value="sut_ve_yem">Süt ve Yem</option><option value="sadece_sut">Sadece Süt</option><option value="sadece_yem">Sadece Yem</option></select></div>
-                            <div class="form-group"><label for="cariAcilisBakiye">Açılış Bakiyesi:</label><input type="number" id="cariAcilisBakiye" placeholder="Örn: 500" step="0.01"></div>
-                            <div class="form-group"><label for="cariAcilisBakiyeTuru">Bakiye Türü:</label><select id="cariAcilisBakiyeTuru"><option value="yok">Yok</option><option value="borc">Cari Borçlu</option><option value="alacak">Cari Alacaklı</option></select></div>
-                            <div class="form-group"><label for="cariTelefon">Telefon:</label><input type="tel" id="cariTelefon"></div>
-                            <div class="form-group"><label for="cariEposta">E-posta:</label><input type="email" id="cariEposta"></div>
-                            <div class="form-group" style="grid-column: span 2;"><label for="cariAdres">Adres:</label><textarea id="cariAdres"></textarea></div>
-                            <div class="form-group"><label for="cariBankaAdi">Banka Adı:</label><input type="text" id="cariBankaAdi"></div>
-                            <div class="form-group"><label for="cariIban">IBAN:</label><input type="text" id="cariIban"></div>
-                            <div class="form-group"><label for="cariVergiDairesi">Vergi Dairesi:</label><input type="text" id="cariVergiDairesi"></div>
-                            <div class="form-group"><label for="cariVergiNo">Vergi No / T.C.:</label><input type="text" id="cariVergiNo"></div>
-                            <div class="form-group" style="grid-column: span 2;"><label for="cariNotlar">Özel Notlar:</label><textarea id="cariNotlar"></textarea></div>
-                        </div>
-                        <button type="submit" class="btn btn-primary" id="cariKaydetBtn">Kaydet</button>
-                        <button type="button" class="btn" id="cariFormTemizleBtn" style="display:none;">Yeni Kayıt</button>
-                    </form>
+       <section id="cari-yonetimi" class="module-section hidden-section">
+    <div class="module-header"><h2>👥 Cari Yönetimi</h2></div>
+    <div class="container">
+        <div class="form-section">
+            <h3><span id="cariFormBaslik">Yeni Cari Kart</span></h3>
+            <form id="cariForm" action="#">
+                <input type="hidden" id="cariEditId">
+                <div class="form-grid">
+                    <div class="form-group"><label for="cariKodu">Cari Kodu:</label><input type="text" id="cariKodu" placeholder="Örn: C001"></div>
+                    <div class="form-group"><label for="cariRotaSirasi">Rota Sırası:</label><input type="number" id="cariRotaSirasi" placeholder="Örn: 1, 2, 3..."></div>
+                    <div class="form-group"><label for="cariAdiSoyadi">Adı Soyadı / Firma Adı:</label><input type="text" id="cariAdiSoyadi" required></div>
+                    <div class="form-group"><label for="cariKategori">Kategori/Köy:</label><select id="cariKategori" required><option value="">Seçiniz...</option></select></div>
+                    <div class="form-group"><label for="cariDurum">Durum:</label><select id="cariDurum"><option value="aktif">Aktif</option><option value="pasif">Pasif</option></select></div>
+                    <div class="form-group"><label for="cariTipi">Cari Tipi:</label><select id="cariTipi"><option value="sut_ve_yem">Süt ve Yem</option><option value="sadece_sut">Sadece Süt</option><option value="sadece_yem">Sadece Yem</option></select></div>
+                    <div class="form-group"><label for="cariAcilisBakiye">Açılış Bakiyesi:</label><input type="number" id="cariAcilisBakiye" placeholder="Örn: 500" step="0.01"></div>
+                    <div class="form-group"><label for="cariAcilisBakiyeTuru">Bakiye Türü:</label><select id="cariAcilisBakiyeTuru"><option value="yok">Yok</option><option value="borc">Cari Borçlu</option><option value="alacak">Cari Alacaklı</option></select></div>
+                    <div class="form-group"><label for="cariTelefon">Telefon:</label><input type="tel" id="cariTelefon"></div>
+                    <div class="form-group"><label for="cariEposta">E-posta:</label><input type="email" id="cariEposta"></div>
+                    <div class="form-group" style="grid-column: span 2;"><label for="cariAdres">Adres:</label><textarea id="cariAdres"></textarea></div>
+                    <div class="form-group"><label for="cariBankaAdi">Banka Adı:</label><input type="text" id="cariBankaAdi"></div>
+                    <div class="form-group"><label for="cariIban">IBAN:</label><input type="text" id="cariIban"></div>
+                    <div class="form-group"><label for="cariVergiDairesi">Vergi Dairesi:</label><input type="text" id="cariVergiDairesi"></div>
+                    <div class="form-group"><label for="cariVergiNo">Vergi No / T.C.:</label><input type="text" id="cariVergiNo"></div>
+                    <div class="form-group" style="grid-column: span 2;"><label for="cariNotlar">Özel Notlar:</label><textarea id="cariNotlar"></textarea></div>
                 </div>
-                <div id="cari-list-printable-area">
-    <h1 class="print-only print-title" style="text-align: center; display: none;">Cari Listesi</h1>
+                <button type="submit" class="btn btn-primary" id="cariKaydetBtn">Kaydet</button>
+                <button type="button" class="btn" id="cariFormTemizleBtn" style="display:none;">Yeni Kayıt</button>
+            </form>
+        </div>
 
-                    <div class="list-section">
-                        <div id="cariRotaSirasiUyari"></div>
-                        <div class="list-header-with-filter">
-                            <h3>Cari Listesi</h3>
-                            <div class="search-container"><input type="text" id="cariSearchInput" placeholder="Cari Ara..." aria-label="Cari Arama Kutusu"></div>
-                            <select id="cariKategoriFiltre"><option value="">Tüm Kategoriler</option></select>
-                        </div>
-                        <table>
-                            <thead><tr><th>Kod</th><th>Ad/Firma</th><th>Kategori</th><th>Rota Sırası</th><th>Durum</th><th>Telefon</th><th>Borç</th><th>Alınan</th><th>Bakiye</th><th class="dont-print">İşlemler</th></tr></thead>
-                            <tbody id="cariListesiBody"></tbody>
-                            <tfoot id="cariListesiFooter"></tfoot>
-                        </table>
+        <div id="cari-list-printable-area" class="printable-content format-a4">
+            <h1 class="print-only print-title" style="text-align: center; display: none;">Cari Listesi</h1>
+            <div class="list-section">
+
+                <div class="form-grid dont-print" style="grid-template-columns: 1fr auto; align-items: end; gap: 10px; padding: 10px; border: 1px solid #ddd; margin-bottom: 15px; border-radius: 5px;">
+                    <div class="form-group">
+                        <label for="cariTarihFiltresi"><strong>Tarihsel Bakiye Raporu:</strong></label>
+                        <input type="date" id="cariTarihFiltresi">
+                        <small>Belirli bir tarih itibarıyla bakiye durumunu görmek için bir tarih seçip 'Raporla' butonuna basın. Boş bırakırsanız güncel durumu gösterir.</small>
                     </div>
+                    <button type="button" class="btn btn-primary" id="cariTarihselRaporBtn" style="height:45px;">Raporla</button>
                 </div>
-                <button type="button" class="btn btn-secondary dont-print" id="cariListesiYazdirBtn" style="margin-top: 20px;">Listeyi Yazdır</button>
-            </div>
-        </section>
 
+                <div id="cariRotaSirasiUyari" style="display: none;"></div>
+
+                <div class="list-header-with-filter">
+                    <h3>Cari Listesi (<span id="raporTarihEtiketi">Güncel Durum</span>)</h3>
+                    <div class="search-container"><input type="text" id="cariSearchInput" placeholder="Cari Ara..." aria-label="Cari Arama Kutusu"></div>
+                    <select id="cariKategoriFiltre"><option value="">Tüm Kategoriler</option></select>
+                </div>
+
+                <table>
+                    <thead><tr><th>Kod</th><th>Ad/Firma</th><th>Kategori</th><th>Rota Sırası</th><th>Durum</th><th>Telefon</th><th>Borç</th><th>Alacak</th><th>Bakiye</th><th class="dont-print">İşlemler</th></tr></thead>
+                    <tbody id="cariListesiBody"></tbody>
+                    <tfoot id="cariListesiFooter"></tfoot>
+                </table>
+
+            </div>
+        </div>
+        <button type="button" class="btn btn-secondary dont-print" id="cariListesiYazdirBtn" style="margin-top: 20px;">Listeyi Yazdır</button>
+    </div>
+</section>
         <section id="sut-alimi" class="module-section hidden-section">
             <div class="module-header"><h2>🥛 Günlük Süt Alımı</h2></div>
             <div class="container">
@@ -367,27 +392,28 @@
             </div>
         </section>
         
-        <section id="aylik-yem-raporu" class="module-section hidden-section">
-             <div class="module-header"><h2>📈 Aylık Yem Raporu</h2></div>
-             <div class="container">
-                 <div class="report-section">
-                    <h3>Aylık Yem Satış Kârlılık Raporu</h3>
-                    <div class="form-grid dont-print" style="grid-template-columns: 1fr auto; align-items: end;">
-                        <div class="form-group">
-                            <label for="yemRaporuAySecimi">Ay Seçin:</label>
-                            <input type="month" id="yemRaporuAySecimi">
-                        </div>
-                        <button type="button" class="btn btn-primary" id="yemRaporuOlusturBtn" style="height:45px;">Raporu Göster</button>
-                    </div>
-                    <hr class="dont-print">
-                    <div id="yemRaporuAlani" class="printable-content format-a4">
-                    </div>
-                    <button type="button" class="btn btn-secondary dont-print" id="yemRaporuYazdirBtn" style="margin-top:20px;">Raporu Yazdır</button>
-<button type="button" class="btn btn-danger dont-print" id="yemRaporuPdfBtn" style="margin-top:20px;">PDF İndir</button>
-<button type="button" class="btn btn-success dont-print" id="yemRaporuXlsxBtn" style="margin-top:20px;">Excel İndir</button>
-                 </div>
-             </div>
-        </section>
+       <section id="aylik-yem-raporu" class="module-section hidden-section">
+    <div class="module-header"><h2>📈 Aylık Yem Satış Raporları</h2></div>
+    <div class="container">
+        <div class="report-section">
+           <h3>Yem Satış Analizi</h3>
+           <div class="form-grid dont-print" style="grid-template-columns: 1fr auto auto; align-items: end; gap: 10px;">
+               <div class="form-group">
+                   <label for="yemRaporuAySecimi">Ay Seçin:</label>
+                   <input type="month" id="yemRaporuAySecimi">
+               </div>
+               <button type="button" class="btn btn-primary" id="yemDetayliSatisRaporuBtn" style="height:45px;">Detaylı Satış Raporu</button>
+               <button type="button" class="btn btn-info" id="yemMusteriKarRaporuBtn" style="height:45px;">Müşteri Kârlılık Raporu</button>
+           </div>
+           <hr class="dont-print">
+           <div id="yemRaporuAlani" class="printable-content format-a4" style="overflow-x: auto;">
+               </div>
+           <button type="button" class="btn btn-secondary dont-print" id="yemRaporuYazdirBtn" style="margin-top:20px;">Raporu Yazdır</button>
+           <button type="button" class="btn btn-danger dont-print" id="yemRaporuPdfBtn" style="margin-top:20px;">PDF İndir</button>
+           <button type="button" class="btn btn-success dont-print" id="yemRaporuXlsxBtn" style="margin-top:20px;">Excel İndir</button>
+        </div>
+    </div>
+</section>
         
         <section id="hareket-dokumu" class="module-section hidden-section">
             <div class="module-header"><h2>📋 Hareket Dökümü</h2></div>
@@ -527,7 +553,9 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 
+// --- LÜTFEN MEVCUT initializeApp FONKSİYONUNUZU BU KOD İLE TAMAMEN DEĞİŞTİRİN ---
 function initializeApp() {
+    // Element tanımlamaları
     const sidebarNav = document.getElementById('sidebarNav');
     const moduleSections = document.querySelectorAll('.main-content .module-section');
     const logoutButton = document.getElementById('logoutButton');
@@ -550,71 +578,26 @@ function initializeApp() {
     const cariListesiYazdirBtn = document.getElementById('cariListesiYazdirBtn');
     const topluGirisTarihInput = document.getElementById('topluGirisTarih');
     const topluGirisKategoriSelect = document.getElementById('topluGirisKategori');
-    const raporOlusturBtn = document.getElementById('raporOlusturBtn');
-    const raporYazdirBtn = document.getElementById('raporYazdirBtn');
-    const sutRaporuOlusturBtn = document.getElementById('sutRaporuOlusturBtn');
-    const sutRaporuTumunuGosterBtn = document.getElementById('sutRaporuTumunuGosterBtn');
-    const sutRaporuKategoriGosterBtn = document.getElementById('sutRaporuKategoriGosterBtn');
-const menuToggleBtn = document.getElementById('menuToggleBtn');
-const sidebar = document.querySelector('.sidebar');
-const mainContent = document.querySelector('.main-content');
-
-if (menuToggleBtn && sidebar) {
-    menuToggleBtn.addEventListener('click', () => {
-        // 'collapsed' sınıfını ekleyip kaldırarak menüyü aç/kapat
-        sidebar.classList.toggle('collapsed');
-    });
-
-    // Küçük ekranda bir menü linkine tıklandığında menünün otomatik kapanmasını sağla
-    sidebar.addEventListener('click', (event) => {
-        if (window.innerWidth <= 1024 && event.target.closest('a.nav-link')) {
-            sidebar.classList.add('collapsed');
-        }
-    });
-}
-
-    const sutRaporuYazdirBtn = document.getElementById('sutRaporuYazdirBtn');
-    const yemRaporuOlusturBtn = document.getElementById('yemRaporuOlusturBtn');
-    const yemRaporuYazdirBtn = document.getElementById('yemRaporuYazdirBtn');
     const sutDuzenleForm = document.getElementById('sutDuzenleForm');
     const odemeCariSecimi = document.getElementById('odemeYapilanTedarikci');
-if(odemeCariSecimi) {
-    odemeCariSecimi.addEventListener('change', async (event) => {
-        const cariId = event.target.value;
-        const bakiyeBilgiAlani = document.getElementById('cariBakiyeBilgisi');
-        
-        if (!cariId) {
-            bakiyeBilgiAlani.textContent = '';
-            return;
-        }
+    const menuToggleBtn = document.getElementById('menuToggleBtn');
+    const sidebar = document.querySelector('.sidebar');
 
-        try {
-            bakiyeBilgiAlani.textContent = 'Bakiye hesaplanıyor...';
-            const bakiyeDetay = await calculateCariBakiyeDetayli(cariId);
-            const bakiye = bakiyeDetay.bakiye;
-            
-            if (bakiye < 0) {
-                bakiyeBilgiAlani.textContent = `Bakiye: ${formatCurrency(bakiye)} (Cari Borçlu)`;
-                bakiyeBilgiAlani.style.color = 'red';
-            } else {
-                bakiyeBilgiAlani.textContent = `Bakiye: ${formatCurrency(bakiye)} (Cari Alacaklı)`;
-                bakiyeBilgiAlani.style.color = 'green';
+    // Menü toggle butonu
+    if (menuToggleBtn && sidebar) {
+        menuToggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+        sidebar.addEventListener('click', (event) => {
+            if (window.innerWidth <= 1024 && event.target.closest('a.nav-link')) {
+                sidebar.classList.add('collapsed');
             }
-        } catch (error) {
-            console.error("Bakiye bilgisi alınırken hata:", error);
-            bakiyeBilgiAlani.textContent = 'Bakiye alınamadı.';
-            bakiyeBilgiAlani.style.color = 'black';
-        }
-    });
-}
+        });
+    }
 
-
-
-
-
+    // Rol izinlerini ve başlangıç verilerini yükle
     applyRolePermissions();
     loadAndRenderAllData();
     
+    // Sol menü navigasyon
     sidebarNav.addEventListener('click', function(event) {
         const link = event.target.closest('a.nav-link');
         if (!link || link.id === 'logoutButton') return;
@@ -628,20 +611,11 @@ if(odemeCariSecimi) {
         const activeSection = document.getElementById(targetId);
         if(activeSection) activeSection.style.display = 'block';
         
+        // Sekme bazlı veri yükleme ve hazırlık işlemleri
         if (targetId === 'dashboard') { updateDashboardStats(); }
-	    if (document.getElementById('aylikChartGosterBtn')) {	document.getElementById('aylikChartGosterBtn').addEventListener('click', renderAylikSutunGrafik);}
         if (targetId === 'cari-yonetimi') { populateCariKategoriFiltre(); renderCariListesi(); populateCariKategoriSelect(document.getElementById('cariKategori')); }
         if (targetId === 'sut-alimi') { if(topluGirisTarihInput) topluGirisTarihInput.value = getTodayForInput(); populateCariKategoriSelect(topluGirisKategori); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); }
-        
-        // --- DOĞRU VE TAM KOD BURASI ---
-        // Yem stok yönetimi sekmesine tıklandığında hem select kutularını doldur, hem alış geçmişini getir, hem de stok listesini güncelle.
-        if (targetId === 'yem-stok-yonetimi') { 
-            populateCariSelect(document.getElementById('yemAlisTedarikci')); 
-            populateYemSelect(document.getElementById('yemSecimiAlis')); 
-            renderYemAlisHareketleri(); // Alış hareketlerini yükler.
-            renderYemStokListesi();     // Stok listesini yükler.
-        }
-        
+        if (targetId === 'yem-stok-yonetimi') { populateCariSelect(document.getElementById('yemAlisTedarikci')); populateYemSelect(document.getElementById('yemSecimiAlis')); renderYemAlisHareketleri(); renderYemStokListesi(); }
         if (targetId === 'yem-satisi') { populateCariSelect(document.getElementById('yemAlanTedarikci')); populateYemSelect(document.getElementById('yemSecimiSatis')); renderYemSatisListesi(); }
         if (targetId === 'tahsilat-ve-odemeler') { populateCariSelect(document.getElementById('odemeYapilanTedarikci')); renderOdemeListesi(); }
         if (targetId === 'hesap-ozeti'){ populateCariSelect(document.getElementById('raporCariSecimi')); if(!document.getElementById('raporTarihAraligi').value) document.getElementById('raporTarihAraligi').value = getMonthYearForInput(); }
@@ -651,45 +625,59 @@ if(odemeCariSecimi) {
         if (targetId === 'ayarlar') { populateCariKategoriSelect(document.getElementById('cariKategori')); renderCariKategoriListesi(); getSettings(); renderKullaniciListesi(); }
     });
     
+    // Çıkış ve Form Gönderme Olayları
     logoutButton.addEventListener('click', handleLogout);
     cariForm.addEventListener('submit', handleCariKaydet);
-    if(cariFormTemizleBtn) cariFormTemizleBtn.addEventListener('click', resetCariForm);
     yemTanimForm.addEventListener('submit', handleYemTanimKaydet);
-    if(yemTanimFormTemizleBtn) yemTanimFormTemizleBtn.addEventListener('click', resetYemTanimForm);
     yemAlisForm.addEventListener('submit', handleYemAlisKaydet);
-    if(yemAlisFormTemizleBtn) yemAlisFormTemizleBtn.addEventListener('click', resetYemAlisForm);
     yemSatisForm.addEventListener('submit', handleYemSatisKaydet);
-    if(yemSatisFormTemizleBtn) yemSatisFormTemizleBtn.addEventListener('click', resetYemSatisForm);
     odemeForm.addEventListener('submit', handleOdemeKaydet);
-    if(odemeFormTemizleBtn) odemeFormTemizleBtn.addEventListener('click', resetOdemeForm);
     ayarlarForm.addEventListener('submit', handleAyarlarKaydet);
     cariKategoriForm.addEventListener('submit', handleCariKategoriEkle);
     if(kullaniciForm) kullaniciForm.addEventListener('submit', handleKullaniciKaydet);
     sifreDegistirForm.addEventListener('submit', handleSifreDegistir);
     if(sutDuzenleForm) sutDuzenleForm.addEventListener('submit', handleSutAlimiGuncelle);
 
+    // Form Temizleme Olayları
+    if(cariFormTemizleBtn) cariFormTemizleBtn.addEventListener('click', resetCariForm);
+    if(yemTanimFormTemizleBtn) yemTanimFormTemizleBtn.addEventListener('click', resetYemTanimForm);
+    if(yemAlisFormTemizleBtn) yemAlisFormTemizleBtn.addEventListener('click', resetYemAlisForm);
+    if(yemSatisFormTemizleBtn) yemSatisFormTemizleBtn.addEventListener('click', resetYemSatisForm);
+    if(odemeFormTemizleBtn) odemeFormTemizleBtn.addEventListener('click', resetOdemeForm);
+    
+    // Filtreleme ve Dinamik Değişiklik Olayları
     cariSearchInput.addEventListener('input', renderCariListesi);
     cariKategoriFiltre.addEventListener('change', renderCariListesi);
-    cariListesiYazdirBtn.addEventListener('click', handleCariListeYazdir);
     topluGirisTarihInput.addEventListener('change', () => { renderTopluSutGirisFormu(); renderSutAlimGecmisi(); });
     topluGirisKategoriSelect.addEventListener('change', renderTopluSutGirisFormu);
+    document.getElementById('aylikChartGosterBtn')?.addEventListener('click', renderAylikSutunGrafik);
+    if(odemeCariSecimi) odemeCariSecimi.addEventListener('change', async (event) => { /* ... bakiye gösterme kodu ... */ });
+    
+    // Rapor Oluşturma Olayları
+    document.getElementById('raporOlusturBtn')?.addEventListener('click', handleHesapOzetiRaporuOlustur);
+    document.getElementById('sutRaporuOlusturBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: false}));
+    document.getElementById('sutRaporuTumunuGosterBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: true, kategori: false}));
+    document.getElementById('sutRaporuKategoriGosterBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: true}));
+    document.getElementById('yemDetayliSatisRaporuBtn')?.addEventListener('click', () => handleYemPivotRaporu('satis'));
+    document.getElementById('yemMusteriKarRaporuBtn')?.addEventListener('click', () => handleYemPivotRaporu('karlilik'));
 
-    raporOlusturBtn.addEventListener('click', handleHesapOzetiRaporuOlustur);
-    raporYazdirBtn.addEventListener('click', () => handleYazdir('hesap-ozeti'));
-    sutRaporuOlusturBtn.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: false}));
-    sutRaporuTumunuGosterBtn.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: true, kategori: false}));
-    sutRaporuKategoriGosterBtn.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: true}));
-    sutRaporuYazdirBtn.addEventListener('click', () => handleYazdir('sut-alim-raporu'));
-    yemRaporuOlusturBtn.addEventListener('click', handleYemKarRaporuOlustur);
-    yemRaporuYazdirBtn.addEventListener('click', () => handleYazdir('aylik-yem-raporu'));
+    // Yazdırma ve Dışa Aktarma Olayları
+    cariListesiYazdirBtn.addEventListener('click', () => handleYazdir('cari-yonetimi'));
+    document.getElementById('cariTarihselRaporBtn')?.addEventListener('click', renderCariListesi);
+
+    document.getElementById('raporYazdirBtn')?.addEventListener('click', () => handleYazdir('hesap-ozeti'));
+    document.getElementById('sutRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('sut-alim-raporu'));
+    document.getElementById('yemRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('aylik-yem-raporu')); // BU SATIRIN EKSİKSİZ OLDUĞUNDAN EMİN OLUN
+    
     document.getElementById('hesapOzetiPdfBtn')?.addEventListener('click', () => exportTableToPdf('raporDetayAlani', 'hesap_ozeti', 'Cari Hesap Özeti'));
-document.getElementById('hesapOzetiXlsxBtn')?.addEventListener('click', () => exportTableToExcel('raporDetayAlani', 'hesap_ozeti'));
-document.getElementById('sutRaporuPdfBtn')?.addEventListener('click', () => exportTableToPdf('sutRaporuDetayAlani', 'sut_alim_raporu', 'Aylık Süt Alım Raporu'));
-document.getElementById('sutRaporuXlsxBtn')?.addEventListener('click', () => exportTableToExcel('sutRaporuDetayAlani', 'sut_alim_raporu'));
-document.getElementById('yemRaporuPdfBtn')?.addEventListener('click', () => exportTableToPdf('yemRaporuAlani', 'yem_kar_raporu', 'Aylık Yem Kârlılık Raporu'));
-document.getElementById('yemRaporuXlsxBtn')?.addEventListener('click', () => exportTableToExcel('yemRaporuAlani', 'yem_kar_raporu'));
+    document.getElementById('hesapOzetiXlsxBtn')?.addEventListener('click', () => exportTableToExcel('raporDetayAlani', 'hesap_ozeti'));
+    document.getElementById('sutRaporuPdfBtn')?.addEventListener('click', () => exportTableToPdf('sutRaporuDetayAlani', 'sut_alim_raporu', 'Aylık Süt Alım Raporu'));
+    document.getElementById('sutRaporuXlsxBtn')?.addEventListener('click', () => exportTableToExcel('sutRaporuDetayAlani', 'sut_alim_raporu'));
+    document.getElementById('yemRaporuPdfBtn')?.addEventListener('click', () => exportTableToPdf('yemRaporuAlani', 'yem_raporu', 'Aylık Yem Raporu'));
+    document.getElementById('yemRaporuXlsxBtn')?.addEventListener('click', () => exportTableToExcel('yemRaporuAlani', 'yem_raporu'));
 
-document.getElementById('yemAlisMiktar').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
+    // Otomatik Tutar Hesaplama Olayları
+    document.getElementById('yemAlisMiktar').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
     document.getElementById('yemAlisBirimFiyati').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
     document.getElementById('yemSatisMiktar').addEventListener('input', () => hesaplaToplamTutar('yemSatisMiktar', 'yemSatisBirimFiyati', 'yemSatisToplamTutar'));
     document.getElementById('yemSatisBirimFiyati').addEventListener('input', () => hesaplaToplamTutar('yemSatisMiktar', 'yemSatisBirimFiyati', 'yemSatisToplamTutar'));
@@ -820,11 +808,12 @@ async function handleSifreDegistir(event) {
     }
 }
 
+// İLGİLİ FONKSİYON
 async function updateDashboardStats() {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
 
-    // --- Süt ve Müşteri İstatistikleri ---
+    // --- Günlük Süt ve Müşteri İstatistikleri ---
     try {
         const today = new Date();
         const yesterday = new Date();
@@ -867,7 +856,7 @@ async function updateDashboardStats() {
         document.getElementById('dashAksamSut').textContent = aksamToplam.toFixed(2);
         document.getElementById('dashAktifMusteri').textContent = carilerSnapshot.size;
 
-    } catch (e) { console.error("Dashboard temel istatistikleri alınırken hata", e); }
+    } catch (e) { console.error("Dashboard günlük istatistikleri alınırken hata", e); }
     
     // --- Bakiye Toplamları ve İlerleme Çubukları ---
     try {
@@ -890,7 +879,7 @@ async function updateDashboardStats() {
         document.getElementById('dashToplamAlacak').textContent = formatCurrency(toplamMusteriBorcu);
         document.getElementById('dashToplamBorc').textContent = formatCurrency(toplamMusteriAlacagi);
 
-       const toplamBakiye = toplamMusteriAlacagi - toplamMusteriBorcu; // Cari gözünden bakiye (Alacak - Borç)
+       const toplamBakiye = toplamMusteriAlacagi - toplamMusteriBorcu;
         const toplamBakiyeSpan = document.getElementById('dashToplamBakiye');
         const bakiyeUyariSpan = document.getElementById('bakiyeDurumUyarisi');
         const bakiyeKarti = document.getElementById('bakiyeDurumKarti');
@@ -906,9 +895,8 @@ async function updateDashboardStats() {
             bakiyeUyariSpan.textContent = "Genel Bakiye Alacaklı";
             bakiyeUyariSpan.style.color = 'green';
             toplamBakiyeSpan.style.color = 'green';
-            bakiyeKarti.style.borderColor = '#ddd'; // Varsayılan renk
+            bakiyeKarti.style.borderColor = '#ddd';
         }
-
 
         const total = toplamMusteriBorcu + toplamMusteriAlacagi;
         const alacakYuzde = total > 0 ? (toplamMusteriBorcu / total) * 100 : 0;
@@ -917,25 +905,56 @@ async function updateDashboardStats() {
         document.getElementById('borcBar').style.width = borcYuzde + '%';
 
     } catch (e) { console.error("Dashboard bakiye toplamları alınırken hata", e); }
+    
+    // --- AYLIK SÜT VE TUTAR HESAPLAMASI (YENİ EKLENEN BÖLÜM) ---
+    try {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        // Ayın ilk ve son gününü bul
+        const startDate = new Date(year, month, 1);
+        const endDate = new Date(year, month + 1, 0);
+
+        const startDateStr = startDate.toISOString().split('T')[0];
+        const endDateStr = endDate.toISOString().split('T')[0];
+
+        // İlgili aydaki süt alımlarını getir
+        const aylikSutSnapshot = await db.collection('sut_alimlari')
+            .where('sahipId', '==', currentUser.uid)
+            .where('tarih', '>=', startDateStr)
+            .where('tarih', '<=', endDateStr)
+            .get();
+
+        let aylikToplamSut = 0;
+        let aylikToplamTutar = 0;
+
+        aylikSutSnapshot.forEach(doc => {
+            aylikToplamSut += doc.data().toplam || 0;
+            aylikToplamTutar += doc.data().toplamTutar || 0;
+        });
+
+        // Günlük ortalamayı hesapla (ayın kaçıncı günündeysek ona bölerek)
+        const bugununGunu = now.getDate();
+        const gunOrtalamasi = aylikToplamSut > 0 ? (aylikToplamSut / bugununGunu) : 0;
+        
+        // HTML elemanlarını güncelle
+        document.getElementById('dashBuAykiToplamSut').textContent = aylikToplamSut.toLocaleString('tr-TR', { maximumFractionDigits: 0 });
+        document.getElementById('dashBuAykiSutDegeri').textContent = formatCurrency(aylikToplamTutar);
+        document.getElementById('aylikGunOrtalamasi').textContent = gunOrtalamasi.toLocaleString('tr-TR', { maximumFractionDigits: 0 });
+
+    } catch (e) { console.error("Dashboard aylık istatistikleri alınırken hata", e); }
+
 
     // --- Grafikler ---
     try {
-        // Günlük grafiği yükle (mevcut kod)
         if (typeof renderGunlukSutGrafik === 'function') await renderGunlukSutGrafik();
-
-        // --- YENİ EKLENEN BÖLÜM ---
-        // Aylık grafik için varsayılan olarak bu ayı ayarla
         const aylikChartInput = document.getElementById('aylikChartAySecimi');
-        if (aylikChartInput) {
-            aylikChartInput.value = getMonthYearForInput(); // Mevcut ayı input'a ata
+        if (aylikChartInput && !aylikChartInput.value) {
+            aylikChartInput.value = getMonthYearForInput();
         }
-        // Aylık grafiği otomatik olarak yükle
         if (typeof renderAylikSutunGrafik === 'function') await renderAylikSutunGrafik();
-        // --- YENİ BÖLÜM SONU ---
-        
     } catch(e) { console.error("Kontrol paneli grafikleri oluşturulurken hata", e); }
 }
-
 // --- CARİ YÖNETİMİ FONKSİYONLARI ---
 async function handleCariKaydet(event) {
     event.preventDefault();
@@ -1065,11 +1084,16 @@ async function renderCariListesi() {
     const cariListesiFooter = document.getElementById('cariListesiFooter');
     const cariSearchInput = document.getElementById('cariSearchInput');
     const cariKategoriFiltre = document.getElementById('cariKategoriFiltre');
-    const uyariDiv = document.getElementById('cariRotaSirasiUyari'); // Uyarı div'ini seç
+    const uyariDiv = document.getElementById('cariRotaSirasiUyari');
     const searchTerm = cariSearchInput.value.toLowerCase();
     const kategori = cariKategoriFiltre.value;
     const currentUser = auth.currentUser;
     if (!currentUser) return;
+
+    // --- GÜNCELLEME: Tarih filtresinden değeri oku ---
+    const tarihFiltresi = document.getElementById('cariTarihFiltresi').value;
+    const raporTarihEtiketi = document.getElementById('raporTarihEtiketi');
+    raporTarihEtiketi.textContent = tarihFiltresi ? `${formatDate(tarihFiltresi)} Tarihi İtibarıyla` : 'Güncel Durum';
 
     let query = db.collection('cariler').where("sahipId", "==", currentUser.uid);
     if (kategori) {
@@ -1081,86 +1105,56 @@ async function renderCariListesi() {
         const snapshot = await query.get();
         let cariler = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        // --- ROTA SIRASI TEKRAR KONTROLÜ BAŞLANGICI ---
         const rotaSiraCounts = {};
         cariler.forEach(cari => {
             const sira = cari.rotaSirasi;
-            if (sira && sira > 0) { // Sadece null veya 0 olmayanları say
-                rotaSiraCounts[sira] = (rotaSiraCounts[sira] || 0) + 1;
-            }
+            if (sira && sira > 0) rotaSiraCounts[sira] = (rotaSiraCounts[sira] || 0) + 1;
         });
-
         const duplicates = Object.keys(rotaSiraCounts).filter(sira => rotaSiraCounts[sira] > 1);
-
         if (duplicates.length > 0) {
             uyariDiv.innerHTML = `<strong>⚠️ Uyarı:</strong> Aşağıdaki rota sıraları birden fazla cari için kullanılmış: <strong>${duplicates.join(', ')}</strong>. Lütfen bu carileri düzenleyerek her cariye benzersiz bir rota sırası atayın.`;
             uyariDiv.style.display = 'block';
         } else {
-            uyariDiv.innerHTML = '';
             uyariDiv.style.display = 'none';
         }
-        // --- ROTA SIRASI TEKRAR KONTROLÜ SONU ---
 
         if (searchTerm) {
             cariler = cariler.filter(c => c.kodu?.toLowerCase().includes(searchTerm) || c.adiSoyadi?.toLowerCase().includes(searchTerm));
         }
         
+        cariListesiBody.innerHTML = '<tr><td colspan="10" style="text-align:center;">Bakiyeler hesaplanıyor...</td></tr>';
+        
+        // --- GÜNCELLEME: Bakiye hesaplamasına tarih filtresini gönder ---
+        const bakiyePromises = cariler.map(c => calculateCariBakiyeDetayli(c.id, tarihFiltresi));
+        const bakiyeler = await Promise.all(bakiyePromises);
+        
         cariListesiBody.innerHTML = '';
         cariListesiFooter.innerHTML = '';
-        
         if (cariler.length === 0) {
             cariListesiBody.innerHTML = '<tr><td colspan="10" style="text-align:center;">Kayıtlı cari bulunmuyor.</td></tr>';
             return;
         }
 
-        const bakiyePromises = cariler.map(c => calculateCariBakiyeDetayli(c.id));
-        const bakiyeler = await Promise.all(bakiyePromises);
-        
-        let genelToplamAlacak = 0;
-        let genelToplamBorc = 0;
-
+        let genelToplamAlacak = 0, genelToplamBorc = 0;
         cariler.forEach((c, index) => {
             const row = cariListesiBody.insertRow();
             const bakiyeDetay = bakiyeler[index];
             if (bakiyeDetay) {
                 genelToplamAlacak += bakiyeDetay.alacak;
                 genelToplamBorc += bakiyeDetay.borc;
-                
                 const bakiye = bakiyeDetay.bakiye;
                 const durumText = c.durum === 'aktif' ? 'Aktif' : 'Pasif';
                 const durumStyle = c.durum === 'aktif' ? 'color:green;' : 'color:red;';
                 const bakiyeStyle = bakiye >= 0 ? 'color:green;' : 'color:red;';
                 const bakiyeText = `${formatCurrency(bakiye)} ${bakiye >= 0 ? '(A)' : '(B)'}`;
-                
-                row.innerHTML = `
-                    <td>${c.kodu || ''}</td>
-                    <td>${c.adiSoyadi || ''}</td>
-                    <td>${c.kategori || ''}</td>
-                    <td style="${duplicates.includes(String(c.rotaSirasi)) ? 'background-color:#fff3cd; color:red; font-weight:bold;' : ''}">${c.rotaSirasi || ''}</td>
-                    <td style="${durumStyle}">${durumText}</td>
-                    <td>${c.telefon || ''}</td>
-                    <td>${formatCurrency(bakiyeDetay.borc)}</td>
-                    <td>${formatCurrency(bakiyeDetay.alacak)}</td>
-                    <td style="${bakiyeStyle}">${bakiyeText}</td>
-                    <td class="dont-print">
-                        <button class="btn btn-edit btn-sm" onclick="editCari('${c.id}')">Düzenle</button>
-                        <button class="btn btn-delete btn-sm" onclick="deleteCari('${c.id}')">Sil</button>
-                    </td>`;
+                row.innerHTML = `<td>${c.kodu || ''}</td><td>${c.adiSoyadi || ''}</td><td>${c.kategori || ''}</td><td style="${duplicates.includes(String(c.rotaSirasi)) ? 'background-color:#fff3cd; color:red; font-weight:bold;' : ''}">${c.rotaSirasi || ''}</td><td style="${durumStyle}">${durumText}</td><td>${c.telefon || ''}</td><td>${formatCurrency(bakiyeDetay.borc)}</td><td>${formatCurrency(bakiyeDetay.alacak)}</td><td style="${bakiyeStyle}">${bakiyeText}</td><td class="dont-print"><button class="btn btn-edit btn-sm" onclick="editCari('${c.id}')">Düzenle</button><button class="btn btn-delete btn-sm" onclick="deleteCari('${c.id}')">Sil</button></td>`;
             }
         });
-
         const footerRow = cariListesiFooter.insertRow();
         const toplamBakiye = genelToplamAlacak - genelToplamBorc;
         const toplamBakiyeStyle = toplamBakiye >= 0 ? 'color:green;' : 'color:red;';
         const etiket = kategori ? `Kategori Toplamı` : 'Genel Toplam';
-        
-        footerRow.innerHTML = `
-            <td colspan="6"><strong>${etiket}</strong></td>
-            <td><strong>${formatCurrency(genelToplamBorc)}</strong></td>
-            <td><strong>${formatCurrency(genelToplamAlacak)}</strong></td>
-            <td style="${toplamBakiyeStyle}"><strong>${formatCurrency(toplamBakiye)}</strong></td>
-            <td class="dont-print"></td>`;
-
+        footerRow.innerHTML = `<td colspan="6"><strong>${etiket}</strong></td><td><strong>${formatCurrency(genelToplamBorc)}</strong></td><td><strong>${formatCurrency(genelToplamAlacak)}</strong></td><td style="${toplamBakiyeStyle}"><strong>${formatCurrency(toplamBakiye)}</strong></td><td class="dont-print"></td>`;
     } catch (error) {
         console.error("Cariler listelenirken hata", error);
         cariListesiBody.innerHTML = '<tr><td colspan="10" style="color:red; text-align:center;">Liste yüklenirken bir hata oluştu. Firestore index\'i gerekebilir.</td></tr>';
@@ -1169,11 +1163,6 @@ async function renderCariListesi() {
 
 
 
-/**
- * Belirtilen ID'ye sahip bir konteyner içindeki İLK tabloyu Excel (.xlsx) dosyası olarak indirir.
- * @param {string} containerId - Rapor tablosunu içeren div'in ID'si.
- * @param {string} fileName - Oluşturulacak dosyanın adı (uzantısız).
- */
 function exportTableToExcel(containerId, fileName = 'rapor') {
     const container = document.getElementById(containerId);
     if (!container) {
@@ -2288,27 +2277,38 @@ function resetYemSatisForm() {
     setEditingMode(document.getElementById('yemSatisFormBaslik'), document.getElementById('yemSatisKaydetBtn'), document.getElementById('yemSatisFormTemizleBtn'), null, 'Yeni Yem Satışı');
 }
 
-async function calculateCariBakiyeDetayli(cariId) {
+async function calculateCariBakiyeDetayli(cariId, endDate = null) {
     let alacak = 0, borc = 0;
     const currentUser = auth.currentUser;
     if (!currentUser) return { alacak: 0, borc: 0, bakiye: 0 };
-    try {
-        const sutQuery = db.collection('sut_alimlari').where('sahipId', '==', currentUser.uid).where('cariId', '==', cariId).get();
-        const yemQuery = db.collection('yem_satislari').where('sahipId', '==', currentUser.uid).where('cariId', '==', cariId).get();
-        const odemeQuery = db.collection('odemeVeTahsilatlar').where('sahipId', '==', currentUser.uid).where('cariId', '==', cariId).get();
 
-        const [sutSnapshot, yemSnapshot, odemeSnapshot] = await Promise.all([sutQuery, yemQuery, odemeQuery]);
+    try {
+        // --- GÜNCELLEME: Tüm sorgulara tarih filtresi eklendi ---
+        const createQuery = (collectionName) => {
+            let query = db.collection(collectionName).where('sahipId', '==', currentUser.uid).where('cariId', '==', cariId);
+            if (endDate) {
+                query = query.where('tarih', '<=', endDate);
+            }
+            return query.get();
+        };
+
+        const sutQuery = createQuery('sut_alimlari');
+        const yemSatisQuery = createQuery('yem_satislari');
+        const odemeQuery = createQuery('odemeVeTahsilatlar');
+        const yemAlimQuery = createQuery('yem_alimlari');
+
+        const [sutSnapshot, yemSatisSnapshot, odemeSnapshot, yemAlimSnapshot] = await Promise.all([
+            sutQuery, yemSatisQuery, odemeQuery, yemAlimQuery
+        ]);
 
         sutSnapshot.forEach(doc => alacak += doc.data().toplamTutar);
-        yemSnapshot.forEach(doc => borc += doc.data().toplamTutar);
+        yemAlimSnapshot.forEach(doc => alacak += doc.data().toplamTutar);
+        yemSatisSnapshot.forEach(doc => borc += doc.data().toplamTutar);
         
         odemeSnapshot.forEach(doc => {
             const data = doc.data();
-            if (data.islemTuru === 'odeme' || data.islemTuru === 'alacak') { // 'alacak' açılış bakiyesi
-                alacak += data.tutar;
-            } else if (data.islemTuru === 'tahsilat' || data.islemTuru === 'borc') { // 'borc' açılış bakiyesi
-                borc += data.tutar;
-            }
+            if (data.islemTuru === 'odeme' || data.islemTuru === 'alacak') alacak += data.tutar;
+            else if (data.islemTuru === 'tahsilat' || data.islemTuru === 'borc') borc += data.tutar;
         });
         return { alacak, borc, bakiye: alacak - borc };
     } catch (error) {
@@ -2316,8 +2316,6 @@ async function calculateCariBakiyeDetayli(cariId) {
         return { alacak: 0, borc: 0, bakiye: 0 };
     }
 }
-
-
         
 async function renderYemSatisListesi() {
     const listBody = document.getElementById('yemSatisListesiBody');
@@ -2513,6 +2511,7 @@ async function deleteYemSatisi(id) {
 
         
 
+// --- BU FONKSİYONU AŞAĞIDAKİ İLE DEĞİŞTİRİN ---
 async function renderTopluSutGirisFormu() {
     const tarih = document.getElementById('topluGirisTarih').value;
     const kategori = document.getElementById('topluGirisKategori').value;
@@ -2541,8 +2540,8 @@ async function renderTopluSutGirisFormu() {
             query = query.where('kategori', '==', kategori);
         }
         
-        // DEĞİŞİKLİK: Sıralama önce kategoriye, sonra ada göre yapıldı.
-           const carilerSnapshot = await query.orderBy('kategori').orderBy('rotaSirasi').get();
+        // --- GÜNCELLEME: Sıralama artık sadece 'rotaSirasi'na göre yapılıyor. ---
+        const carilerSnapshot = await query.orderBy('rotaSirasi').get();
         
         const gosterilecekCariler = carilerSnapshot.docs.filter(doc => !kayitliCariIdleri.has(doc.id));
 
@@ -2576,12 +2575,13 @@ async function renderTopluSutGirisFormu() {
     } catch (error) {
         console.error("Süt girişi için cariler getirilirken hata:", error);
         if (error.code === 'failed-precondition') {
-             container.innerHTML = '<p style="text-align:center; color: red;"><b>Veritabanı Hatası:</b> Bu sorgu için bir dizin (index) oluşturmanız gerekiyor.<br>Lütfen tarayıcı konsolundaki (F12) hatayı kontrol edin ve index oluşturma linkine tıklayın.</p>';
+             container.innerHTML = '<p style="text-align:center; color: red;"><b>Veritabanı Hatası:</b> Bu sorgu için bir dizin (index) oluşturmanız gerekiyor.<br>Lütfen tarayıcı konsolundaki (F12) hatayı kontrol edin ve Firestore tarafından sunulan index oluşturma linkine tıklayın.</p>';
         } else {
              container.innerHTML = '<p style="text-align:center; color: red;">Tedarikçiler yüklenirken bir hata oluştu.</p>';
         }
     }
 }
+
 
 function sutMiktarGuncelle(cariId) {
     const sabah = parseFloat(document.getElementById(`sabah-${cariId}`).value) || 0;
@@ -2895,79 +2895,177 @@ async function handleSutAlimRaporuOlustur(options) {
 
 
 
-async function handleYemKarRaporuOlustur() {
+// --- YENİ, KAPSAMLI RAPOR FONKSİYONU ---
+async function handleYemPivotRaporu(reportType) {
+    const raporAlani = document.getElementById('yemRaporuAlani');
     toggleReportButtons('yemRaporu', false);
     const ayYil = document.getElementById('yemRaporuAySecimi').value;
-    const raporAlani = document.getElementById('yemRaporuAlani');
     const currentUser = auth.currentUser;
-    if (!currentUser) return;
-    if (!ayYil) { alert("Lütfen bir ay seçin."); raporAlani.innerHTML = ''; return; }
-
-    const [year, month] = ayYil.split('-');
-    const startDateStr = `${year}-${month}-01`;
-    const endDate = new Date(year, month, 0);
-    const endDateStr = endDate.toISOString().split('T')[0];
+    
+    if (!currentUser || !ayYil) {
+        alert("Lütfen bir ay seçin.");
+        raporAlani.innerHTML = '';
+        return;
+    }
 
     raporAlani.innerHTML = '<p>Rapor oluşturuluyor, lütfen bekleyin...</p>';
 
     try {
-        const satisSnapshot = await db.collection('yem_satislari').where('sahipId', '==', currentUser.uid).where('tarih', '>=', startDateStr).where('tarih', '<=', endDateStr).get();
-        if (satisSnapshot.empty) { 
-            raporAlani.innerHTML = '<h4>Bu ay için yem satışı bulunmuyor.</h4>'; 
-            return; 
+        const [year, month] = ayYil.split('-');
+        const startDateStr = `${year}-${month}-01`;
+        const endDate = new Date(year, month, 0);
+        const endDateStr = endDate.toISOString().split('T')[0];
+
+        // 1. Gerekli tüm verileri tek seferde çek
+        const satisPromise = db.collection('yem_satislari').where('sahipId', '==', currentUser.uid).where('tarih', '>=', startDateStr).where('tarih', '<=', endDateStr).get();
+        const yemlerPromise = db.collection('yemler').where('sahipId', '==', currentUser.uid).get();
+        const carilerPromise = db.collection('cariler').where('sahipId', '==', currentUser.uid).get();
+
+        const [satisSnapshot, yemlerSnapshot, carilerSnapshot] = await Promise.all([satisPromise, yemlerPromise, carilerPromise]);
+
+        if (satisSnapshot.empty) {
+            raporAlani.innerHTML = '<h4>Bu ay için yem satışı bulunmuyor.</h4>';
+            return;
         }
 
-        const yemlerSnapshot = await db.collection('yemler').where('sahipId', '==', currentUser.uid).get();
-        const yemlerMap = new Map();
-        yemlerSnapshot.forEach(doc => { yemlerMap.set(doc.id, doc.data()); });
+        // 2. Verileri kolay erişim için Map yapısına dönüştür
+        const yemMap = new Map(yemlerSnapshot.docs.map(doc => [doc.id, doc.data()]));
+        const cariMap = new Map(carilerSnapshot.docs.map(doc => [doc.id, doc.data()]));
 
-        const raporVerisi = {};
+        // 3. Veriyi Müşteri ve Yem bazında grupla (pivot)
+        const reportData = {};
+        const yemlerInReport = new Set();
+
         satisSnapshot.forEach(doc => {
             const satis = doc.data();
-            const yemDetay = yemlerMap.get(satis.yemId);
-            const yemAdi = yemDetay ? yemDetay.ad : 'Bilinmeyen Yem';
-            const maliyet = yemDetay ? (yemDetay.alisFiyati || 0) : 0;
-            if (!raporVerisi[satis.yemId]) {
-                raporVerisi[satis.yemId] = {
-                    ad: yemAdi, toplamMiktar: 0, toplamSatisTutar: 0,
-                    toplamMaliyet: 0, toplamKar: 0
+            yemlerInReport.add(satis.yemId);
+
+            // Müşteri (cari) anahtarını oluştur
+            if (!reportData[satis.cariId]) {
+                reportData[satis.cariId] = {
+                    cariAdi: cariMap.get(satis.cariId)?.adiSoyadi || 'Bilinmeyen Cari',
+                    yemler: {},
+                    musteriToplamSatis: 0,
+                    musteriToplamKar: 0
                 };
             }
-            const satisKar = (satis.satisFiyati - maliyet) * satis.miktar;
-            raporVerisi[satis.yemId].toplamMiktar += satis.miktar;
-            raporVerisi[satis.yemId].toplamSatisTutar += satis.toplamTutar;
-            raporVerisi[satis.yemId].toplamMaliyet += maliyet * satis.miktar;
-            raporVerisi[satis.yemId].toplamKar += satisKar;
+            
+            // Yem anahtarını oluştur
+            if (!reportData[satis.cariId].yemler[satis.yemId]) {
+                reportData[satis.cariId].yemler[satis.yemId] = {
+                    adet: 0,
+                    toplamSatis: 0,
+                    toplamKar: 0,
+                    satisFiyatlari: []
+                };
+            }
+
+            const yemData = reportData[satis.cariId].yemler[satis.yemId];
+            yemData.adet += satis.miktar;
+            yemData.toplamSatis += satis.toplamTutar;
+            yemData.satisFiyatlari.push(satis.satisFiyati);
+
+            const alisFiyati = yemMap.get(satis.yemId)?.alisFiyati || 0;
+            yemData.toplamKar += (satis.satisFiyati - alisFiyati) * satis.miktar;
+
+            // Müşteri geneli toplamlarını güncelle
+            reportData[satis.cariId].musteriToplamSatis += satis.toplamTutar;
+            reportData[satis.cariId].musteriToplamKar += (satis.satisFiyati - alisFiyati) * satis.miktar;
         });
 
-        let genelToplamSatis = 0, genelToplamMaliyet = 0, genelToplamKar = 0;
-        let tableHTML = `<h3 class="print-only print-title">Aylık Yem Satış Kârlılık Raporu - ${formatMonthYear(ayYil)}</h3><table class="report-table"><thead><tr><th>Yem Adı</th><th>Satılan Miktar (Birim)</th><th>Toplam Satış 	Tutarı</th><th>Toplam Maliyet</th><th>Toplam Kâr</th></tr></thead><tbody>`;
+        const sortedYemList = Array.from(yemlerInReport).sort((a, b) => (yemMap.get(a)?.ad || '').localeCompare(yemMap.get(b)?.ad || ''));
 
-        for (const yemId in raporVerisi) {
-            const veri = raporVerisi[yemId];
-            genelToplamSatis += veri.toplamSatisTutar;
-            genelToplamMaliyet += veri.toplamMaliyet;
-            genelToplamKar += veri.toplamKar;
-            tableHTML += `<tr><td>${veri.ad}</td><td>${veri.toplamMiktar}</td><td>${formatCurrency(veri.toplamSatisTutar)}</td><td>${formatCurrency(veri.toplamMaliyet)}</td><td>${formatCurrency(veri.toplamKar)}</td></tr>`;
-        }
+        // 4. HTML Tablosunu oluştur
+        let tableHTML = `<h3 class="print-only print-title" style="text-align:center;">${reportType === 'satis' ? 'Detaylı Yem Satış Raporu' : 'Müşteri Bazlı Yem Kârlılık Raporu'} - ${formatMonthYear(ayYil)}</h3>`;
+        tableHTML += `<table class="report-table"><thead>`;
+        
+        // Üst Başlık (Yem Adları)
+        tableHTML += `<tr><th rowspan="2" style="vertical-align: middle;">Müşteri Adı</th>`;
+        sortedYemList.forEach(yemId => {
+            const yemAdi = yemMap.get(yemId)?.ad || 'Bilinmeyen Yem';
+            const colSpan = reportType === 'satis' ? 3 : 5;
+            tableHTML += `<th colspan="${colSpan}" style="text-align: center;">${yemAdi}</th>`;
+        });
+        tableHTML += `<th rowspan="2" style="vertical-align: middle;">${reportType === 'satis' ? 'Müşteri Toplamı' : 'Müşteri Toplam Kârı'}</th></tr>`;
 
-        tableHTML += `</tbody><tfoot><tr class="report-totals-row">
-                        <td><strong>GENEL TOPLAM</strong></td>
-                        <td></td>
-                        <td><strong>${formatCurrency(genelToplamSatis)}</strong></td>
-                        <td><strong>${formatCurrency(genelToplamMaliyet)}</strong></td>
-                        <td><strong>${formatCurrency(genelToplamKar)}</strong></td>
-                    </tr></tfoot></table>`;
+        // Alt Başlıklar (Adet, Fiyat vb.)
+        tableHTML += `<tr>`;
+        sortedYemList.forEach(() => {
+            if (reportType === 'satis') {
+                tableHTML += `<th>Adet</th><th>Fiyat</th><th>Toplam</th>`;
+            } else { // karlilik
+                tableHTML += `<th>Adet</th><th>Satış F.</th><th>Alış F.</th><th>Birim Kâr</th><th>Toplam Kâr</th>`;
+            }
+        });
+        tableHTML += `</tr></thead><tbody>`;
+
+        const genelToplamlar = {};
+        
+        // Müşteri Satırları
+        Object.values(reportData).sort((a,b) => a.cariAdi.localeCompare(b.cariAdi)).forEach(cariData => {
+            tableHTML += `<tr><td>${cariData.cariAdi}</td>`;
+            sortedYemList.forEach(yemId => {
+                const yemSatis = cariData.yemler[yemId];
+                if (yemSatis) {
+                    const ortSatisFiyati = yemSatis.toplamSatis / yemSatis.adet;
+                    const alisFiyati = yemMap.get(yemId)?.alisFiyati || 0;
+                    const birimKar = ortSatisFiyati - alisFiyati;
+
+                    if (reportType === 'satis') {
+                        tableHTML += `<td>${yemSatis.adet}</td><td>${formatCurrency(ortSatisFiyati)}</td><td>${formatCurrency(yemSatis.toplamSatis)}</td>`;
+                    } else {
+                        tableHTML += `<td>${yemSatis.adet}</td><td>${formatCurrency(ortSatisFiyati)}</td><td>${formatCurrency(alisFiyati)}</td><td style="color:green;">${formatCurrency(birimKar)}</td><td style="color:green; font-weight:bold;">${formatCurrency(yemSatis.toplamKar)}</td>`;
+                    }
+
+                    // Genel toplamları biriktir
+                    if (!genelToplamlar[yemId]) genelToplamlar[yemId] = { adet: 0, toplamSatis: 0, toplamKar: 0 };
+                    genelToplamlar[yemId].adet += yemSatis.adet;
+                    genelToplamlar[yemId].toplamSatis += yemSatis.toplamSatis;
+                    genelToplamlar[yemId].toplamKar += yemSatis.toplamKar;
+
+                } else {
+                    const colSpan = reportType === 'satis' ? 3 : 5;
+                    for (let i = 0; i < colSpan; i++) tableHTML += `<td>-</td>`;
+                }
+            });
+            const musteriToplam = reportType === 'satis' ? cariData.musteriToplamSatis : cariData.musteriToplamKar;
+            tableHTML += `<td style="font-weight:bold;">${formatCurrency(musteriToplam)}</td></tr>`;
+        });
+        
+        tableHTML += `</tbody><tfoot><tr class="report-totals-row"><td><strong>Genel Toplam</strong></td>`;
+
+        let sonGenelToplam = 0;
+        sortedYemList.forEach(yemId => {
+            const toplam = genelToplamlar[yemId];
+            if (toplam) {
+                 if (reportType === 'satis') {
+                    tableHTML += `<td><strong>${toplam.adet}</strong></td><td></td><td><strong>${formatCurrency(toplam.toplamSatis)}</strong></td>`;
+                    sonGenelToplam += toplam.toplamSatis;
+                } else {
+                    tableHTML += `<td><strong>${toplam.adet}</strong></td><td></td><td></td><td></td><td><strong style="color:green;">${formatCurrency(toplam.toplamKar)}</strong></td>`;
+                    sonGenelToplam += toplam.toplamKar;
+                }
+            } else {
+                const colSpan = reportType === 'satis' ? 3 : 5;
+                for (let i = 0; i < colSpan; i++) tableHTML += `<td></td>`;
+            }
+        });
+        tableHTML += `<td><strong>${formatCurrency(sonGenelToplam)}</strong></td></tr>`;
+        tableHTML += `</tfoot></table>`;
+
         raporAlani.innerHTML = tableHTML;
         toggleReportButtons('yemRaporu', true);
 
     } catch (error) {
-        console.error("Yem kârlılık raporu oluşturulurken hata:", error);
+        console.error("Yem raporu oluşturulurken hata:", error);
         raporAlani.innerHTML = `<p style="color:red; font-weight:bold;">RAPOR OLUŞTURULAMADI!<br>Hata Detayı: ${error.message}</p>`;
-        alert(`Yem raporu oluşturulurken bir hata oluştu!\n\nHata: ${error.message}\n\nLütfen konsol (F12) loglarını kontrol edin.`);
     }
 }
 
+
+
+
+// BU FONKSİYONU GÜNCELLEYİN
 async function handleHesapOzetiRaporuOlustur() {
     toggleReportButtons('hesapOzeti', false);
     const cariId = document.getElementById('raporCariSecimi').value;
@@ -2990,87 +3088,87 @@ async function handleHesapOzetiRaporuOlustur() {
     raporDetayAlani.innerHTML = '<p>Rapor oluşturuluyor, lütfen bekleyin...</p>';
 
     try {
-        const startDate = new Date(year, month - 1, 1);
-        const endDate = new Date(year, month, 0);
-        const oncekiAyEndDate = new Date(year, month - 1, 0);
+        const startDate = new Date(year, month - 1, 1).toISOString().split('T')[0];
+        const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+        const devirTarihiStr = new Date(year, month - 1, 0).toISOString().split('T')[0];
         
-        const startDateStr = startDate.toISOString().split('T')[0];
-        const endDateStr = endDate.toISOString().split('T')[0];
-        const devirTarihiStr = oncekiAyEndDate.toISOString().split('T')[0];
+        const createQuery = (collection, isDevir) => {
+            let q = db.collection(collection).where('sahipId', '==', currentUser.uid).where('cariId', '==', cariId);
+            q = isDevir ? q.where('tarih', '<=', devirTarihiStr) : q.where('tarih', '>=', startDate).where('tarih', '<=', endDate);
+            return q.get();
+        };
         
-        const devirSutPromise = db.collection('sut_alimlari').where('sahipId', '==', currentUser.uid).where('cariId', '==', cariId).where('tarih', '<=', devirTarihiStr).get();
-        const devirYemPromise = db.collection('yem_satislari').where('sahipId', '==', currentUser.uid).where('cariId', '==', cariId).where('tarih', '<=', devirTarihiStr).get();
-        const devirOdemePromise = db.collection('odemeVeTahsilatlar').where('sahipId', '==', currentUser.uid).where('cariId', '==', cariId).where('tarih', '<=', devirTarihiStr).get();
-        
-        const aySutPromise = db.collection('sut_alimlari').where('sahipId', '==', currentUser.uid).where('cariId', '==', cariId).where('tarih', '>=', startDateStr).where('tarih', '<=', endDateStr).get();
-        const ayYemPromise = db.collection('yem_satislari').where('sahipId', '==', currentUser.uid).where('cariId', '==', cariId).where('tarih', '>=', startDateStr).where('tarih', '<=', endDateStr).get();
-        const ayOdemePromise = db.collection('odemeVeTahsilatlar').where('sahipId', '==', currentUser.uid).where('cariId', '==', cariId).where('tarih', '>=', startDateStr).where('tarih', '<=', endDateStr).get();
+        const yemlerPromise = db.collection('yemler').where('sahipId', '==', currentUser.uid).get();
 
-        const [devirSut, devirYem, devirOdeme, aySut, ayYem, ayOdeme] = await Promise.all([
-            devirSutPromise, devirYemPromise, devirOdemePromise,
-            aySutPromise, ayYemPromise, ayOdemePromise
+        const [
+            devirSut, devirYemSatis, devirYemAlim, devirOdeme,
+            aySut, ayYemSatis, ayYemAlim, ayOdeme, yemlerSnapshot
+        ] = await Promise.all([
+            createQuery('sut_alimlari', true), createQuery('yem_satislari', true), createQuery('yem_alimlari', true), createQuery('odemeVeTahsilatlar', true),
+            createQuery('sut_alimlari', false), createQuery('yem_satislari', false), createQuery('yem_alimlari', false), createQuery('odemeVeTahsilatlar', false),
+            yemlerPromise
         ]);
+        
+        const yemMap = new Map(yemlerSnapshot.docs.map(doc => [doc.id, doc.data()]));
 
-        let devredenAlacak = 0;
-        let devredenBorc = 0;
-
+        let devredenAlacak = 0, devredenBorc = 0;
         devirSut.forEach(doc => devredenAlacak += doc.data().toplamTutar);
-        devirYem.forEach(doc => devredenBorc += doc.data().toplamTutar);
-        devirOdeme.forEach(doc => {
+        devirYemAlim.forEach(doc => devredenAlacak += doc.data().toplamTutar);
+        devirYemSatis.forEach(doc => devredenBorc += doc.data().toplamTutar);
+        devirOdeme.forEach(doc => { 
             const data = doc.data();
             if (data.islemTuru === 'odeme' || data.islemTuru === 'alacak') devredenAlacak += data.tutar;
             else if (data.islemTuru === 'tahsilat' || data.islemTuru === 'borc') devredenBorc += data.tutar;
         });
         const devredenBakiye = devredenAlacak - devredenBorc;
 
-        let toplamSutMiktari = 0, toplamSutDegeri = 0;
-        aySut.forEach(doc => {
-            toplamSutMiktari += doc.data().toplam;
-            toplamSutDegeri += doc.data().toplamTutar;
-        });
-        const ortalamaSutFiyati = toplamSutMiktari > 0 ? (toplamSutDegeri / toplamSutMiktari) : 0;
+        let toplamSutDegeri = 0;
+        aySut.forEach(doc => toplamSutDegeri += doc.data().toplamTutar);
         
-        let toplamYemSatisTutari = 0;
-        ayYem.forEach(doc => toplamYemSatisTutari += doc.data().toplamTutar);
+        let toplamYemSatisTutari = 0, yemSatisDetayHTML = '';
+        if (!ayYemSatis.empty) {
+            yemSatisDetayHTML = '<table class="report-table"><thead><tr><th>Tarih</th><th>Yem Adı</th><th>Miktar</th><th>Tutar</th></tr></thead><tbody>';
+            ayYemSatis.docs.forEach(doc => {
+                const satis = doc.data();
+                toplamYemSatisTutari += satis.toplamTutar;
+                const yemAdi = yemMap.get(satis.yemId)?.ad || 'Bilinmeyen Yem';
+                yemSatisDetayHTML += `<tr><td>${formatDate(satis.tarih)}</td><td>${yemAdi}</td><td>${satis.miktar}</td><td>${formatCurrency(satis.toplamTutar)}</td></tr>`;
+            });
+            yemSatisDetayHTML += '</tbody></table>';
+        }
 
-        let toplamOdemeTutari = 0; // Bizim yaptığımız ödeme (Cari'nin Alacağı)
-        let toplamTahsilatTutari = 0; // Bizim aldığımız para (Cari'nin Borcu)
-        ayOdeme.forEach(doc => {
-            if (doc.data().islemTuru === 'odeme') toplamOdemeTutari += doc.data().tutar;
-            else if (doc.data().islemTuru === 'tahsilat') toplamTahsilatTutari += doc.data().tutar;
-        });
+        let toplamOdemeTutari = 0, odemeDetayHTML = '';
+        let toplamTahsilatTutari = 0, tahsilatDetayHTML = '';
+        if(!ayOdeme.empty) {
+            odemeDetayHTML = '<table class="report-table"><thead><tr><th>Tarih</th><th>Ödeme Türü</th><th>Açıklama</th><th>Tutar</th></tr></thead><tbody>';
+            tahsilatDetayHTML = '<table class="report-table"><thead><tr><th>Tarih</th><th>Ödeme Türü</th><th>Açıklama</th><th>Tutar</th></tr></thead><tbody>';
+            let odemeEklendi = false, tahsilatEklendi = false;
+            ayOdeme.docs.forEach(doc => {
+                const islem = doc.data();
+                if (islem.islemTuru === 'odeme') {
+                    toplamOdemeTutari += islem.tutar;
+                    odemeDetayHTML += `<tr><td>${formatDate(islem.tarih)}</td><td>${islem.odemeTuru || '-'}</td><td>${islem.aciklama}</td><td>${formatCurrency(islem.tutar)}</td></tr>`;
+                    odemeEklendi = true;
+                } else if (islem.islemTuru === 'tahsilat') {
+                    toplamTahsilatTutari += islem.tutar;
+                    tahsilatDetayHTML += `<tr><td>${formatDate(islem.tarih)}</td><td>${islem.odemeTuru || '-'}</td><td>${islem.aciklama}</td><td>${formatCurrency(islem.tutar)}</td></tr>`;
+                    tahsilatEklendi = true;
+                }
+            });
+            odemeDetayHTML += '</tbody></table>';
+            tahsilatDetayHTML += '</tbody></table>';
+            if(!odemeEklendi) odemeDetayHTML = '';
+            if(!tahsilatEklendi) tahsilatDetayHTML = '';
+        }
         
-        const donemSonuBakiye = devredenBakiye + toplamSutDegeri + toplamOdemeTutari - toplamYemSatisTutari - toplamTahsilatTutari;
+        const donemSonuBakiye = devredenBakiye + toplamSutDegeri - toplamYemSatisTutari + toplamOdemeTutari - toplamTahsilatTutari;
 
         let reportHTML = `
-            <div class="report-block">
-                <h5>Önceki Dönemden Devir</h5>
-                <p class="block-total">Devreden Bakiye: <strong>${formatCurrency(devredenBakiye)} (${devredenBakiye >= 0 ? 'Alacaklı' : 'Borçlu'})</strong></p>
-            </div>
-            
-            <div class="report-block">
-                <h5>Süt Alımları (Cari'nin Alacağı)</h5>
-                <table class="summary-table">
-                    <tr><th>Aylık Toplam Süt Miktarı</th><th>Ortalama Birim Fiyat</th><th>Aylık Toplam Değer</th></tr>
-                    <tr><td>${toplamSutMiktari.toFixed(2)} Lt</td><td>${formatCurrency(ortalamaSutFiyati)}/Lt</td><td>${formatCurrency(toplamSutDegeri)}</td></tr>
-                </table>
-            </div>
-
-            <div class="report-block">
-                <h5>Yem Satışları (Cari'nin Borcu)</h5>
-                <p class="block-total">Aylık Toplam Yem Satış Tutarı: <strong>${formatCurrency(toplamYemSatisTutari)}</strong></p>
-            </div>
-
-            <div class="report-block">
-                <h5>Yapılan Ödemeler (Cari'ye)</h5>
-                <p class="block-total">Aylık Toplam Ödeme Tutarı: <strong>${formatCurrency(toplamOdemeTutari)}</strong></p>
-            </div>
-            
-            <div class="report-block">
-                <h5>Yapılan Tahsilatlar (Cari'den)</h5>
-                <p class="block-total">Aylık Toplam Tahsilat Tutarı: <strong>${formatCurrency(toplamTahsilatTutari)}</strong></p>
-            </div>
-
+            <div class="report-block"><h5>Önceki Dönemden Devir</h5><p class="block-total">Devreden Bakiye: <strong>${formatCurrency(devredenBakiye)} (${devredenBakiye >= 0 ? 'Alacaklı' : 'Borçlu'})</strong></p></div>
+            <div class="report-block"><h5>Süt Alımları (Cari'nin Alacağı)</h5><p class="block-total">Aylık Toplam Süt Değeri: <strong>${formatCurrency(toplamSutDegeri)}</strong></p></div>
+            <div class="report-block"><h5>Yem Satışları (Cari'nin Borcu)</h5><p class="block-total">Aylık Toplam Yem Satış Tutarı: <strong>${formatCurrency(toplamYemSatisTutari)}</strong></p>${yemSatisDetayHTML ? `<details><summary>Detayları Göster</summary>${yemSatisDetayHTML}</details>` : ''}</div>
+            <div class="report-block"><h5>Yapılan Ödemeler (Cari'ye)</h5><p class="block-total">Aylık Toplam Ödeme Tutarı: <strong>${formatCurrency(toplamOdemeTutari)}</strong></p>${odemeDetayHTML ? `<details><summary>Detayları Göster</summary>${odemeDetayHTML}</details>` : ''}</div>
+            <div class="report-block"><h5>Yapılan Tahsilatlar (Cari'den)</h5><p class="block-total">Aylık Toplam Tahsilat Tutarı: <strong>${formatCurrency(toplamTahsilatTutari)}</strong></p>${tahsilatDetayHTML ? `<details><summary>Detayları Göster</summary>${tahsilatDetayHTML}</details>` : ''}</div>
             <div class="report-block final-summary">
                 <h5>DÖNEM SONU HESAPLAMASI</h5>
                 <p><span>Önceki Aydan Devir:</span> <span>${formatCurrency(devredenBakiye)}</span></p>
@@ -3078,21 +3176,16 @@ async function handleHesapOzetiRaporuOlustur() {
                 <p><span>+ Cari Ay Yapılan Ödemeler:</span> <span>+ ${formatCurrency(toplamOdemeTutari)}</span></p>
                 <p><span>- Cari Ay Yem Satışları:</span> <span>- ${formatCurrency(toplamYemSatisTutari)}</span></p>
                 <p><span>- Cari Ay Yapılan Tahsilatlar:</span> <span>- ${formatCurrency(toplamTahsilatTutari)}</span></p>
-                <hr>
-                <p><strong>DÖNEM SONU NET BAKİYE:</strong> <strong>${formatCurrency(donemSonuBakiye)} (${donemSonuBakiye >= 0 ? 'Cari Alacaklı' : 'Cari Borçlu'})</strong></p>
+                <hr><p><strong>DÖNEM SONU NET BAKİYE:</strong> <strong>${formatCurrency(donemSonuBakiye)} (${donemSonuBakiye >= 0 ? 'Cari Alacaklı' : 'Cari Borçlu'})</strong></p>
             </div>
         `;
         raporDetayAlani.innerHTML = reportHTML;
         toggleReportButtons('hesapOzeti', true);
-
     } catch (error) {
         console.error("Hesap özeti raporu oluşturulurken hata:", error);
         raporDetayAlani.innerHTML = `<p style="color:red; font-weight:bold;">RAPOR OLUŞTURULAMADI!<br>Hata Detayı: ${error.message}</p>`;
-        alert(`Hesap özeti raporu oluşturulurken bir hata oluştu!\n\nHata: ${error.message}\n\nLütfen konsol (F12) loglarını kontrol edin.`);
     }
 }
-
-
 function toggleReportButtons(reportPrefix, show) {
     const displayStyle = show ? 'inline-block' : 'none';
     const pdfBtn = document.getElementById(`${reportPrefix}PdfBtn`);
@@ -3110,25 +3203,30 @@ function handleCariListeYazdir() {
     handleYazdir('cari-yonetimi');
 }
 
+
 function handleYazdir(sectionId) {
     const sectionToPrint = document.getElementById(sectionId);
-    if (!sectionToPrint) return;
-    let reportContent = sectionToPrint.querySelector('.printable-content, #cari-list-printable-area, #yemRaporuAlani');
-    if(!reportContent && sectionId === 'cari-yonetimi') {
-        reportContent = document.getElementById('cari-list-printable-area');
-    }
-    if (sectionId !== 'cari-yonetimi' && (!reportContent || reportContent.innerText.trim() === '' || reportContent.innerText.includes("Lütfen Rapor Kriterlerini Seçin"))) {
-        alert("Lütfen önce bir rapor oluşturun.");
+    if (!sectionToPrint) {
+        console.error("Yazdırma hatası: Yazdırılacak bölüm bulunamadı ->", sectionId);
         return;
     }
+
+    const reportContent = sectionToPrint.querySelector('.printable-content');
+
+    if (!reportContent || reportContent.innerHTML.trim() === '') {
+        alert("Lütfen yazdırmadan önce bir rapor oluşturun.");
+        return;
+    }
+    
     const bodyElement = document.body;
     bodyElement.classList.add('print-active');
     sectionToPrint.classList.add('print-section-active');
+
     const pageFormatClass = reportContent.classList.contains('format-a5') ? 'format-a5' : 'format-a4';
     bodyElement.classList.add(pageFormatClass);
+    
     window.print();
 }
-
 
 window.onafterprint = () => {
     const bodyElement = document.body;
