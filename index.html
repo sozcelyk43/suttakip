@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -123,7 +124,11 @@
             </div>
         </section>
 
-       <section id="cari-yonetimi" class="module-section hidden-section">
+      
+
+
+
+<section id="cari-yonetimi" class="module-section hidden-section">
     <div class="module-header"><h2>👥 Cari Yönetimi</h2></div>
     <div class="container">
         <div class="form-section">
@@ -135,10 +140,34 @@
                     <div class="form-group"><label for="cariRotaSirasi">Rota Sırası:</label><input type="number" id="cariRotaSirasi" placeholder="Örn: 1, 2, 3..."></div>
                     <div class="form-group"><label for="cariAdiSoyadi">Adı Soyadı / Firma Adı:</label><input type="text" id="cariAdiSoyadi" required></div>
                     <div class="form-group"><label for="cariKategori">Kategori/Köy:</label><select id="cariKategori" required><option value="">Seçiniz...</option></select></div>
-                    <div class="form-group"><label for="cariDurum">Durum:</label><select id="cariDurum"><option value="aktif">Aktif</option><option value="pasif">Pasif</option></select></div>
-                    <div class="form-group"><label for="cariTipi">Cari Tipi:</label><select id="cariTipi"><option value="sut_ve_yem">Süt ve Yem</option><option value="sadece_sut">Sadece Süt</option><option value="sadece_yem">Sadece Yem</option></select></div>
+                    <div class="form-group"><label for="cariGrup">Cari Grubu:</label>
+                        <select id="cariGrup" required>
+                            <option value="üretici" selected>Üretici (Süt Alınan)</option>
+                            <option value="tedarikçi">Tedarikçi (Yem Alınan)</option>
+                            <option value="süt alıcı">Süt Alıcı (Süt Satılan)</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label for="cariDurum">Durum:</label>
+                        <select id="cariDurum">
+                            <option value="aktif">Aktif</option>
+                            <option value="pasif">Pasif</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label for="cariTipi">Cari Tipi:</label>
+                        <select id="cariTipi">
+                            <option value="sut_ve_yem">Süt ve Yem</option>
+                            <option value="sadece_sut">Sadece Süt</option>
+                            <option value="sadece_yem">Sadece Yem</option>
+                        </select>
+                    </div>
                     <div class="form-group"><label for="cariAcilisBakiye">Açılış Bakiyesi:</label><input type="number" id="cariAcilisBakiye" placeholder="Örn: 500" step="0.01"></div>
-                    <div class="form-group"><label for="cariAcilisBakiyeTuru">Bakiye Türü:</label><select id="cariAcilisBakiyeTuru"><option value="yok">Yok</option><option value="borc">Cari Borçlu</option><option value="alacak">Cari Alacaklı</option></select></div>
+                    <div class="form-group"><label for="cariAcilisBakiyeTuru">Bakiye Türü:</label>
+                        <select id="cariAcilisBakiyeTuru">
+                            <option value="yok">Yok</option>
+                            <option value="borc">Cari Borçlu</option>
+                            <option value="alacak">Cari Alacaklı</option>
+                        </select>
+                    </div>
                     <div class="form-group"><label for="cariTelefon">Telefon:</label><input type="tel" id="cariTelefon"></div>
                     <div class="form-group"><label for="cariEposta">E-posta:</label><input type="email" id="cariEposta"></div>
                     <div class="form-group" style="grid-column: span 2;"><label for="cariAdres">Adres:</label><textarea id="cariAdres"></textarea></div>
@@ -175,7 +204,21 @@
                 </div>
 
                 <table>
-                    <thead><tr><th>Kod</th><th>Ad/Firma</th><th>Kategori</th><th>Rota Sırası</th><th>Durum</th><th>Telefon</th><th>Borç</th><th>Alacak</th><th>Bakiye</th><th class="dont-print">İşlemler</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Kod</th>
+                            <th>Ad/Firma</th>
+                            <th>Kategori</th>
+                            <th>Cari Grubu</th>
+                            <th>Rota Sırası</th>
+                            <th>Durum</th>
+                            <th>Telefon</th>
+                            <th>Borç</th>
+                            <th>Alacak</th>
+                            <th>Bakiye</th>
+                            <th class="dont-print">İşlemler</th>
+                        </tr>
+                    </thead>
                     <tbody id="cariListesiBody"></tbody>
                     <tfoot id="cariListesiFooter"></tfoot>
                 </table>
@@ -185,6 +228,13 @@
         <button type="button" class="btn btn-secondary dont-print" id="cariListesiYazdirBtn" style="margin-top: 20px;">Listeyi Yazdır</button>
     </div>
 </section>
+
+
+
+
+
+
+
         <section id="sut-alimi" class="module-section hidden-section">
     <div class="module-header"><h2>🥛 Günlük Süt Alımı</h2></div>
     <div class="container">
@@ -698,8 +748,17 @@ if(odemeCariSecimi) {
         if (targetId === 'dashboard') { updateDashboardStats(); }
         if (targetId === 'cari-yonetimi') { populateCariKategoriFiltre(); renderCariListesi(); populateCariKategoriSelect(document.getElementById('cariKategori')); }
         if (targetId === 'sut-alimi') { if(topluGirisTarihInput) topluGirisTarihInput.value = getTodayForInput(); populateCariKategoriSelect(topluGirisKategori); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); }
-        if (targetId === 'yem-stok-yonetimi') { populateCariSelect(document.getElementById('yemAlisTedarikci')); populateYemSelect(document.getElementById('yemSecimiAlis')); renderYemAlisHareketleri(); renderYemStokListesi(); }
-        if (targetId === 'yem-satisi') { populateCariSelect(document.getElementById('yemAlanTedarikci')); populateYemSelect(document.getElementById('yemSecimiSatis')); renderYemSatisListesi(); }
+       if (targetId === 'yem-stok-yonetimi') { 
+    populateCariSelect(document.getElementById('yemAlisTedarikci'), 'tedarikçi'); // Sadece tedarikçileri listele
+    populateYemSelect(document.getElementById('yemSecimiAlis')); 
+    renderYemAlisHareketleri(); 
+    renderYemStokListesi(); 
+}
+        if (targetId === 'yem-satisi') { 
+    populateCariSelect(document.getElementById('yemAlanTedarikci'), 'üretici'); // Sadece üreticileri listele
+    populateYemSelect(document.getElementById('yemSecimiSatis')); 
+    renderYemSatisListesi(); 
+}
         if (targetId === 'tahsilat-ve-odemeler') { populateCariSelect(document.getElementById('odemeYapilanTedarikci')); renderOdemeListesi(); }
         if (targetId === 'hesap-ozeti'){ populateCariSelect(document.getElementById('raporCariSecimi')); if(!document.getElementById('raporTarihAraligi').value) document.getElementById('raporTarihAraligi').value = getMonthYearForInput(); }
         if (targetId === 'sut-alim-raporu'){ populateCariSelect(document.getElementById('sutRaporuTedarikciSecimi')); populateCariKategoriSelect(document.getElementById('sutRaporuKategoriSecimi'), "Tümü"); if(!document.getElementById('sutRaporuAySecimi').value) document.getElementById('sutRaporuAySecimi').value = getMonthYearForInput(); }
@@ -709,10 +768,10 @@ if(odemeCariSecimi) {
         // GÜNCELLEME: Yeni tank sekmeleri için veri yükleme
         if (targetId === 'tank-yonetimi') { renderTankListesi(); }
         if (targetId === 'tank-aktarim') { 
-            populateTankSelect(document.getElementById('aktarimKaynakTank'));
-            populateCariSelect(document.getElementById('aktarimHedefCari'));
-            if(document.getElementById('aktarimTarih')) document.getElementById('aktarimTarih').value = getTodayForInput();
-        }
+    populateTankSelect(document.getElementById('aktarimKaynakTank'));
+    populateCariSelect(document.getElementById('aktarimHedefCari'), 'süt alıcı'); // Sadece süt alıcılarını listele
+    if(document.getElementById('aktarimTarih')) document.getElementById('aktarimTarih').value = getTodayForInput();
+}
     });
     
     // Çıkış ve Form Gönderme Olayları
@@ -1026,13 +1085,20 @@ async function updateDashboardStats() {
 async function handleCariKaydet(event) {
     event.preventDefault();
     const currentUser = auth.currentUser;
-    if (!currentUser) { alert("Lütfen giriş yapın."); return; }
+    if (!currentUser) {
+        alert("Lütfen giriş yapın.");
+        return;
+    }
 
     const cariAdi = document.getElementById('cariAdiSoyadi').value;
-    if (!cariAdi) { alert("Adı Soyadı / Firma Adı alanı zorunludur."); return; }
+    if (!cariAdi) {
+        alert("Adı Soyadı / Firma Adı alanı zorunludur.");
+        return;
+    }
 
     const rotaSirasiInput = document.getElementById('cariRotaSirasi').value;
     const yeniRotaSirasi = rotaSirasiInput ? parseInt(rotaSirasiInput, 10) : null;
+    const editingCariId = document.getElementById('cariEditId').value;
 
     const formData = {
         kodu: document.getElementById('cariKodu').value,
@@ -1041,6 +1107,7 @@ async function handleCariKaydet(event) {
         kategori: document.getElementById('cariKategori').value,
         durum: document.getElementById('cariDurum').value,
         cariTipi: document.getElementById('cariTipi').value,
+        cariGrup: document.getElementById('cariGrup').value, // EKLENDİ
         telefon: document.getElementById('cariTelefon').value,
         eposta: document.getElementById('cariEposta').value,
         adres: document.getElementById('cariAdres').value,
@@ -1053,79 +1120,58 @@ async function handleCariKaydet(event) {
     };
 
     try {
-        // DÜZENLEME MODU
         if (editingCariId) {
             const cariRef = db.collection('cariler').doc(editingCariId);
-
             await db.runTransaction(async (transaction) => {
                 const cariDoc = await transaction.get(cariRef);
                 if (!cariDoc.exists) throw "Düzenlenecek cari bulunamadı!";
                 
                 const eskiRotaSirasi = cariDoc.data().rotaSirasi;
 
-                // Rota sırası değişmediyse veya null ise, sadece güncelle ve çık
-                if (eskiRotaSirasi === yeniRotaSirasi) {
-                    transaction.set(cariRef, formData, { merge: true });
-                    return;
+                if (eskiRotaSirasi !== yeniRotaSirasi) {
+                    // Rota sırası değişim mantığı...
+                    if (yeniRotaSirasi && eskiRotaSirasi) {
+                         if (yeniRotaSirasi > eskiRotaSirasi) {
+                            const carilerToUpdateQuery = db.collection('cariler').where('sahipId', '==', currentUser.uid).where('rotaSirasi', '>', eskiRotaSirasi).where('rotaSirasi', '<=', yeniRotaSirasi);
+                            const snapshot = await carilerToUpdateQuery.get();
+                            snapshot.forEach(doc => transaction.update(doc.ref, { rotaSirasi: doc.data().rotaSirasi - 1 }));
+                        } else {
+                            const carilerToUpdateQuery = db.collection('cariler').where('sahipId', '==', currentUser.uid).where('rotaSirasi', '>=', yeniRotaSirasi).where('rotaSirasi', '<', eskiRotaSirasi);
+                            const snapshot = await carilerToUpdateQuery.get();
+                            snapshot.forEach(doc => transaction.update(doc.ref, { rotaSirasi: doc.data().rotaSirasi + 1 }));
+                        }
+                    } else if (yeniRotaSirasi && !eskiRotaSirasi) {
+                        const carilerToUpdateQuery = db.collection('cariler').where('sahipId', '==', currentUser.uid).where('rotaSirasi', '>=', yeniRotaSirasi);
+                        const snapshot = await carilerToUpdateQuery.get();
+                        snapshot.forEach(doc => transaction.update(doc.ref, { rotaSirasi: doc.data().rotaSirasi + 1 }));
+                    } else if (!yeniRotaSirasi && eskiRotaSirasi) {
+                         const carilerToUpdateQuery = db.collection('cariler').where('sahipId', '==', currentUser.uid).where('rotaSirasi', '>', eskiRotaSirasi);
+                        const snapshot = await carilerToUpdateQuery.get();
+                        snapshot.forEach(doc => transaction.update(doc.ref, { rotaSirasi: doc.data().rotaSirasi - 1 }));
+                    }
                 }
-
-                // --- Rota Sırası Değişim Mantığı ---
-
-                // 1. Durum: Eski sıradan daha büyük bir sıraya geçme (örn: 3 -> 5)
-                // Aradaki (4, 5) sıraları birer azaltılmalı.
-                if (yeniRotaSirasi > eskiRotaSirasi) {
-                    const carilerToUpdateQuery = db.collection('cariler')
-                        .where('sahipId', '==', currentUser.uid)
-                        .where('rotaSirasi', '>', eskiRotaSirasi)
-                        .where('rotaSirasi', '<=', yeniRotaSirasi);
-                    const snapshot = await carilerToUpdateQuery.get();
-                    snapshot.forEach(doc => {
-                        transaction.update(doc.ref, { rotaSirasi: doc.data().rotaSirasi - 1 });
-                    });
-                }
-                // 2. Durum: Eski sıradan daha küçük bir sıraya geçme (örn: 5 -> 3)
-                // Aradaki (3, 4) sıraları birer artırılmalı.
-                else if (yeniRotaSirasi < eskiRotaSirasi) {
-                    const carilerToUpdateQuery = db.collection('cariler')
-                        .where('sahipId', '==', currentUser.uid)
-                        .where('rotaSirasi', '>=', yeniRotaSirasi)
-                        .where('rotaSirasi', '<', eskiRotaSirasi);
-                    const snapshot = await carilerToUpdateQuery.get();
-                    snapshot.forEach(doc => {
-                        transaction.update(doc.ref, { rotaSirasi: doc.data().rotaSirasi + 1 });
-                    });
-                }
-
-                // Son olarak, düzenlenen cariyi yeni sırasıyla güncelle
-                transaction.set(cariRef, formData, { merge: true });
+                transaction.update(cariRef, formData);
             });
-
-        } 
-        // YENİ KAYIT MODU
-        else {
-             await db.runTransaction(async (transaction) => {
-                 // Eğer yeni kayda bir rota sırası verilmişse, o sıradan sonrakileri 1 artır
+        } else {
+            await db.runTransaction(async (transaction) => {
                 if (yeniRotaSirasi) {
-                     const carilerToUpdateQuery = db.collection('cariler')
-                        .where('sahipId', '==', currentUser.uid)
-                        .where('rotaSirasi', '>=', yeniRotaSirasi);
+                    const carilerToUpdateQuery = db.collection('cariler').where('sahipId', '==', currentUser.uid).where('rotaSirasi', '>=', yeniRotaSirasi);
                     const snapshot = await carilerToUpdateQuery.get();
-                     snapshot.forEach(doc => {
+                    snapshot.forEach(doc => {
                         transaction.update(doc.ref, { rotaSirasi: doc.data().rotaSirasi + 1 });
                     });
                 }
                 
-                // Yeni cariyi ekle
                 const newCariRef = db.collection('cariler').doc();
                 transaction.set(newCariRef, formData);
 
-                // Açılış bakiyesini de transaction içinde hallet
                 const acilisBakiye = parseFloat(document.getElementById('cariAcilisBakiye').value) || 0;
                 const bakiyeTuru = document.getElementById('cariAcilisBakiyeTuru').value;
                 if (acilisBakiye > 0 && bakiyeTuru !== 'yok') {
                     const bakiyeData = {
-                        aciklama: "Açılış Bakiyesi", cariId: newCariRef.id,
-                        islemTuru: bakiyeTuru === 'borc' ? 'tahsilat' : 'odeme', // Bakiye türüne göre işlem türü ayarı
+                        aciklama: "Açılış Bakiyesi",
+                        cariId: newCariRef.id,
+                        islemTuru: bakiyeTuru,
                         sahipId: currentUser.uid,
                         tarih: new Date(1990, 0, 1).toISOString().split('T')[0],
                         tutar: acilisBakiye
@@ -1133,18 +1179,19 @@ async function handleCariKaydet(event) {
                     const odemeRef = db.collection('odemeVeTahsilatlar').doc();
                     transaction.set(odemeRef, bakiyeData);
                 }
-             });
+            });
         }
         
         resetCariForm();
         await renderCariListesi();
+        alert('Cari başarıyla kaydedildi!');
 
     } catch (error) {
         console.error("Cari kaydedilirken hata: ", error);
         alert("Cari kaydedilirken bir hata oluştu: " + error.message);
     }
 }
-  
+
 // -- AÇIKLAMA: Rota sırası tekrarı kontrolü eklendi --
 async function renderCariListesi() {
     const cariListesiBody = document.getElementById('cariListesiBody');
@@ -1157,7 +1204,6 @@ async function renderCariListesi() {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
 
-    // --- GÜNCELLEME: Tarih filtresinden değeri oku ---
     const tarihFiltresi = document.getElementById('cariTarihFiltresi').value;
     const raporTarihEtiketi = document.getElementById('raporTarihEtiketi');
     raporTarihEtiketi.textContent = tarihFiltresi ? `${formatDate(tarihFiltresi)} Tarihi İtibarıyla` : 'Güncel Durum';
@@ -1175,9 +1221,13 @@ async function renderCariListesi() {
         const rotaSiraCounts = {};
         cariler.forEach(cari => {
             const sira = cari.rotaSirasi;
-            if (sira && sira > 0) rotaSiraCounts[sira] = (rotaSiraCounts[sira] || 0) + 1;
+            if (sira && sira > 0) {
+                rotaSiraCounts[sira] = (rotaSiraCounts[sira] || 0) + 1;
+            }
         });
+
         const duplicates = Object.keys(rotaSiraCounts).filter(sira => rotaSiraCounts[sira] > 1);
+
         if (duplicates.length > 0) {
             uyariDiv.innerHTML = `<strong>⚠️ Uyarı:</strong> Aşağıdaki rota sıraları birden fazla cari için kullanılmış: <strong>${duplicates.join(', ')}</strong>. Lütfen bu carileri düzenleyerek her cariye benzersiz bir rota sırası atayın.`;
             uyariDiv.style.display = 'block';
@@ -1191,7 +1241,6 @@ async function renderCariListesi() {
         
         cariListesiBody.innerHTML = '<tr><td colspan="10" style="text-align:center;">Bakiyeler hesaplanıyor...</td></tr>';
         
-        // --- GÜNCELLEME: Bakiye hesaplamasına tarih filtresini gönder ---
         const bakiyePromises = cariler.map(c => calculateCariBakiyeDetayli(c.id, tarihFiltresi));
         const bakiyeler = await Promise.all(bakiyePromises);
         
@@ -1203,6 +1252,7 @@ async function renderCariListesi() {
         }
 
         let genelToplamAlacak = 0, genelToplamBorc = 0;
+
         cariler.forEach((c, index) => {
             const row = cariListesiBody.insertRow();
             const bakiyeDetay = bakiyeler[index];
@@ -1214,21 +1264,42 @@ async function renderCariListesi() {
                 const durumStyle = c.durum === 'aktif' ? 'color:green;' : 'color:red;';
                 const bakiyeStyle = bakiye >= 0 ? 'color:green;' : 'color:red;';
                 const bakiyeText = `${formatCurrency(bakiye)} ${bakiye >= 0 ? '(A)' : '(B)'}`;
-                row.innerHTML = `<td>${c.kodu || ''}</td><td>${c.adiSoyadi || ''}</td><td>${c.kategori || ''}</td><td style="${duplicates.includes(String(c.rotaSirasi)) ? 'background-color:#fff3cd; color:red; font-weight:bold;' : ''}">${c.rotaSirasi || ''}</td><td style="${durumStyle}">${durumText}</td><td>${c.telefon || ''}</td><td>${formatCurrency(bakiyeDetay.borc)}</td><td>${formatCurrency(bakiyeDetay.alacak)}</td><td style="${bakiyeStyle}">${bakiyeText}</td><td class="dont-print"><button class="btn btn-edit btn-sm" onclick="editCari('${c.id}')">Düzenle</button><button class="btn btn-delete btn-sm" onclick="deleteCari('${c.id}')">Sil</button></td>`;
+                
+                row.innerHTML = `
+                    <td>${c.kodu || ''}</td>
+                    <td>${c.adiSoyadi || ''}</td>
+                    <td>${c.kategori || ''}</td>
+                    <td>${c.cariGrup || 'Belirtilmemiş'}</td>
+                    <td style="${duplicates.includes(String(c.rotaSirasi)) ? 'background-color:#fff3cd; color:red; font-weight:bold;' : ''}">${c.rotaSirasi || ''}</td>
+                    <td style="${durumStyle}">${durumText}</td>
+                    <td>${c.telefon || ''}</td>
+                    <td>${formatCurrency(bakiyeDetay.borc)}</td>
+                    <td>${formatCurrency(bakiyeDetay.alacak)}</td>
+                    <td style="${bakiyeStyle}">${bakiyeText}</td>
+                    <td class="dont-print">
+                        <button class="btn btn-edit btn-sm" onclick="editCari('${c.id}')">Düzenle</button>
+                        <button class="btn btn-delete btn-sm" onclick="deleteCari('${c.id}')">Sil</button>
+                    </td>`;
             }
         });
+
         const footerRow = cariListesiFooter.insertRow();
         const toplamBakiye = genelToplamAlacak - genelToplamBorc;
         const toplamBakiyeStyle = toplamBakiye >= 0 ? 'color:green;' : 'color:red;';
         const etiket = kategori ? `Kategori Toplamı` : 'Genel Toplam';
-        footerRow.innerHTML = `<td colspan="6"><strong>${etiket}</strong></td><td><strong>${formatCurrency(genelToplamBorc)}</strong></td><td><strong>${formatCurrency(genelToplamAlacak)}</strong></td><td style="${toplamBakiyeStyle}"><strong>${formatCurrency(toplamBakiye)}</strong></td><td class="dont-print"></td>`;
+        
+        footerRow.innerHTML = `
+            <td colspan="7"><strong>${etiket}</strong></td>
+            <td><strong>${formatCurrency(genelToplamBorc)}</strong></td>
+            <td><strong>${formatCurrency(genelToplamAlacak)}</strong></td>
+            <td style="${toplamBakiyeStyle}"><strong>${formatCurrency(toplamBakiye)}</strong></td>
+            <td class="dont-print"></td>`;
+
     } catch (error) {
         console.error("Cariler listelenirken hata", error);
         cariListesiBody.innerHTML = '<tr><td colspan="10" style="color:red; text-align:center;">Liste yüklenirken bir hata oluştu. Firestore index\'i gerekebilir.</td></tr>';
     }
 }
-
-
 
 function exportTableToExcel(containerId, fileName = 'rapor') {
     const container = document.getElementById(containerId);
@@ -1483,37 +1554,37 @@ async function renderAylikSutunGrafik() {
 }
 
         
-async function editCari(id) { 
+async function editCari(id) {
     try {
         const doc = await db.collection('cariler').doc(id).get();
         if (!doc.exists) return;
         const cari = doc.data();
 
-        const cariKoduInput = document.getElementById('cariKodu');
-        cariKoduInput.readOnly = false;
-
-        editingCariId = id; 
-        document.getElementById('cariEditId').value = id; 
-        document.getElementById('cariKodu').value = cari.kodu || ''; 
-        document.getElementById('cariRotaSirasi').value = cari.rotaSirasi || null; 
-        document.getElementById('cariAdiSoyadi').value = cari.adiSoyadi || ''; 
-        document.getElementById('cariKategori').value = cari.kategori || ''; 
+        document.getElementById('cariEditId').value = id;
+        document.getElementById('cariKodu').value = cari.kodu || '';
+        document.getElementById('cariRotaSirasi').value = cari.rotaSirasi || null;
+        document.getElementById('cariAdiSoyadi').value = cari.adiSoyadi || '';
+        document.getElementById('cariKategori').value = cari.kategori || '';
+        document.getElementById('cariGrup').value = cari.cariGrup || 'üretici';
         document.getElementById('cariDurum').value = cari.durum || 'aktif';
         document.getElementById('cariTipi').value = cari.cariTipi || 'sut_ve_yem';
-        document.getElementById('cariTelefon').value = cari.telefon || ''; 
-        document.getElementById('cariEposta').value = cari.eposta || ''; 
-        document.getElementById('cariAdres').value = cari.adres || ''; 
-        document.getElementById('cariBankaAdi').value = cari.bankaAdi || ''; 
-        document.getElementById('cariIban').value = cari.iban || ''; 
-        document.getElementById('cariVergiDairesi').value = cari.vergiDairesi || ''; 
-        document.getElementById('cariVergiNo').value = cari.vergiNo || ''; 
-        document.getElementById('cariNotlar').value = cari.notlar || ''; 
+        document.getElementById('cariTelefon').value = cari.telefon || '';
+        document.getElementById('cariEposta').value = cari.eposta || '';
+        document.getElementById('cariAdres').value = cari.adres || '';
+        document.getElementById('cariBankaAdi').value = cari.bankaAdi || '';
+        document.getElementById('cariIban').value = cari.iban || '';
+        document.getElementById('cariVergiDairesi').value = cari.vergiDairesi || '';
+        document.getElementById('cariVergiNo').value = cari.vergiNo || '';
+        document.getElementById('cariNotlar').value = cari.notlar || '';
+        
+        document.getElementById('cariAcilisBakiye').disabled = true;
+        document.getElementById('cariAcilisBakiyeTuru').disabled = true;
 
         setEditingMode(
             document.getElementById('cariFormBaslik'),
             document.getElementById('cariKaydetBtn'),
             document.getElementById('cariFormTemizleBtn'),
-            editingCariId,
+            id,
             'Cari'
         );
     } catch (e) {
@@ -1694,21 +1765,44 @@ async function populateCariKategoriSelect(selectElement, defaultOptionText = "Se
     } catch(error) { console.error("Kategori seçimi yüklenirken hata:", error); }
 }
 
-async function populateCariSelect(selectElement, defaultText = "Seçiniz...") { 
-    if(!selectElement) return;
+async function populateCariSelect(selectElement, filterGroup = null, defaultText = "Seçiniz...") {
+    if (!selectElement) return;
     const currentUser = auth.currentUser;
     if (!currentUser) return;
-    try {
-        const snapshot = await db.collection('cariler').where("sahipId", "==", currentUser.uid).where("durum", "==", "aktif").orderBy('adiSoyadi').get();
-        const cariler = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-        const currentValue = selectElement.value; 
-        selectElement.innerHTML = ''; 
-        const firstOption = document.createElement('option'); firstOption.value = ""; firstOption.textContent = defaultText; selectElement.appendChild(firstOption); 
-        cariler.forEach(c => { const option = document.createElement('option'); option.value = c.id; option.textContent = `${c.adiSoyadi} (${c.kodu || 'Kodsuz'})`; selectElement.appendChild(option); }); 
-        if (cariler.some(c => c.id === currentValue)) { selectElement.value = currentValue; }
-    } catch(error) { console.error("Cari seçimi yüklenirken hata:", error); }
-}
 
+    selectElement.innerHTML = `<option value="">Yükleniyor...</option>`;
+    
+    let query = db.collection('cariler').where("sahipId", "==", currentUser.uid).where("durum", "==", "aktif");
+
+    if (filterGroup) {
+        query = query.where('cariGrup', '==', filterGroup);
+    }
+    
+    query = query.orderBy('adiSoyadi');
+
+    try {
+        const snapshot = await query.get();
+        const currentValue = selectElement.value;
+        if (snapshot.empty) {
+            selectElement.innerHTML = `<option value="">Tanımlı cari bulunamadı.</option>`;
+            return;
+        }
+        selectElement.innerHTML = `<option value="">${defaultText}</option>`;
+        const cariler = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+        cariler.forEach(c => {
+            const option = document.createElement('option');
+            option.value = c.id;
+            option.textContent = `${c.adiSoyadi} (${c.kodu || 'Kodsuz'})`;
+            selectElement.appendChild(option);
+        });
+        if (cariler.some(c => c.id === currentValue)) {
+            selectElement.value = currentValue;
+        }
+    } catch (error) {
+        console.error("Cariler yüklenirken hata:", error);
+        selectElement.innerHTML = `<option value="">Hata oluştu!</option>`;
+    }
+}
 async function populateYemSelect(selectElement, defaultText = "Yem Seçiniz...") {
     if(!selectElement) return;
     const currentUser = auth.currentUser;

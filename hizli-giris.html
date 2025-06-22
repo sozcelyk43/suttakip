@@ -18,13 +18,13 @@
         .time-selector { display: flex; gap: 10px; margin-bottom: 20px; }
         .time-selector button { flex-grow: 1; padding: 15px; font-size: 1rem; border: 1px solid #dddfe2; background-color: #f5f6f7; color: #4b4f56; border-radius: 6px; cursor: pointer; }
         .time-selector button.active { background-color: #3498db; color: white; border-color: #3498db; font-weight: bold; }
-        .producer-list .producer-item { display: flex; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f0f2f5; }
+        .producer-list .producer-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f0f2f5; transition: opacity 0.5s ease; }
         .producer-list .producer-name { flex-grow: 1; font-weight: 500; }
         .producer-list .input-group { display: flex; align-items: center; }
-        .producer-list input { width: 80px; text-align: right; margin-right: 5px; }
+        .producer-list input { width: 80px; text-align: right; margin-right: 5px; padding: 10px; font-size: 1rem; border: 1px solid #ccc; border-radius: 6px; }
         .producer-list span { color: #606770; }
-        .submit-btn { width: 100%; padding: 15px; font-size: 1.1rem; font-weight: bold; color: white; background-color: #2ecc71; border: none; border-radius: 6px; cursor: pointer; }
-        .submit-btn:disabled { background-color: #95a5a6; }
+        .save-btn-row { padding: 10px 15px; font-size: 0.9rem; font-weight: bold; color: white; background-color: #2ecc71; border: none; border-radius: 6px; cursor: pointer; }
+        .save-btn-row:disabled { background-color: #95a5a6; }
         #message { text-align: center; padding: 10px; border-radius: 6px; display: none; margin-top: 15px; }
         #message.success { background-color: #d4edda; color: #155724; }
         #message.error { background-color: #f8d7da; color: #721c24; }
@@ -57,7 +57,6 @@
                 <p style="text-align:center; color: #606770;">Lütfen bir kategori/köy seçin.</p>
             </div>
         </div>
-        <button class="submit-btn" id="saveAllBtn">Tüm Girişleri Kaydet</button>
         <div id="message"></div>
     </div>
 
@@ -81,18 +80,15 @@
         let currentUserId = '';
         let currentUserName = '';
 
-        // --- AUTH KONTROLÜ ---
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUserId = user.uid;
-                // Kullanıcı adını Firestore'dan alıyoruz (ana uygulamada nasıl kaydediliyorsa)
                 db.collection('kullanicilar').doc(currentUserId).get().then(doc => {
                     if (doc.exists) {
                         currentUserName = doc.data().kullaniciAdi || user.email;
                         document.getElementById('collectorName').textContent = currentUserName;
                         initializeApp();
                     } else {
-                        // Rolü bulunamayan kullanıcı ana sayfaya yönlendirilir.
                         window.location.href = 'index.html';
                     }
                 });
@@ -101,13 +97,11 @@
             }
         });
 
-        // --- UYGULAMA BAŞLATMA ---
         function initializeApp() {
             populateTanks();
             populateCategories();
 
             document.getElementById('categorySelect').addEventListener('change', renderProducerList);
-            document.getElementById('saveAllBtn').addEventListener('click', saveAllEntries);
 
             const btnAksam = document.getElementById('btnAksam');
             const btnSabah = document.getElementById('btnSabah');
@@ -121,7 +115,6 @@
             });
         }
 
-        // --- VERİ ÇEKME FONKSİYONLARI ---
         async function populateTanks() {
             const select = document.getElementById('tankSelect');
             select.innerHTML = '<option>Yükleniyor...</option>';
@@ -146,6 +139,7 @@
             });
         }
 
+        // --- GÜNCELLEME: Üretici listesi artık her satırda bir kaydet butonu içeriyor ---
         async function renderProducerList() {
             const listDiv = document.getElementById('producerList');
             const category = document.getElementById('categorySelect').value;
@@ -158,6 +152,7 @@
             const snapshot = await db.collection('cariler')
                 .where('kategori', '==', category)
                 .where('durum', '==', 'aktif')
+                .where('cariGrup', '==', 'üretici')
                 .orderBy('rotaSirasi')
                 .get();
                 
@@ -169,6 +164,7 @@
             let html = '';
             snapshot.forEach(doc => {
                 const producer = doc.data();
+                // Not: `handleSingleSave` fonksiyonuna tırnak içinde tırnak sorunu olmaması için doc.id'yi düzgünce iletiyoruz.
                 html += `
                     <div class="producer-item" data-id="${doc.id}">
                         <div class="producer-name">${producer.adiSoyadi} (${producer.kodu || ''})</div>
@@ -176,77 +172,69 @@
                             <input type="number" class="milk-input" placeholder="0" step="0.1" inputmode="decimal">
                             <span>Lt</span>
                         </div>
+                        <button class="save-btn-row" onclick="handleSingleSave('${doc.id}')">Kaydet</button>
                     </div>
                 `;
             });
             listDiv.innerHTML = html;
         }
 
-        // --- KAYDETME İŞLEMİ ---
-        async function saveAllEntries() {
-            const saveBtn = document.getElementById('saveAllBtn');
+        // --- YENİ FONKSİYON: Tek bir girişi kaydetmek için ---
+        async function handleSingleSave(ureticiId) {
+            const rowElement = document.querySelector(`.producer-item[data-id="${ureticiId}"]`);
+            if (!rowElement) return;
+
+            const saveBtn = rowElement.querySelector('.save-btn-row');
+            const litreInput = rowElement.querySelector('.milk-input');
+            const litre = parseFloat(litreInput.value);
+
+            if (!litre || litre <= 0) {
+                alert("Lütfen geçerli bir miktar girin.");
+                return;
+            }
+
             const tankId = document.getElementById('tankSelect').value;
+            if (!tankId) {
+                alert('Lütfen bir tank seçin!');
+                return;
+            }
+            
             const vakit = document.getElementById('btnAksam').classList.contains('active') ? 'akşam' : 'sabah';
             const tarih = new Date().toISOString().split('T')[0];
-            const entries = document.querySelectorAll('.producer-item');
 
-            if (!tankId) {
-                showMessage('Lütfen bir tank seçin!', 'error');
-                return;
-            }
-
-            saveBtn.textContent = 'KAYDEDİLİYOR...';
+            saveBtn.textContent = '...';
             saveBtn.disabled = true;
 
+            const tankRef = db.collection('tanklar').doc(tankId);
+            const movementRef = db.collection('tank_hareketleri').doc();
             const batch = db.batch();
-            let totalMilkForTank = 0;
-            let entryCount = 0;
 
-            entries.forEach(entry => {
-                const ureticiId = entry.dataset.id;
-                const litreInput = entry.querySelector('.milk-input');
-                const litre = parseFloat(litreInput.value);
-
-                if (litre > 0) {
-                    const movementRef = db.collection('tank_hareketleri').doc();
-                    batch.set(movementRef, {
-                        ureticiId: ureticiId,
-                        calisanId: currentUserId,
-                        calisanAdi: currentUserName,
-                        tankId: tankId,
-                        tarih: tarih,
-                        vakit: vakit,
-                        litre: litre,
-                        kayitZamani: new Date()
-                    });
-                    totalMilkForTank += litre;
-                    entryCount++;
-                }
+            batch.set(movementRef, {
+                ureticiId: ureticiId,
+                calisanId: currentUserId,
+                calisanAdi: currentUserName,
+                tankId: tankId,
+                tarih: tarih,
+                vakit: vakit,
+                litre: litre,
+                kayitZamani: new Date()
             });
 
-            if (entryCount === 0) {
-                showMessage('Kaydedilecek bir giriş bulunamadı.', 'error');
-                saveBtn.textContent = 'Tüm Girişleri Kaydet';
-                saveBtn.disabled = false;
-                return;
-            }
-
-            // Tanktaki süt miktarını artır
-            const tankRef = db.collection('tanklar').doc(tankId);
             batch.update(tankRef, {
-                mevcutLitre: firebase.firestore.FieldValue.increment(totalMilkForTank)
+                mevcutLitre: firebase.firestore.FieldValue.increment(litre)
             });
 
             try {
                 await batch.commit();
-                showMessage(`${entryCount} adet giriş başarıyla tanka kaydedildi.`, 'success');
-                // Formu temizle
-                document.querySelectorAll('.milk-input').forEach(input => input.value = '');
+                // Kaydedilen satırı animasyonla gizle ve kaldır
+                rowElement.style.opacity = '0';
+                setTimeout(() => {
+                    rowElement.remove();
+                }, 500);
             } catch (error) {
                 console.error("Hata:", error);
                 showMessage('Kayıt sırasında bir hata oluştu!', 'error');
-            } finally {
-                saveBtn.textContent = 'Tüm Girişleri Kaydet';
+                saveBtn.textContent = 'Kaydet';
                 saveBtn.disabled = false;
             }
         }
