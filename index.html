@@ -15,6 +15,9 @@
         <h1>Süt Takip Programı</h1>
         <nav id="sidebarNav">
             <ul>
+<li class="quick-entry-link">
+            <a href="hizli-giris.html" target="_blank">⚡ Hızlı Süt Girişi</a>
+        </li>
                 <li><a href="#dashboard" class="nav-link active">📝 Kontrol Paneli</a></li>
                 <li><a href="#cari-yonetimi" class="nav-link">👥 Cari Yönetimi</a></li>
                 <li><a href="#sut-alimi" class="nav-link">🥛 Günlük Süt Alımı</a></li>
@@ -25,6 +28,8 @@
                 <li><a href="#sut-alim-raporu" class="nav-link">🗓️ Aylık Süt Raporu</a></li>
                 <li><a href="#aylik-yem-raporu" class="nav-link">📈 Aylık Yem Raporu</a></li>
                 <li><a href="#hareket-dokumu" class="nav-link">📋 Hareket Dökümü</a></li>
+<li><a href="#tank-yonetimi" class="nav-link">💧 Tank Yönetimi</a></li>
+<li><a href="#tank-aktarim" class="nav-link">→ Tanktan Aktarım</a></li>
                 <li><a href="#ayarlar" class="nav-link">⚙️ Ayarlar</a></li>
                 <li class="logout-link">
                     <a href="#" id="logoutButton">🚪 Çıkış Yap</a>
@@ -89,6 +94,7 @@
                         <div class="progress-bar-container"><div id="borcBar" class="progress-bar borc" style="width: 0%;"></div></div>
                     </div>
                 </div>
+
                 <div class="charts-container-vertical">
                     <div class="chart-card">
                         <h3>Bugünkü Süt Alım Dağılımı (Kategori Bazlı)</h3>
@@ -106,6 +112,13 @@
         <canvas id="aylikSutGrafik"></canvas>
     </div>
 </div>
+
+<div class="tank-dashboard-container">
+    <h3>Tank Doluluk Oranları</h3>
+    <div id="dashboardTanklar">
+        </div>
+</div>
+
                 </div>
             </div>
         </section>
@@ -385,66 +398,143 @@
         </section>
         
         <section id="ayarlar" class="module-section hidden-section">
-             <div class="module-header"><h2>⚙️ Ayarlar</h2></div>
-             <div class="container">
-                <div class="ayarlar-ust-bolum">
-                    <div class="settings-section">
-                        <h3>Genel Ayarlar</h3>
-                        <form id="ayarlarForm">
-                            <div class="form-group">
-                                <label for="varsayilanSutFiyati">Varsayılan Süt Fiyatı (TL/Lt):</label>
-                                <input type="number" id="varsayilanSutFiyati" step="0.01">
-                            </div>
-                            <button type="submit" class="btn btn-primary">Kaydet</button>
-                        </form>
+    <div class="module-header"><h2>⚙️ Ayarlar</h2></div>
+    <div class="container">
+        <div class="ayarlar-ust-bolum">
+            <div class="settings-section">
+                <h3>Genel Ayarlar</h3>
+                <form id="ayarlarForm">
+                    <div class="form-group">
+                        <label for="varsayilanSutFiyati">Varsayılan Süt Fiyatı (TL/Lt):</label>
+                        <input type="number" id="varsayilanSutFiyati" step="0.01">
                     </div>
-                    <div class="settings-section">
-                        <h3>Şifre Değiştir</h3>
-                        <form id="sifreDegistirForm">
-                            <div class="form-group"><label for="eskiSifre">Eski Şifre:</label><input type="password" id="eskiSifre" required></div>
-                            <div class="form-group"><label for="yeniSifre">Yeni Şifre:</label><input type="password" id="yeniSifre" required></div>
-                            <div class="form-group"><label for="yeniSifreTekrar">Yeni Şifre (Tekrar):</label><input type="password" id="yeniSifreTekrar" required></div>
-                            <button type="submit" class="btn btn-primary" style="width: 100%;">Güncelle</button>
-                        </form>
+                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                </form>
+            </div>
+            <div class="settings-section">
+                <h3>Şifre Değiştir</h3>
+                <form id="sifreDegistirForm">
+                    <div class="form-group"><label for="eskiSifre">Eski Şifre:</label><input type="password" id="eskiSifre" required></div>
+                    <div class="form-group"><label for="yeniSifre">Yeni Şifre:</label><input type="password" id="yeniSifre" required></div>
+                    <div class="form-group"><label for="yeniSifreTekrar">Yeni Şifre (Tekrar):</label><input type="password" id="yeniSifreTekrar" required></div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Güncelle</button>
+                </form>
+            </div>
+        </div>
+        <hr>
+        <div class="settings-section">
+            <h3>Cari Kategori/Köy Tanımları</h3>
+            <form id="cariKategoriForm" action="#">
+                <div class="form-grid" style="grid-template-columns: 1fr auto; align-items:end;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="yeniCariKategoriAdi">Yeni Ad:</label>
+                        <input type="text" id="yeniCariKategoriAdi" required>
+                    </div>
+                    <button type="submit" class="btn" style="height:45px;">Ekle</button>
+                </div>
+            </form>
+            <div class="list-section" style="margin-top:20px;">
+                <h4>Tanımlı Kategoriler/Köyler</h4>
+                <ul id="cariKategoriListesiUl"></ul>
+            </div>
+        </div>
+        <hr class="dont-calisan">
+        <div class="settings-section dont-calisan">
+            <h3>Kullanıcı Yönetimi</h3>
+            <form id="kullaniciForm">
+                <input type="hidden" id="kullaniciEditId">
+                <div class="form-grid">
+                    <div class="form-group"><label for="kullaniciAdi">Kullanıcı E-posta:</label><input type="email" id="kullaniciAdi" required></div>
+                    <div class="form-group"><label for="kullaniciSifre">Şifre:</label><input type="password" id="kullaniciSifre" required></div>
+                </div>
+                <button type="submit" class="btn" id="kullaniciKaydetBtn">Çalışan Ekle</button>
+            </form>
+            <div class="list-section">
+                <h4>Kullanıcı Listesi</h4>
+                <table>
+                    <thead><tr><th>Kullanıcı Adı</th><th>Rol</th><th class="dont-print">İşlemler</th></tr></thead>
+                    <tbody id="kullaniciListesiBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="tank-yonetimi" class="module-section hidden-section">
+    <div class="module-header"><h2>💧 Tank Yönetimi</h2></div>
+    <div class="container">
+        <div class="form-section">
+            <h3><span id="tankFormBaslik">Yeni Tank Tanımla</span></h3>
+            <form id="tankForm">
+                <input type="hidden" id="tankEditId">
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr auto;">
+                    <div class="form-group">
+                        <label for="tankAdi">Tank Adı:</label>
+                        <input type="text" id="tankAdi" required placeholder="Örn: Ana Tank 1">
+                    </div>
+                    <div class="form-group">
+                        <label for="tankKapasite">Kapasite (Litre):</label>
+                        <input type="number" id="tankKapasite" required placeholder="Örn: 5000">
+                    </div>
+                    <div style="align-self: end;">
+                        <button type="submit" class="btn btn-primary" id="tankKaydetBtn">Kaydet</button>
+                        <button type="button" class="btn" id="tankFormTemizleBtn" style="display:none;">Yeni</button>
                     </div>
                 </div>
-                <hr>
-                <div class="settings-section">
-                    <h3>Cari Kategori/Köy Tanımları</h3>
-                    <form id="cariKategoriForm" action="#">
-                        <div class="form-grid" style="grid-template-columns: 1fr auto; align-items:end;">
-                            <div class="form-group" style="margin-bottom:0;">
-                                <label for="yeniCariKategoriAdi">Yeni Ad:</label>
-                                <input type="text" id="yeniCariKategoriAdi" required>
-                            </div>
-                            <button type="submit" class="btn" style="height:45px;">Ekle</button>
-                        </div>
-                    </form>
-                    <div class="list-section" style="margin-top:20px;">
-                        <h4>Tanımlı Kategoriler/Köyler</h4>
-                        <ul id="cariKategoriListesiUl"></ul>
+            </form>
+        </div>
+        <div class="list-section">
+            <h3>Tanımlı Tanklar</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tank Adı</th>
+                        <th>Kapasite</th>
+                        <th>Mevcut Miktar</th>
+                        <th>Doluluk Oranı</th>
+                        <th class="dont-print">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody id="tankListesiBody"></tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section id="tank-aktarim" class="module-section hidden-section">
+    <div class="module-header"><h2>→ Tanktan Cari'ye Aktarım</h2></div>
+    <div class="container">
+        <div class="form-section">
+            <h3>Tanktan Süt Aktarımı</h3>
+            <form id="tankAktarimForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="aktarimKaynakTank">Kaynak Tank:</label>
+                        <select id="aktarimKaynakTank" required></select>
+                        <small>Mevcut Miktar: <strong id="kaynakTankMiktar">0.00 Lt</strong></small>
+                    </div>
+                    <div class="form-group">
+                        <label for="aktarimHedefCari">Hedef Cari (Sütün Satıldığı Firma):</label>
+                        <select id="aktarimHedefCari" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="aktarimMiktar">Aktarılacak Miktar (Litre):</label>
+                        <input type="number" id="aktarimMiktar" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="aktarimFiyat">Birim Fiyat (TL/Litre):</label>
+                        <input type="number" id="aktarimFiyat" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="aktarimTarih">İşlem Tarihi:</label>
+                        <input type="date" id="aktarimTarih" required>
                     </div>
                 </div>
-                <hr class="dont-calisan">
-                <div class="settings-section dont-calisan">
-                    <h3>Kullanıcı Yönetimi</h3>
-                    <form id="kullaniciForm">
-                        <input type="hidden" id="kullaniciEditId">
-                        <div class="form-grid">
-                            <div class="form-group"><label for="kullaniciAdi">Kullanıcı E-posta:</label><input type="email" id="kullaniciAdi" required></div>
-                            <div class="form-group"><label for="kullaniciSifre">Şifre:</label><input type="password" id="kullaniciSifre" required></div>
-                        </div>
-                        <button type="submit" class="btn" id="kullaniciKaydetBtn">Çalışan Ekle</button>
-                    </form>
-                    <div class="list-section">
-                        <h4>Kullanıcı Listesi</h4>
-                        <table>
-                            <thead><tr><th>Kullanıcı Adı</th><th>Rol</th><th class="dont-print">İşlemler</th></tr></thead>
-                            <tbody id="kullaniciListesiBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-             </div>
+                <button type="submit" class="btn btn-primary">Aktarımı Tamamla</button>
+            </form>
+        </div>
+    </div>
+</section>
         </section>
 
     </div> 
@@ -539,8 +629,42 @@ function initializeApp() {
     const topluGirisKategoriSelect = document.getElementById('topluGirisKategori');
     const sutDuzenleForm = document.getElementById('sutDuzenleForm');
     const odemeCariSecimi = document.getElementById('odemeYapilanTedarikci');
+if(odemeCariSecimi) {
+    odemeCariSecimi.addEventListener('change', async (event) => {
+        const cariId = event.target.value;
+        const bakiyeBilgiAlani = document.getElementById('cariBakiyeBilgisi');
+        
+        if (!cariId) {
+            bakiyeBilgiAlani.textContent = '';
+            return;
+        }
+
+        try {
+            bakiyeBilgiAlani.textContent = 'Bakiye hesaplanıyor...';
+            const bakiyeDetay = await calculateCariBakiyeDetayli(cariId);
+            const bakiye = bakiyeDetay.bakiye;
+            
+            if (bakiye < 0) {
+                bakiyeBilgiAlani.textContent = `Bakiye: ${formatCurrency(bakiye)} (Cari Borçlu)`;
+                bakiyeBilgiAlani.style.color = 'red';
+            } else {
+                bakiyeBilgiAlani.textContent = `Bakiye: ${formatCurrency(bakiye)} (Cari Alacaklı)`;
+                bakiyeBilgiAlani.style.color = 'green';
+            }
+        } catch (error) {
+            console.error("Bakiye bilgisi alınırken hata:", error);
+            bakiyeBilgiAlani.textContent = 'Bakiye alınamadı.';
+            bakiyeBilgiAlani.style.color = 'black';
+        }
+    });
+}
     const menuToggleBtn = document.getElementById('menuToggleBtn');
     const sidebar = document.querySelector('.sidebar');
+    // GÜNCELLEME: Yeni tank yönetimi elemanları eklendi
+    const tankForm = document.getElementById('tankForm');
+    const tankFormTemizleBtn = document.getElementById('tankFormTemizleBtn');
+    const tankAktarimForm = document.getElementById('tankAktarimForm');
+    const aktarimKaynakTankSelect = document.getElementById('aktarimKaynakTank');
 
     // Menü toggle butonu
     if (menuToggleBtn && sidebar) {
@@ -582,6 +706,13 @@ function initializeApp() {
         if (targetId === 'aylik-yem-raporu'){ if(!document.getElementById('yemRaporuAySecimi').value) document.getElementById('yemRaporuAySecimi').value = getMonthYearForInput(); }
         if (targetId === 'hareket-dokumu') { renderHareketDokumu(); }
         if (targetId === 'ayarlar') { populateCariKategoriSelect(document.getElementById('cariKategori')); renderCariKategoriListesi(); getSettings(); renderKullaniciListesi(); }
+        // GÜNCELLEME: Yeni tank sekmeleri için veri yükleme
+        if (targetId === 'tank-yonetimi') { renderTankListesi(); }
+        if (targetId === 'tank-aktarim') { 
+            populateTankSelect(document.getElementById('aktarimKaynakTank'));
+            populateCariSelect(document.getElementById('aktarimHedefCari'));
+            if(document.getElementById('aktarimTarih')) document.getElementById('aktarimTarih').value = getTodayForInput();
+        }
     });
     
     // Çıkış ve Form Gönderme Olayları
@@ -596,6 +727,9 @@ function initializeApp() {
     if(kullaniciForm) kullaniciForm.addEventListener('submit', handleKullaniciKaydet);
     sifreDegistirForm.addEventListener('submit', handleSifreDegistir);
     if(sutDuzenleForm) sutDuzenleForm.addEventListener('submit', handleSutAlimiGuncelle);
+    // GÜNCELLEME: Yeni tank form olay dinleyicileri
+    tankForm.addEventListener('submit', handleTankKaydet);
+    tankAktarimForm.addEventListener('submit', handleTankAktarim);
 
     // Form Temizleme Olayları
     if(cariFormTemizleBtn) cariFormTemizleBtn.addEventListener('click', resetCariForm);
@@ -603,15 +737,29 @@ function initializeApp() {
     if(yemAlisFormTemizleBtn) yemAlisFormTemizleBtn.addEventListener('click', resetYemAlisForm);
     if(yemSatisFormTemizleBtn) yemSatisFormTemizleBtn.addEventListener('click', resetYemSatisForm);
     if(odemeFormTemizleBtn) odemeFormTemizleBtn.addEventListener('click', resetOdemeForm);
+    if(tankFormTemizleBtn) tankFormTemizleBtn.addEventListener('click', resetTankForm); // GÜNCELLEME
     
     // Filtreleme ve Dinamik Değişiklik Olayları
     cariSearchInput.addEventListener('input', renderCariListesi);
     cariKategoriFiltre.addEventListener('change', renderCariListesi);
-    topluGirisTarihInput.addEventListener('change', () => { renderTopluSutGirisFormu(); renderSutAlimGecmisi(); });
-    topluGirisKategoriSelect.addEventListener('change', renderTopluSutGirisFormu);
+    document.getElementById('cariTarihselRaporBtn')?.addEventListener('click', renderCariListesi);
+    topluGirisTarihInput?.addEventListener('change', () => { renderTopluSutGirisFormu(); renderSutAlimGecmisi(); });
+    topluGirisKategoriSelect?.addEventListener('change', renderTopluSutGirisFormu);
     document.getElementById('aylikChartGosterBtn')?.addEventListener('click', renderAylikSutunGrafik);
     if(odemeCariSecimi) odemeCariSecimi.addEventListener('change', async (event) => { /* ... bakiye gösterme kodu ... */ });
     
+    // GÜNCELLEME: Tank seçimi değişikliğini dinleme
+    aktarimKaynakTankSelect?.addEventListener('change', (event) => {
+        const tankId = event.target.value;
+        const miktarGosterge = document.getElementById('kaynakTankMiktar');
+        if (tankId && window.tankDataMap && window.tankDataMap.has(tankId)) {
+            const mevcutLitre = window.tankDataMap.get(tankId).mevcutLitre;
+            miktarGosterge.textContent = `${mevcutLitre.toFixed(2)} Lt`;
+        } else {
+            miktarGosterge.textContent = '0.00 Lt';
+        }
+    });
+
     // Rapor Oluşturma Olayları
     document.getElementById('raporOlusturBtn')?.addEventListener('click', handleHesapOzetiRaporuOlustur);
     document.getElementById('sutRaporuOlusturBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: false}));
@@ -621,12 +769,10 @@ function initializeApp() {
     document.getElementById('yemMusteriKarRaporuBtn')?.addEventListener('click', () => handleYemPivotRaporu('karlilik'));
 
     // Yazdırma ve Dışa Aktarma Olayları
-    cariListesiYazdirBtn.addEventListener('click', () => handleYazdir('cari-yonetimi'));
-    document.getElementById('cariTarihselRaporBtn')?.addEventListener('click', renderCariListesi);
-
+    cariListesiYazdirBtn?.addEventListener('click', () => handleYazdir('cari-yonetimi'));
     document.getElementById('raporYazdirBtn')?.addEventListener('click', () => handleYazdir('hesap-ozeti'));
     document.getElementById('sutRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('sut-alim-raporu'));
-    document.getElementById('yemRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('aylik-yem-raporu')); // BU SATIRIN EKSİKSİZ OLDUĞUNDAN EMİN OLUN
+    document.getElementById('yemRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('aylik-yem-raporu'));
     
     document.getElementById('hesapOzetiPdfBtn')?.addEventListener('click', () => exportTableToPdf('raporDetayAlani', 'hesap_ozeti', 'Cari Hesap Özeti'));
     document.getElementById('hesapOzetiXlsxBtn')?.addEventListener('click', () => exportTableToExcel('raporDetayAlani', 'hesap_ozeti'));
@@ -772,7 +918,7 @@ async function updateDashboardStats() {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
 
-    // --- Günlük Süt ve Müşteri İstatistikleri ---
+    // --- Süt ve Müşteri İstatistikleri ---
     try {
         const today = new Date();
         const yesterday = new Date();
@@ -865,48 +1011,10 @@ async function updateDashboardStats() {
 
     } catch (e) { console.error("Dashboard bakiye toplamları alınırken hata", e); }
     
-    // --- AYLIK SÜT VE TUTAR HESAPLAMASI (YENİ EKLENEN BÖLÜM) ---
-    try {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = now.getMonth();
-        // Ayın ilk ve son gününü bul
-        const startDate = new Date(year, month, 1);
-        const endDate = new Date(year, month + 1, 0);
-
-        const startDateStr = startDate.toISOString().split('T')[0];
-        const endDateStr = endDate.toISOString().split('T')[0];
-
-        // İlgili aydaki süt alımlarını getir
-        const aylikSutSnapshot = await db.collection('sut_alimlari')
-            .where('sahipId', '==', currentUser.uid)
-            .where('tarih', '>=', startDateStr)
-            .where('tarih', '<=', endDateStr)
-            .get();
-
-        let aylikToplamSut = 0;
-        let aylikToplamTutar = 0;
-
-        aylikSutSnapshot.forEach(doc => {
-            aylikToplamSut += doc.data().toplam || 0;
-            aylikToplamTutar += doc.data().toplamTutar || 0;
-        });
-
-        // Günlük ortalamayı hesapla (ayın kaçıncı günündeysek ona bölerek)
-        const bugununGunu = now.getDate();
-        const gunOrtalamasi = aylikToplamSut > 0 ? (aylikToplamSut / bugununGunu) : 0;
-        
-        // HTML elemanlarını güncelle
-        document.getElementById('dashBuAykiToplamSut').textContent = aylikToplamSut.toLocaleString('tr-TR', { maximumFractionDigits: 0 });
-        document.getElementById('dashBuAykiSutDegeri').textContent = formatCurrency(aylikToplamTutar);
-        document.getElementById('aylikGunOrtalamasi').textContent = gunOrtalamasi.toLocaleString('tr-TR', { maximumFractionDigits: 0 });
-
-    } catch (e) { console.error("Dashboard aylık istatistikleri alınırken hata", e); }
-
-
-    // --- Grafikler ---
+    // --- GÜNCELLEME: Dashboard açıldığında tank grafikleri ve diğer grafikler yüklenir ---
     try {
         if (typeof renderGunlukSutGrafik === 'function') await renderGunlukSutGrafik();
+        if (typeof renderDashboardTanks === 'function') await renderDashboardTanks(); // TANK GRAFİĞİ ÇAĞIRILIYOR
         const aylikChartInput = document.getElementById('aylikChartAySecimi');
         if (aylikChartInput && !aylikChartInput.value) {
             aylikChartInput.value = getMonthYearForInput();
@@ -1414,70 +1522,94 @@ async function editCari(id) {
 }
 
 async function deleteCari(id) {
-    if (confirm('Bu cariyi ve ilgili tüm hareketlerini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!')) {
-        const currentUser = auth.currentUser;
-        if (!currentUser) {
-            alert("Lütfen giriş yapın.");
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+        alert("Lütfen giriş yapın.");
+        return;
+    }
+
+    try {
+        const cariRef = db.collection('cariler').doc(id);
+        const cariDoc = await cariRef.get();
+        if (!cariDoc.exists) {
+            alert("Silinecek cari bulunamadı!");
+            return;
+        }
+        
+        const cariData = cariDoc.data();
+        const cariAdi = cariData.adiSoyadi;
+        const cariKodu = cariData.kodu || '';
+
+        // 1. AŞAMA: İlk Onay Penceresi
+        const ilkOnay = confirm(`⚠️ DİKKAT!
+'${cariAdi}' isimli cariyi silmek üzeresiniz.
+
+Bu işlem, cariye ait TÜM SÜT, YEM, ÖDEME ve TAHSİLAT kayıtlarını kalıcı olarak silecektir. Bu işlem geri alınamaz!
+
+Devam etmek istediğinizden emin misiniz?`);
+
+        if (!ilkOnay) {
+            return; // Kullanıcı iptal etti
+        }
+
+        // 2. AŞAMA: Yazılı Onay Penceresi
+        const ikinciOnayMesaji = `🛑 SON UYARI!
+Silme işlemini onaylamak için lütfen carinin kodunu (${cariKodu}) aşağıdaki kutucuğa yazın.`;
+        
+        const kullaniciGirdisi = prompt(ikinciOnayMesaji, "");
+
+        // Kullanıcı iptal ettiyse veya bir şey yazmadıysa işlemi durdur
+        if (kullaniciGirdisi === null) {
+            return;
+        }
+        
+        // Kullanıcının girdiği kod, carinin koduyla eşleşmiyorsa işlemi durdur
+        if (kullaniciGirdisi.trim() !== cariKodu) {
+            alert("Girilen cari kodu yanlış! Silme işlemi iptal edildi.");
             return;
         }
 
-        try {
-            // --- ADIM 1: SİLİNECEK VE GÜNCELLENECEK TÜM BİLGİLERİ TRANSACTION DIŞINDA OKU/SORGULA ---
+        // Tüm onaylar başarılıysa silme işlemine geç
+        // (Buradaki kod, rota sırasını güncelleyen ve tüm hareketleri silen mevcut kodunuzdur)
+        const silinenRotaSirasi = cariData.rotaSirasi;
+        const hareketler = ['sut_alimlari', 'yem_alimlari', 'yem_satislari', 'odemeVeTahsilatlar'];
+        const hareketSnapshots = [];
+        for (const koleksiyon of hareketler) {
+            const q = db.collection(koleksiyon).where('cariId', '==', id).where('sahipId', '==', currentUser.uid);
+            const snapshot = await q.get();
+            hareketSnapshots.push(snapshot);
+        }
 
-            const cariRef = db.collection('cariler').doc(id);
-            const cariDoc = await cariRef.get();
+        let carilerToUpdateSnapshot = null;
+        if (silinenRotaSirasi) {
+            const carilerToUpdateQuery = db.collection('cariler')
+                .where('sahipId', '==', currentUser.uid)
+                .where('rotaSirasi', '>', silinenRotaSirasi);
+            carilerToUpdateSnapshot = await carilerToUpdateQuery.get();
+        }
 
-            if (!cariDoc.exists) {
-                throw "Silinecek cari bulunamadı!";
-            }
-            const silinenRotaSirasi = cariDoc.data().rotaSirasi;
-
-            // Silinecek cariyle ilişkili tüm hareketleri sorgula
-            const hareketler = ['sut_alimlari', 'yem_alimlari', 'yem_satislari', 'odemeVeTahsilatlar'];
-            const hareketSnapshots = []; // Tüm sorgu sonuçlarını burada biriktireceğiz
-            for (const koleksiyon of hareketler) {
-                const q = db.collection(koleksiyon).where('cariId', '==', id).where('sahipId', '==', currentUser.uid);
-                const snapshot = await q.get();
-                hareketSnapshots.push(snapshot);
-            }
-
-            // Rota sırası güncellenecek carileri sorgula (eğer silinenin bir sırası varsa)
-            let carilerToUpdateSnapshot = null;
-            if (silinenRotaSirasi) {
-                const carilerToUpdateQuery = db.collection('cariler')
-                    .where('sahipId', '==', currentUser.uid)
-                    .where('rotaSirasi', '>', silinenRotaSirasi);
-                carilerToUpdateSnapshot = await carilerToUpdateQuery.get();
-            }
-
-            // --- ADIM 2: TÜM YAZMA/SİLME İŞLEMLERİNİ TRANSACTION İÇİNDE GÜVENLE YAP ---
-            await db.runTransaction(async (transaction) => {
-                // Okuduğumuz ilişkili hareketleri sil
-                hareketSnapshots.forEach(snapshot => {
-                    snapshot.forEach(doc => {
-                        transaction.delete(doc.ref);
-                    });
-                });
-
-                // Rota sıralarını güncelle
-                if (carilerToUpdateSnapshot) {
-                    carilerToUpdateSnapshot.forEach(doc => {
-                        const mevcutSira = doc.data().rotaSirasi;
-                        transaction.update(doc.ref, { rotaSirasi: mevcutSira - 1 });
-                    });
-                }
-                
-                // Son olarak ana cariyi sil
-                transaction.delete(cariRef);
+        await db.runTransaction(async (transaction) => {
+            hareketSnapshots.forEach(snapshot => {
+                snapshot.forEach(doc => transaction.delete(doc.ref));
             });
 
-            console.log("Cari başarıyla silindi ve rota sıraları güncellendi.");
-            await renderCariListesi(); // Listeyi yenile
+            if (carilerToUpdateSnapshot) {
+                carilerToUpdateSnapshot.forEach(doc => {
+                    const mevcutSira = doc.data().rotaSirasi;
+                    transaction.update(doc.ref, { rotaSirasi: mevcutSira - 1 });
+                });
+            }
+            
+            transaction.delete(cariRef);
+        });
 
-        } catch (error) {
-            console.error("Cari silinirken hata:", error);
-            alert("Cari silinirken bir hata oluştu: " + error);
-        }
+        console.log("Cari başarıyla silindi ve rota sıraları güncellendi.");
+        await renderCariListesi();
+        alert(`'${cariAdi}' isimli cari ve tüm hareketleri başarıyla silindi.`);
+
+    } catch (error) {
+        console.error("Cari silinirken hata:", error);
+        alert("Cari silinirken bir hata oluştu: " + error);
     }
 }
 
@@ -3031,7 +3163,218 @@ async function handleYemPivotRaporu(reportType) {
     }
 }
 
+// ======================================================
+// YENİ EKLENEN TANK FONKSİYONLARI
+// ======================================================
 
+// --- TANK YÖNETİMİ FONKSİYONLARI ---
+
+async function renderTankListesi() {
+    const listBody = document.getElementById('tankListesiBody');
+    if (!listBody) return;
+    listBody.innerHTML = '<tr><td colspan="5">Yükleniyor...</td></tr>';
+    
+    const snapshot = await db.collection('tanklar').orderBy('ad').get();
+    if (snapshot.empty) {
+        listBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Tanımlı tank bulunmuyor.</td></tr>';
+        return;
+    }
+
+    let rows = '';
+    snapshot.forEach(doc => {
+        const tank = doc.data();
+        const dolulukOrani = (tank.mevcutLitre / tank.kapasite) * 100;
+        rows += `
+            <tr>
+                <td>${tank.ad}</td>
+                <td>${tank.kapasite.toLocaleString('tr-TR')} Lt</td>
+                <td>${tank.mevcutLitre.toLocaleString('tr-TR', {maximumFractionDigits: 2})} Lt</td>
+                <td>
+                    <div class="progress-bar-container" style="height:20px;">
+                        <div class="progress-bar" style="width: ${dolulukOrani.toFixed(2)}%; background-color:#3498db; color:white; text-align:center; font-size:11px; line-height:20px;">
+                            % ${dolulukOrani.toFixed(1)}
+                        </div>
+                    </div>
+                </td>
+                <td class="dont-print">
+                    <button class="btn btn-edit btn-sm" onclick="editTank('${doc.id}')">Düzenle</button>
+                    <button class="btn btn-delete btn-sm" onclick="deleteTank('${doc.id}')">Sil</button>
+                </td>
+            </tr>
+        `;
+    });
+    listBody.innerHTML = rows;
+}
+
+function resetTankForm() {
+    document.getElementById('tankForm').reset();
+    document.getElementById('tankEditId').value = '';
+    document.getElementById('tankFormBaslik').textContent = 'Yeni Tank Tanımla';
+    document.getElementById('tankKaydetBtn').textContent = 'Kaydet';
+    document.getElementById('tankFormTemizleBtn').style.display = 'none';
+}
+
+async function handleTankKaydet(event) {
+    event.preventDefault();
+    const editId = document.getElementById('tankEditId').value;
+    const formData = {
+        ad: document.getElementById('tankAdi').value,
+        kapasite: parseFloat(document.getElementById('tankKapasite').value) || 0,
+    };
+
+    try {
+        if (editId) {
+            await db.collection('tanklar').doc(editId).update(formData);
+        } else {
+            formData.mevcutLitre = 0; // Yeni tank boş başlar
+            await db.collection('tanklar').add(formData);
+        }
+        resetTankForm();
+        renderTankListesi();
+        renderDashboardTanks();
+    } catch (error) {
+        console.error("Tank kaydedilirken hata:", error);
+        alert("Tank kaydedilirken bir hata oluştu.");
+    }
+}
+
+async function editTank(id) {
+    const doc = await db.collection('tanklar').doc(id).get();
+    if (!doc.exists) return;
+    const tank = doc.data();
+    
+    document.getElementById('tankEditId').value = id;
+    document.getElementById('tankAdi').value = tank.ad;
+    document.getElementById('tankKapasite').value = tank.kapasite;
+
+    document.getElementById('tankFormBaslik').textContent = 'Tank Bilgilerini Düzenle';
+    document.getElementById('tankKaydetBtn').textContent = 'Güncelle';
+    document.getElementById('tankFormTemizleBtn').style.display = 'inline-block';
+}
+
+async function deleteTank(id) {
+    const doc = await db.collection('tanklar').doc(id).get();
+    if(doc.data().mevcutLitre > 0) {
+        alert("İçinde süt bulunan bir tankı silemezsiniz. Lütfen önce tankı boşaltın.");
+        return;
+    }
+    if (confirm("Bu tankı silmek istediğinizden emin misiniz?")) {
+        await db.collection('tanklar').doc(id).delete();
+        renderTankListesi();
+        renderDashboardTanks();
+    }
+}
+
+// --- TANKTAN AKTARIM FONKSİYONLARI ---
+
+async function populateTankSelect(selectElement) {
+     if(!selectElement) return;
+     selectElement.innerHTML = '<option value="">Yükleniyor...</option>';
+     const snapshot = await db.collection('tanklar').orderBy('ad').get();
+     if(snapshot.empty) {
+         selectElement.innerHTML = '<option value="">Tanımlı tank yok</option>';
+         return;
+     }
+     selectElement.innerHTML = '<option value="">Tank Seçiniz...</option>';
+     window.tankDataMap = new Map();
+     snapshot.forEach(doc => {
+        const tank = doc.data();
+        window.tankDataMap.set(doc.id, tank);
+        selectElement.innerHTML += `<option value="${doc.id}">${tank.ad}</option>`;
+     });
+}
+
+async function handleTankAktarim(event) {
+    event.preventDefault();
+    const form = document.getElementById('tankAktarimForm');
+    const kaynakTankId = document.getElementById('aktarimKaynakTank').value;
+    const hedefCariId = document.getElementById('aktarimHedefCari').value;
+    const aktarimMiktar = parseFloat(document.getElementById('aktarimMiktar').value);
+    const birimFiyat = parseFloat(document.getElementById('aktarimFiyat').value);
+    const tarih = document.getElementById('aktarimTarih').value;
+
+    if (!kaynakTankId || !hedefCariId || !aktarimMiktar || !birimFiyat || !tarih || aktarimMiktar <= 0) {
+        alert("Lütfen tüm alanları doğru bir şekilde doldurun.");
+        return;
+    }
+
+    const tankRef = db.collection('tanklar').doc(kaynakTankId);
+    
+    try {
+        await db.runTransaction(async (transaction) => {
+            const tankDoc = await transaction.get(tankRef);
+            if (!tankDoc.exists) throw "Kaynak tank bulunamadı!";
+
+            const mevcutLitre = tankDoc.data().mevcutLitre;
+            if (mevcutLitre < aktarimMiktar) {
+                throw `Yetersiz süt! Tankta sadece ${mevcutLitre.toFixed(2)} Lt süt var.`;
+            }
+
+            // 1. Süt alım kaydını oluştur
+            const sutAlimRef = db.collection('sut_alimlari').doc();
+            const hedefCariAdi = document.getElementById('aktarimHedefCari').options[document.getElementById('aktarimHedefCari').selectedIndex].text;
+            transaction.set(sutAlimRef, {
+                tarih: tarih,
+                cariId: hedefCariId,
+                cariAdi: hedefCariAdi,
+                sabah: 0, // Bu toplu bir aktarım olduğu için sabah/akşam detayı yok
+                aksam: 0,
+                toplam: aktarimMiktar,
+                fiyat: birimFiyat,
+                toplamTutar: aktarimMiktar * birimFiyat,
+                aciklama: `${tankDoc.data().ad} tankından aktarıldı.`,
+                sahipId: currentUserId
+            });
+
+            // 2. Tanktaki sütü azalt
+            transaction.update(tankRef, {
+                mevcutLitre: firebase.firestore.FieldValue.increment(-aktarimMiktar)
+            });
+        });
+
+        alert("Aktarım başarıyla tamamlandı!");
+        form.reset();
+        document.getElementById('kaynakTankMiktar').textContent = '0.00 Lt';
+        renderDashboardTanks();
+
+    } catch (error) {
+        console.error("Tank aktarımı sırasında hata:", error);
+        alert("Aktarım sırasında bir hata oluştu: " + error);
+    }
+}
+
+// --- DASHBOARD TANK GRAFİĞİ FONKSİYONU ---
+async function renderDashboardTanks() {
+    const container = document.getElementById('dashboardTanklar');
+    if (!container) return;
+    container.innerHTML = 'Yükleniyor...';
+
+    const snapshot = await db.collection('tanklar').orderBy('ad').get();
+    if (snapshot.empty) {
+        container.innerHTML = '<p>Tanımlı tank bulunmuyor.</p>';
+        return;
+    }
+    let html = '';
+    snapshot.forEach(doc => {
+        const tank = doc.data();
+        const dolulukOrani = (tank.mevcutLitre / tank.kapasite) * 100;
+        const barClass = dolulukOrani > 95 ? 'tank-bar full' : 'tank-bar';
+        html += `
+            <div class="tank-item">
+                <div class="tank-item-header">
+                    <span>${tank.ad}</span>
+                    <span>${tank.mevcutLitre.toLocaleString('tr-TR', {maximumFractionDigits:1})} / ${tank.kapasite.toLocaleString('tr-TR')} Lt</span>
+                </div>
+                <div class="tank-bar-wrapper">
+                    <div class="${barClass}" style="width: ${dolulukOrani.toFixed(2)}%;">
+                        %${dolulukOrani.toFixed(1)}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
 
 
 // BU FONKSİYONU GÜNCELLEYİN
