@@ -18,59 +18,17 @@
     .time-selector { display: flex; gap: 10px; margin-bottom: 20px; }
     .time-selector button { flex-grow: 1; padding: 15px; font-size: 1rem; border: 1px solid #dddfe2; background-color: #f5f6f7; color: #4b4f56; border-radius: 6px; cursor: pointer; }
     .time-selector button.active { background-color: #3498db; color: white; border-color: #3498db; font-weight: bold; }
-    
-    /* YENİ TABLO STİLLERİ */
-    .producer-list-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    .producer-item {
-        transition: opacity 0.5s ease;
-    }
-    .producer-list-table td {
-        padding: 8px 5px;
-        border-bottom: 1px solid #f0f2f5;
-        vertical-align: middle;
-    }
-    .producer-name {
-        font-weight: 500;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .input-cell {
-        width: 1px; /* Genişliğin içeriğe göre ayarlanmasını sağlar */
-    }
-    .input-group {
-        display: flex;
-        align-items: center;
-    }
-    .input-group input {
-        width: 70px;
-        text-align: right;
-        margin-right: 5px;
-        padding: 10px;
-        font-size: 1rem;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-    }
+    .producer-list-table { width: 100%; border-collapse: collapse; }
+    .producer-item { transition: opacity 0.5s ease; }
+    .producer-list-table td { padding: 8px 5px; border-bottom: 1px solid #f0f2f5; vertical-align: middle; }
+    .producer-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .input-cell { width: 1px; }
+    .input-group { display: flex; align-items: center; }
+    .input-group input { width: 70px; text-align: right; margin-right: 5px; padding: 10px; font-size: 1rem; border: 1px solid #ccc; border-radius: 6px; }
     .input-group span { color: #606770; }
-    .button-cell {
-        width: 1px;
-    }
-    .save-btn-row {
-        padding: 10px 15px;
-        font-size: 0.9rem;
-        font-weight: bold;
-        color: white;
-        background-color: #2ecc71;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        white-space: nowrap; /* Buton metninin kaymasını engeller */
-    }
+    .button-cell { width: 1px; }
+    .save-btn-row { padding: 10px 15px; font-size: 0.9rem; font-weight: bold; color: white; background-color: #2ecc71; border: none; border-radius: 6px; cursor: pointer; white-space: nowrap; }
     .save-btn-row:disabled { background-color: #95a5a6; }
-    
     #message { text-align: center; padding: 10px; border-radius: 6px; display: none; margin-top: 15px; }
     #message.success { background-color: #d4edda; color: #155724; }
     #message.error { background-color: #f8d7da; color: #721c24; }
@@ -98,14 +56,15 @@
                 <button id="btnSabah">SABAH</button>
             </div>
         </div>
-        <div class="card" style="padding: 5px 15px;"> <table class="producer-list-table">
-        <tbody id="producerList">
-            <tr>
-                <td style="text-align:center; color: #606770;">Lütfen bir kategori/köy seçin.</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+        <div class="card" style="padding: 5px 15px;">
+            <table class="producer-list-table">
+                <tbody id="producerList">
+                    <tr>
+                        <td style="text-align:center; color: #606770;">Lütfen bir kategori/köy seçin.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
         <div id="message"></div>
     </div>
 
@@ -128,17 +87,22 @@
         const db = firebase.firestore();
         let currentUserId = '';
         let currentUserName = '';
+        let sahipId = '';
 
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUserId = user.uid;
                 db.collection('kullanicilar').doc(currentUserId).get().then(doc => {
-                    if (doc.exists) {
-                        currentUserName = doc.data().kullaniciAdi || user.email;
+                    if (doc.exists && doc.data().sahipId) {
+                        const userData = doc.data();
+                        currentUserName = userData.kullaniciAdi || user.email;
+                        sahipId = userData.sahipId;
                         document.getElementById('collectorName').textContent = currentUserName;
                         initializeApp();
                     } else {
-                        window.location.href = 'index.html';
+                        alert("Kullanıcı profili veya sahip bilgisi bulunamadı. Lütfen yöneticinizle iletişime geçin.");
+                        auth.signOut();
+                        window.location.href = 'login.html';
                     }
                 });
             } else {
@@ -149,25 +113,17 @@
         function initializeApp() {
             populateTanks();
             populateCategories();
-
             document.getElementById('categorySelect').addEventListener('change', renderProducerList);
-
             const btnAksam = document.getElementById('btnAksam');
             const btnSabah = document.getElementById('btnSabah');
-            btnAksam.addEventListener('click', () => {
-                btnAksam.classList.add('active');
-                btnSabah.classList.remove('active');
-            });
-            btnSabah.addEventListener('click', () => {
-                btnSabah.classList.add('active');
-                btnAksam.classList.remove('active');
-            });
+            btnAksam.addEventListener('click', () => { btnAksam.classList.add('active'); btnSabah.classList.remove('active'); });
+            btnSabah.addEventListener('click', () => { btnSabah.classList.add('active'); btnAksam.classList.remove('active'); });
         }
 
         async function populateTanks() {
             const select = document.getElementById('tankSelect');
             select.innerHTML = '<option>Yükleniyor...</option>';
-            const snapshot = await db.collection('tanklar').orderBy('ad').get();
+            const snapshot = await db.collection('tanklar').where('sahipId', '==', sahipId).orderBy('ad').get();
             if (snapshot.empty) {
                 select.innerHTML = '<option>Tanımlı tank bulunamadı!</option>';
                 return;
@@ -182,57 +138,54 @@
         async function populateCategories() {
             const select = document.getElementById('categorySelect');
             select.innerHTML = '<option value="">Köy Seçiniz...</option>';
-            const snapshot = await db.collection('cari_kategorileri').orderBy('ad').get();
+            const snapshot = await db.collection('cari_kategorileri').where('sahipId', '==', sahipId).orderBy('ad').get();
             snapshot.forEach(doc => {
                 select.innerHTML += `<option value="${doc.data().ad}">${doc.data().ad}</option>`;
             });
         }
 
-        // --- GÜNCELLEME: Üretici listesi artık her satırda bir kaydet butonu içeriyor ---
-async function renderProducerList() {
-    const listBody = document.getElementById('producerList'); // Artık tbody'yi seçiyor
-    const category = document.getElementById('categorySelect').value;
-    if (!category) {
-        listBody.innerHTML = '<tr><td style="text-align:center; color: #606770;">Lütfen bir kategori/köy seçin.</td></tr>';
-        return;
-    }
-    listBody.innerHTML = '<tr><td style="text-align:center; color: #606770;">Üreticiler yükleniyor...</td></tr>';
-    
-    const snapshot = await db.collection('cariler')
-        .where('kategori', '==', category)
-        .where('durum', '==', 'aktif')
-        .where('cariGrup', '==', 'üretici')
-        .orderBy('rotaSirasi')
-        .get();
-        
-    if (snapshot.empty) {
-        listBody.innerHTML = '<tr><td style="text-align:center; color: #606770;">Bu köyde aktif üretici bulunmuyor.</td></tr>';
-        return;
-    }
+        async function renderProducerList() {
+            const listBody = document.getElementById('producerList');
+            const category = document.getElementById('categorySelect').value;
+            if (!category) {
+                listBody.innerHTML = '<tr><td style="text-align:center; color: #606770;">Lütfen bir kategori/köy seçin.</td></tr>';
+                return;
+            }
+            listBody.innerHTML = '<tr><td style="text-align:center; color: #606770;">Üreticiler yükleniyor...</td></tr>';
+            
+            const snapshot = await db.collection('cariler')
+                .where('sahipId', '==', sahipId)
+                .where('kategori', '==', category)
+                .where('durum', '==', 'aktif')
+                .where('cariGrup', '==', 'üretici')
+                .orderBy('rotaSirasi')
+                .get();
+                
+            if (snapshot.empty) {
+                listBody.innerHTML = '<tr><td style="text-align:center; color: #606770;">Bu köyde aktif üretici bulunmuyor.</td></tr>';
+                return;
+            }
+            let html = '';
+            snapshot.forEach(doc => {
+                const producer = doc.data();
+                html += `
+                    <tr class="producer-item" data-id="${doc.id}">
+                        <td class="producer-name">${producer.adiSoyadi} (${producer.kodu || ''})</td>
+                        <td class="input-cell">
+                            <div class="input-group">
+                                <input type="number" class="milk-input" placeholder="0" step="0.1" inputmode="decimal">
+                                <span>Lt</span>
+                            </div>
+                        </td>
+                        <td class="button-cell">
+                            <button class="save-btn-row" onclick="handleSingleSave('${doc.id}')">Kaydet</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            listBody.innerHTML = html;
+        }
 
-    let html = '';
-    snapshot.forEach(doc => {
-        const producer = doc.data();
-        // HTML artık div yerine tr ve td olarak oluşturuluyor
-        html += `
-            <tr class="producer-item" data-id="${doc.id}">
-                <td class="producer-name">${producer.adiSoyadi} (${producer.kodu || ''})</td>
-                <td class="input-cell">
-                    <div class="input-group">
-                        <input type="number" class="milk-input" placeholder="0" step="0.1" inputmode="decimal">
-                        <span>Lt</span>
-                    </div>
-                </td>
-                <td class="button-cell">
-                    <button class="save-btn-row" onclick="handleSingleSave('${doc.id}')">Kaydet</button>
-                </td>
-            </tr>
-        `;
-    });
-    listBody.innerHTML = html;
-}
-
-        // --- YENİ FONKSİYON: Tek bir girişi kaydetmek için ---
         async function handleSingleSave(ureticiId) {
             const rowElement = document.querySelector(`.producer-item[data-id="${ureticiId}"]`);
             if (!rowElement) return;
@@ -245,19 +198,17 @@ async function renderProducerList() {
                 alert("Lütfen geçerli bir miktar girin.");
                 return;
             }
-
             const tankId = document.getElementById('tankSelect').value;
             if (!tankId) {
                 alert('Lütfen bir tank seçin!');
                 return;
             }
             
-            const vakit = document.getElementById('btnAksam').classList.contains('active') ? 'akşam' : 'sabah';
-            const tarih = new Date().toISOString().split('T')[0];
-
             saveBtn.textContent = '...';
             saveBtn.disabled = true;
 
+            const vakit = document.getElementById('btnAksam').classList.contains('active') ? 'akşam' : 'sabah';
+            const tarih = new Date().toISOString().split('T')[0];
             const tankRef = db.collection('tanklar').doc(tankId);
             const movementRef = db.collection('tank_hareketleri').doc();
             const batch = db.batch();
@@ -266,27 +217,24 @@ async function renderProducerList() {
                 ureticiId: ureticiId,
                 calisanId: currentUserId,
                 calisanAdi: currentUserName,
+                sahipId: sahipId,
                 tankId: tankId,
                 tarih: tarih,
                 vakit: vakit,
                 litre: litre,
                 kayitZamani: new Date()
             });
-
-            batch.update(tankRef, {
-                mevcutLitre: firebase.firestore.FieldValue.increment(litre)
-            });
+            batch.update(tankRef, { mevcutLitre: firebase.firestore.FieldValue.increment(litre) });
 
             try {
                 await batch.commit();
-                // Kaydedilen satırı animasyonla gizle ve kaldır
                 rowElement.style.opacity = '0';
                 setTimeout(() => {
                     rowElement.remove();
                 }, 500);
             } catch (error) {
                 console.error("Hata:", error);
-                showMessage('Kayıt sırasında bir hata oluştu!', 'error');
+                showMessage('Kayıt sırasında bir hata oluştu: ' + error.message, 'error');
                 saveBtn.textContent = 'Kaydet';
                 saveBtn.disabled = false;
             }
@@ -297,9 +245,10 @@ async function renderProducerList() {
             messageDiv.textContent = msg;
             messageDiv.className = type;
             messageDiv.style.display = 'block';
-            setTimeout(() => { messageDiv.style.display = 'none'; }, 4000);
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 4000);
         }
-
     </script>
 </body>
 </html>
