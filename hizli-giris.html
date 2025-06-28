@@ -58,7 +58,8 @@
                 <div class="form-group"><label for="collection-date">Süt Alım Tarihi</label><input type="date" id="collection-date" name="collection-date"></div>
                 <div class="form-group"><label for="unit-price">Süt Birim Fiyatı (₺)</label><input type="number" id="unit-price" name="unit-price" step="0.01"></div>
                 <div class="form-group"><label>Zaman</label><div class="time-selection"><input type="radio" id="aksam" name="time" value="akşam" checked><label for="aksam">AKŞAM</label><input type="radio" id="sabah" name="time" value="sabah"><label for="sabah">SABAH</label></div></div>
-                <div class="form-group"><label for="tank">Tank Seçimi</label><select id="tank" name="tank"></select></div>
+                <div class="form-group"><label for="tank">Tank Seçimi</label><select id="tank" name="tank"></select><small id="tankMevcutLitre" style="display: block; margin-top: 8px; font-weight: 500; color: #007bff;"></small>
+</div>
                 <div class="form-group"><label for="category">Kategori/Köy (Rota)</label><select id="category" name="category"></select></div>
             </form>
             <div id="producer-panel" style="display: none;">
@@ -94,6 +95,7 @@
         let routeProducers = [], collectionHistory = [];
         let currentProducerIndex = 0;
         let editingEntry = null;
+        let tankDataMap = new Map(); 
 
         const collectionDateInput = document.getElementById('collection-date');
         const unitPriceInput = document.getElementById('unit-price');
@@ -135,7 +137,7 @@
             saveBtn.addEventListener('click', handleSave);
             skipBtn.addEventListener('click', handleSkip);
             cancelEditBtn.addEventListener('click', cancelEditMode);
-
+            tankSelect.addEventListener('change', (e) => updateTankInfoDisplay(e.target.value));
             [collectionDateInput, ...document.querySelectorAll('input[name="time"]')].forEach(el => {
                 el.addEventListener('change', () => { if (categorySelect.value) startRoute(); });
             });
@@ -159,7 +161,7 @@ async function populateTanks() {
     tankSelect.innerHTML = '<option value="">Yükleniyor...</option>';
 
     if (!sahipId) {
-        console.error("populateTanks çağrıldı ama sahipId boş. Kullanıcı oturum bilgisi bekleniyor.");
+        console.error("populateTanks çağrıldı ama sahipId boş.");
         tankSelect.innerHTML = '<option value="" disabled selected>Kullanıcı bilgisi bekleniyor...</option>';
         return;
     }
@@ -169,24 +171,48 @@ async function populateTanks() {
 
         if (snapshot.empty) {
             tankSelect.innerHTML = '<option value="" disabled selected>Tanımlı tank bulunamadı!</option>';
-            console.warn(`Veritabanında sahipId'si '${sahipId}' olan bir tank bulunamadı. Lütfen Firestore veritabanınızı kontrol edin.`);
+            // tankMevcutLitre'yi de temizle
+            const displayElement = document.getElementById('tankMevcutLitre');
+            if(displayElement) displayElement.textContent = '';
             return;
         }
 
         tankSelect.innerHTML = '';
+        tankDataMap.clear(); // Hafızadaki eski tank verilerini temizle
         snapshot.forEach(doc => {
             const tank = doc.data();
+            tankDataMap.set(doc.id, tank); // Yeni verileri hafızaya al
+            
             const option = document.createElement('option');
             option.value = doc.id;
             option.textContent = `${tank.ad} (${tank.kapasite} Lt)`;
             tankSelect.appendChild(option);
         });
+
+        // Sayfa ilk yüklendiğinde, seçili olan ilk tankın miktarını göster
+        if (tankSelect.value) {
+            updateTankInfoDisplay(tankSelect.value);
+        }
+
     } catch (error) {
         console.error("Tanklar yüklenirken bir Firestore hatası oluştu:", error);
         tankSelect.innerHTML = '<option value="" disabled selected>Hata: Tanklar yüklenemedi.</option>';
     }
 }
 
+
+        
+function updateTankInfoDisplay(tankId) {
+    const displayElement = document.getElementById('tankMevcutLitre');
+    if (!displayElement) return;
+
+    if (tankId && tankDataMap.has(tankId)) {
+        const mevcutLitre = tankDataMap.get(tankId).mevcutLitre;
+        displayElement.textContent = `Mevcut: ${mevcutLitre.toLocaleString('tr-TR', {maximumFractionDigits: 1})} Lt`;
+    } else {
+        displayElement.textContent = '';
+    }
+}
 async function populateCategories() {
     const categorySelect = document.getElementById('category');
     if (!categorySelect) return;
