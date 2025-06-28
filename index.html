@@ -3165,23 +3165,44 @@ async function handleYemPivotRaporu(reportType) {
         const endDate = new Date(year, month, 0);
         const endDateStr = endDate.toISOString().split('T')[0];
 
-        // 1. Gerekli tüm verileri tek seferde çek
+        // 1. Gerekli tüm verileri çek (Satışlar, Yem Tanımları, Cariler, Yem Alışları)
         const satisPromise = db.collection('yem_satislari').where('sahipId', '==', currentUser.uid).where('tarih', '>=', startDateStr).where('tarih', '<=', endDateStr).get();
         const yemlerPromise = db.collection('yemler').where('sahipId', '==', currentUser.uid).get();
         const carilerPromise = db.collection('cariler').where('sahipId', '==', currentUser.uid).get();
+        // GÜNCELLEME: Maliyet hesabı için tüm geçmiş yem alımlarını çek
+        const yemAlimlariPromise = db.collection('yem_alimlari').where('sahipId', '==', currentUser.uid).orderBy('tarih').get();
 
-        const [satisSnapshot, yemlerSnapshot, carilerSnapshot] = await Promise.all([satisPromise, yemlerPromise, carilerPromise]);
+        const [satisSnapshot, yemlerSnapshot, carilerSnapshot, yemAlimlariSnapshot] = await Promise.all([satisPromise, yemlerPromise, carilerPromise, yemAlimlariPromise]);
 
         if (satisSnapshot.empty) {
             raporAlani.innerHTML = '<h4>Bu ay için yem satışı bulunmuyor.</h4>';
             return;
         }
 
-        // 2. Verileri kolay erişim için Map yapısına dönüştür
+        // 2. Verileri kolay erişim için Map yapılarına dönüştür
         const yemMap = new Map(yemlerSnapshot.docs.map(doc => [doc.id, doc.data()]));
         const cariMap = new Map(carilerSnapshot.docs.map(doc => [doc.id, doc.data()]));
 
-        // 3. Veriyi Müşteri ve Yem bazında grupla (pivot)
+        // --- GÜNCELLEME: YEM MALİYET HESAPLAMA ---
+        const maliyetMap = new Map();
+        yemAlimlariSnapshot.forEach(doc => {
+            const alim = doc.data();
+            if (!maliyetMap.has(alim.yemId)) {
+                maliyetMap.set(alim.yemId, { toplamTutar: 0, toplamMiktar: 0 });
+            }
+            const yemMaliyet = maliyetMap.get(alim.yemId);
+            yemMaliyet.toplamTutar += alim.toplamTutar;
+            yemMaliyet.toplamMiktar += alim.miktar;
+        });
+        
+        const ortalamaMaliyetMap = new Map();
+        maliyetMap.forEach((value, key) => {
+            if (value.toplamMiktar > 0) {
+                ortalamaMaliyetMap.set(key, value.toplamTutar / value.toplamMiktar);
+            }
+        });
+        // --- MALİYET HESAPLAMA SONU ---
+
         const reportData = {};
         const yemlerInReport = new Set();
 
@@ -3189,7 +3210,6 @@ async function handleYemPivotRaporu(reportType) {
             const satis = doc.data();
             yemlerInReport.add(satis.yemId);
 
-            // Müşteri (cari) anahtarını oluştur
             if (!reportData[satis.cariId]) {
                 reportData[satis.cariId] = {
                     cariAdi: cariMap.get(satis.cariId)?.adiSoyadi || 'Bilinmeyen Cari',
@@ -3198,66 +3218,51 @@ async function handleYemPivotRaporu(reportType) {
                     musteriToplamKar: 0
                 };
             }
-            
-            // Yem anahtarını oluştur
             if (!reportData[satis.cariId].yemler[satis.yemId]) {
-                reportData[satis.cariId].yemler[satis.yemId] = {
-                    adet: 0,
-                    toplamSatis: 0,
-                    toplamKar: 0,
-                    satisFiyatlari: []
-                };
+                reportData[satis.cariId].yemler[satis.yemId] = { adet: 0, toplamSatis: 0, toplamKar: 0 };
             }
 
             const yemData = reportData[satis.cariId].yemler[satis.yemId];
             yemData.adet += satis.miktar;
             yemData.toplamSatis += satis.toplamTutar;
-            yemData.satisFiyatlari.push(satis.satisFiyati);
-
-            const alisFiyati = yemMap.get(satis.yemId)?.alisFiyati || 0;
-            yemData.toplamKar += (satis.satisFiyati - alisFiyati) * satis.miktar;
-
-            // Müşteri geneli toplamlarını güncelle
+            
+            // GÜNCELLEME: Maliyet artık ortalama maliyet haritasından alınıyor
+            const maliyet = ortalamaMaliyetMap.get(satis.yemId) || 0;
+            const satisKar = (satis.satisFiyati - maliyet) * satis.miktar;
+            yemData.toplamKar += satisKar;
+            
             reportData[satis.cariId].musteriToplamSatis += satis.toplamTutar;
-            reportData[satis.cariId].musteriToplamKar += (satis.satisFiyati - alisFiyati) * satis.miktar;
+            reportData[satis.cariId].musteriToplamKar += satisKar;
         });
 
         const sortedYemList = Array.from(yemlerInReport).sort((a, b) => (yemMap.get(a)?.ad || '').localeCompare(yemMap.get(b)?.ad || ''));
-
-        // 4. HTML Tablosunu oluştur
-        let tableHTML = `<h3 class="print-only print-title" style="text-align:center;">${reportType === 'satis' ? 'Detaylı Yem Satış Raporu' : 'Müşteri Bazlı Yem Kârlılık Raporu'} - ${formatMonthYear(ayYil)}</h3>`;
-        tableHTML += `<table class="report-table"><thead>`;
         
-        // Üst Başlık (Yem Adları)
-        tableHTML += `<tr><th rowspan="2" style="vertical-align: middle;">Müşteri Adı</th>`;
+        let tableHTML = `<h3 class="print-only print-title" style="text-align:center;">${reportType === 'satis' ? 'Detaylı Yem Satış Raporu' : 'Müşteri Bazlı Yem Kârlılık Raporu'} - ${formatMonthYear(ayYil)}</h3>`;
+        tableHTML += `<table class="report-table"><thead><tr><th rowspan="2" style="vertical-align: middle;">Müşteri Adı</th>`;
         sortedYemList.forEach(yemId => {
             const yemAdi = yemMap.get(yemId)?.ad || 'Bilinmeyen Yem';
             const colSpan = reportType === 'satis' ? 3 : 5;
             tableHTML += `<th colspan="${colSpan}" style="text-align: center;">${yemAdi}</th>`;
         });
-        tableHTML += `<th rowspan="2" style="vertical-align: middle;">${reportType === 'satis' ? 'Müşteri Toplamı' : 'Müşteri Toplam Kârı'}</th></tr>`;
-
-        // Alt Başlıklar (Adet, Fiyat vb.)
-        tableHTML += `<tr>`;
+        tableHTML += `<th rowspan="2" style="vertical-align: middle;">${reportType === 'satis' ? 'Müşteri Toplamı' : 'Müşteri Toplam Kârı'}</th></tr><tr>`;
+        
         sortedYemList.forEach(() => {
             if (reportType === 'satis') {
                 tableHTML += `<th>Adet</th><th>Fiyat</th><th>Toplam</th>`;
-            } else { // karlilik
-                tableHTML += `<th>Adet</th><th>Satış F.</th><th>Alış F.</th><th>Birim Kâr</th><th>Toplam Kâr</th>`;
+            } else {
+                tableHTML += `<th>Adet</th><th>Satış F.</th><th>Ort. Alış F.</th><th>Birim Kâr</th><th>Toplam Kâr</th>`;
             }
         });
         tableHTML += `</tr></thead><tbody>`;
 
         const genelToplamlar = {};
-        
-        // Müşteri Satırları
         Object.values(reportData).sort((a,b) => a.cariAdi.localeCompare(b.cariAdi)).forEach(cariData => {
             tableHTML += `<tr><td>${cariData.cariAdi}</td>`;
             sortedYemList.forEach(yemId => {
                 const yemSatis = cariData.yemler[yemId];
                 if (yemSatis) {
                     const ortSatisFiyati = yemSatis.toplamSatis / yemSatis.adet;
-                    const alisFiyati = yemMap.get(yemId)?.alisFiyati || 0;
+                    const alisFiyati = ortalamaMaliyetMap.get(yemId) || 0; // GÜNCELLEME
                     const birimKar = ortSatisFiyati - alisFiyati;
 
                     if (reportType === 'satis') {
@@ -3266,12 +3271,10 @@ async function handleYemPivotRaporu(reportType) {
                         tableHTML += `<td>${yemSatis.adet}</td><td>${formatCurrency(ortSatisFiyati)}</td><td>${formatCurrency(alisFiyati)}</td><td style="color:green;">${formatCurrency(birimKar)}</td><td style="color:green; font-weight:bold;">${formatCurrency(yemSatis.toplamKar)}</td>`;
                     }
 
-                    // Genel toplamları biriktir
                     if (!genelToplamlar[yemId]) genelToplamlar[yemId] = { adet: 0, toplamSatis: 0, toplamKar: 0 };
                     genelToplamlar[yemId].adet += yemSatis.adet;
                     genelToplamlar[yemId].toplamSatis += yemSatis.toplamSatis;
                     genelToplamlar[yemId].toplamKar += yemSatis.toplamKar;
-
                 } else {
                     const colSpan = reportType === 'satis' ? 3 : 5;
                     for (let i = 0; i < colSpan; i++) tableHTML += `<td>-</td>`;
@@ -3282,7 +3285,6 @@ async function handleYemPivotRaporu(reportType) {
         });
         
         tableHTML += `</tbody><tfoot><tr class="report-totals-row"><td><strong>Genel Toplam</strong></td>`;
-
         let sonGenelToplam = 0;
         sortedYemList.forEach(yemId => {
             const toplam = genelToplamlar[yemId];
@@ -3304,7 +3306,6 @@ async function handleYemPivotRaporu(reportType) {
 
         raporAlani.innerHTML = tableHTML;
         toggleReportButtons('yemRaporu', true);
-
     } catch (error) {
         console.error("Yem raporu oluşturulurken hata:", error);
         raporAlani.innerHTML = `<p style="color:red; font-weight:bold;">RAPOR OLUŞTURULAMADI!<br>Hata Detayı: ${error.message}</p>`;
