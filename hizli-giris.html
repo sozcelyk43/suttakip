@@ -35,6 +35,16 @@
         .history-item { padding: 10px 0; border-bottom: 1px solid #f0f2f5; display: flex; align-items: center; gap: 10px; }
         .history-item-info { font-weight: 600; flex-grow: 1; }
         .history-item-details { text-align: right; }
+.history-item .delete-btn {
+    background-color: var(--danger-color);
+    color: var(--white-color);
+    padding: 8px 12px;
+    font-size: 0.9em;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
         .history-item .edit-btn { background-color: var(--warning-color); color: var(--dark-color); padding: 8px 12px; font-size: 0.9em; flex-shrink: 0; border-radius: 6px; border: none; cursor: pointer;}
         #cancel-edit-btn { display: none; margin-top: 10px; width: 100%; background-color: var(--danger-color); color: var(--white-color); }
     </style>
@@ -415,32 +425,90 @@ function getSessionKey(category) {
             displayCurrentProducer();
         }
 
-        function renderHistory() {
-            if (!historySection || !historyList || !sessionSummary) return;
-            if (collectionHistory.length === 0) { historySection.style.display = 'none'; return; }
-            historySection.style.display = 'block';
-            historyList.innerHTML = '';
-            let totalMilk = 0, totalValue = 0;
+       function renderHistory() {
+    if (!historySection || !historyList || !sessionSummary) return;
+    if (collectionHistory.length === 0) {
+        historySection.style.display = 'none';
+        return;
+    }
+    historySection.style.display = 'block';
+    historyList.innerHTML = '';
+    let totalMilk = 0,
+        totalValue = 0;
 
-            collectionHistory.sort((a,b) => (b.kayitZamani.seconds || b.kayitZamani) - (a.kayitZamani.seconds || a.kayitZamani)).forEach(item => {
-                const listItem = document.createElement('li');
-                listItem.className = 'history-item';
-                listItem.innerHTML = `
-                    <div class="history-item-info">${item.ureticiAdi}</div>
-                    <div class="history-item-details">
-                        <span>${item.miktar.toFixed(1)} Litre</span>
-                        <span class="price">${item.toplam_tutar.toFixed(2)} ₺</span>
-                    </div>
-                    <button class="btn edit-btn" onclick="editHistoryItem('${item.movementId}')">Düzenle</button>
-                `;
-                historyList.appendChild(listItem);
-                totalMilk += item.miktar;
-                totalValue += item.toplam_tutar;
-            });
+    collectionHistory.sort((a, b) => (b.kayitZamani.seconds || b.kayitZamani) - (a.kayitZamani.seconds || a.kayitZamani)).forEach(item => {
+        // Düzenleme fonksiyonuna doğru indeksi gönderebilmek için item'ın kendisini bulalım
+        const originalIndex = collectionHistory.findIndex(h => h.movementId === item.movementId);
 
-            sessionSummary.innerHTML = `<p>Toplam Süt (Bu Oturum): <span>${totalMilk.toFixed(1)} Litre</span></p><p>Toplam Tutar (Bu Oturum): <span>${totalValue.toFixed(2)} ₺</span></p>`;
-        }
-        
+        const listItem = document.createElement('li');
+        listItem.className = 'history-item';
+        listItem.innerHTML = `
+            <div class="history-item-info">${item.ureticiAdi}</div>
+            <div class="history-item-details">
+                <span>${item.miktar.toFixed(1)} Litre</span>
+                <span class="price">${item.toplam_tutar.toFixed(2)} ₺</span>
+            </div>
+            <div>
+                <button class="btn edit-btn" onclick="editHistoryItem(${originalIndex})">Düzenle</button>
+                <button class="btn delete-btn" onclick="deleteHistoryItem('${item.movementId}')">Sil</button>
+            </div>
+        `;
+        historyList.appendChild(listItem);
+        totalMilk += item.miktar;
+        totalValue += item.toplam_tutar;
+    });
+
+    sessionSummary.innerHTML = `<p>Toplam Süt (Bu Oturum): <span>${totalMilk.toFixed(1)} Litre</span></p><p>Toplam Tutar (Bu Oturum): <span>${totalValue.toFixed(2)} ₺</span></p>`;
+}
+        async function deleteHistoryItem(movementId) {
+    const entryToDelete = collectionHistory.find(item => item.movementId === movementId);
+    if (!entryToDelete) {
+        alert("Silinecek kayıt oturum geçmişinde bulunamadı.");
+        return;
+    }
+    if (!confirm(`'${entryToDelete.ureticiAdi}' için girilen ${entryToDelete.miktar} Lt süt kaydını kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!`)) {
+        return;
+    }
+
+    const saveBtn = document.getElementById('save-btn');
+    const skipBtn = document.getElementById('skip-btn');
+    saveBtn.disabled = true;
+    skipBtn.disabled = true;
+
+    // Silinecek kayda ait tüm referansları al
+    const tankRef = db.collection('tanklar').doc(entryToDelete.tankId);
+    const movementRef = db.collection('tank_hareketleri').doc(entryToDelete.movementId);
+    const sutAlimSnapshot = await db.collection('sut_alimlari')
+        .where('sahipId', '==', sahipId)
+        .where('cariId', '==', entryToEdit.ureticiId)
+        .where('tarih', '==', entryToEdit.alim_tarihi)
+        .where('toplamTutar', '==', entryToEdit.toplam_tutar)
+        .limit(1).get();
+
+    const batch = db.batch();
+
+    // 1. Tank miktarını azalt
+    batch.update(tankRef, { mevcutLitre: firebase.firestore.FieldValue.increment(-entryToDelete.miktar) });
+    // 2. Tank hareketini sil
+    batch.delete(movementRef);
+    // 3. Finansal süt alım kaydını sil
+    if (!sutAlimSnapshot.empty) {
+        batch.delete(sutAlimSnapshot.docs[0].ref);
+    }
+
+    try {
+        await batch.commit();
+        alert("Kayıt başarıyla silindi.");
+        // Sayfanın durumunu yeniden yükleyerek hem geçmişi hem de yapılacaklar listesini güncelle
+        startRoute();
+    } catch (error) {
+        console.error("Silme hatası:", error);
+        alert("Kayıt silinirken bir hata oluştu: " + error.message);
+    } finally {
+        saveBtn.disabled = false;
+        skipBtn.disabled = false;
+    }
+}
         function editHistoryItem(movementId) {
             const entry = collectionHistory.find(item => item.movementId === movementId);
             if (entry) {
