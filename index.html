@@ -1837,7 +1837,7 @@ async function populateCariSelect(selectElement, filterGroup = null, defaultText
         cariler.forEach(c => {
             const option = document.createElement('option');
             option.value = c.id;
-            option.textContent = `${c.adiSoyadi} (${c.kodu || 'Kodsuz'})`;
+            option.textContent = c.adiSoyadi;
             selectElement.appendChild(option);
         });
         if (cariler.some(c => c.id === currentValue)) {
