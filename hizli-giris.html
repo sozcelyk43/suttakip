@@ -344,7 +344,8 @@ async function initializeApp() {
             movementId: movementRef.id, ureticiId: currentProducer.id, ureticiAdi: currentProducer.adiSoyadi,
             sahipId: sahipId, calisanId: auth.currentUser.uid, tankId: tankId, alim_tarihi: alimTarihi,
             zaman_dilimi: zamanDilimi, miktar: quantity, birim_fiyat: unitPrice,
-            toplam_tutar: totalPrice, not: notesInput.value, kayitZamani: new Date()
+            toplam_tutar: totalPrice, not: notesInput.value, kayitZamani: firebase.firestore.FieldValue.serverTimestamp()
+
         };
 
         const batch = db.batch();
@@ -383,7 +384,11 @@ async function initializeApp() {
         let totalMilk = 0;
         let totalValue = 0;
 
-        collectionHistory.sort((a,b) => b.kayitZamani.seconds - a.kayitZamani.seconds).forEach(item => {
+        collectionHistory.sort((a, b) => {
+    const timeA = a.kayitZamani?.seconds || 0;
+    const timeB = b.kayitZamani?.seconds || 0;
+    return timeB - timeA;
+}).forEach(item => {
             const listItem = document.createElement('li');
             listItem.className = 'history-item';
             listItem.innerHTML = `
