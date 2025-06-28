@@ -145,25 +145,35 @@
 async function populateTanks() {
     const tankSelect = document.getElementById('tank');
     if (!tankSelect) return;
+
     tankSelect.innerHTML = '<option value="">Yükleniyor...</option>';
+
     if (!sahipId) {
-        tankSelect.innerHTML = '<option value="" disabled selected>Sahip bilgisi bekleniyor...</option>';
+        console.error("populateTanks çağrıldı ama sahipId boş. Kullanıcı oturum bilgisi bekleniyor.");
+        tankSelect.innerHTML = '<option value="" disabled selected>Kullanıcı bilgisi bekleniyor...</option>';
         return;
     }
+
     try {
         const snapshot = await db.collection('tanklar').where('sahipId', '==', sahipId).orderBy('ad').get();
+
         if (snapshot.empty) {
             tankSelect.innerHTML = '<option value="" disabled selected>Tanımlı tank bulunamadı!</option>';
+            console.warn(`Veritabanında sahipId'si '${sahipId}' olan bir tank bulunamadı. Lütfen Firestore veritabanınızı kontrol edin.`);
             return;
         }
+
         tankSelect.innerHTML = '';
         snapshot.forEach(doc => {
             const tank = doc.data();
-            tankSelect.innerHTML += `<option value="${doc.id}">${tank.ad} (${tank.kapasite} Lt)</option>`;
+            const option = document.createElement('option');
+            option.value = doc.id;
+            option.textContent = `${tank.ad} (${tank.kapasite} Lt)`;
+            tankSelect.appendChild(option);
         });
-    } catch (e) {
-        console.error("Tanklar yüklenirken hata:", e);
-        tankSelect.innerHTML = '<option value="" disabled selected>Hata: Tanklar yüklenemedi</option>';
+    } catch (error) {
+        console.error("Tanklar yüklenirken bir Firestore hatası oluştu:", error);
+        tankSelect.innerHTML = '<option value="" disabled selected>Hata: Tanklar yüklenemedi.</option>';
     }
 }
 
