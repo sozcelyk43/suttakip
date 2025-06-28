@@ -460,7 +460,7 @@ function getSessionKey(category) {
 
     sessionSummary.innerHTML = `<p>Toplam Süt (Bu Oturum): <span>${totalMilk.toFixed(1)} Litre</span></p><p>Toplam Tutar (Bu Oturum): <span>${totalValue.toFixed(2)} ₺</span></p>`;
 }
-        async function deleteHistoryItem(movementId) {
+    async function deleteHistoryItem(movementId) {
     const entryToDelete = collectionHistory.find(item => item.movementId === movementId);
     if (!entryToDelete) {
         alert("Silinecek kayıt oturum geçmişinde bulunamadı.");
@@ -475,23 +475,21 @@ function getSessionKey(category) {
     saveBtn.disabled = true;
     skipBtn.disabled = true;
 
-    // Silinecek kayda ait tüm referansları al
     const tankRef = db.collection('tanklar').doc(entryToDelete.tankId);
     const movementRef = db.collection('tank_hareketleri').doc(entryToDelete.movementId);
+
+    // --- DÜZELTME: 'entryToEdit' olan değişken adı 'entryToDelete' olarak düzeltildi ---
     const sutAlimSnapshot = await db.collection('sut_alimlari')
         .where('sahipId', '==', sahipId)
-        .where('cariId', '==', entryToEdit.ureticiId)
-        .where('tarih', '==', entryToEdit.alim_tarihi)
-        .where('toplamTutar', '==', entryToEdit.toplam_tutar)
+        .where('cariId', '==', entryToDelete.ureticiId)
+        .where('tarih', '==', entryToDelete.alim_tarihi)
+        .where('toplamTutar', '==', entryToDelete.toplam_tutar)
         .limit(1).get();
 
     const batch = db.batch();
 
-    // 1. Tank miktarını azalt
     batch.update(tankRef, { mevcutLitre: firebase.firestore.FieldValue.increment(-entryToDelete.miktar) });
-    // 2. Tank hareketini sil
     batch.delete(movementRef);
-    // 3. Finansal süt alım kaydını sil
     if (!sutAlimSnapshot.empty) {
         batch.delete(sutAlimSnapshot.docs[0].ref);
     }
@@ -499,7 +497,6 @@ function getSessionKey(category) {
     try {
         await batch.commit();
         alert("Kayıt başarıyla silindi.");
-        // Sayfanın durumunu yeniden yükleyerek hem geçmişi hem de yapılacaklar listesini güncelle
         startRoute();
     } catch (error) {
         console.error("Silme hatası:", error);
