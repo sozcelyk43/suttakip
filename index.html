@@ -242,19 +242,20 @@
     <div class="container">
         <div class="form-section">
             <h3>Giriş Filtreleri</h3>
-            <div class="form-grid" id="sutGirisFiltreler" style="grid-template-columns: 1fr 1fr;">
-                <div class="form-group">
-                    <label for="topluGirisTarih">Giriş Tarihi:</label>
-                    <input type="date" id="topluGirisTarih" required>
-                    <small style="display: block; margin-top: 5px; font-style: italic;">
-                        Not: Seçeceğiniz tarih, **akşam sütünün** alındığı gün olmalıdır.
-                    </small>
-                </div>
-                <div class="form-group">
-                    <label for="topluGirisKategori">Kategori/Köy Seçin:</label>
-                    <select id="topluGirisKategori" required><option value="">Tüm Kategoriler</option></select>
-                </div>
-            </div>
+          <div class="form-grid" id="sutGirisFiltreler" style="grid-template-columns: 1fr 1fr 1fr;">
+    <div class="form-group">
+        <label for="topluGirisTarih">Giriş Tarihi:</label>
+        <input type="date" id="topluGirisTarih" required>
+    </div>
+    <div class="form-group">
+        <label for="topluGirisKategori">Kategori/Köy Seçin:</label>
+        <select id="topluGirisKategori" required><option value="">Tüm Kategoriler</option></select>
+    </div>
+    <div class="form-group">
+        <label for="topluGirisTank">Tank Seçimi:</label>
+        <select id="topluGirisTank" required></select>
+    </div>
+</div>
         </div>
         <div class="list-section">
             <h3>Günlük Süt Girişi</h3>
@@ -749,8 +750,13 @@ if(odemeCariSecimi) {
         // Sekme bazlı veri yükleme ve hazırlık işlemleri
         if (targetId === 'dashboard') { updateDashboardStats(); }
         if (targetId === 'cari-yonetimi') { populateCariKategoriFiltre(); renderCariListesi(); populateCariKategoriSelect(document.getElementById('cariKategori')); }
-        if (targetId === 'sut-alimi') { if(topluGirisTarihInput) topluGirisTarihInput.value = getTodayForInput(); populateCariKategoriSelect(topluGirisKategori); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); }
-       if (targetId === 'yem-stok-yonetimi') { 
+       if (targetId === 'sut-alimi') {
+    if(document.getElementById('topluGirisTarih')) document.getElementById('topluGirisTarih').value = getTodayForInput();
+    populateCariKategoriSelect(document.getElementById('topluGirisKategori'));
+    populateTankSelect(document.getElementById('topluGirisTank')); // YENİ EKLENDİ
+    renderTopluSutGirisFormu();
+    renderSutAlimGecmisi();
+}
     populateCariSelect(document.getElementById('yemAlisTedarikci'), 'tedarikçi'); // Sadece tedarikçileri listele
     populateYemSelect(document.getElementById('yemSecimiAlis')); 
     renderYemAlisHareketleri(); 
@@ -2794,30 +2800,77 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
     const sabahInput = document.getElementById(`sabah-${cariId}`);
     const aksamInput = document.getElementById(`aksam-${cariId}`);
     const fiyatInput = document.getElementById(`fiyat-${cariId}`);
-    const satir = document.getElementById(`satir-${cariId}`);
+    
+    // YENİ: Tank seçimini al
+    const tankId = document.getElementById('topluGirisTank').value;
 
     const sabahMiktar = parseFloat(sabahInput.value) || 0;
     const aksamMiktar = parseFloat(aksamInput.value) || 0;
-    // DÜZELTME: Fiyat input'tan okunuyor
     const birimFiyat = parseFloat(fiyatInput.value) || globalSettings.defaultMilkPrice || 0;
     const toplamMiktar = sabahMiktar + aksamMiktar;
+    
+    if (toplamMiktar <= 0) {
+        alert("Lütfen en az bir miktar girin.");
+        return;
+    }
+    // YENİ: Tank seçimi kontrolü
+    if (!tankId) {
+        alert("Lütfen bir tank seçin!");
+        return;
+    }
 
-    if (toplamMiktar <= 0) { return; }
+    const satir = document.getElementById(`satir-${cariId}`);
+    if(satir) satir.querySelector('button').disabled = true;
 
-    const sutAlimData = {
-        tarih: tarih, cariId: cariId, cariAdi: cariAdi,
-        sabah: sabahMiktar, aksam: aksamMiktar, toplam: toplamMiktar,
-        fiyat: birimFiyat, // Düzeltilmiş fiyat kullanılıyor
-        toplamTutar: toplamMiktar * birimFiyat, // Düzeltilmiş tutar
-        sahipId: auth.currentUser.uid
-    };
+    const batch = db.batch();
+    const sahipId = auth.currentUser.uid;
+
+    // 1. Finansal Süt Alım Kaydını Hazırla
+    const sutAlimRef = db.collection("sut_alimlari").doc();
+    batch.set(sutAlimRef, {
+        tarih: tarih,
+        cariId: cariId,
+        cariAdi: cariAdi,
+        sabah: sabahMiktar,
+        aksam: aksamMiktar,
+        toplam: toplamMiktar,
+        fiyat: birimFiyat,
+        toplamTutar: toplamMiktar * birimFiyat,
+        sahipId: sahipId
+    });
+
+    // 2. Tank Hareketlerini Hazırla (Sabah ve Akşam için ayrı ayrı)
+    if (sabahMiktar > 0) {
+        const movementRefSabah = db.collection('tank_hareketleri').doc();
+        batch.set(movementRefSabah, {
+            movementId: movementRefSabah.id, ureticiId: cariId, ureticiAdi: cariAdi,
+            sahipId: sahipId, calisanId: sahipId, tankId: tankId, alim_tarihi: tarih,
+            zaman_dilimi: 'sabah', miktar: sabahMiktar, birim_fiyat: birimFiyat,
+            toplam_tutar: sabahMiktar * birimFiyat, kayitZamani: new Date()
+        });
+    }
+    if (aksamMiktar > 0) {
+        const movementRefAksam = db.collection('tank_hareketleri').doc();
+        batch.set(movementRefAksam, {
+            movementId: movementRefAksam.id, ureticiId: cariId, ureticiAdi: cariAdi,
+            sahipId: sahipId, calisanId: sahipId, tankId: tankId, alim_tarihi: tarih,
+            zaman_dilimi: 'akşam', miktar: aksamMiktar, birim_fiyat: birimFiyat,
+            toplam_tutar: aksamMiktar * birimFiyat, kayitZamani: new Date()
+        });
+    }
+
+    // 3. Tank Miktarını Güncelle
+    const tankRef = db.collection('tanklar').doc(tankId);
+    batch.update(tankRef, { mevcutLitre: firebase.firestore.FieldValue.increment(toplamMiktar) });
 
     try {
-        await db.collection("sut_alimlari").add(sutAlimData);
+        await batch.commit();
         if (satir) satir.style.display = 'none';
         await renderSutAlimGecmisi();
     } catch (error) {
-        console.error("Süt alımı kaydedilirken hata:", error);
+        console.error("Toplu süt alımı kaydedilirken hata:", error);
+        alert("Kayıt sırasında bir hata oluştu: " + error.message);
+        if(satir) satir.querySelector('button').disabled = false;
     }
 }
 
