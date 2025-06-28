@@ -104,101 +104,102 @@
         messagingSenderId: "512756958486",
         appId: "1:512756958486:web:13cceb6835e2c575e9fc37"
     };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-    // Değişkenleri global olarak tanımla
-    let sahipId = '';
-    let routeProducers = [];
-    let currentProducerIndex = 0;
-    let collectionHistory = [];
-    let appInitialized = false;
+// Değişkenleri global olarak tanımla
+let sahipId = '';
+let routeProducers = [];
+let currentProducerIndex = 0;
+let collectionHistory = [];
+let appInitialized = false;
 
-    // DOM elementlerini global olarak tanımla
-    let statusPanel, mainContent, collectionDateInput, unitPriceInput, tankSelect, categorySelect, producerPanel, currentProducerName, producerSelect, quantityInput, notesInput, saveBtn, skipBtn, historySection, historyList, sessionSummary;
+// DOM elementlerini global olarak tanımla
+let statusPanel, mainContent, collectionDateInput, unitPriceInput, tankSelect, categorySelect, producerPanel, currentProducerName, producerSelect, quantityInput, notesInput, saveBtn, skipBtn, historySection, historyList, sessionSummary;
 
-    // Sayfa tamamen yüklendiğinde tüm işlemleri başlat
-    document.addEventListener('DOMContentLoaded', () => {
-        
-        statusPanel = document.getElementById('status-panel');
-        mainContent = document.getElementById('main-content');
+// updateStatus fonksiyonunu global olarak tanımla
+function updateStatus(message, isError = false) {
+    if (statusPanel) {
+        statusPanel.textContent = message;
+        statusPanel.className = isError ? 'error' : 'info';
+        statusPanel.style.display = 'block';
+    }
+}
 
-        const updateStatus = (message, isError = false) => {
-            if (statusPanel) {
-                statusPanel.textContent = message;
-                statusPanel.className = isError ? 'error' : 'info';
-                statusPanel.style.display = 'block';
-            }
-        };
+// Sayfa tamamen yüklendiğinde tüm işlemleri başlat
+document.addEventListener('DOMContentLoaded', () => {
+    statusPanel = document.getElementById('status-panel');
+    mainContent = document.getElementById('main-content');
 
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                updateStatus('Oturum doğrulandı. Kullanıcı profili aranıyor...');
-                db.collection('kullanicilar').doc(user.uid).get()
-                    .then(doc => {
-                        if (doc.exists && doc.data().sahipId) {
-                            sahipId = doc.data().sahipId;
-                            if (!appInitialized) {
-                                mainContent.style.display = 'block';
-                                //mainContent.innerHTML = document.getElementById('app-template').innerHTML;
-                                initializeApp();
-                                appInitialized = true;
-                            }
-                        } else {
-                            updateStatus('HATA: Kullanıcı profilinizde, hangi ana hesaba bağlı olduğunuzu gösteren "sahipId" alanı bulunamadı. Lütfen yöneticinizle iletişime geçerek çalışan hesabınıza "sahipId" alanı eklemesini isteyin.', true);
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            updateStatus('Oturum doğrulandı. Kullanıcı profili aranıyor...');
+            db.collection('kullanicilar').doc(user.uid).get()
+                .then(doc => {
+                    if (doc.exists && doc.data().sahipId) {
+                        sahipId = doc.data().sahipId;
+                        if (!appInitialized) {
+                            mainContent.style.display = 'block';
+                            initializeApp();
+                            appInitialized = true;
                         }
-                    })
-                    .catch(err => {
-                        console.error("Kullanıcı verisi alınırken hata:", err);
-                        updateStatus('HATA: Kullanıcı profilinize erişilemedi. Güvenlik kurallarınızı veya internet bağlantınızı kontrol edin.', true);
-                    });
-            } else {
-                window.location.href = 'login.html';
+                    } else {
+                        updateStatus('HATA: Kullanıcı profilinizde, hangi ana hesaba bağlı olduğunuzu gösteren "sahipId" alanı bulunamadı. Lütfen yöneticinizle iletişime geçerek çalışan hesabınıza "sahipId" alanı eklemesini isteyin.', true);
+                    }
+                })
+                .catch(err => {
+                    console.error("Kullanıcı verisi alınırken hata:", err);
+                    updateStatus('HATA: Kullanıcı profilinize erişilemedi. Güvenlik kurallarınızı veya internet bağlantınızı kontrol edin.', true);
+                });
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
+});
+
+async function initializeApp() {
+    // Template yüklendikten sonra elementleri ata
+    collectionDateInput = document.getElementById('collection-date');
+    unitPriceInput = document.getElementById('unit-price');
+    tankSelect = document.getElementById('tank');
+    categorySelect = document.getElementById('category');
+    producerPanel = document.getElementById('producer-panel');
+    currentProducerName = document.getElementById('current-producer-name');
+    producerSelect = document.getElementById('producer-select');
+    quantityInput = document.getElementById('quantity');
+    notesInput = document.getElementById('notes');
+    saveBtn = document.getElementById('save-btn');
+    skipBtn = document.getElementById('skip-btn');
+    historySection = document.getElementById('history-section');
+    historyList = document.getElementById('history-list');
+    sessionSummary = document.getElementById('session-summary');
+
+    // Tarihi bugüne ayarla
+    collectionDateInput.value = new Date().toISOString().split('T')[0];
+
+    updateStatus('Ayarlar ve başlangıç verileri yükleniyor...');
+    const settings = await getSettings();
+    unitPriceInput.value = settings.defaultMilkPrice ? settings.defaultMilkPrice.toFixed(2) : "15.50";
+
+    await Promise.all([populateTanks(), populateCategories()]);
+    updateStatus('Uygulama hazır.');
+    setTimeout(() => { if (statusPanel) statusPanel.style.display = 'none'; }, 2000);
+
+    categorySelect.addEventListener('change', startRoute);
+    producerSelect.addEventListener('change', jumpToProducer);
+    saveBtn.addEventListener('click', handleSaveAndNext);
+    skipBtn.addEventListener('click', handleSkip);
+
+    [collectionDateInput, ...document.querySelectorAll('input[name="time"]')].forEach(el => {
+        el.addEventListener('change', () => {
+            if (categorySelect.value) {
+                startRoute();
             }
         });
     });
+}
 
-    async function initializeApp() {
-        // Template yüklendikten sonra elementleri ata
-        collectionDateInput = document.getElementById('collection-date');
-        unitPriceInput = document.getElementById('unit-price');
-        tankSelect = document.getElementById('tank');
-        categorySelect = document.getElementById('category');
-        producerPanel = document.getElementById('producer-panel');
-        currentProducerName = document.getElementById('current-producer-name');
-        producerSelect = document.getElementById('producer-select');
-        quantityInput = document.getElementById('quantity');
-        notesInput = document.getElementById('notes');
-        saveBtn = document.getElementById('save-btn');
-        skipBtn = document.getElementById('skip-btn');
-        historySection = document.getElementById('history-section');
-        historyList = document.getElementById('history-list');
-        sessionSummary = document.getElementById('session-summary');
-        
-        collectionDateInput.value = new Date().toISOString().split('T')[0];
-        
-        updateStatus('Ayarlar ve başlangıç verileri yükleniyor...');
-        const settings = await getSettings();
-        unitPriceInput.value = settings.defaultMilkPrice ? settings.defaultMilkPrice.toFixed(2) : "15.50";
-        
-        await Promise.all([populateTanks(), populateCategories()]);
-        updateStatus('Uygulama hazır.');
-        setTimeout(() => { if(statusPanel) statusPanel.style.display = 'none'; }, 2000);
-
-        categorySelect.addEventListener('change', startRoute);
-        producerSelect.addEventListener('change', jumpToProducer);
-        saveBtn.addEventListener('click', handleSaveAndNext);
-        skipBtn.addEventListener('click', handleSkip);
-
-        [collectionDateInput, ...document.querySelectorAll('input[name="time"]')].forEach(el => {
-            el.addEventListener('change', () => {
-                if (categorySelect.value) {
-                     startRoute();
-                }
-            });
-        });
-    }
 
     async function getSettings() {
         if (!sahipId) return {};
