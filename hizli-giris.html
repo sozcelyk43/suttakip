@@ -435,7 +435,7 @@ async function handleSave() {
             displayCurrentProducer();
         }
 
-     function renderHistory() {
+    function renderHistory() {
     if (!historySection || !historyList || !sessionSummary) return;
     if (collectionHistory.length === 0) {
         historySection.style.display = 'none';
@@ -446,7 +446,6 @@ async function handleSave() {
     let totalMilk = 0,
         totalValue = 0;
 
-    // Geçmişi en yeniden eskiye doğru sırala
     collectionHistory.sort((a, b) => {
         const timeA = a.kayitZamani.seconds ? a.kayitZamani.toMillis() : a.kayitZamani.getTime();
         const timeB = b.kayitZamani.seconds ? b.kayitZamani.toMillis() : b.kayitZamani.getTime();
@@ -455,14 +454,17 @@ async function handleSave() {
         const listItem = document.createElement('li');
         listItem.className = 'history-item';
         
-        // --- DÜZELTME: Buton artık sıra numarası yerine kaydın benzersiz ID'sini gönderiyor ---
+        // --- GÜNCELLEME: "Sil" butonu tekrar eklendi ---
         listItem.innerHTML = `
             <div class="history-item-info">${item.ureticiAdi}</div>
             <div class="history-item-details">
                 <span>${item.miktar.toFixed(1)} Litre</span>
                 <span class="price">${item.toplam_tutar.toFixed(2)} ₺</span>
             </div>
-            <button class="btn edit-btn" onclick="editHistoryItem('${item.movementId}')">Düzenle</button>
+            <div>
+                <button class="btn edit-btn" onclick="editHistoryItem('${item.movementId}')">Düzenle</button>
+                <button class="btn delete-btn" onclick="deleteHistoryItem('${item.movementId}')">Sil</button>
+            </div>
         `;
         historyList.appendChild(listItem);
         totalMilk += item.miktar;
