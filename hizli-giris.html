@@ -280,90 +280,100 @@ function getSessionKey(category) {
         }
 
         function setEditMode(entry) {
-            editingEntry = entry;
-            editingMovementIdInput.value = entry.movementId;
-            currentProducerName.textContent = `DÜZENLE: ${entry.ureticiAdi}`;
-            quantityInput.value = entry.miktar;
-            notesInput.value = entry.not || '';
-            unitPriceInput.value = entry.birim_fiyat.toFixed(2);
-            producerSelect.disabled = true;
-            categorySelect.disabled = true;
-            skipBtn.style.display = 'none';
-            saveBtn.textContent = 'Güncelle';
-            saveBtn.className = 'btn btn-warning';
-            cancelEditBtn.style.display = 'block';
-            producerPanel.scrollIntoView({ behavior: 'smooth' });
-        }
+    editingEntry = entry;
+    editingMovementIdInput.value = entry.movementId;
+    currentProducerName.textContent = `DÜZENLE: ${entry.ureticiAdi}`;
+    quantityInput.value = entry.miktar;
+    notesInput.value = entry.not || '';
+    unitPriceInput.value = entry.birim_fiyat.toFixed(2);
+    producerSelect.disabled = true;
+    categorySelect.disabled = true;
+    skipBtn.style.display = 'none';
+    saveBtn.textContent = 'Güncelle';
+    saveBtn.className = 'btn btn-warning';
+    cancelEditBtn.style.display = 'block';
+    producerPanel.scrollIntoView({ behavior: 'smooth' });
+}
 
-        function cancelEditMode() {
-            editingEntry = null;
-            editingMovementIdInput.value = '';
-            producerSelect.disabled = false;
-            categorySelect.disabled = false;
-            skipBtn.style.display = 'block';
-            saveBtn.textContent = 'Kaydet ve Sonraki';
-            saveBtn.className = 'btn btn-success';
-            cancelEditBtn.style.display = 'none';
-            displayCurrentProducer();
-        }
+       function cancelEditMode() {
+    editingEntry = null;
+    editingMovementIdInput.value = '';
+    producerSelect.disabled = false;
+    categorySelect.disabled = false;
+    skipBtn.style.display = 'block';
+    saveBtn.textContent = 'Kaydet ve Sonraki';
+    saveBtn.className = 'btn btn-success';
+    cancelEditBtn.style.display = 'none';
+    displayCurrentProducer();
+}
 
-        async function handleSave() {
-            if (editingMovementIdInput.value) {
-                await handleUpdate();
-            } else {
-                await handleSaveAndNext();
-            }
-        }
+async function handleSave() {
+    if (editingMovementIdInput.value) {
+        await handleUpdate();
+    } else {
+        await handleSaveAndNext();
+    }
+}
 
         async function handleUpdate() {
-            const yeniMiktar = parseFloat(quantityInput.value);
-            if (!yeniMiktar || yeniMiktar <= 0) { alert('Lütfen geçerli bir miktar girin.'); return; }
-            
-            const eskiMiktar = editingEntry.miktar;
-            const litreFarki = yeniMiktar - eskiMiktar;
-            const yeniBirimFiyat = parseFloat(unitPriceInput.value);
-            const yeniToplamTutar = yeniMiktar * yeniBirimFiyat;
-            const zamanDilimi = editingEntry.zaman_dilimi;
+    const yeniMiktar = parseFloat(quantityInput.value);
+    if (!yeniMiktar || yeniMiktar <= 0) {
+        alert('Lütfen geçerli bir miktar girin.');
+        return;
+    }
+    
+    const eskiMiktar = editingEntry.miktar;
+    const litreFarki = yeniMiktar - eskiMiktar;
+    const yeniBirimFiyat = parseFloat(unitPriceInput.value);
+    const yeniToplamTutar = yeniMiktar * yeniBirimFiyat;
+    const zamanDilimi = editingEntry.zaman_dilimi;
 
-            saveBtn.disabled = true;
+    saveBtn.disabled = true;
 
-            const batch = db.batch();
-            const tankRef = db.collection('tanklar').doc(editingEntry.tankId);
-            const movementRef = db.collection('tank_hareketleri').doc(editingEntry.movementId);
-            
-            const sutAlimSnapshot = await db.collection('sut_alimlari')
-                .where('sahipId', '==', sahipId)
-                .where('cariId', '==', editingEntry.ureticiId)
-                .where('tarih', '==', editingEntry.alim_tarihi)
-                .where('toplamTutar', '==', editingEntry.toplam_tutar)
-                .limit(1).get();
+    const batch = db.batch();
+    const tankRef = db.collection('tanklar').doc(editingEntry.tankId);
+    const movementRef = db.collection('tank_hareketleri').doc(editingEntry.movementId);
+    
+    const sutAlimSnapshot = await db.collection('sut_alimlari')
+        .where('sahipId', '==', sahipId)
+        .where('cariId', '==', editingEntry.ureticiId)
+        .where('tarih', '==', editingEntry.alim_tarihi)
+        .where('toplamTutar', '==', editingEntry.toplam_tutar)
+        .limit(1).get();
 
-            if (!sutAlimSnapshot.empty) {
-                const sutAlimRef = sutAlimSnapshot.docs[0].ref;
-                batch.update(sutAlimRef, {
-                    toplam: yeniMiktar,
-                    sabah: zamanDilimi === 'sabah' ? yeniMiktar : 0,
-                    aksam: zamanDilimi === 'akşam' ? yeniMiktar : 0,
-                    fiyat: yeniBirimFiyat,
-                    toplamTutar: yeniToplamTutar
-                });
-            } else {
-                console.warn("Güncellenecek ilgili süt alım kaydı bulunamadı.");
-            }
+    if (!sutAlimSnapshot.empty) {
+        const sutAlimRef = sutAlimSnapshot.docs[0].ref;
+        batch.update(sutAlimRef, {
+            toplam: yeniMiktar,
+            sabah: zamanDilimi === 'sabah' ? yeniMiktar : 0,
+            aksam: zamanDilimi === 'akşam' ? yeniMiktar : 0,
+            fiyat: yeniBirimFiyat,
+            toplamTutar: yeniToplamTutar
+        });
+    } else {
+        console.warn("Güncellenecek ilgili süt alım kaydı bulunamadı.");
+    }
 
-            batch.update(movementRef, { miktar: yeniMiktar, birim_fiyat: yeniBirimFiyat, toplam_tutar: yeniToplamTutar });
-            batch.update(tankRef, { mevcutLitre: firebase.firestore.FieldValue.increment(litreFarki) });
+    batch.update(movementRef, {
+        miktar: yeniMiktar,
+        birim_fiyat: yeniBirimFiyat,
+        toplam_tutar: yeniToplamTutar,
+        not: notesInput.value
+    });
+    batch.update(tankRef, {
+        mevcutLitre: firebase.firestore.FieldValue.increment(litreFarki)
+    });
 
-            try {
-                await batch.commit();
-                await startRoute();
-                cancelEditMode();
-            } catch (error) {
-                alert("Güncelleme sırasında hata: " + error.message);
-            } finally {
-                saveBtn.disabled = false;
-            }
-        }
+    try {
+        await batch.commit();
+        await startRoute();
+        cancelEditMode();
+    } catch (error) {
+        alert("Güncelleme sırasında hata: " + error.message);
+    } finally {
+        saveBtn.disabled = false;
+    }
+}
         
         async function handleSaveAndNext() {
             const unitPrice = parseFloat(unitPriceInput.value);
@@ -506,14 +516,17 @@ function getSessionKey(category) {
         skipBtn.disabled = false;
     }
 }
-        function editHistoryItem(movementId) {
-            const entry = collectionHistory.find(item => item.movementId === movementId);
-            if (entry) {
-                setEditMode(entry);
-            } else {
-                alert("Düzenlenecek kayıt bulunamadı.");
-            }
-        }
+       function editHistoryItem(movementId) {
+    const entry = collectionHistory.find(item => item.movementId === movementId);
+    if (entry) {
+        setEditMode(entry);
+    } else {
+        alert("Düzenlenecek kayıt bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin.");
+    }
+}
+
+
+        
     </script>
 </body>
 </html>
