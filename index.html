@@ -460,6 +460,11 @@
             <div id="dinamikRaporContainer" class="printable-content format-a3">
                 <p style="text-align:center;">Raporu oluşturmak için lütfen yukarıdan ay ve kategori seçin.</p>
             </div>
+<div class="report-buttons-footer dont-print" style="text-align: right; margin-top: 20px;">
+    <button type="button" class="btn btn-secondary" id="karneYazdirBtn">🖨️ Yazdır</button>
+    <button type="button" class="btn btn-danger" id="karnePdfBtn">📄 PDF İndir</button>
+    <button type="button" class="btn btn-success" id="karneXlsxBtn">📊 Excel İndir</button>
+</div>
         </div>
     </div>
 </section>
@@ -872,7 +877,9 @@ document.getElementById('yemMusteriKarRaporuBtn')?.addEventListener('click', () 
     document.getElementById('raporYazdirBtn')?.addEventListener('click', () => handleYazdir('hesap-ozeti'));
     document.getElementById('sutRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('sut-alim-raporu'));
     document.getElementById('yemRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('aylik-yem-raporu'));
-    
+    document.getElementById('karneYazdirBtn')?.addEventListener('click', () => handleYazdir('dinamik-sut-raporu'));
+document.getElementById('karnePdfBtn')?.addEventListener('click', () => exportTableToPdf('dinamikRaporContainer', 'sut_karnesi', 'Aylık Süt Karnesi'));
+document.getElementById('karneXlsxBtn')?.addEventListener('click', () => exportTableToExcel('dinamikRaporContainer', 'sut_karnesi'));
     document.getElementById('hesapOzetiPdfBtn')?.addEventListener('click', () => exportTableToPdf('raporDetayAlani', 'hesap_ozeti', 'Cari Hesap Özeti'));
     document.getElementById('hesapOzetiXlsxBtn')?.addEventListener('click', () => exportTableToExcel('raporDetayAlani', 'hesap_ozeti'));
     document.getElementById('sutRaporuPdfBtn')?.addEventListener('click', () => exportTableToPdf('sutRaporuDetayAlani', 'sut_alim_raporu', 'Aylık Süt Alım Raporu'));
@@ -1391,100 +1398,114 @@ async function exportTableToPdf(containerId, fileName = 'rapor', title = 'Rapor'
         return;
     }
 
-    if (containerId === 'raporDetayAlani') {
-        const pdfButton = document.getElementById('hesapOzetiPdfBtn');
+    // --- GÜNCELLEME: Dinamik Süt Karnesi için özel YATAY PDF oluşturma ---
+    if (containerId === 'dinamikRaporContainer') {
+        const pdfButton = document.getElementById('karnePdfBtn');
         const originalButtonText = pdfButton.textContent;
-        pdfButton.textContent = "PDF Oluşturuluyor...";
-        pdfButton.disabled = true;
+        if(pdfButton) {
+            pdfButton.textContent = "Oluşturuluyor...";
+            pdfButton.disabled = true;
+        }
 
+        const tableElement = container.querySelector('#sut-rapor-tablosu');
+        if (!tableElement) {
+             alert('Rapor tablosu bulunamadı.');
+             if(pdfButton) {
+                 pdfButton.textContent = originalButtonText;
+                 pdfButton.disabled = false;
+             }
+             return;
+        }
+
+        try {
+            const canvas = await html2canvas(tableElement, { scale: 2, useCORS: true });
+            const imgData = canvas.toDataURL('image/png');
+            
+            // PDF'i 'l' (landscape) yani yatay modda oluştur
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4');
+            
+            const pdfWidth = doc.internal.pageSize.getWidth();
+            const pdfHeight = doc.internal.pageSize.getHeight();
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+            const ratio = canvasWidth / canvasHeight;
+            
+            const margin = 10;
+            let imgWidth = pdfWidth - (margin * 2);
+            let imgHeight = imgWidth / ratio;
+            
+            // Eğer yükseklik sayfaya sığmıyorsa, yüksekliğe göre yeniden boyutlandır
+            if (imgHeight > pdfHeight - (margin * 2 + 15)) {
+                imgHeight = pdfHeight - (margin * 2 + 15);
+                imgWidth = imgHeight * ratio;
+            }
+
+            const reportTitle = container.querySelector('h1')?.innerText || title;
+            doc.setFontSize(18);
+            doc.text(reportTitle, pdfWidth / 2, margin + 5, { align: 'center' });
+            
+            doc.addImage(imgData, 'PNG', margin, margin + 15, imgWidth, imgHeight);
+            doc.save(`${fileName}_${new Date().toLocaleDateString('tr-TR')}.pdf`);
+        } catch (error) {
+            console.error("PDF oluşturulurken hata:", error);
+            alert("PDF oluşturulurken bir hata oluştu.");
+        } finally {
+            if(pdfButton) {
+                pdfButton.textContent = originalButtonText;
+                pdfButton.disabled = false;
+            }
+        }
+
+    } 
+    // Diğer raporlar için (Cari Hesap Özeti vb.) mevcut dikey mantık devam ediyor
+    else {
+        const pdfButton = document.getElementById('hesapOzetiPdfBtn');
+        const originalButtonText = pdfButton?.textContent;
+        if(pdfButton) {
+            pdfButton.textContent = "Oluşturuluyor...";
+            pdfButton.disabled = true;
+        }
+        
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('p', 'mm', 'a4');
         const pdfWidth = doc.internal.pageSize.getWidth();
         const margin = 15;
         const usableWidth = pdfWidth - (margin * 2);
         let y = margin;
-
-        const reportTitle = document.getElementById('raporBaslik').innerText;
         
-        // --- YENİ EKLENEN BÖLÜM: Türkçe karakter sorununu çözmek için ---
-        const sanitizedTitle = reportTitle
-            .replace(/İ/g, 'I').replace(/ı/g, 'i')
-            .replace(/Ş/g, 'S').replace(/ş/g, 's')
-            .replace(/Ğ/g, 'G').replace(/ğ/g, 'g')
-            .replace(/Ü/g, 'U').replace(/ü/g, 'u')
-            .replace(/Ö/g, 'O').replace(/ö/g, 'o')
-            .replace(/Ç/g, 'C').replace(/ç/g, 'c');
-        
+        const reportTitle = document.getElementById('raporBaslik')?.innerText || title;
         doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
-
-        // Genişlik hesaplaması ve yazdırma işlemi temizlenmiş başlık ile yapılır.
-        const textWidth = doc.getTextWidth(sanitizedTitle);
-        const textX = (pdfWidth - textWidth) / 2;
-        doc.text(sanitizedTitle, textX, y);
-        
-        y += 15; 
+        const textWidth = doc.getTextWidth(reportTitle);
+        doc.text(reportTitle, (pdfWidth - textWidth) / 2, y);
+        y += 15;
 
         const blocks = container.querySelectorAll('.report-block');
-
         for (const block of blocks) {
-            const canvas = await html2canvas(block, {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: '#ffffff',
-                willReadFrequently: true
-            });
-            
-            const imgData = canvas.toDataURL('image/jpeg', 0.95);
-            const imgHeight = (canvas.height * usableWidth) / canvas.width;
+            try {
+                const canvas = await html2canvas(block, { scale: 2, useCORS: true, backgroundColor: '#ffffff', willReadFrequently: true });
+                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                const imgHeight = (canvas.height * usableWidth) / canvas.width;
 
-            if (y + imgHeight > doc.internal.pageSize.getHeight() - margin) {
-                doc.addPage();
-                y = margin;
-            }
-            
-            doc.addImage(imgData, 'JPEG', margin, y, usableWidth, imgHeight);
-            y += imgHeight + 5;
-        }
-
-        doc.save(`${fileName}_${new Date().toLocaleDateString('tr-TR')}.pdf`);
-        pdfButton.textContent = originalButtonText;
-        pdfButton.disabled = false;
-
-    } 
-    else {
-        // Diğer basit tablo raporları için kod aynı kalır...
-        const tableElement = container.querySelector('table');
-        if (!tableElement) {
-            alert('Rapor içeriğinde indirilecek bir tablo bulunamadı.');
-            return;
-        }
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.text(title, 14, 20);
-        doc.autoTable({
-            html: tableElement,
-            startY: 30,
-            theme: 'grid',
-            styles: { fontSize: 9, cellPadding: 2 },
-            didParseCell: function (data) {
-                if (data.cell.text && typeof data.cell.text[0] === 'string') {
-                    data.cell.text[0] = data.cell.text[0]
-                        .replace(/İ/g, 'I').replace(/ı/g, 'i')
-                        .replace(/Ş/g, 'S').replace(/ş/g, 's')
-                        .replace(/Ğ/g, 'G').replace(/ğ/g, 'g')
-                        .replace(/Ü/g, 'U').replace(/ü/g, 'u')
-                        .replace(/Ö/g, 'O').replace(/ö/g, 'o')
-                        .replace(/Ç/g, 'C').replace(/ç/g, 'c')
-                        .replace(/₺/g, 'TL');
+                if (y + imgHeight > doc.internal.pageSize.getHeight() - margin) {
+                    doc.addPage();
+                    y = margin;
                 }
+                doc.addImage(imgData, 'JPEG', margin, y, usableWidth, imgHeight);
+                y += imgHeight + 5;
+            } catch (error) {
+                console.error("Rapor bloğu PDF'e eklenirken hata:", error);
             }
-        });
+        }
+        
         doc.save(`${fileName}_${new Date().toLocaleDateString('tr-TR')}.pdf`);
+        if(pdfButton) {
+            pdfButton.textContent = originalButtonText;
+            pdfButton.disabled = false;
+        }
     }
 }
-
-
 function generateRandomColors(count) {
     const colors = [];
     for (let i = 0; i < count; i++) {
@@ -3826,34 +3847,50 @@ function handleCariListeYazdir() {
 
 function handleYazdir(sectionId) {
     const sectionToPrint = document.getElementById(sectionId);
-    if (!sectionToPrint) {
-        console.error("Yazdırma hatası: Yazdırılacak bölüm bulunamadı ->", sectionId);
-        return;
+    if (!sectionToPrint) return;
+
+    // --- YENİ: Dinamik Stil Oluşturma ---
+    // Hangi raporun yazdırıldığına bakarak sayfa yönünü belirle
+    let pageOrientation = 'portrait'; // Varsayılan dikey
+    if (sectionId === 'dinamik-sut-raporu') {
+        pageOrientation = 'landscape'; // Sadece karne için yatay
     }
 
-    const reportContent = sectionToPrint.querySelector('.printable-content');
-
-    if (!reportContent || reportContent.innerHTML.trim() === '') {
-        alert("Lütfen yazdırmadan önce bir rapor oluşturun.");
-        return;
-    }
+    // Yazdırmaya özel stil etiketini oluştur
+    const printStyle = `
+        @page {
+            size: A4 ${pageOrientation};
+            margin: 1.2cm;
+        }
+    `;
     
+    const styleEl = document.createElement('style');
+    styleEl.id = 'print-style-override'; // Sonradan silebilmek için ID ver
+    styleEl.innerHTML = printStyle;
+    document.head.appendChild(styleEl);
+    // --- BİTİŞ ---
+
     const bodyElement = document.body;
     bodyElement.classList.add('print-active');
     sectionToPrint.classList.add('print-section-active');
-
-    const pageFormatClass = reportContent.classList.contains('format-a5') ? 'format-a5' : 'format-a4';
-    bodyElement.classList.add(pageFormatClass);
     
+    // Tarayıcının yazdırma penceresini aç
     window.print();
 }
 
 window.onafterprint = () => {
     const bodyElement = document.body;
-    bodyElement.classList.remove('print-active', 'format-a4', 'format-a5');
+    bodyElement.classList.remove('print-active');
     document.querySelectorAll('.print-section-active').forEach(el => {
         el.classList.remove('print-section-active');
     });
+
+    // --- YENİ: Yazdırma işlemi bitince eklediğimiz özel stili kaldır ---
+    const overrideStyle = document.getElementById('print-style-override');
+    if (overrideStyle) {
+        overrideStyle.remove();
+    }
+    // --- BİTİŞ ---
 };
 
 </script>
