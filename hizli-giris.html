@@ -435,7 +435,7 @@ async function handleSave() {
             displayCurrentProducer();
         }
 
-       function renderHistory() {
+     function renderHistory() {
     if (!historySection || !historyList || !sessionSummary) return;
     if (collectionHistory.length === 0) {
         historySection.style.display = 'none';
@@ -446,29 +446,43 @@ async function handleSave() {
     let totalMilk = 0,
         totalValue = 0;
 
-    collectionHistory.sort((a, b) => (b.kayitZamani.seconds || b.kayitZamani) - (a.kayitZamani.seconds || a.kayitZamani)).forEach(item => {
-        // Düzenleme fonksiyonuna doğru indeksi gönderebilmek için item'ın kendisini bulalım
-        const originalIndex = collectionHistory.findIndex(h => h.movementId === item.movementId);
-
+    // Geçmişi en yeniden eskiye doğru sırala
+    collectionHistory.sort((a, b) => {
+        const timeA = a.kayitZamani.seconds ? a.kayitZamani.toMillis() : a.kayitZamani.getTime();
+        const timeB = b.kayitZamani.seconds ? b.kayitZamani.toMillis() : b.kayitZamani.getTime();
+        return timeB - timeA;
+    }).forEach(item => {
         const listItem = document.createElement('li');
         listItem.className = 'history-item';
+        
+        // --- DÜZELTME: Buton artık sıra numarası yerine kaydın benzersiz ID'sini gönderiyor ---
         listItem.innerHTML = `
             <div class="history-item-info">${item.ureticiAdi}</div>
             <div class="history-item-details">
                 <span>${item.miktar.toFixed(1)} Litre</span>
                 <span class="price">${item.toplam_tutar.toFixed(2)} ₺</span>
             </div>
-            <div>
-                <button class="btn edit-btn" onclick="editHistoryItem(${originalIndex})">Düzenle</button>
-                <button class="btn delete-btn" onclick="deleteHistoryItem('${item.movementId}')">Sil</button>
-            </div>
+            <button class="btn edit-btn" onclick="editHistoryItem('${item.movementId}')">Düzenle</button>
         `;
         historyList.appendChild(listItem);
         totalMilk += item.miktar;
         totalValue += item.toplam_tutar;
     });
 
-    sessionSummary.innerHTML = `<p>Toplam Süt (Bu Oturum): <span>${totalMilk.toFixed(1)} Litre</span></p><p>Toplam Tutar (Bu Oturum): <span>${totalValue.toFixed(2)} ₺</span></p>`;
+    sessionSummary.innerHTML = `<p>Toplam Süt: <span>${totalMilk.toFixed(1)} Litre</span></p><p>Toplam Tutar: <span>${totalValue.toFixed(2)} ₺</span></p>`;
+}
+function editHistoryItem(movementId) {
+    // --- DÜZELTME: Fonksiyon artık sıra numarası yerine benzersiz ID ile arama yapıyor ---
+    const entry = collectionHistory.find(item => item.movementId === movementId);
+    
+    if (entry) {
+        // Kayıt bulunduysa, düzenleme modunu başlat
+        setEditMode(entry);
+    } else {
+        // Kayıt bulunamadıysa kullanıcıyı bilgilendir
+        alert("Düzenlenecek kayıt bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin.");
+        console.error(`Aranan movementId bulunamadı: ${movementId}`);
+    }
 }
     async function deleteHistoryItem(movementId) {
     const entryToDelete = collectionHistory.find(item => item.movementId === movementId);
@@ -514,14 +528,6 @@ async function handleSave() {
     } finally {
         saveBtn.disabled = false;
         skipBtn.disabled = false;
-    }
-}
-       function editHistoryItem(movementId) {
-    const entry = collectionHistory.find(item => item.movementId === movementId);
-    if (entry) {
-        setEditMode(entry);
-    } else {
-        alert("Düzenlenecek kayıt bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin.");
     }
 }
 
