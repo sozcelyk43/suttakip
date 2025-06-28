@@ -293,7 +293,7 @@
                    <div class="form-group"><label for="yemAdi">Ad:</label><input type="text" id="yemAdi" required></div>
                    <div class="form-group"><label for="yemKategorisi">Kategori:</label><select id="yemKategorisi"><option value="buyukbas">Büyükbaş</option><option value="kucukbas">Küçükbaş</option></select></div>
                    <div class="form-group"><label for="yemBirimi">Birim:</label><input type="text" id="yemBirimi" value="Çuval"></div>
-                   <div class="form-group"><label for="yemAlisFiyati">Alış Fiyatı:</label><input type="number" id="yemAlisFiyati" step="0.01"></div>
+                  
                    <div class="form-group"><label for="yemSatisFiyati">Satış Fiyatı:</label><input type="number" id="yemSatisFiyati" step="0.01"></div>
                </div><button type="submit" class="btn btn-primary" id="yemTanimKaydetBtn">Kaydet</button><button type="button" class="btn" id="yemTanimFormTemizleBtn" style="display:none;">Yeni</button></form></div>
                <div class="list-section"><h3>Tanımlı Yemler & Stok</h3><table><thead><tr><th>Kod</th><th>Ad</th><th>Kategori</th><th>Birim</th><th>Alış F.</th><th>Satış F.</th><th>Stok</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemStokListesiBody"></tbody></table></div>
@@ -2005,21 +2005,24 @@ async function handleYemTanimKaydet(event) {
     event.preventDefault();
     const currentUser = auth.currentUser;
     if (!currentUser) { alert("Lütfen giriş yapın."); return; }
+
     const formData = {
         kod: document.getElementById('yemKodu').value,
         ad: document.getElementById('yemAdi').value,
         kategori: document.getElementById('yemKategorisi').value,
         birim: document.getElementById('yemBirimi').value,
-        alisFiyati: parseFloat(document.getElementById('yemAlisFiyati').value) || 0,
+        // alisFiyati alanı kaldırıldı
         satisFiyati: parseFloat(document.getElementById('yemSatisFiyati').value) || 0,
         sahipId: currentUser.uid
     };
+
     try {
+        const editingYemTanimId = document.getElementById('yemTanimEditId').value;
         if (editingYemTanimId) {
-            await db.collection('yemler').doc(editingYemTanimId).set(formData, { merge: true }); // merge:true stokMiktarını korur
+            await db.collection('yemler').doc(editingYemTanimId).set(formData, { merge: true });
             alert("Yem tanımı güncellendi.");
         } else {
-            formData.stokMiktari = 0; // Yeni tanımda stok 0'dır.
+            formData.stokMiktari = 0;
             await db.collection('yemler').add(formData);
             alert("Yem tanımı kaydedildi.");
         }
@@ -2030,7 +2033,6 @@ async function handleYemTanimKaydet(event) {
         alert("Yem tanımı kaydedilirken bir hata oluştu.");
     }
 }
-
 
 
 
@@ -2177,20 +2179,18 @@ async function editYemTanimi(id) {
         if (!doc.exists) { alert("Düzenlenecek yem bulunamadı."); return; }
         const yem = doc.data();
         
-        editingYemTanimId = id;
         document.getElementById('yemTanimEditId').value = id;
         document.getElementById('yemKodu').value = yem.kod;
         document.getElementById('yemAdi').value = yem.ad;
         document.getElementById('yemKategorisi').value = yem.kategori;
         document.getElementById('yemBirimi').value = yem.birim;
-        document.getElementById('yemAlisFiyati').value = yem.alisFiyati;
+        // document.getElementById('yemAlisFiyati').value = yem.alisFiyati; // Bu satır kaldırıldı
         document.getElementById('yemSatisFiyati').value = yem.satisFiyati;
         
         setEditingMode(document.getElementById('yemTanimFormBaslik'), document.getElementById('yemTanimKaydetBtn'), document.getElementById('yemTanimFormTemizleBtn'), id, 'Yem Tanımı');
         document.getElementById('yemTanimForm').scrollIntoView();
     } catch (error) { console.error("Yem tanımı düzenlenirken hata:", error); }
 }
-
 
 function resetYemAlisForm() {
     document.getElementById('yemAlisForm').reset();
