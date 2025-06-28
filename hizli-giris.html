@@ -10,27 +10,20 @@
             --secondary-color: #6c757d;
             --success-color: #28a745;
             --danger-color: #dc3545;
+            --warning-color: #ffc107;
             --light-color: #f8f9fa;
             --dark-color: #343a40;
             --border-color: #dee2e6;
             --white-color: #fff;
         }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--light-color);
-            color: var(--dark-color);
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding: 0; background-color: var(--light-color); color: var(--dark-color); }
         .container { max-width: 600px; margin: 0 auto; padding: 15px; }
         header { background-color: var(--primary-color); color: var(--white-color); padding: 20px 15px; text-align: center; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         header h1 { margin: 0; font-size: 1.8em; }
         main { padding: 20px 0; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 1.1em; }
-        .form-group select, .form-group input[type="number"], .form-group input[type="date"], .form-group textarea {
-            width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1em; box-sizing: border-box;
-        }
+        .form-group select, .form-group input[type="number"], .form-group input[type="date"], .form-group textarea { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1em; box-sizing: border-box; }
         .time-selection { display: flex; gap: 10px; }
         .time-selection input[type="radio"] { display: none; }
         .time-selection label { flex: 1; text-align: center; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s ease-in-out; font-weight: 500; }
@@ -48,11 +41,12 @@
         #session-summary p { margin: 5px 0; font-size: 1.1em; }
         #session-summary span { font-weight: 700; color: var(--primary-color); }
         #history-list { list-style: none; padding: 0; margin: 0; }
-        .history-item { background-color: var(--white-color); border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .history-item-info { font-size: 1.1em; font-weight: 600; }
+        .history-item { background-color: var(--white-color); border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .history-item-info { font-size: 1.1em; font-weight: 600; flex-grow: 1; }
         .history-item-details { text-align: right; }
         .history-item-details span { display: block; }
         .history-item-details .price { font-weight: 700; color: var(--success-color); }
+        .history-item .edit-btn { background-color: var(--warning-color); color: var(--dark-color); padding: 8px 12px; font-size: 0.9em; flex-shrink: 0;}
     </style>
 </head>
 <body>
@@ -135,17 +129,13 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // --- Global Değişkenler ---
         let currentUserId = '', currentUserName = '', sahipId = '';
         let routeProducers = [];
         let currentProducerIndex = 0;
-        let processedProducers = new Set();
         let collectionHistory = [];
 
-        // --- Element Referansları ---
         const collectionDateInput = document.getElementById('collection-date');
         const unitPriceInput = document.getElementById('unit-price');
-        const timeRadios = document.querySelectorAll('input[name="time"]');
         const tankSelect = document.getElementById('tank');
         const categorySelect = document.getElementById('category');
         const producerPanel = document.getElementById('producer-panel');
@@ -159,26 +149,21 @@
         const historyList = document.getElementById('history-list');
         const sessionSummary = document.getElementById('session-summary');
 
-        // --- OTURUM KONTROLÜ ---
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUserId = user.uid;
                 db.collection('kullanicilar').doc(currentUserId).get().then(doc => {
                     if (doc.exists && doc.data().sahipId) {
-                        const userData = doc.data();
-                        sahipId = userData.sahipId;
+                        sahipId = doc.data().sahipId;
                         initializeApp();
                     } else {
                         alert("Kullanıcı profili veya sahip bilgisi bulunamadı.");
                         window.location.href = 'login.html';
                     }
                 });
-            } else {
-                window.location.href = 'login.html';
-            }
+            } else { window.location.href = 'login.html'; }
         });
 
-        // --- UYGULAMA BAŞLATMA ---
         async function initializeApp() {
             collectionDateInput.value = new Date().toISOString().split('T')[0];
             const settings = await getSettings();
@@ -186,28 +171,23 @@
 
             await Promise.all([populateTanks(), populateCategories()]);
 
-            // Event Listeners
             categorySelect.addEventListener('change', startRoute);
             producerSelect.addEventListener('change', jumpToProducer);
             saveBtn.addEventListener('click', handleSaveAndNext);
             skipBtn.addEventListener('click', handleSkip);
 
-            // Oturum sıfırlayıcılar
-            collectionDateInput.addEventListener('change', resetSession);
-            timeRadios.forEach(radio => radio.addEventListener('change', resetSession));
-            tankSelect.addEventListener('change', resetSession);
+            [collectionDateInput, tankSelect, ...document.querySelectorAll('input[name="time"]')].forEach(el => {
+                el.addEventListener('change', () => { if (routeProducers.length > 0) startRoute(); });
+            });
         }
 
         async function getSettings() {
-            const settingsRef = db.collection('ayarlar').doc(sahipId);
-            const doc = await settingsRef.get();
+            const doc = await db.collection('ayarlar').doc(sahipId).get();
             return doc.exists ? doc.data() : {};
         }
 
-        // --- ROTA VE VERİ YÖNETİMİ ---
         function resetSession() {
             collectionHistory = [];
-            processedProducers.clear();
             routeProducers = [];
             historySection.style.display = 'none';
             historyList.innerHTML = '';
@@ -220,18 +200,8 @@
             const category = categorySelect.value;
             if (!category) return;
 
-            const snapshot = await db.collection('cariler')
-                .where('sahipId', '==', sahipId)
-                .where('kategori', '==', category)
-                .where('durum', '==', 'aktif')
-                .where('cariGrup', '==', 'üretici')
-                .orderBy('rotaSirasi')
-                .get();
-            
-            if (snapshot.empty) {
-                alert("Bu rotada kayıtlı üretici bulunamadı.");
-                return;
-            }
+            const snapshot = await db.collection('cariler').where('sahipId', '==', sahipId).where('kategori', '==', category).where('durum', '==', 'aktif').where('cariGrup', '==', 'üretici').orderBy('rotaSirasi').get();
+            if (snapshot.empty) { alert("Bu rotada kayıtlı üretici bulunamadı."); return; }
 
             routeProducers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             currentProducerIndex = 0;
@@ -241,6 +211,11 @@
         }
         
         function displayCurrentProducer() {
+            if (currentProducerIndex >= routeProducers.length) {
+                alert(`${categorySelect.options[categorySelect.selectedIndex].text} rotası tamamlandı!`);
+                producerPanel.style.display = 'none';
+                return;
+            }
             const producer = routeProducers[currentProducerIndex];
             currentProducerName.textContent = producer.adiSoyadi;
             producerSelect.value = currentProducerIndex;
@@ -252,12 +227,10 @@
         function populateProducerSelect() {
             producerSelect.innerHTML = '';
             routeProducers.forEach((producer, index) => {
-                if (!processedProducers.has(producer.id)) {
-                    const option = document.createElement('option');
-                    option.value = index;
-                    option.textContent = `${producer.rotaSirasi}. ${producer.adiSoyadi}`;
-                    producerSelect.appendChild(option);
-                }
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${producer.rotaSirasi}. ${producer.adiSoyadi}`;
+                producerSelect.appendChild(option);
             });
         }
 
@@ -269,42 +242,29 @@
             }
         }
         
-        function findNextAvailableProducerIndex() {
-            let nextIndex = currentProducerIndex + 1;
-            while (nextIndex < routeProducers.length && processedProducers.has(routeProducers[nextIndex].id)) {
-                nextIndex++;
-            }
-            return nextIndex;
-        }
-
         function goToNextProducer() {
-            const nextIndex = findNextAvailableProducerIndex();
-            if (nextIndex < routeProducers.length) {
-                currentProducerIndex = nextIndex;
-                populateProducerSelect();
-                displayCurrentProducer();
-            } else {
-                alert(`${categorySelect.options[categorySelect.selectedIndex].text} rotası tamamlandı!`);
-                producerPanel.style.display = 'none';
-            }
+            currentProducerIndex++;
+            displayCurrentProducer();
         }
 
-        // --- VERİ KAYDETME VE GÜNCELLEME ---
         async function handleSaveAndNext() {
             const unitPrice = parseFloat(unitPriceInput.value);
             const quantity = parseFloat(quantityInput.value);
             const tankId = tankSelect.value;
             const currentProducer = routeProducers[currentProducerIndex];
 
-            if (!unitPrice || unitPrice <= 0) { alert('Lütfen geçerli bir birim fiyatı giriniz.'); unitPriceInput.focus(); return; }
-            if (!quantity || quantity <= 0) { alert('Lütfen geçerli bir miktar giriniz.'); quantityInput.focus(); return; }
-            if (!tankId) { alert('Lütfen bir tank seçin.'); tankSelect.focus(); return; }
+            if (!unitPrice || unitPrice <= 0) { alert('Lütfen geçerli bir birim fiyatı giriniz.'); return; }
+            if (!quantity || quantity <= 0) { alert('Lütfen geçerli bir miktar giriniz.'); return; }
+            if (!tankId) { alert('Lütfen bir tank seçin.'); return; }
             
             saveBtn.disabled = true;
-            saveBtn.textContent = 'Kaydediliyor...';
+            skipBtn.disabled = true;
             
-            const totalPrice = (quantity * unitPrice).toFixed(2);
+            const totalPrice = (quantity * unitPrice);
+            const movementRef = db.collection('tank_hareketleri').doc();
+            
             const entryData = {
+                movementId: movementRef.id,
                 ureticiId: currentProducer.id,
                 ureticiAdi: currentProducer.adiSoyadi,
                 sahipId: sahipId,
@@ -314,13 +274,11 @@
                 zaman_dilimi: document.querySelector('input[name="time"]:checked').value,
                 miktar: quantity,
                 birim_fiyat: unitPrice,
-                toplam_tutar: parseFloat(totalPrice),
+                toplam_tutar: totalPrice,
                 not: notesInput.value,
-                kayitZamani: new Date()
             };
 
             const tankRef = db.collection('tanklar').doc(tankId);
-            const movementRef = db.collection('tank_hareketleri').doc();
             const batch = db.batch();
             batch.set(movementRef, entryData);
             batch.update(tankRef, { mevcutLitre: firebase.firestore.FieldValue.increment(quantity) });
@@ -328,7 +286,6 @@
             try {
                 await batch.commit();
                 collectionHistory.push(entryData);
-                processedProducers.add(currentProducer.id);
                 renderHistory();
                 goToNextProducer();
             } catch (error) {
@@ -336,27 +293,25 @@
                 alert("Veri kaydedilirken bir hata oluştu: " + error.message);
             } finally {
                 saveBtn.disabled = false;
-                saveBtn.textContent = 'Kaydet ve Sonraki';
+                skipBtn.disabled = false;
             }
         }
 
         function handleSkip() {
-            const currentProducer = routeProducers[currentProducerIndex];
-            processedProducers.add(currentProducer.id);
-            goToNextProducer();
+            const producerToMove = routeProducers.splice(currentProducerIndex, 1)[0];
+            routeProducers.push(producerToMove);
+            populateProducerSelect();
+            displayCurrentProducer();
         }
 
         function renderHistory() {
-            if (collectionHistory.length === 0) {
-                historySection.style.display = 'none';
-                return;
-            }
             historySection.style.display = 'block';
             historyList.innerHTML = '';
             let totalMilk = 0;
             let totalValue = 0;
 
-            collectionHistory.slice().reverse().forEach(item => {
+            collectionHistory.slice().reverse().forEach((item, index) => {
+                const displayIndex = collectionHistory.length - 1 - index;
                 const listItem = document.createElement('li');
                 listItem.className = 'history-item';
                 listItem.innerHTML = `
@@ -365,6 +320,7 @@
                         <span>${item.miktar.toFixed(1)} Litre</span>
                         <span class="price">${item.toplam_tutar.toFixed(2)} ₺</span>
                     </div>
+                    <button class="btn edit-btn" onclick="editHistoryItem(${displayIndex})">Düzenle</button>
                 `;
                 historyList.appendChild(listItem);
                 totalMilk += item.miktar;
@@ -376,8 +332,40 @@
                 <p>Toplam Tutar (Bu Oturum): <span>${totalValue.toFixed(2)} ₺</span></p>
             `;
         }
+        
+        async function editHistoryItem(historyIndex) {
+            if (!confirm('Bu girişi düzenlemek, orijinal kaydı silecek ve tanktan miktarını düşecektir. Devam etmek istiyor musunuz?')) return;
+            
+            const entryToEdit = collectionHistory[historyIndex];
+            if (!entryToEdit) return;
 
-        // --- VERİTABANINDAN VERİ ÇEKME FONKSİYONLARI ---
+            const tankRef = db.collection('tanklar').doc(entryToEdit.tankId);
+            const movementRef = db.collection('tank_hareketleri').doc(entryToEdit.movementId);
+            const batch = db.batch();
+            batch.update(tankRef, { mevcutLitre: firebase.firestore.FieldValue.increment(-entryToEdit.miktar) });
+            batch.delete(movementRef);
+
+            try {
+                await batch.commit();
+                
+                collectionHistory.splice(historyIndex, 1);
+                
+                const producerIndexInRoute = routeProducers.findIndex(p => p.id === entryToEdit.ureticiId);
+                if(producerIndexInRoute !== -1) {
+                    currentProducerIndex = producerIndexInRoute;
+                    displayCurrentProducer();
+                    quantityInput.value = entryToEdit.miktar;
+                    notesInput.value = entryToEdit.not;
+                    unitPriceInput.value = entryToEdit.birim_fiyat;
+                }
+                
+                renderHistory();
+            } catch(error) {
+                console.error("Düzenleme hatası (geri alma):", error);
+                alert("Kayıt geri alınırken bir hata oluştu: " + error.message);
+            }
+        }
+
         async function populateTanks() {
             tankSelect.innerHTML = '<option value="">Yükleniyor...</option>';
             const snapshot = await db.collection('tanklar').where('sahipId', '==', sahipId).orderBy('ad').get();
