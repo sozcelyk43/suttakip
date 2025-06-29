@@ -266,38 +266,37 @@ function getSessionKey(category) {
     return `session_${sahipId}_${date}_${time}_${category || 'none'}`;
 }
 
-        async function startRoute() {
-            producerPanel.style.display = 'none';
-            collectionHistory = [];
-            
-            const category = categorySelect.value;
-            if (!category) { return; }
+async function startRoute() {
+    producerPanel.style.display = 'none';
+    collectionHistory = [];
+    
+    const category = categorySelect.value;
+    if (!category) { return; }
 
-            const alimTarihi = collectionDateInput.value;
-            const zamanDilimi = document.querySelector('input[name="time"]:checked').value;
-            
-            const [producersSnapshot, existingEntriesSnapshot] = await Promise.all([
-                db.collection('cariler').where('sahipId', '==', sahipId).where('kategori', '==', category).where('durum', '==', 'aktif').where('cariGrup', '==', 'üretici').orderBy('rotaSirasi').get(),
-                db.collection('tank_hareketleri').where('sahipId', '==', sahipId).where('alim_tarihi', '==', alimTarihi).where('zaman_dilimi', '==', zamanDilimi).get()
-            ]);
+    const alimTarihi = collectionDateInput.value;
+    const zamanDilimi = document.querySelector('input[name="time"]:checked').value;
+    
+    const [producersSnapshot, existingEntriesSnapshot] = await Promise.all([
+        db.collection('cariler').where('sahipId', '==', sahipId).where('kategori', '==', category).where('durum', '==', 'aktif').where('cariGrup', 'array-contains', 'üretici').orderBy('rotaSirasi').get(),
+        db.collection('tank_hareketleri').where('sahipId', '==', sahipId).where('alim_tarihi', '==', alimTarihi).where('zaman_dilimi', '==', zamanDilimi).get()
+    ]);
 
-            collectionHistory = existingEntriesSnapshot.docs.map(doc => doc.data());
-            renderHistory();
+    collectionHistory = existingEntriesSnapshot.docs.map(doc => doc.data());
+    renderHistory();
 
-            const savedProducerIds = new Set(collectionHistory.map(entry => entry.ureticiId));
-            routeProducers = producersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(p => !savedProducerIds.has(p.id));
+    const savedProducerIds = new Set(collectionHistory.map(entry => entry.ureticiId));
+    routeProducers = producersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(p => !savedProducerIds.has(p.id));
 
-            if(routeProducers.length === 0) {
-                alert("Bu rota için tüm süt girişleri tamamlanmış.");
-                return;
-            }
-            
-            currentProducerIndex = 0;
-            populateProducerSelect();
-            displayCurrentProducer();
-            producerPanel.style.display = 'block';
-        }
-
+    if(routeProducers.length === 0) {
+        alert("Bu rota için tüm süt girişleri tamamlanmış.");
+        return;
+    }
+    
+    currentProducerIndex = 0;
+    populateProducerSelect();
+    displayCurrentProducer();
+    producerPanel.style.display = 'block';
+}
         function displayCurrentProducer() {
             if (currentProducerIndex >= routeProducers.length) {
                 producerPanel.style.display = 'none';
