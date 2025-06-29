@@ -522,3 +522,20 @@ body.pdf-generating .pdf-source-section .container {
 #sut-rapor-tablosu tfoot strong {
     color: var(--primary-color);
 }
+/* ÇIKIŞ BUTONU KULLANICI ADI STİLİ */
+#logoutButton {
+    /* Buton içeriğini ortala ve satır yüksekliğini ayarla */
+    text-align: center;
+    line-height: 1.4; 
+    padding-top: 8px;    /* Üst boşluğu biraz artır */
+    padding-bottom: 8px; /* Alt boşluğu biraz artır */
+}
+
+#logoutUserEmail {
+    font-size: 0.7em;          /* Daha küçük font boyutu */
+    font-weight: 300;          /* Daha ince font */
+    color: #ecf0f1;             /* Hafif soluk bir renk */
+    opacity: 0.8;              /* Biraz şeffaflık */
+    text-transform: none;      /* E-posta adresi küçük harf kalsın */
+    margin-top: 2px;           /* Üstteki yazı ile arasına hafif boşluk */
+}
