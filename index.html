@@ -3777,33 +3777,11 @@ async function handleHesapOzetiRaporuOlustur() {
         const endDate = new Date(year, month, 0).toISOString().split('T')[0];
         const devirTarihiStr = new Date(year, month - 1, 0).toISOString().split('T')[0];
         
-        let devredenAlacak = 0, devredenBorc = 0;
-
-        // 1. ADIM: Sadece "Açılış Bakiyesi" kaydını özel olarak bul ve hesaba kat.
-        const acilisBakiyeSnapshot = await db.collection('odemeVeTahsilatlar')
-            .where('sahipId', '==', sahipId)
-            .where('cariId', '==', cariId)
-            .where('aciklama', '==', 'Açılış Bakiyesi')
-            .get();
-
-        if (!acilisBakiyeSnapshot.empty) {
-            const acilisData = acilisBakiyeSnapshot.docs[0].data();
-            if (acilisData.islemTuru === 'alacak') {
-                devredenAlacak += acilisData.tutar;
-            } else if (acilisData.islemTuru === 'borc') {
-                devredenBorc += acilisData.tutar;
-            }
-        }
-        
-        // 2. ADIM: Diğer devreden işlemleri, "Açılış Bakiyesi" hariç tutarak sorgula.
+        // Düzeltilmiş createQuery fonksiyonu: "aciklama" üzerindeki '!=' filtresi kaldırıldı.
         const createQuery = (collection, isDevir) => {
             let q = db.collection(collection).where('sahipId', '==', sahipId).where('cariId', '==', cariId);
             if (isDevir) {
                 q = q.where('tarih', '<=', devirTarihiStr);
-                // "Açılış Bakiyesi" olanları tekrar saymamak için hariç tut
-                if (collection === 'odemeVeTahsilatlar') {
-                    q = q.where('aciklama', '!=', 'Açılış Bakiyesi');
-                }
             } else {
                 q = q.where('tarih', '>=', startDate).where('tarih', '<=', endDate);
             }
@@ -3822,17 +3800,17 @@ async function handleHesapOzetiRaporuOlustur() {
         
         const yemMap = new Map(yemlerSnapshot.docs.map(doc => [doc.id, doc.data()]));
         
-        // 3. ADIM: Diğer devreden işlemleri, açılış bakiyesinin üzerine ekle.
+        let devredenAlacak = 0, devredenBorc = 0;
         devirSut.forEach(doc => devredenAlacak += doc.data().toplamTutar);
         devirYemSatis.forEach(doc => devredenBorc += doc.data().toplamTutar);
         devirOdeme.forEach(doc => { 
             const data = doc.data();
-            if (data.islemTuru === 'odeme') devredenAlacak += data.tutar;
-            else if (data.islemTuru === 'tahsilat') devredenBorc += data.tutar;
+            // Bu kısım "Açılış Bakiyesi" kayıtlarını da ('borc' ve 'alacak' türleri ile) doğru şekilde işler.
+            if (data.islemTuru === 'odeme' || data.islemTuru === 'alacak') devredenAlacak += data.tutar;
+            else if (data.islemTuru === 'tahsilat' || data.islemTuru === 'borc') devredenBorc += data.tutar;
         });
         const devredenBakiye = devredenAlacak - devredenBorc;
 
-        // --- Raporun geri kalanı aynı şekilde devam ediyor ---
         let toplamSabah = 0, toplamAksam = 0, toplamLitre = 0, toplamSutDegeri = 0;
         if (!aySut.empty) {
             aySut.forEach(doc => {
@@ -3904,7 +3882,6 @@ async function handleHesapOzetiRaporuOlustur() {
         console.error("Hesap özeti raporu oluşturulurken hata:", error);
     }
 }
-
 function toggleReportButtons(reportPrefix, show) {
     const displayStyle = show ? 'inline-block' : 'none';
     const pdfBtn = document.getElementById(`${reportPrefix}PdfBtn`);
