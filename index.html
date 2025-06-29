@@ -948,7 +948,7 @@ async function getSettings() {
         console.error("getSettings çağrıldı ancak aktif bir kullanıcı oturumu bulunamadı.");
         return;
     }
-    const settingsRef = db.collection('ayarlar').doc(currentUser.uid);
+    const settingsRef = db.collection('ayarlar').doc(sahipId);
     try {
         const doc = await settingsRef.get();
         if (doc.exists) {
@@ -972,7 +972,7 @@ async function handleAyarlarKaydet(event) {
     if (!isNaN(yeniFiyat) && yeniFiyat >= 0) {
         try {
             // Ayarları veritabanına kaydet
-            await db.collection('ayarlar').doc(currentUser.uid).set({ defaultMilkPrice: yeniFiyat, sahipId: currentUser.uid }, { merge: true });
+            await db.collection('ayarlar').doc(sahipId).set({ defaultMilkPrice: yeniFiyat, sahipId: sahipId }, { merge: true });
             // Global ayar değişkenini güncelle
             globalSettings.defaultMilkPrice = yeniFiyat;
             alert('Genel ayarlar kaydedildi.');
@@ -1034,9 +1034,9 @@ async function updateDashboardStats() {
         const todayStr = today.toISOString().split('T')[0];
         const yesterdayStr = yesterday.toISOString().split('T')[0];
 
-        const todaySutPromise = db.collection('sut_alimlari').where("sahipId", "==", currentUser.uid).where("tarih", "==", todayStr).get();
-        const yesterdaySutPromise = db.collection('sut_alimlari').where("sahipId", "==", currentUser.uid).where("tarih", "==", yesterdayStr).get();
-        const carilerPromise = db.collection('cariler').where("sahipId", "==", currentUser.uid).where("durum", "==", "aktif").get();
+        const todaySutPromise = db.collection('sut_alimlari').where("sahipId", "==", sahipId).where("tarih", "==", todayStr).get();
+        const yesterdaySutPromise = db.collection('sut_alimlari').where("sahipId", "==", sahipId).where("tarih", "==", yesterdayStr).get();
+        const carilerPromise = db.collection('cariler').where("sahipId", "==", sahipId).where("durum", "==", "aktif").get();
 
         const [sutSnapshot, dunkuSutSnapshot, carilerSnapshot] = await Promise.all([todaySutPromise, yesterdaySutPromise, carilerPromise]);
         
@@ -1072,7 +1072,7 @@ async function updateDashboardStats() {
     
     // --- Bakiye Toplamları ve İlerleme Çubukları ---
     try {
-        const allCarilerSnapshot = await db.collection('cariler').where("sahipId", "==", currentUser.uid).get();
+        const allCarilerSnapshot = await db.collection('cariler').where("sahipId", "==", sahipId).get();
         let toplamMusteriBorcu = 0;
         let toplamMusteriAlacagi = 0;
         
@@ -1164,7 +1164,7 @@ async function handleCariKaydet(event) {
         vergiDairesi: document.getElementById('cariVergiDairesi').value,
         vergiNo: document.getElementById('cariVergiNo').value,
         notlar: document.getElementById('cariNotlar').value,
-        sahipId: currentUser.uid
+        sahipId: sahipId
     };
 
     try {
@@ -1180,20 +1180,20 @@ async function handleCariKaydet(event) {
                     // Rota sırası değişim mantığı...
                     if (yeniRotaSirasi && eskiRotaSirasi) {
                          if (yeniRotaSirasi > eskiRotaSirasi) {
-                            const carilerToUpdateQuery = db.collection('cariler').where('sahipId', '==', currentUser.uid).where('rotaSirasi', '>', eskiRotaSirasi).where('rotaSirasi', '<=', yeniRotaSirasi);
+                            const carilerToUpdateQuery = db.collection('cariler').where('sahipId', '==', sahipId).where('rotaSirasi', '>', eskiRotaSirasi).where('rotaSirasi', '<=', yeniRotaSirasi);
                             const snapshot = await carilerToUpdateQuery.get();
                             snapshot.forEach(doc => transaction.update(doc.ref, { rotaSirasi: doc.data().rotaSirasi - 1 }));
                         } else {
-                            const carilerToUpdateQuery = db.collection('cariler').where('sahipId', '==', currentUser.uid).where('rotaSirasi', '>=', yeniRotaSirasi).where('rotaSirasi', '<', eskiRotaSirasi);
+                            const carilerToUpdateQuery = db.collection('cariler').where('sahipId', '==', sahipId).where('rotaSirasi', '>=', yeniRotaSirasi).where('rotaSirasi', '<', eskiRotaSirasi);
                             const snapshot = await carilerToUpdateQuery.get();
                             snapshot.forEach(doc => transaction.update(doc.ref, { rotaSirasi: doc.data().rotaSirasi + 1 }));
                         }
                     } else if (yeniRotaSirasi && !eskiRotaSirasi) {
-                        const carilerToUpdateQuery = db.collection('cariler').where('sahipId', '==', currentUser.uid).where('rotaSirasi', '>=', yeniRotaSirasi);
+                        const carilerToUpdateQuery = db.collection('cariler').where('sahipId', '==', sahipId).where('rotaSirasi', '>=', yeniRotaSirasi);
                         const snapshot = await carilerToUpdateQuery.get();
                         snapshot.forEach(doc => transaction.update(doc.ref, { rotaSirasi: doc.data().rotaSirasi + 1 }));
                     } else if (!yeniRotaSirasi && eskiRotaSirasi) {
-                         const carilerToUpdateQuery = db.collection('cariler').where('sahipId', '==', currentUser.uid).where('rotaSirasi', '>', eskiRotaSirasi);
+                         const carilerToUpdateQuery = db.collection('cariler').where('sahipId', '==', sahipId).where('rotaSirasi', '>', eskiRotaSirasi);
                         const snapshot = await carilerToUpdateQuery.get();
                         snapshot.forEach(doc => transaction.update(doc.ref, { rotaSirasi: doc.data().rotaSirasi - 1 }));
                     }
@@ -1203,7 +1203,7 @@ async function handleCariKaydet(event) {
         } else {
             await db.runTransaction(async (transaction) => {
                 if (yeniRotaSirasi) {
-                    const carilerToUpdateQuery = db.collection('cariler').where('sahipId', '==', currentUser.uid).where('rotaSirasi', '>=', yeniRotaSirasi);
+                    const carilerToUpdateQuery = db.collection('cariler').where('sahipId', '==', sahipId).where('rotaSirasi', '>=', yeniRotaSirasi);
                     const snapshot = await carilerToUpdateQuery.get();
                     snapshot.forEach(doc => {
                         transaction.update(doc.ref, { rotaSirasi: doc.data().rotaSirasi + 1 });
@@ -1220,7 +1220,7 @@ async function handleCariKaydet(event) {
                         aciklama: "Açılış Bakiyesi",
                         cariId: newCariRef.id,
                         islemTuru: bakiyeTuru,
-                        sahipId: currentUser.uid,
+                        sahipId: sahipId,
                         tarih: new Date(1990, 0, 1).toISOString().split('T')[0],
                         tutar: acilisBakiye
                     };
@@ -1256,7 +1256,7 @@ async function renderCariListesi() {
     const raporTarihEtiketi = document.getElementById('raporTarihEtiketi');
     raporTarihEtiketi.textContent = tarihFiltresi ? `${formatDate(tarihFiltresi)} Tarihi İtibarıyla` : 'Güncel Durum';
 
-    let query = db.collection('cariler').where("sahipId", "==", currentUser.uid);
+    let query = db.collection('cariler').where("sahipId", "==", sahipId);
     if (kategori) {
         query = query.where("kategori", "==", kategori);
     }
@@ -1550,7 +1550,7 @@ async function renderAylikSutunGrafik() {
         const endDateStr = new Date(year, month, 0).toISOString().split('T')[0];
 
         const alimlarSnapshot = await db.collection('sut_alimlari')
-            .where('sahipId', '==', currentUser.uid)
+            .where('sahipId', '==', sahipId)
             .where('tarih', '>=', startDateStr)
             .where('tarih', '<=', endDateStr)
             .get();
@@ -1563,7 +1563,7 @@ async function renderAylikSutunGrafik() {
         }
         
         // --- Veri Varsa Grafik Çizim Kodları ---
-        const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', currentUser.uid).get();
+        const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', sahipId).get();
         const kategoriMap = new Map();
         carilerSnapshot.forEach(doc => {
             kategoriMap.set(doc.id, doc.data().kategori || 'Belirtilmemiş');
@@ -1712,7 +1712,7 @@ Silme işlemini onaylamak için lütfen carinin kodunu (${cariKodu}) aşağıdak
         const hareketler = ['sut_alimlari', 'yem_alimlari', 'yem_satislari', 'odemeVeTahsilatlar'];
         const hareketSnapshots = [];
         for (const koleksiyon of hareketler) {
-            const q = db.collection(koleksiyon).where('cariId', '==', id).where('sahipId', '==', currentUser.uid);
+            const q = db.collection(koleksiyon).where('cariId', '==', id).where('sahipId', '==', sahipId);
             const snapshot = await q.get();
             hareketSnapshots.push(snapshot);
         }
@@ -1720,7 +1720,7 @@ Silme işlemini onaylamak için lütfen carinin kodunu (${cariKodu}) aşağıdak
         let carilerToUpdateSnapshot = null;
         if (silinenRotaSirasi) {
             const carilerToUpdateQuery = db.collection('cariler')
-                .where('sahipId', '==', currentUser.uid)
+                .where('sahipId', '==', sahipId)
                 .where('rotaSirasi', '>', silinenRotaSirasi);
             carilerToUpdateSnapshot = await carilerToUpdateQuery.get();
         }
@@ -1765,7 +1765,7 @@ async function handleCariKategoriEkle(event) {
     if (!currentUser) { alert("Lütfen giriş yapın."); return; }
     if (yeniAd === '') { alert('Kategori/Köy adı boş olamaz.'); return; }
     try {
-        await db.collection('cari_kategorileri').add({ ad: yeniAd, sahipId: currentUser.uid });
+        await db.collection('cari_kategorileri').add({ ad: yeniAd, sahipId: sahipId });
         await Promise.all([
           renderCariKategoriListesi(),
           populateCariKategoriSelect(document.getElementById('cariKategori')),
@@ -1784,7 +1784,7 @@ async function renderCariKategoriListesi() {
     const currentUser = auth.currentUser;
     if (!cariKategoriListesiUl || !currentUser) return;
     try {
-        const snapshot = await db.collection('cari_kategorileri').where("sahipId", "==", currentUser.uid).orderBy('ad').get();
+        const snapshot = await db.collection('cari_kategorileri').where("sahipId", "==", sahipId).orderBy('ad').get();
         const kategoriler = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
         cariKategoriListesiUl.innerHTML = ''; 
         if (kategoriler.length === 0) { cariKategoriListesiUl.innerHTML = '<li>Tanımlı kategori/köy bulunmuyor.</li>'; return; } 
@@ -1808,7 +1808,7 @@ async function populateCariKategoriFiltre() {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
     try {
-        const snapshot = await db.collection('cari_kategorileri').where("sahipId", "==", currentUser.uid).orderBy('ad').get();
+        const snapshot = await db.collection('cari_kategorileri').where("sahipId", "==", sahipId).orderBy('ad').get();
         const kategoriler = snapshot.docs.map(doc => doc.data());
         const currentValue = selectElement.value; 
         selectElement.innerHTML = `<option value="">Tüm Kategoriler</option>`; 
@@ -1822,7 +1822,7 @@ async function populateCariKategoriSelect(selectElement, defaultOptionText = "Se
     const currentUser = auth.currentUser;
     if (!currentUser) return;
     try {
-        const snapshot = await db.collection('cari_kategorileri').where("sahipId", "==", currentUser.uid).orderBy('ad').get();
+        const snapshot = await db.collection('cari_kategorileri').where("sahipId", "==", sahipId).orderBy('ad').get();
         const kategoriler = snapshot.docs.map(doc => doc.data());
         const currentValue = selectElement.value; 
         selectElement.innerHTML = `<option value="">${defaultOptionText}</option>`; 
@@ -1838,7 +1838,7 @@ async function populateCariSelect(selectElement, filterGroup = null, defaultText
 
     selectElement.innerHTML = `<option value="">Yükleniyor...</option>`;
     
-    let query = db.collection('cariler').where("sahipId", "==", currentUser.uid).where("durum", "==", "aktif");
+    let query = db.collection('cariler').where("sahipId", "==", sahipId).where("durum", "==", "aktif");
 
     if (filterGroup) {
         query = query.where('cariGrup', '==', filterGroup);
@@ -1874,7 +1874,7 @@ async function populateYemSelect(selectElement, defaultText = "Yem Seçiniz...")
     const currentUser = auth.currentUser;
     if (!currentUser) return;
     try {
-        const snapshot = await db.collection('yemler').where("sahipId", "==", currentUser.uid).orderBy('ad').get();
+        const snapshot = await db.collection('yemler').where("sahipId", "==", sahipId).orderBy('ad').get();
         const yemler = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
         
         window.yemDataMap = new Map(); // Fiyatları saklamak için global bir map
@@ -1905,7 +1905,7 @@ async function renderGunlukSutGrafik() {
 
     try {
         const tarihStr = getTodayForInput();
-        const alimlarSnapshot = await db.collection('sut_alimlari').where('sahipId', '==', currentUser.uid).where('tarih', '==', tarihStr).get();
+        const alimlarSnapshot = await db.collection('sut_alimlari').where('sahipId', '==', sahipId).where('tarih', '==', tarihStr).get();
         
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
@@ -1917,7 +1917,7 @@ async function renderGunlukSutGrafik() {
             return;
         }
 
-        const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', currentUser.uid).get();
+        const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', sahipId).get();
         const kategoriMap = new Map();
         carilerSnapshot.forEach(doc => {
             kategoriMap.set(doc.id, doc.data().kategori || 'Belirtilmemiş');
@@ -2001,7 +2001,7 @@ async function renderKullaniciListesi() {
     const currentUser = auth.currentUser;
     if(!kullaniciListesiBody || !currentUser) return;
     try {
-        const snapshot = await db.collection('kullanicilar').where("sahipId", "==", currentUser.uid).get();
+        const snapshot = await db.collection('kullanicilar').where("sahipId", "==", sahipId).get();
         kullaniciListesiBody.innerHTML = '';
         snapshot.forEach(doc => {
             const user = doc.data();
@@ -2076,7 +2076,7 @@ async function handleYemTanimKaydet(event) {
         birim: document.getElementById('yemBirimi').value,
         // alisFiyati alanı kaldırıldı
         satisFiyati: parseFloat(document.getElementById('yemSatisFiyati').value) || 0,
-        sahipId: currentUser.uid
+        sahipId: sahipId
     };
 
     try {
@@ -2118,7 +2118,7 @@ async function renderYemStokListesi() {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
     try {
-        const snapshot = await db.collection('yemler').where('sahipId', '==', currentUser.uid).orderBy('ad').get();
+        const snapshot = await db.collection('yemler').where('sahipId', '==', sahipId).orderBy('ad').get();
         if (snapshot.empty) {
             yemStokListesiBody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Tanımlı yem bulunmuyor.</td></tr>';
             return;
@@ -2166,7 +2166,7 @@ async function handleYemAlisKaydet(event) {
         cariId: document.getElementById('yemAlisTedarikci').value || '',
         alisFiyati: birimFiyat,
         toplamTutar: miktar * birimFiyat,
-        sahipId: currentUser.uid
+        sahipId: sahipId
     };
 
     const yemRef = db.collection('yemler').doc(yemId);
@@ -2267,7 +2267,7 @@ async function renderYemAlisHareketleri() {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
     try {
-        const snapshot = await db.collection('yem_alimlari').where('sahipId', '==', currentUser.uid).orderBy('tarih', 'desc').limit(20).get();
+        const snapshot = await db.collection('yem_alimlari').where('sahipId', '==', sahipId).orderBy('tarih', 'desc').limit(20).get();
         if (snapshot.empty) {
             listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Yem alım hareketi bulunmuyor.</td></tr>';
             return;
@@ -2377,13 +2377,13 @@ async function renderHareketDokumu() {
         ];
 
         // Tüm carilerin isimlerini almak için bir harita oluştur
-        const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', currentUser.uid).get();
+        const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', sahipId).get();
         const cariMap = new Map();
         carilerSnapshot.forEach(doc => cariMap.set(doc.id, doc.data().adiSoyadi));
 
         // Tüm veri kaynaklarından verileri çek
         const sorguPromise_leri = kaynaklar.map(kaynak => 
-            db.collection(kaynak.koleksiyon).where('sahipId', '==', currentUser.uid).get()
+            db.collection(kaynak.koleksiyon).where('sahipId', '==', sahipId).get()
         );
         const sonuclar = await Promise.all(sorguPromise_leri);
 
@@ -2552,7 +2552,7 @@ async function handleYemSatisKaydet(event) {
                 if (anlikStok < miktar) { throw `Yetersiz stok! Anlık stok: ${anlikStok}`; }
                 const formData = {
                     tarih: document.getElementById('yemSatisTarih').value, yemId: yemId, cariId: cariId, 
-                    miktar: miktar, satisFiyati: birimFiyat, toplamTutar: miktar * birimFiyat, sahipId: currentUser.uid
+                    miktar: miktar, satisFiyati: birimFiyat, toplamTutar: miktar * birimFiyat, sahipId: sahipId
                 };
                 transaction.set(yemSatisRef, formData);
                 transaction.update(yemRef, { stokMiktari: firebase.firestore.FieldValue.increment(-miktar) });
@@ -2587,7 +2587,7 @@ async function calculateCariBakiyeDetayli(cariId, endDate = null) {
     try {
         // --- GÜNCELLEME: Tüm sorgulara tarih filtresi eklendi ---
         const createQuery = (collectionName) => {
-            let query = db.collection(collectionName).where('sahipId', '==', currentUser.uid).where('cariId', '==', cariId);
+            let query = db.collection(collectionName).where('sahipId', '==', sahipId).where('cariId', '==', cariId);
             if (endDate) {
                 query = query.where('tarih', '<=', endDate);
             }
@@ -2624,7 +2624,7 @@ async function renderYemSatisListesi() {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
     try {
-        const snapshot = await db.collection('yem_satislari').where('sahipId', '==', currentUser.uid).orderBy('tarih', 'desc').limit(20).get();
+        const snapshot = await db.collection('yem_satislari').where('sahipId', '==', sahipId).orderBy('tarih', 'desc').limit(20).get();
         if (snapshot.empty) { listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Yem satış hareketi bulunmuyor.</td></tr>'; return; }
         
         const yemIds = [...new Set(snapshot.docs.map(doc => doc.data().yemId))];
@@ -2678,7 +2678,7 @@ async function handleOdemeKaydet(event) {
 	odemeTuru: document.getElementById('odemeTuru').value,
         tutar: tutar,
         aciklama: document.getElementById('odemeAciklama').value.trim(),
-        sahipId: currentUser.uid
+        sahipId: sahipId
     };
     try {
         if (editingOdemeId) {
@@ -2723,7 +2723,7 @@ async function renderOdemeListesi() {
     
     try {
         const snapshot = await db.collection('odemeVeTahsilatlar')
-            .where('sahipId', '==', currentUser.uid)
+            .where('sahipId', '==', sahipId)
             .orderBy('tarih', 'desc')
             .limit(30) // Performans için son 30 hareketi göster
             .get();
@@ -2824,8 +2824,8 @@ async function renderTopluSutGirisFormu() {
 
     try {
         const [sutAlimSnapshot, carilerSnapshot] = await Promise.all([
-             db.collection('sut_alimlari').where('sahipId', '==', currentUser.uid).where('tarih', '==', tarih).get(),
-             db.collection('cariler').where('sahipId', '==', currentUser.uid).where('kategori', '==', kategori || null).where('durum', '==', 'aktif').where('cariGrup', '==', 'üretici').orderBy('rotaSirasi').get()
+             db.collection('sut_alimlari').where('sahipId', '==', sahipId).where('tarih', '==', tarih).get(),
+             db.collection('cariler').where('sahipId', '==', sahipId).where('kategori', '==', kategori || null).where('durum', '==', 'aktif').where('cariGrup', '==', 'üretici').orderBy('rotaSirasi').get()
         ]);
 
         const kayitliCariIdleri = new Set(sutAlimSnapshot.docs.map(doc => doc.data().cariId));
@@ -2890,7 +2890,7 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
     if(satir) satir.querySelector('button').disabled = true;
 
     const batch = db.batch();
-    const sahipId = auth.currentUser.uid;
+    const sahipId = auth.sahipId;
 
     // 1. Finansal Süt Alım Kaydını Hazırla
     const sutAlimRef = db.collection("sut_alimlari").doc();
@@ -2960,8 +2960,8 @@ async function handleDinamikSutRaporu() {
 
     try {
         const [producersSnapshot, milkSnapshot] = await Promise.all([
-            db.collection('cariler').where('sahipId', '==', currentUser.uid).where('kategori', '==', kategori).where('cariGrup', '==', 'üretici').orderBy('rotaSirasi').get(),
-            db.collection('sut_alimlari').where('sahipId', '==', currentUser.uid).where('tarih', '>=', `${year}-${month}-01`).where('tarih', '<=', `${year}-${month}-${ayGunSayisi}`).get()
+            db.collection('cariler').where('sahipId', '==', sahipId).where('kategori', '==', kategori).where('cariGrup', '==', 'üretici').orderBy('rotaSirasi').get(),
+            db.collection('sut_alimlari').where('sahipId', '==', sahipId).where('tarih', '>=', `${year}-${month}-01`).where('tarih', '<=', `${year}-${month}-${ayGunSayisi}`).get()
         ]);
         
         if (producersSnapshot.empty) {
@@ -3085,7 +3085,7 @@ async function renderSutAlimGecmisi() {
 
     try {
         const snapshot = await db.collection('sut_alimlari')
-            .where('sahipId', '==', currentUser.uid).where('tarih', '==', tarih).orderBy('cariAdi').get();
+            .where('sahipId', '==', sahipId).where('tarih', '==', tarih).orderBy('cariAdi').get();
 
         if (snapshot.empty) {
             body.innerHTML = '<tr><td colspan="7" style="text-align:center;">Bu tarih için süt alım kaydı bulunmuyor.</td></tr>';
@@ -3220,7 +3220,7 @@ async function handleSutAlimRaporuOlustur(options) {
 
     try {
         let baseQuery = db.collection('sut_alimlari')
-            .where('sahipId', '==', currentUser.uid)
+            .where('sahipId', '==', sahipId)
             .where('tarih', '>=', startDateStr)
             .where('tarih', '<=', endDateStr);
 
@@ -3269,7 +3269,7 @@ async function handleSutAlimRaporuOlustur(options) {
             let alimlar = alimlarSnapshot.docs.map(doc => doc.data());
 
             if (options.kategori) {
-                const cariSnapshot = await db.collection('cariler').where('sahipId', '==', currentUser.uid).where('kategori', '==', kategori).get();
+                const cariSnapshot = await db.collection('cariler').where('sahipId', '==', sahipId).where('kategori', '==', kategori).get();
                 const cariIdsInKategori = cariSnapshot.docs.map(doc => doc.id);
                 alimlar = alimlar.filter(alim => cariIdsInKategori.includes(alim.cariId));
             }
@@ -3344,10 +3344,10 @@ async function handleYemPivotRaporu(reportType) {
         const endDateStr = endDate.toISOString().split('T')[0];
 
         const [satisSnapshot, yemlerSnapshot, carilerSnapshot, yemAlimlariSnapshot] = await Promise.all([
-            db.collection('yem_satislari').where('sahipId', '==', currentUser.uid).where('tarih', '>=', startDateStr).where('tarih', '<=', endDateStr).get(),
-            db.collection('yemler').where('sahipId', '==', currentUser.uid).get(),
-            db.collection('cariler').where('sahipId', '==', currentUser.uid).get(),
-            db.collection('yem_alimlari').where('sahipId', '==', currentUser.uid).orderBy('tarih').get()
+            db.collection('yem_satislari').where('sahipId', '==', sahipId).where('tarih', '>=', startDateStr).where('tarih', '<=', endDateStr).get(),
+            db.collection('yemler').where('sahipId', '==', sahipId).get(),
+            db.collection('cariler').where('sahipId', '==', sahipId).get(),
+            db.collection('yem_alimlari').where('sahipId', '==', sahipId).orderBy('tarih').get()
         ]);
 
         if (satisSnapshot.empty) {
@@ -3730,7 +3730,7 @@ async function handleHesapOzetiRaporuOlustur() {
         const devirTarihiStr = new Date(year, month - 1, 0).toISOString().split('T')[0];
         
         const createQuery = (collection, isDevir) => {
-            let q = db.collection(collection).where('sahipId', '==', currentUser.uid).where('cariId', '==', cariId);
+            let q = db.collection(collection).where('sahipId', '==', sahipId).where('cariId', '==', cariId);
             q = isDevir ? q.where('tarih', '<=', devirTarihiStr) : q.where('tarih', '>=', startDate).where('tarih', '<=', endDate);
             return q.get();
         };
@@ -3738,7 +3738,7 @@ async function handleHesapOzetiRaporuOlustur() {
         const [devirSut, devirYemSatis, devirOdeme, aySut, ayYemSatis, ayOdeme, yemlerSnapshot] = await Promise.all([
             createQuery('sut_alimlari', true), createQuery('yem_satislari', true), createQuery('odemeVeTahsilatlar', true),
             createQuery('sut_alimlari', false), createQuery('yem_satislari', false), createQuery('odemeVeTahsilatlar', false),
-            db.collection('yemler').where('sahipId', '==', currentUser.uid).get()
+            db.collection('yemler').where('sahipId', '==', sahipId).get()
         ]);
         
         const yemMap = new Map(yemlerSnapshot.docs.map(doc => [doc.id, doc.data()]));
