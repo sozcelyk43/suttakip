@@ -10,10 +10,10 @@ body {
     min-height: 100vh;
 }
 .sidebar {
-    width: 260px;
+    width: 235px;
     background-color: #2c3e50;
     color: #fff;
-    padding: 20px;
+    padding: 18px;
     box-shadow: 2px 0 5px rgba(0,0,0,0.1);
     position: fixed;
     height: 100%;
@@ -22,8 +22,8 @@ body {
 }
 .main-content {
     flex-grow: 1;
-    padding: 25px;
-    margin-left: 260px;
+    padding: 24px;
+    margin-left: 250px;
     background-color: #ecf0f1;
     transition: margin-left 0.3s ease-in-out;
 }
@@ -445,7 +445,7 @@ body.pdf-generating .pdf-source-section .container {
 
 .table-wrapper {
     width: 100%;
-    overflow-x: hidden; /* Yatay kaydırmayı engelle */
+   // overflow-x: hidden; /* Yatay kaydırmayı engelle */
     border: 1px solid #dee2e6;
 }
 #sut-rapor-tablosu {
@@ -475,7 +475,7 @@ body.pdf-generating .pdf-source-section .container {
     position: sticky;
     left: 0;
     z-index: 1;
-    width: 8%; /* Üretici sütununa biraz daha yer verelim */
+    width: 9%; /* Üretici sütununa biraz daha yer verelim */
     min-width: 160px;
     padding-left: 8px;
 }
