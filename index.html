@@ -1680,6 +1680,8 @@ if (Array.isArray(cari.cariGrup)) {
         }
 
         setEditingMode(document.getElementById('cariFormBaslik'), document.getElementById('cariKaydetBtn'), document.getElementById('cariFormTemizleBtn'), id, 'Cari');
+	            document.getElementById('cariFormBaslik').scrollIntoView({ behavior: 'smooth' });
+
     } catch (e) {
         console.error("Cari bilgileri yüklenirken hata:", e);
     }
