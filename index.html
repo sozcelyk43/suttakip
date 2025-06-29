@@ -37,9 +37,11 @@
 <li><a href="#tank-yonetimi" class="nav-link">💧 Tank Yönetimi</a></li>
 <li><a href="#tank-aktarim" class="nav-link">→ Tanktan Aktarım</a></li>
                 <li><a href="#ayarlar" class="nav-link">⚙️ Ayarlar</a></li>
-                <li class="logout-link">
-                    <a href="#" id="logoutButton">🚪 Çıkış Yap</a>
-                </li>
+               <li class="logout-link">
+    <a href="#" id="logoutButton">
+        <div>🚪 Çıkış Yap</div>
+        <div id="logoutUserEmail"></div> </a>
+</li>
             </ul>
         </nav>
     </div>
@@ -670,6 +672,8 @@
 
 auth.onAuthStateChanged(async (user) => {
         if (user) {
+		            document.getElementById('logoutUserEmail').textContent = user.email;
+
             currentUserId = user.uid;
             try {
                 const userDoc = await db.collection('kullanicilar').doc(currentUserId).get();
