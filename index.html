@@ -2851,7 +2851,6 @@ async function deleteYemSatisi(id) {
 
         
 
-// --- BU FONKSİYONU AŞAĞIDAKİ İLE DEĞİŞTİRİN ---
 async function renderTopluSutGirisFormu() {
     const tarih = document.getElementById('topluGirisTarih').value;
     const kategori = document.getElementById('topluGirisKategori').value;
@@ -2863,7 +2862,7 @@ async function renderTopluSutGirisFormu() {
     try {
         const [sutAlimSnapshot, carilerSnapshot] = await Promise.all([
              db.collection('sut_alimlari').where('sahipId', '==', sahipId).where('tarih', '==', tarih).get(),
-             db.collection('cariler').where('sahipId', '==', sahipId).where('kategori', '==', kategori || null).where('durum', '==', 'aktif').where('cariGrup', '==', 'üretici').orderBy('rotaSirasi').get()
+             db.collection('cariler').where('sahipId', '==', sahipId).where('kategori', '==', kategori || null).where('durum', '==', 'aktif').where('cariGrup', 'array-contains', 'üretici').orderBy('rotaSirasi').get()
         ]);
 
         const kayitliCariIdleri = new Set(sutAlimSnapshot.docs.map(doc => doc.data().cariId));
