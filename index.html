@@ -2649,6 +2649,12 @@ async function handleOdemeKaydet(event) {
     event.preventDefault();
     const currentUser = auth.currentUser;
     if (!currentUser) { alert("Lütfen giriş yapın."); return; }
+    
+    // --- DÜZELTME BAŞLANGICI ---
+    // ID'yi global değişken yerine doğrudan HTML'deki gizli input'tan alıyoruz.
+    const editingId = document.getElementById('odemeEditId').value;
+    // --- DÜZELTME SONU ---
+
     const tutar = parseFloat(document.getElementById('odemeTutari').value);
     const cariId = document.getElementById('odemeYapilanTedarikci').value;
     if (!cariId || isNaN(tutar) || tutar <= 0) {
@@ -2659,15 +2665,18 @@ async function handleOdemeKaydet(event) {
         tarih: document.getElementById('odemeTarih').value,
         cariId: cariId,
         islemTuru: document.getElementById('islemTuru').value,
-	odemeTuru: document.getElementById('odemeTuru').value,
+        odemeTuru: document.getElementById('odemeTuru').value,
         tutar: tutar,
         aciklama: document.getElementById('odemeAciklama').value.trim(),
         sahipId: sahipId
     };
     try {
-        if (editingOdemeId) {
-            await db.collection('odemeVeTahsilatlar').doc(editingOdemeId).set(formData, { merge: true });
+        // --- DÜZELTME: Koşulu, HTML'den okuduğumuz "editingId" ile yapıyoruz. ---
+        if (editingId) {
+            // Eğer bir ID varsa, bu bir güncellemedir.
+            await db.collection('odemeVeTahsilatlar').doc(editingId).set(formData, { merge: true });
         } else {
+            // Eğer ID yoksa, bu yeni bir kayıttır.
             await db.collection('odemeVeTahsilatlar').add(formData);
         }
         resetOdemeForm();
@@ -2851,7 +2860,6 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
     const sabahInput = document.getElementById(`sabah-${cariId}`);
     const aksamInput = document.getElementById(`aksam-${cariId}`);
     const fiyatInput = document.getElementById(`fiyat-${cariId}`);
-    
     const tankId = document.getElementById('topluGirisTank').value;
 
     const sabahMiktar = parseFloat(sabahInput.value) || 0;
@@ -2871,16 +2879,9 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
     const satir = document.getElementById(`satir-${cariId}`);
     if(satir) satir.querySelector('button').disabled = true;
 
-    // --- DÜZELTME BAŞLANGICI ---
-    // Hatalı olan "const sahipId = auth.currentUser.uid;" satırı kaldırıldı.
-    // Artık fonksiyon, global alanda tanımlı olan doğru "sahipId" değişkenini kullanacak.
-    // İşlemi yapan kullanıcının kimliğini ise ayrı bir değişkende tutuyoruz.
-    const calisanId = auth.currentUser.uid; 
-    // --- DÜZELTME SONU ---
-
+    const calisanId = auth.currentUser.uid;
     const batch = db.batch();
 
-    // 1. Finansal Süt Alım Kaydını Hazırla
     const sutAlimRef = db.collection("sut_alimlari").doc();
     batch.set(sutAlimRef, {
         tarih: tarih,
@@ -2891,34 +2892,44 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
         toplam: toplamMiktar,
         fiyat: birimFiyat,
         toplamTutar: toplamMiktar * birimFiyat,
-        [cite_start]sahipId: sahipId // <-- Artık globaldeki doğru sahipId kullanılıyor. [cite: 3]
+        sahipId: sahipId
     });
 
-    // 2. Tank Hareketlerini Hazırla (Sabah ve Akşam için ayrı ayrı)
     if (sabahMiktar > 0) {
         const movementRefSabah = db.collection('tank_hareketleri').doc();
         batch.set(movementRefSabah, {
-            movementId: movementRefSabah.id, ureticiId: cariId, ureticiAdi: cariAdi,
-            [cite_start]sahipId: sahipId, // <-- Artık globaldeki doğru sahipId kullanılıyor. [cite: 3]
-            calisanId: calisanId, // <-- İşlemi yapanın gerçek kimliği kullanılıyor.
-            tankId: tankId, alim_tarihi: tarih,
-            zaman_dilimi: 'sabah', miktar: sabahMiktar, birim_fiyat: birimFiyat,
-            toplam_tutar: sabahMiktar * birimFiyat, kayitZamani: new Date()
+            movementId: movementRefSabah.id,
+            ureticiId: cariId,
+            ureticiAdi: cariAdi,
+            sahipId: sahipId,
+            calisanId: calisanId,
+            tankId: tankId,
+            alim_tarihi: tarih,
+            zaman_dilimi: 'sabah',
+            miktar: sabahMiktar,
+            birim_fiyat: birimFiyat,
+            toplam_tutar: sabahMiktar * birimFiyat,
+            kayitZamani: new Date()
         });
     }
     if (aksamMiktar > 0) {
         const movementRefAksam = db.collection('tank_hareketleri').doc();
         batch.set(movementRefAksam, {
-            movementId: movementRefAksam.id, ureticiId: cariId, ureticiAdi: cariAdi,
-            [cite_start]sahipId: sahipId, // <-- Artık globaldeki doğru sahipId kullanılıyor. [cite: 3]
-            calisanId: calisanId, // <-- İşlemi yapanın gerçek kimliği kullanılıyor.
-            tankId: tankId, alim_tarihi: tarih,
-            zaman_dilimi: 'akşam', miktar: aksamMiktar, birim_fiyat: birimFiyat,
-            toplam_tutar: aksamMiktar * birimFiyat, kayitZamani: new Date()
+            movementId: movementRefAksam.id,
+            ureticiId: cariId,
+            ureticiAdi: cariAdi,
+            sahipId: sahipId,
+            calisanId: calisanId,
+            tankId: tankId,
+            alim_tarihi: tarih,
+            zaman_dilimi: 'akşam',
+            miktar: aksamMiktar,
+            birim_fiyat: birimFiyat,
+            toplam_tutar: aksamMiktar * birimFiyat,
+            kayitZamani: new Date()
         });
     }
 
-    // 3. Tank Miktarını Güncelle
     const tankRef = db.collection('tanklar').doc(tankId);
     batch.update(tankRef, { mevcutLitre: firebase.firestore.FieldValue.increment(toplamMiktar) });
 
@@ -2932,6 +2943,7 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
         if(satir) satir.querySelector('button').disabled = false;
     }
 }
+
 
 async function handleDinamikSutRaporu() {
     const ayYil = document.getElementById('karneRaporuAySecimi').value;
