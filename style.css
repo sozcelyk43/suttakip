@@ -539,3 +539,24 @@ body.pdf-generating .pdf-source-section .container {
     text-transform: none;      /* E-posta adresi küçük harf kalsın */
     margin-top: 2px;           /* Üstteki yazı ile arasına hafif boşluk */
 }
+
+/* CARİ GRUBU CHECKBOX STİLİ */
+.checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 6px;
+    background-color: #fdfdfd;
+}
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 0; /* form-group'tan gelen boşluğu sıfırla */
+}
+.checkbox-group input[type="checkbox"] {
+    width: auto; /* Genişliği içeriğe göre ayarla */
+    margin-right: 8px;
+}

@@ -144,14 +144,15 @@
                     <div class="form-group"><label for="cariKodu">Cari Kodu:</label><input type="text" id="cariKodu" placeholder="Örn: C001"></div>
                     <div class="form-group"><label for="cariRotaSirasi">Rota Sırası:</label><input type="number" id="cariRotaSirasi" placeholder="Örn: 1, 2, 3..."></div>
                     <div class="form-group"><label for="cariAdiSoyadi">Adı Soyadı / Firma Adı:</label><input type="text" id="cariAdiSoyadi" required></div>
-                    <div class="form-group"><label for="cariKategori">Kategori/Köy:</label><select id="cariKategori" required><option value="">Seçiniz...</option></select></div>
-                    <div class="form-group"><label for="cariGrup">Cari Grubu:</label>
-                        <select id="cariGrup" required>
-                            <option value="üretici" selected>Üretici (Süt Alınan)</option>
-                            <option value="tedarikçi">Tedarikçi (Yem Alınan)</option>
-                            <option value="süt alıcı">Süt Alıcı (Süt Satılan)</option>
-                        </select>
-                    </div>
+                    <div class="form-group"><label for="cariKategori">Kategori/Köy:</label><select id="cariKategori"><option value="">Seçiniz...</option></select></div>
+                    <div class="form-group">
+    <label>Cari Grubu (Birden çok seçilebilir):</label>
+    <div class="checkbox-group">
+        <label for="grupUretici"><input type="checkbox" id="grupUretici" value="üretici"> Üretici</label>
+        <label for="grupTedarikci"><input type="checkbox" id="grupTedarikci" value="tedarikçi"> Tedarikçi</label>
+        <label for="grupSutAlici"><input type="checkbox" id="grupSutAlici" value="süt alıcı"> Süt Alıcı</label>
+    </div>
+</div>
                     <div class="form-group"><label for="cariDurum">Durum:</label>
                         <select id="cariDurum">
                             <option value="aktif">Aktif</option>
@@ -1122,16 +1123,21 @@ async function handleCariKaydet(event) {
         return;
     }
 
+    const editingId = document.getElementById('cariEditId').value;
     const cariAdi = document.getElementById('cariAdiSoyadi').value;
     if (!cariAdi) {
         alert("Adı Soyadı / Firma Adı alanı zorunludur.");
         return;
     }
 
+    const secilenGruplar = [];
+    if (document.getElementById('grupUretici').checked) secilenGruplar.push('üretici');
+    if (document.getElementById('grupTedarikci').checked) secilenGruplar.push('tedarikçi');
+    if (document.getElementById('grupSutAlici').checked) secilenGruplar.push('süt alıcı');
+
     const rotaSirasiInput = document.getElementById('cariRotaSirasi').value;
     const yeniRotaSirasi = rotaSirasiInput ? parseInt(rotaSirasiInput, 10) : null;
-    const editingCariId = document.getElementById('cariEditId').value;
-
+    
     const formData = {
         kodu: document.getElementById('cariKodu').value,
         rotaSirasi: yeniRotaSirasi,
@@ -1139,7 +1145,7 @@ async function handleCariKaydet(event) {
         kategori: document.getElementById('cariKategori').value,
         durum: document.getElementById('cariDurum').value,
         cariTipi: document.getElementById('cariTipi').value,
-        cariGrup: document.getElementById('cariGrup').value, // EKLENDİ
+        cariGrup: secilenGruplar,
         telefon: document.getElementById('cariTelefon').value,
         eposta: document.getElementById('cariEposta').value,
         adres: document.getElementById('cariAdres').value,
@@ -1152,16 +1158,22 @@ async function handleCariKaydet(event) {
     };
 
     try {
-        if (editingCariId) {
-            const cariRef = db.collection('cariler').doc(editingCariId);
+        if (editingId) {
+            const cariRef = db.collection('cariler').doc(editingId);
             await db.runTransaction(async (transaction) => {
                 const cariDoc = await transaction.get(cariRef);
                 if (!cariDoc.exists) throw "Düzenlenecek cari bulunamadı!";
                 
-                const eskiRotaSirasi = cariDoc.data().rotaSirasi;
+                const acilisBakiyeQuery = db.collection('odemeVeTahsilatlar')
+                    .where('cariId', '==', editingId)
+                    .where('aciklama', '==', 'Açılış Bakiyesi');
+                const acilisBakiyeSnapshot = await acilisBakiyeQuery.get();
+                acilisBakiyeSnapshot.forEach(doc => {
+                    transaction.delete(doc.ref);
+                });
 
+                const eskiRotaSirasi = cariDoc.data().rotaSirasi;
                 if (eskiRotaSirasi !== yeniRotaSirasi) {
-                    // Rota sırası değişim mantığı...
                     if (yeniRotaSirasi && eskiRotaSirasi) {
                          if (yeniRotaSirasi > eskiRotaSirasi) {
                             const carilerToUpdateQuery = db.collection('cariler').where('sahipId', '==', sahipId).where('rotaSirasi', '>', eskiRotaSirasi).where('rotaSirasi', '<=', yeniRotaSirasi);
@@ -1182,7 +1194,24 @@ async function handleCariKaydet(event) {
                         snapshot.forEach(doc => transaction.update(doc.ref, { rotaSirasi: doc.data().rotaSirasi - 1 }));
                     }
                 }
+                
                 transaction.update(cariRef, formData);
+
+                const acilisBakiye = parseFloat(document.getElementById('cariAcilisBakiye').value) || 0;
+                const bakiyeTuru = document.getElementById('cariAcilisBakiyeTuru').value;
+                if (acilisBakiye > 0 && bakiyeTuru !== 'yok') {
+                    const bakiyeData = {
+                        aciklama: "Açılış Bakiyesi",
+                        cariId: editingId,
+                        islemTuru: bakiyeTuru,
+                        sahipId: sahipId,
+                        tarih: new Date(1990, 0, 1).toISOString().split('T')[0],
+                        tutar: acilisBakiye,
+                        odemeTuru: 'Sistem'
+                    };
+                    const odemeRef = db.collection('odemeVeTahsilatlar').doc();
+                    transaction.set(odemeRef, bakiyeData);
+                }
             });
         } else {
             await db.runTransaction(async (transaction) => {
@@ -1206,7 +1235,8 @@ async function handleCariKaydet(event) {
                         islemTuru: bakiyeTuru,
                         sahipId: sahipId,
                         tarih: new Date(1990, 0, 1).toISOString().split('T')[0],
-                        tutar: acilisBakiye
+                        tutar: acilisBakiye,
+                        odemeTuru: 'Sistem'
                     };
                     const odemeRef = db.collection('odemeVeTahsilatlar').doc();
                     transaction.set(odemeRef, bakiyeData);
@@ -1223,7 +1253,6 @@ async function handleCariKaydet(event) {
         alert("Cari kaydedilirken bir hata oluştu: " + error.message);
     }
 }
-
 // -- AÇIKLAMA: Rota sırası tekrarı kontrolü eklendi --
 async function renderCariListesi() {
     const cariListesiBody = document.getElementById('cariListesiBody');
@@ -1612,7 +1641,21 @@ async function editCari(id) {
         document.getElementById('cariRotaSirasi').value = cari.rotaSirasi || null; 
         document.getElementById('cariAdiSoyadi').value = cari.adiSoyadi || ''; 
         document.getElementById('cariKategori').value = cari.kategori || ''; 
-        document.getElementById('cariGrup').value = cari.cariGrup || 'üretici';
+
+document.getElementById('grupUretici').checked = false;
+document.getElementById('grupTedarikci').checked = false;
+document.getElementById('grupSutAlici').checked = false;
+
+if (Array.isArray(cari.cariGrup)) {
+    cari.cariGrup.forEach(grup => {
+        if (grup === 'üretici') document.getElementById('grupUretici').checked = true;
+        if (grup === 'tedarikçi') document.getElementById('grupTedarikci').checked = true;
+        if (grup === 'süt alıcı') document.getElementById('grupSutAlici').checked = true;
+    });
+}
+
+
+
         document.getElementById('cariDurum').value = cari.durum || 'aktif';
         document.getElementById('cariTipi').value = cari.cariTipi || 'sut_ve_yem';
         document.getElementById('cariTelefon').value = cari.telefon || ''; 
@@ -1825,8 +1868,8 @@ async function populateCariSelect(selectElement, filterGroup = null, defaultText
     let query = db.collection('cariler').where("sahipId", "==", sahipId).where("durum", "==", "aktif");
 
     if (filterGroup) {
-        query = query.where('cariGrup', '==', filterGroup);
-    }
+    query = query.where('cariGrup', 'array-contains', filterGroup);
+}
     
     query = query.orderBy('adiSoyadi');
 
@@ -3828,6 +3871,7 @@ async function handleHesapOzetiRaporuOlustur() {
         console.error("Hesap özeti raporu oluşturulurken hata:", error);
     }
 }
+
 
 function toggleReportButtons(reportPrefix, show) {
     const displayStyle = show ? 'inline-block' : 'none';
