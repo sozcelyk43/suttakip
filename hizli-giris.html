@@ -15,6 +15,24 @@
         header { background-color: var(--primary-color); color: var(--white-color); padding: 20px 15px; text-align: center; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         header h1 { margin: 0; font-size: 1.8em; }
         main { padding: 20px 0; }
+        #logoutButton {
+    position: fixed; /* Sayfada sabit kalır */
+    top: 15px;
+    right: 15px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 500;
+    z-index: 1000; /* Diğer elementlerin üstünde kalır */
+    transition: background-color 0.2s;
+}
+#logoutButton:hover {
+    background-color: #c82333;
+}
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 1.1em; }
         .form-group select, .form-group input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1em; box-sizing: border-box; }
@@ -50,6 +68,8 @@
     </style>
 </head>
 <body>
+<button id="logoutButton">🚪 Çıkış Yap</button>
+
     <div class="container">
         <header><h1>Gelişmiş Süt Girişi</h1></header>
         <main>
@@ -89,6 +109,13 @@
         };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+document.getElementById('logoutButton').addEventListener('click', () => {
+    auth.signOut().then(() => {
+        window.location.href = 'login.html';
+    }).catch(error => {
+        console.error("Çıkış yaparken hata oluştu:", error);
+    });
+});
         const db = firebase.firestore();
 
         let sahipId = '';

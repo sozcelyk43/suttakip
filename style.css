@@ -197,8 +197,34 @@ details summary { cursor: pointer; font-weight: bold; padding: 4px; margin-top: 
 
 
 /* === ROL BAZLI GİZLEME === */
-.role-calisan a[href="#yem-stok-yonetimi"], .role-calisan a[href="#tahsilat-ve-odemeler"], .role-calisan a[href="#hesap-ozeti"], .role-calisan a[href="#sut-alim-raporu"], .role-calisan a[href="#aylik-yem-raporu"], .role-calisan a[href="#ayarlar"], .role-calisan a[href="#hareket-dokumu"] { display: none; }
-.role-calisan #cari-yonetimi .dont-calisan { display: none !important; }
+/* === ROL BAZLI GİZLEME (YENİ KURALLAR) === */
+
+/* Çalışan rolü için ana içerik alanını ve menü açma butonunu tamamen gizle */
+.role-calisan .main-content,
+.role-calisan .menu-toggle-btn {
+    display: none !important;
+}
+
+/* Çalışan rolü için kenar çubuğundaki logo ve başlığı gizle */
+.role-calisan .sidebar-logo,
+.role-calisan .sidebar h1 {
+    display: none;
+}
+
+/* Önce, çalışan için TÜM menü elemanlarını varsayılan olarak gizle */
+.role-calisan .sidebar nav ul li {
+    display: none;
+}
+
+/* SONRA, SADECE hızlı giriş ve çıkış butonlarının görünür olmasını sağla */
+.role-calisan .sidebar nav ul li.quick-entry-link,
+.role-calisan .sidebar nav ul li.logout-link {
+    display: block; /* 'none' olan display'i geçersiz kılarak görünür yap */
+}
+
+
+
+.dont-calisan { display: none !important; }
 .role-admin .dont-admin { display: none !important; }
 
 /* === RESPONSIVE MOBİL UYUM === */
