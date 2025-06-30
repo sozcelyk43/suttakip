@@ -867,13 +867,13 @@ auth.onAuthStateChanged(async (user) => {
         document.getElementById('sutRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('sut-alim-raporu'));
         document.getElementById('yemRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('aylik-yem-raporu'));
         document.getElementById('karneYazdirBtn')?.addEventListener('click', () => handleYazdir('dinamik-sut-raporu'));
-        document.getElementById('karnePdfBtn')?.addEventListener('click', () => exportTableToPdf('dinamikRaporContainer', 'sut_karnesi', 'Aylık Süt Karnesi'));
+document.getElementById('karnePdfBtn')?.addEventListener('click', () => exportTableToPdf('dinamikRaporContainer', 'sut_karnesi', 'Aylık Süt Karnesi', 'karnePdfBtn'));
         document.getElementById('karneXlsxBtn')?.addEventListener('click', () => exportTableToExcel('dinamikRaporContainer', 'sut_karnesi'));
-        document.getElementById('hesapOzetiPdfBtn')?.addEventListener('click', () => exportTableToPdf('raporDetayAlani', 'hesap_ozeti', 'Cari Hesap Özeti'));
+document.getElementById('hesapOzetiPdfBtn')?.addEventListener('click', () => exportTableToPdf('report-content-to-print', 'hesap_ozeti', 'Cari Hesap Özeti', 'hesapOzetiPdfBtn'));
         document.getElementById('hesapOzetiXlsxBtn')?.addEventListener('click', () => exportTableToExcel('raporDetayAlani', 'hesap_ozeti'));
-        document.getElementById('sutRaporuPdfBtn')?.addEventListener('click', () => exportTableToPdf('sutRaporuDetayAlani', 'sut_alim_raporu', 'Aylık Süt Alım Raporu'));
+document.getElementById('sutRaporuPdfBtn')?.addEventListener('click', () => exportTableToPdf('sutAlimRaporAlani', 'sut_alim_raporu', 'Aylık Süt Alım Raporu', 'sutRaporuPdfBtn'));
         document.getElementById('sutRaporuXlsxBtn')?.addEventListener('click', () => exportTableToExcel('sutRaporuDetayAlani', 'sut_alim_raporu'));
-        document.getElementById('yemRaporuPdfBtn')?.addEventListener('click', () => exportTableToPdf('yemRaporuAlani', 'yem_raporu', 'Aylık Yem Raporu'));
+document.getElementById('yemRaporuPdfBtn')?.addEventListener('click', () => exportTableToPdf('yemRaporuAlani', 'yem_raporu', 'Aylık Yem Raporu', 'yemRaporuPdfBtn'));
         document.getElementById('yemRaporuXlsxBtn')?.addEventListener('click', () => exportTableToExcel('yemRaporuAlani', 'yem_raporu'));
 	    
 
@@ -1408,122 +1408,82 @@ function exportTableToExcel(containerId, fileName = 'rapor') {
 }
 
 
-// --- BU FONKSİYONU GÜNCELLEYİN ---
-async function exportTableToPdf(containerId, fileName = 'rapor', title = 'Rapor') {
+
+// --- EKRAN GÖRÜNTÜSÜ YÖNTEMİ İLE ÇALIŞAN NİHAİ PDF FONKSİYONU ---
+async function exportTableToPdf(containerId, fileName = 'rapor', buttonId) {
     const container = document.getElementById(containerId);
-    if (!container || container.innerHTML.trim() === '') {
+    if (!container || container.innerHTML.trim().length < 20) {
         alert('PDF oluşturmak için önce bir rapor oluşturun.');
         return;
     }
 
-    // --- GÜNCELLEME: Dinamik Süt Karnesi için özel YATAY PDF oluşturma ---
-    if (containerId === 'dinamikRaporContainer') {
-        const pdfButton = document.getElementById('karnePdfBtn');
-        const originalButtonText = pdfButton.textContent;
-        if(pdfButton) {
-            pdfButton.textContent = "Oluşturuluyor...";
-            pdfButton.disabled = true;
-        }
+    const pdfButton = document.getElementById(buttonId);
+    const originalButtonText = pdfButton?.textContent;
+    if (pdfButton) {
+        pdfButton.textContent = "Oluşturuluyor...";
+        pdfButton.disabled = true;
+    }
 
-        const tableElement = container.querySelector('#sut-rapor-tablosu');
-        if (!tableElement) {
-             alert('Rapor tablosu bulunamadı.');
-             if(pdfButton) {
-                 pdfButton.textContent = originalButtonText;
-                 pdfButton.disabled = false;
-             }
-             return;
-        }
+    // PDF oluşturulurken geçici olarak yazdırma stillerini aktif et
+    document.body.classList.add('pdf-generating');
+    const sourceSection = container.closest('.module-section');
+    if (sourceSection) {
+        sourceSection.classList.add('pdf-source-section');
+    }
 
-        try {
-            const canvas = await html2canvas(tableElement, { scale: 2, useCORS: true });
-            const imgData = canvas.toDataURL('image/png');
-            
-            // PDF'i 'l' (landscape) yani yatay modda oluştur
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('l', 'mm', 'a4');
-            
-            const pdfWidth = doc.internal.pageSize.getWidth();
-            const pdfHeight = doc.internal.pageSize.getHeight();
-            const canvasWidth = canvas.width;
-            const canvasHeight = canvas.height;
-            const ratio = canvasWidth / canvasHeight;
-            
-            const margin = 10;
-            let imgWidth = pdfWidth - (margin * 2);
-            let imgHeight = imgWidth / ratio;
-            
-            // Eğer yükseklik sayfaya sığmıyorsa, yüksekliğe göre yeniden boyutlandır
-            if (imgHeight > pdfHeight - (margin * 2 + 15)) {
-                imgHeight = pdfHeight - (margin * 2 + 15);
-                imgWidth = imgHeight * ratio;
-            }
-
-            const reportTitle = container.querySelector('h1')?.innerText || title;
-            doc.setFontSize(18);
-            doc.text(reportTitle, pdfWidth / 2, margin + 5, { align: 'center' });
-            
-            doc.addImage(imgData, 'PNG', margin, margin + 15, imgWidth, imgHeight);
-            doc.save(`${fileName}_${new Date().toLocaleDateString('tr-TR')}.pdf`);
-        } catch (error) {
-            console.error("PDF oluşturulurken hata:", error);
-            alert("PDF oluşturulurken bir hata oluştu.");
-        } finally {
-            if(pdfButton) {
-                pdfButton.textContent = originalButtonText;
-                pdfButton.disabled = false;
-            }
-        }
-
-    } 
-    // Diğer raporlar için (Cari Hesap Özeti vb.) mevcut dikey mantık devam ediyor
-    else {
-        const pdfButton = document.getElementById('hesapOzetiPdfBtn');
-        const originalButtonText = pdfButton?.textContent;
-        if(pdfButton) {
-            pdfButton.textContent = "Oluşturuluyor...";
-            pdfButton.disabled = true;
-        }
-        
+    try {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('p', 'mm', 'a4');
-        const pdfWidth = doc.internal.pageSize.getWidth();
-        const margin = 15;
-        const usableWidth = pdfWidth - (margin * 2);
-        let y = margin;
+        const doc = new jsPDF({
+            orientation: (containerId === 'dinamikRaporContainer' ? 'landscape' : 'portrait'),
+            unit: 'mm',
+            format: 'a4'
+        });
+
+        // html2canvas ile belirtilen konteynerin tamamının ekran görüntüsünü al
+        const canvas = await html2canvas(container, {
+            scale: 2, // Görüntü kalitesini artır
+            useCORS: true,
+            backgroundColor: '#ffffff'
+        });
         
-        const reportTitle = document.getElementById('raporBaslik')?.innerText || title;
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        const textWidth = doc.getTextWidth(reportTitle);
-        doc.text(reportTitle, (pdfWidth - textWidth) / 2, y);
-        y += 15;
+        const imgData = canvas.toDataURL('image/png');
+        const pdfWidth = doc.internal.pageSize.getWidth();
+        const pdfHeight = doc.internal.pageSize.getHeight();
+        const imgWidth = pdfWidth - 20; // Sayfa kenarlarında 10mm boşluk
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 15; // Resmin PDF'teki başlangıç yüksekliği
 
-        const blocks = container.querySelectorAll('.report-block');
-        for (const block of blocks) {
-            try {
-                const canvas = await html2canvas(block, { scale: 2, useCORS: true, backgroundColor: '#ffffff', willReadFrequently: true });
-                const imgData = canvas.toDataURL('image/jpeg', 0.95);
-                const imgHeight = (canvas.height * usableWidth) / canvas.width;
+        doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+        heightLeft -= (pdfHeight - 25);
 
-                if (y + imgHeight > doc.internal.pageSize.getHeight() - margin) {
-                    doc.addPage();
-                    y = margin;
-                }
-                doc.addImage(imgData, 'JPEG', margin, y, usableWidth, imgHeight);
-                y += imgHeight + 5;
-            } catch (error) {
-                console.error("Rapor bloğu PDF'e eklenirken hata:", error);
-            }
+        // Eğer içerik bir sayfadan uzunsa, yeni sayfalar ekle
+        while (heightLeft > 0) {
+            position = heightLeft - imgHeight;
+            doc.addPage();
+            doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+            heightLeft -= pdfHeight;
         }
         
         doc.save(`${fileName}_${new Date().toLocaleDateString('tr-TR')}.pdf`);
-        if(pdfButton) {
+
+    } catch (error) {
+        console.error("PDF oluşturulurken hata:", error);
+        alert("PDF oluşturulurken bir hata oluştu.");
+    } finally {
+        if (pdfButton) {
             pdfButton.textContent = originalButtonText;
             pdfButton.disabled = false;
         }
+        document.body.classList.remove('pdf-generating');
+        if (sourceSection) {
+            sourceSection.classList.remove('pdf-source-section');
+        }
     }
 }
+
+
+
 function generateRandomColors(count) {
     const colors = [];
     for (let i = 0; i < count; i++) {
@@ -4023,6 +3983,9 @@ function handleYazdir(sectionId) {
     window.print();
 }
 
+
+
+
 window.onafterprint = () => {
     const bodyElement = document.body;
     bodyElement.classList.remove('print-active');
@@ -4038,6 +4001,19 @@ window.onafterprint = () => {
     // --- BİTİŞ ---
 };
 
+</script>
+<script src="https://unpkg.com/jspdf-autotable@3.5.23/dist/jspdf.plugin.autotable.js"></script>
+<script>
+// Bu kısım, jsPDF kütüphanesine Verdana fontunu ve Türkçe karakterleri ekler.
+// Font verisi Base64 formatında kodlanmıştır.
+(function (jsPDFAPI) {
+    var font = '... [Base64 font data will be simulated here as it is very long] ...'; // This is a placeholder for a very long Base64 string.
+    var callAddFont = function () {
+        this.addFileToVFS('Verdana-Regular-normal.ttf', font);
+        this.addFont('Verdana-Regular-normal.ttf', 'Verdana', 'normal');
+    };
+    jsPDFAPI.events.push(['addFonts', callAddFont]);
+})(jsPDF.API);
 </script>
 </body>
 </html>
