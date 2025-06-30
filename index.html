@@ -146,10 +146,10 @@
                 <div class="form-grid">
                     <div class="form-group"><label for="cariKodu">Cari Kodu:</label><input type="text" id="cariKodu" placeholder="Örn: C001"></div>
                     <div class="form-group"><label for="cariRotaSirasi">Rota Sırası:</label><input type="number" id="cariRotaSirasi" placeholder="Örn: 1, 2, 3..."></div>
-                    <div class="form-group"><label for="cariAdiSoyadi">Adı Soyadı / Firma Adı: <span class="required-star">*</span></label><input type="text" id="cariAdiSoyadi" required></div>
+                    <div class="form-group"><label for="cariAdiSoyadi">Adı Soyadı / Firma Adı:</label><input type="text" id="cariAdiSoyadi" required></div>
                     <div class="form-group"><label for="cariKategori">Kategori/Köy:</label><select id="cariKategori"><option value="">Seçiniz...</option></select></div>
                     <div class="form-group">
-    <label>Cari Grubu (Birden çok seçilebilir): <span class="required-star">*</span></label>
+    <label>Cari Grubu (Birden çok seçilebilir):</label>
     <div class="checkbox-group">
         <label for="grupUretici"><input type="checkbox" id="grupUretici" value="üretici"> Üretici</label>
         <label for="grupTedarikci"><input type="checkbox" id="grupTedarikci" value="tedarikçi"> Tedarikçi</label>
@@ -407,6 +407,7 @@
                             <button type="button" class="btn btn-primary" id="sutRaporuOlusturBtn" style="height:45px; flex-grow: 1;">Göster</button>
                             <button type="button" class="btn btn-info" id="sutRaporuKategoriGosterBtn" style="height:45px; flex-grow: 1;">Kategori</button>
                             <button type="button" class="btn btn-info" id="sutRaporuTumunuGosterBtn" style="height:45px; flex-grow: 1;">Toplu</button>
+
                         </div>
                     </div> <hr class="dont-print">
                     <div id="sutAlimRaporAlani" class="printable-content format-a5">
@@ -914,6 +915,7 @@ function formatMonthYear(ayYil) {
     const date = new Date(year, month - 1);
     return date.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' });
 }
+
 function getMonthYearForInput() { const d = new Date(); return `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}`;}
 function formatCurrency(number) { return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(number); }
 function setEditingMode(formBaslikEl, kaydetBtnEl, temizleBtnEl, editIdVar, formType) { if(!formBaslikEl || !kaydetBtnEl) return; formBaslikEl.textContent = editIdVar ? `${formType} Bilgilerini Düzenle` : `Yeni ${formType} Kaydı`; kaydetBtnEl.textContent = editIdVar ? 'Güncelle' : 'Kaydet'; if (temizleBtnEl) temizleBtnEl.style.display = editIdVar ? 'inline-block' : 'none'; }
@@ -1137,10 +1139,7 @@ async function handleCariKaydet(event) {
     if (document.getElementById('grupUretici').checked) secilenGruplar.push('üretici');
     if (document.getElementById('grupTedarikci').checked) secilenGruplar.push('tedarikçi');
     if (document.getElementById('grupSutAlici').checked) secilenGruplar.push('süt alıcı');
-	if (secilenGruplar.length === 0) {
-        alert("Lütfen en az bir Cari Grubu seçin.");
-        return; // Fonksiyonu durdurur ve kaydetmeyi engeller
-    }
+
     const rotaSirasiInput = document.getElementById('cariRotaSirasi').value;
     const yeniRotaSirasi = rotaSirasiInput ? parseInt(rotaSirasiInput, 10) : null;
     
@@ -1877,8 +1876,8 @@ async function populateCariSelect(selectElement, filterGroup = null, defaultText
     let query = db.collection('cariler').where("sahipId", "==", sahipId).where("durum", "==", "aktif");
 
     if (filterGroup) {
-    query = query.where('cariGrup', 'array-contains', filterGroup);
-}
+        query = query.where('cariGrup', 'array-contains', filterGroup);
+    }
     
     query = query.orderBy('adiSoyadi');
 
@@ -1894,6 +1893,7 @@ async function populateCariSelect(selectElement, filterGroup = null, defaultText
         cariler.forEach(c => {
             const option = document.createElement('option');
             option.value = c.id;
+            // DEĞİŞİKLİK BURADA YAPILDI: Artık sadece cari adı gösteriliyor.
             option.textContent = c.adiSoyadi;
             selectElement.appendChild(option);
         });
@@ -1905,6 +1905,8 @@ async function populateCariSelect(selectElement, filterGroup = null, defaultText
         selectElement.innerHTML = `<option value="">Hata oluştu!</option>`;
     }
 }
+
+
 async function populateYemSelect(selectElement, defaultText = "Yem Seçiniz...") {
     if(!selectElement) return;
     const currentUser = auth.currentUser;
@@ -3079,104 +3081,7 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
 }
 
 
-async function handleDinamikSutRaporu() {
-    const ayYil = document.getElementById('karneRaporuAySecimi').value;
-    const kategori = document.getElementById('karneRaporuKategoriSecimi').value;
-    const container = document.getElementById('dinamikRaporContainer');
-    const currentUser = auth.currentUser;
 
-    if (!ayYil || !kategori) {
-        alert("Lütfen bir ay ve kategori seçin.");
-        return;
-    }
-    container.innerHTML = `<p style="text-align:center; font-size:1.2em;">Rapor oluşturuluyor, veriler çekiliyor...</p>`;
-
-    const [year, month] = ayYil.split('-');
-    const ayGunSayisi = new Date(year, month, 0).getDate();
-    const ayIsimleri = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-    const reportTitleText = `${kategori} - ${ayIsimleri[new Date(ayYil).getMonth()]} ${year} Süt Karnesi`;
-
-    try {
-        const [producersSnapshot, milkSnapshot] = await Promise.all([
-            db.collection('cariler').where('sahipId', '==', sahipId).where('kategori', '==', kategori).where('cariGrup', '==', 'üretici').orderBy('rotaSirasi').get(),
-            db.collection('sut_alimlari').where('sahipId', '==', sahipId).where('tarih', '>=', `${year}-${month}-01`).where('tarih', '<=', `${year}-${month}-${ayGunSayisi}`).get()
-        ]);
-        
-        if (producersSnapshot.empty) {
-            container.innerHTML = '<p style="text-align:center;">Bu kategoride kayıtlı üretici bulunamadı.</p>';
-            return;
-        }
-
-        const producers = producersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        const milkData = new Map();
-        milkSnapshot.forEach(doc => {
-            const alim = doc.data();
-            const key = `${alim.cariId}_${alim.tarih}`;
-            milkData.set(key, alim);
-        });
-        
-        let tableHTML = `
-            <div class="dinamik-rapor-header dont-print"><h1>${reportTitleText}</h1></div>
-            <div class="table-wrapper">
-                <table id="sut-rapor-tablosu">
-                    <thead>
-                        <tr class="gunler"><th rowspan="2" class="uretici-listesi">Üretici Listesi</th></tr>
-                        <tr class="vakit"></tr>
-                    </thead>
-                    <tbody></tbody>
-                    <tfoot>
-                        <tr>
-                            <td id="genel-toplam-hucre">
-                                <span>Akşam Toplam: <strong id="aksam-genel-toplam">0.00</strong></span>
-                                <span>Sabah Toplam: <strong id="sabah-genel-toplam">0.00</strong></span>
-                                <span>GENEL TOPLAM: <strong id="genel-toplam">0.00</strong></span>
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        `;
-        container.innerHTML = tableHTML;
-        
-        const tableHeadGunler = container.querySelector('thead tr.gunler');
-        const tableHeadVakit = container.querySelector('thead tr.vakit');
-        const tableBody = container.querySelector('tbody');
-
-        for (let i = 1; i <= ayGunSayisi; i++) {
-            const thGun = document.createElement('th');
-            thGun.setAttribute('colspan', '2');
-            thGun.textContent = i;
-            tableHeadGunler.appendChild(thGun);
-            tableHeadVakit.innerHTML += `<th>A</th><th>S</th>`;
-        }
-
-        producers.forEach(producer => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td class="uretici-listesi">${producer.adiSoyadi}</td>`;
-            for (let i = 1; i <= ayGunSayisi; i++) {
-                const day = String(i).padStart(2, '0');
-                const dateStr = `${year}-${month}-${day}`;
-                const key = `${producer.id}_${dateStr}`;
-                const data = milkData.get(key) || { sabah: '', aksam: '' };
-                tr.innerHTML += `
-                    <td><input type="text" class="litre-input aksam" value="${data.aksam || ''}" readonly></td>
-                    <td><input type="text" class="litre-input sabah" value="${data.sabah || ''}" readonly></td>
-                `;
-            }
-            tableBody.appendChild(tr);
-        });
-        
-        // Colspan'ı başlık ve toplam satırı için ayarla
-        const totalColumns = 1 + (ayGunSayisi * 2);
-        container.querySelector('tfoot td').setAttribute('colspan', totalColumns);
-
-        calculateKarneTotals();
-
-    } catch(error) {
-        console.error("Dinamik rapor oluşturulurken hata:", error);
-        container.innerHTML = `<p style="color:red; text-align:center;">Rapor oluşturulurken bir hata oluştu: ${error.message}</p>`;
-    }
-}
 
 function calculateKarneTotals() {
     let aksamGenelToplam = 0, sabahGenelToplam = 0;
@@ -3325,38 +3230,34 @@ async function deleteYemAlisi(id) {
 }
        
 
+// BU, SORUNU ÇÖZECEK OLAN NİHAİ KODDUR
 async function handleSutAlimRaporuOlustur(options) {
     toggleReportButtons('sutRaporu', false);
+    
     const cariId = document.getElementById('sutRaporuTedarikciSecimi').value;
     const ayYil = document.getElementById('sutRaporuAySecimi').value;
     const kategori = document.getElementById('sutRaporuKategoriSecimi').value;
     const raporBaslik = document.getElementById('sutRaporuBaslik');
-    const raporDetayAlani = document.getElementById('sutRaporuDetayAlani');
-    const currentUser = auth.currentUser;
+    // DOĞRU ID KULLANIMI: 'sutRaporuDetayAlani'
+    const sutRaporuDetayAlani = document.getElementById('sutRaporuDetayAlani');
 
-    if (!currentUser || !ayYil) {
+    if (!ayYil) {
         alert("Rapor oluşturmak için lütfen bir ay seçin.");
         return;
     }
-
     if (!options.tumu && !options.kategori && !cariId) {
         alert("Lütfen bir cari seçin veya 'Kategori' ya da 'Toplu' raporu seçin.");
         return;
     }
-    if (options.kategori && !kategori) {
-        alert("Kategori raporu için lütfen bir kategori seçin.");
-        return;
-    }
     
-    raporDetayAlani.innerHTML = '<p>Rapor oluşturuluyor, lütfen bekleyin...</p>';
-    raporBaslik.textContent = '...';
-
-    const [year, month] = ayYil.split('-');
-    const startDateStr = `${year}-${month}-01`;
-    const endDate = new Date(year, month, 0);
-    const endDateStr = endDate.toISOString().split('T')[0];
+    sutRaporuDetayAlani.innerHTML = '<p>Rapor oluşturuluyor, lütfen bekleyin...</p>';
 
     try {
+        const [year, month] = ayYil.split('-');
+        const startDateStr = `${year}-${month}-01`;
+        const endDate = new Date(year, parseInt(month, 10), 0);
+        const endDateStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
+
         let baseQuery = db.collection('sut_alimlari')
             .where('sahipId', '==', sahipId)
             .where('tarih', '>=', startDateStr)
@@ -3364,98 +3265,180 @@ async function handleSutAlimRaporuOlustur(options) {
 
         if (!options.tumu && !options.kategori) {
             const cariAdi = document.getElementById('sutRaporuTedarikciSecimi').options[document.getElementById('sutRaporuTedarikciSecimi').selectedIndex].text;
-            raporBaslik.textContent = `${formatMonthYear(ayYil)} - ${cariAdi} Aylık Süt Detayları`;
-            const snapshot = await baseQuery.where('cariId', '==', cariId).orderBy('tarih').get();
+            raporBaslik.textContent = `${cariAdi} - ${formatMonthYear(ayYil)} Aylık Süt Detayları`;
+            
+            const finalQuery = baseQuery.where('cariId', '==', cariId).orderBy('tarih');
+            const snapshot = await finalQuery.get();
 
             if (snapshot.empty) {
-                raporDetayAlani.innerHTML = '<p>Seçili cari için bu ayda süt alım kaydı bulunamadı.</p>';
-                return;
+                sutRaporuDetayAlani.innerHTML = '<p>Seçili cari için bu ayda süt alım kaydı bulunamadı.</p>';
+            } else {
+                let tableHTML = `<table class="report-table"><thead><tr><th>Tarih</th><th>Akşam</th><th>Sabah</th><th>Toplam (Lt)</th><th>Fiyat</th><th>Tutar</th></tr></thead><tbody>`;
+                let toplamSabah = 0, toplamAksam = 0, toplamLitre = 0, toplamTutar = 0;
+                snapshot.forEach(doc => {
+                    const alim = doc.data();
+                    toplamSabah += alim.sabah || 0;
+                    toplamAksam += alim.aksam || 0;
+                    toplamLitre += alim.toplam || 0;
+                    toplamTutar += alim.toplamTutar || 0;
+                    tableHTML += `<tr><td>${formatDate(alim.tarih)}</td><td>${(alim.aksam || 0).toFixed(2)}</td><td>${(alim.sabah || 0).toFixed(2)}</td><td>${(alim.toplam || 0).toFixed(2)}</td><td>${formatCurrency(alim.fiyat)}</td><td>${formatCurrency(alim.toplamTutar)}</td></tr>`;
+                });
+                const ortalamaFiyat = toplamLitre > 0 ? (toplamTutar / toplamLitre) : 0;
+                tableHTML += `</tbody><tfoot><tr class="report-totals-row"><td>AYLIK TOPLAM</td><td>${toplamAksam.toFixed(2)}</td><td>${toplamSabah.toFixed(2)}</td><td>${toplamLitre.toFixed(2)}</td><td>${formatCurrency(ortalamaFiyat)}</td><td>${formatCurrency(toplamTutar)}</td></tr></tfoot></table>`;
+                sutRaporuDetayAlani.innerHTML = tableHTML;
             }
-
-            let tableHTML = `<table class="report-table"><thead><tr><th>Tarih</th><th>Akşam</th><th>Sabah</th><th>Toplam (Lt)</th><th>Fiyat</th><th>Tutar</th></tr></thead><tbody>`;
-            let toplamSabah = 0, toplamAksam = 0, toplamLitre = 0, toplamTutar = 0;
-
-            snapshot.forEach(doc => {
-                const alim = doc.data();
-                toplamSabah += alim.sabah;
-                toplamAksam += alim.aksam;
-                toplamLitre += alim.toplam;
-                toplamTutar += alim.toplamTutar;
-                tableHTML += `<tr><td>${formatDate(alim.tarih)}</td><td>${alim.aksam.toFixed(2)}</td><td>${alim.sabah.toFixed(2)}</td><td>${alim.toplam.toFixed(2)}</td><td>${formatCurrency(alim.fiyat)}</td>			<td>${formatCurrency(alim.toplamTutar)}</td></tr>`;
-            });
-
-            const ortalamaFiyat = toplamLitre > 0 ? (toplamTutar / toplamLitre) : 0;
-            tableHTML += `</tbody><tfoot><tr class="report-totals-row">
-                            <td>AYLIK TOPLAM</td>
-                            <td>${toplamAksam.toFixed(2)}</td>
-                            <td>${toplamSabah.toFixed(2)}</td>
-                            <td>${toplamLitre.toFixed(2)}</td>
-                            <td>${formatCurrency(ortalamaFiyat)}</td>
-                            <td>${formatCurrency(toplamTutar)}</td>
-                         </tr></tfoot></table>`;
-            raporDetayAlani.innerHTML = tableHTML;
-            toggleReportButtons('sutRaporu', true);
-        } 
-        else {
+        } else {
             if(options.kategori) {
                 raporBaslik.textContent = `${kategori} Kategorisi - ${formatMonthYear(ayYil)} Aylık Özet`;
             } else {
                 raporBaslik.textContent = `Tüm Cariler - ${formatMonthYear(ayYil)} Aylık Özet`;
             }
 
+            const allCarilerSnapshot = await db.collection('cariler').where('sahipId', '==', sahipId).get();
+            const allProducers = new Map(allCarilerSnapshot.docs.map(doc => [doc.id, doc.data()]));
+
             let alimlarSnapshot = await baseQuery.get();
             let alimlar = alimlarSnapshot.docs.map(doc => doc.data());
 
             if (options.kategori) {
-                const cariSnapshot = await db.collection('cariler').where('sahipId', '==', sahipId).where('kategori', '==', kategori).get();
-                const cariIdsInKategori = cariSnapshot.docs.map(doc => doc.id);
+                const cariIdsInKategori = [];
+                allProducers.forEach((value, key) => {
+                    if (value.kategori === kategori) cariIdsInKategori.push(key);
+                });
                 alimlar = alimlar.filter(alim => cariIdsInKategori.includes(alim.cariId));
             }
             
             if (alimlar.length === 0) {
-                raporDetayAlani.innerHTML = '<p>Seçili kriterlere uygun süt alım kaydı bulunamadı.</p>';
-                return;
+                sutRaporuDetayAlani.innerHTML = '<p>Seçili kriterlere uygun süt alım kaydı bulunamadı.</p>';
+            } else {
+                const raporData = {};
+                alimlar.forEach(alim => {
+                    if (!raporData[alim.cariId]) {
+                        raporData[alim.cariId] = { cariAdi: allProducers.get(alim.cariId)?.adiSoyadi || 'Silinmiş Cari', toplamSabah: 0, toplamAksam: 0, toplamLitre: 0, toplamTutar: 0 };
+                    }
+                    const ozet = raporData[alim.cariId];
+                    ozet.toplamSabah += alim.sabah || 0;
+                    ozet.toplamAksam += alim.aksam || 0;
+                    ozet.toplamLitre += alim.toplam || 0;
+                    ozet.toplamTutar += alim.toplamTutar || 0;
+                });
+
+                let tableHTML = `<table class="report-table"><thead><tr><th>Cari Adı</th><th>Toplam Akşam</th><th>Toplam Sabah</th><th>Toplam Litre</th><th>Ortalama Fiyat</th><th>Toplam Tutar</th></tr></thead><tbody>`;
+                Object.values(raporData).sort((a,b) => a.cariAdi.localeCompare(b.cariAdi)).forEach(data => {
+                    const ortalamaFiyat = data.toplamLitre > 0 ? (data.toplamTutar / data.toplamLitre) : 0;
+                    tableHTML += `<tr><td>${data.cariAdi}</td><td>${data.toplamAksam.toFixed(2)}</td><td>${data.toplamSabah.toFixed(2)}</td><td><strong>${data.toplamLitre.toFixed(2)}</strong></td><td>${formatCurrency(ortalamaFiyat)}</td><td><strong>${formatCurrency(data.toplamTutar)}</strong></td></tr>`;
+                });
+                tableHTML += `</tbody></table>`;
+                sutRaporuDetayAlani.innerHTML = tableHTML;
             }
-
-            const raporData = {};
-            alimlar.forEach(alim => {
-                if (!raporData[alim.cariId]) {
-                    raporData[alim.cariId] = { cariAdi: alim.cariAdi, toplamSabah: 0, toplamAksam: 0, toplamLitre: 0, toplamTutar: 0 };
-                }
-                raporData[alim.cariId].toplamSabah += alim.sabah;
-                raporData[alim.cariId].toplamAksam += alim.aksam;
-                raporData[alim.cariId].toplamLitre += alim.toplam;
-                raporData[alim.cariId].toplamTutar += alim.toplamTutar;
-            });
-
-            let tableHTML = `<table class="report-table"><thead><tr><th>Cari Adı</th><th>Toplam Akşam</th><th>Toplam Sabah</th><th>Toplam Litre</th><th>Ortalama Fiyat</th><th>Toplam Tutar</th></tr></thead><tbody>`;
-            let genelToplamSabah = 0, genelToplamAksam = 0, genelToplamLitre = 0, genelToplamTutar = 0;
-
-            Object.values(raporData).sort((a,b) => a.cariAdi.localeCompare(b.cariAdi)).forEach(data => {
-                const ortalamaFiyat = data.toplamLitre > 0 ? (data.toplamTutar / data.toplamLitre) : 0;
-                tableHTML += `<tr><td>${data.cariAdi}</td><td>${data.toplamAksam.toFixed(2)}</td><td>${data.toplamSabah.toFixed(2)}</td><td><strong>${data.toplamLitre.toFixed(2)}</strong></td><td>${formatCurrency(ortalamaFiyat)}</td>	<td><strong>${formatCurrency(data.toplamTutar)}</strong></td></tr>`;
-                genelToplamSabah += data.toplamSabah;
-                genelToplamAksam += data.toplamAksam;
-                genelToplamLitre += data.toplamLitre;
-                genelToplamTutar += data.toplamTutar;
-            });
-            
-            const genelOrtalamaFiyat = genelToplamLitre > 0 ? (genelToplamTutar / genelToplamLitre) : 0;
-            tableHTML += `</tbody><tfoot><tr class="report-totals-row">
-                            <td>GENEL TOPLAM</td>
-                            <td>${genelToplamAksam.toFixed(2)}</td>
-                            <td>${genelToplamSabah.toFixed(2)}</td>
-                            <td>${genelToplamLitre.toFixed(2)}</td>
-                            <td>${formatCurrency(genelOrtalamaFiyat)}</td>
-                            <td>${formatCurrency(genelToplamTutar)}</td>
-                         </tr></tfoot></table>`;
-            raporDetayAlani.innerHTML = tableHTML;
-            toggleReportButtons('sutRaporu', true);
         }
+        toggleReportButtons('sutRaporu', true);
     } catch (error) {
         console.error("Aylık Süt Raporu oluşturulurken hata:", error);
-        raporDetayAlani.innerHTML = `<p style="color:red; font-weight:bold;">RAPOR OLUŞTURULAMADI!<br>Hata Detayı: ${error.message}</p>`;
-        alert(`Süt raporu oluşturulurken bir hata oluştu!\n\nHata: ${error.message}\n\nLütfen konsol (F12) loglarını kontrol edin.`);
+        sutRaporuDetayAlani.innerHTML = `<p style="color:red; font-weight:bold;">RAPOR OLUŞTURULAMADI!<br>Hata Detayı: ${error.message}</p>`;
+    }
+}
+
+
+
+async function handleDinamikSutRaporu() {
+    const ayYil = document.getElementById('karneRaporuAySecimi').value;
+    const kategori = document.getElementById('karneRaporuKategoriSecimi').value;
+    const container = document.getElementById('dinamikRaporContainer');
+    const currentUser = auth.currentUser;
+
+    if (!ayYil || !kategori) {
+        alert("Lütfen bir ay ve kategori seçin.");
+        return;
+    }
+    container.innerHTML = `<p style="text-align:center; font-size:1.2em;">Rapor oluşturuluyor, veriler çekiliyor...</p>`;
+
+    const [year, month] = ayYil.split('-');
+    const ayGunSayisi = new Date(year, parseInt(month, 10), 0).getDate(); // DÜZELTME BURADA
+    const ayIsimleri = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+    const reportTitleText = `${kategori} - ${ayIsimleri[parseInt(month, 10) - 1]} ${year} Süt Karnesi`; // DÜZELTME BURADA
+
+    try {
+        const [producersSnapshot, milkSnapshot] = await Promise.all([
+            db.collection('cariler').where('sahipId', '==', sahipId).where('kategori', '==', kategori).where('cariGrup', 'array-contains', 'üretici').orderBy('rotaSirasi').get(),
+            db.collection('sut_alimlari').where('sahipId', '==', sahipId).where('tarih', '>=', `${year}-${month}-01`).where('tarih', '<=', `${year}-${month}-${ayGunSayisi}`).get()
+        ]);
+        
+        if (producersSnapshot.empty) {
+            container.innerHTML = '<p style="text-align:center;">Bu kategoride kayıtlı üretici bulunamadı.</p>';
+            return;
+        }
+
+        const producers = producersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const milkData = new Map();
+        milkSnapshot.forEach(doc => {
+            const alim = doc.data();
+            const key = `${alim.cariId}_${alim.tarih}`;
+            milkData.set(key, alim);
+        });
+        
+        let tableHTML = `
+            <div class="dinamik-rapor-header dont-print"><h1>${reportTitleText}</h1></div>
+            <div class="table-wrapper">
+                <table id="sut-rapor-tablosu">
+                    <thead>
+                        <tr class="gunler"><th rowspan="2" class="uretici-listesi">Üretici Listesi</th></tr>
+                        <tr class="vakit"></tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <td id="genel-toplam-hucre">
+                                <span>Akşam Toplam: <strong id="aksam-genel-toplam">0.00</strong></span>
+                                <span>Sabah Toplam: <strong id="sabah-genel-toplam">0.00</strong></span>
+                                <span>GENEL TOPLAM: <strong id="genel-toplam">0.00</strong></span>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        `;
+        container.innerHTML = tableHTML;
+        
+        const tableHeadGunler = container.querySelector('thead tr.gunler');
+        const tableHeadVakit = container.querySelector('thead tr.vakit');
+        const tableBody = container.querySelector('tbody');
+
+        tableHeadGunler.innerHTML = '<th rowspan="2" class="uretici-listesi">Üretici Listesi</th>'; // Başlığı sıfırla
+        tableHeadVakit.innerHTML = '';
+
+        for (let i = 1; i <= ayGunSayisi; i++) {
+            const thGun = document.createElement('th');
+            thGun.setAttribute('colspan', '2');
+            thGun.textContent = i;
+            tableHeadGunler.appendChild(thGun);
+            tableHeadVakit.innerHTML += `<th>A</th><th>S</th>`;
+        }
+
+        producers.forEach(producer => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td class="uretici-listesi">${producer.adiSoyadi}</td>`;
+            for (let i = 1; i <= ayGunSayisi; i++) {
+                const day = String(i).padStart(2, '0');
+                const dateStr = `${year}-${month}-${day}`;
+                const key = `${producer.id}_${dateStr}`;
+                const data = milkData.get(key) || { sabah: '', aksam: '' };
+                tr.innerHTML += `
+                    <td><input type="text" class="litre-input aksam" value="${data.aksam || ''}" readonly></td>
+                    <td><input type="text" class="litre-input sabah" value="${data.sabah || ''}" readonly></td>
+                `;
+            }
+            tableBody.appendChild(tr);
+        });
+        
+        const totalColumns = 1 + (ayGunSayisi * 2);
+        container.querySelector('tfoot td').setAttribute('colspan', totalColumns);
+
+        calculateKarneTotals();
+
+    } catch(error) {
+        console.error("Dinamik rapor oluşturulurken hata:", error);
+        container.innerHTML = `<p style="color:red; text-align:center;">Rapor oluşturulurken bir hata oluştu: ${error.message}</p>`;
     }
 }
 
