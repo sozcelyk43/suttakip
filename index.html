@@ -2962,7 +2962,18 @@ async function renderTopluSutGirisFormu() {
         ]);
 
         const kayitliCariIdleri = new Set(sutAlimSnapshot.docs.map(doc => doc.data().cariId));
-        const gosterilecekCariler = carilerSnapshot.docs.filter(doc => !kayitliCariIdleri.has(doc.id));
+
+        // --- BAŞLANGIÇ: YENİ FİLTRELEME EKLENDİ ---
+        // Gelen tüm carileri, cari tipine göre filtreliyoruz.
+        const filtrelenmisCariler = carilerSnapshot.docs.filter(doc => {
+            const cariTipi = doc.data().cariTipi;
+            // Eğer cariTipi 'sadece_yem' DEĞİLSE listeye dahil et.
+            return cariTipi !== 'sadece_yem'; 
+        });
+        // --- BİTİŞ: YENİ FİLTRELEME EKLENDİ ---
+
+        // Artık carilerSnapshot.docs yerine bizim filtrelenmisCariler listemizi kullanıyoruz.
+        const gosterilecekCariler = filtrelenmisCariler.filter(doc => !kayitliCariIdleri.has(doc.id));
 
         if (gosterilecekCariler.length === 0) {
             container.innerHTML = '';
