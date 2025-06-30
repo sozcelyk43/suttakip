@@ -4009,23 +4009,26 @@ async function handleHesapOzetiRaporuOlustur() {
     raporBaslik.textContent = `${cariAdi} - ${formatMonthYear(ayYil)} Hesap Özeti`;
     raporDetayAlani.innerHTML = '<p>Rapor oluşturuluyor, lütfen bekleyin...</p>';
 
+    const intYear = parseInt(year, 10);
+    const intMonth = parseInt(month, 10);
+    const startDate = `${year}-${month}-01`;
+    const ayGunSayisi = new Date(intYear, intMonth, 0).getDate();
+    const endDate = `${year}-${month}-${String(ayGunSayisi).padStart(2, '0')}`;
+    const devirTarihiObj = new Date(intYear, intMonth - 1, 0);
+    const devirYil = devirTarihiObj.getFullYear();
+    const devirAy = String(devirTarihiObj.getMonth() + 1).padStart(2, '0');
+    const devirGun = String(devirTarihiObj.getDate()).padStart(2, '0');
+    const devirTarihiStr = `${devirYil}-${devirAy}-${devirGun}`;
+    
+    
+
     try {
-        const intYear = parseInt(year, 10);
-        const intMonth = parseInt(month, 10);
-        const startDate = `${year}-${month}-01`;
-        const ayGunSayisi = new Date(intYear, intMonth, 0).getDate();
-        const endDate = `${year}-${month}-${String(ayGunSayisi).padStart(2, '0')}`;
-        const devirTarihiObj = new Date(intYear, intMonth - 1, 0);
-        const devirYil = devirTarihiObj.getFullYear();
-        const devirAy = String(devirTarihiObj.getMonth() + 1).padStart(2, '0');
-        const devirGun = String(devirTarihiObj.getDate()).padStart(2, '0');
-        const devirTarihiStr = `${devirYil}-${devirAy}-${devirGun}`;
-        
         const createQuery = (collection, isDevir) => {
             let q = db.collection(collection).where('sahipId', '==', sahipId).where('cariId', '==', cariId);
             q = isDevir ? q.where('tarih', '<=', devirTarihiStr) : q.where('tarih', '>=', startDate).where('tarih', '<=', endDate);
             return q.get();
         };
+        
         
         const [devirSut, devirYemSatis, devirOdeme, aySut, ayYemSatis, ayOdeme, yemlerSnapshot] = await Promise.all([
             createQuery('sut_alimlari', true), 
@@ -4062,15 +4065,29 @@ async function handleHesapOzetiRaporuOlustur() {
             const ortalamaFiyat = toplamLitre > 0 ? (toplamSutDegeri / toplamLitre) : 0;
             sutDetayHTML = `<table class="summary-table"><thead><tr><th>Toplam Akşam</th><th>Toplam Sabah</th><th>Toplam Litre</th><th>Ort. Fiyat</th><th>Toplam Tutar</th></tr></thead><tbody><tr><td>${toplamAksam.toFixed(2)} Lt</td><td>${toplamSabah.toFixed(2)} Lt</td><td>${toplamLitre.toFixed(2)} Lt</td><td>${formatCurrency(ortalamaFiyat)}</td><td>${formatCurrency(toplamSutDegeri)}</td></tr></tbody></table>`;
         }
-
+        
         let toplamYemSatisTutari = 0, yemSatisDetayHTML = '';
         if (!ayYemSatis.empty) {
             const yemSatisOzet = {};
-            ayYemSatis.forEach(doc => { /* ... (Yem Satış özeti hesaplamaları aynı kalıyor) ... */ });
-            yemSatisDetayHTML = '...'; // Yem satış detayı HTML'i aynı kalıyor
+            ayYemSatis.forEach(doc => {
+                const satis = doc.data();
+                toplamYemSatisTutari += satis.toplamTutar;
+                const yemAdi = yemMap.get(satis.yemId)?.ad || 'Bilinmeyen Yem';
+                if (!yemSatisOzet[yemAdi]) {
+                    yemSatisOzet[yemAdi] = { miktar: 0, tutar: 0 };
+                }
+                yemSatisOzet[yemAdi].miktar += satis.miktar;
+                yemSatisOzet[yemAdi].tutar += satis.toplamTutar;
+            });
+            yemSatisDetayHTML = '<table class="summary-table"><thead><tr><th>Yem Adı</th><th>Toplam Miktar</th><th>Ort. Birim Fiyat</th><th>Toplam Tutar</th></tr></thead><tbody>';
+            for (const yemAdi in yemSatisOzet) {
+                const ozet = yemSatisOzet[yemAdi];
+                const ortalamaBirimFiyat = ozet.miktar > 0 ? (ozet.tutar / ozet.miktar) : 0;
+                yemSatisDetayHTML += `<tr><td>${yemAdi}</td><td>${ozet.miktar}</td><td>${formatCurrency(ortalamaBirimFiyat)}</td><td>${formatCurrency(ozet.tutar)}</td></tr>`;
+            }
+            yemSatisDetayHTML += '</tbody></table>';
         }
-        
-        // --- GÜNCELLEME: Ödeme ve Tahsilat detay tabloları yeniden oluşturuluyor ---
+
         let toplamOdemeTutari = 0, odemeDetayHTML = '';
         let toplamTahsilatTutari = 0, tahsilatDetayHTML = '';
         if(!ayOdeme.empty) {
@@ -4097,8 +4114,6 @@ async function handleHesapOzetiRaporuOlustur() {
             if(!tahsilatYapildi) tahsilatDetayHTML = '<p>Bu ay tahsilat yapılmamış.</p>';
         }
 
-        // --- GÜNCELLEME: Bakiye hesaplama mantığı geri bildiriminize göre düzeltildi ---
-        // Ödeme, carinin alacağını artırır (firmaya olan borcunu azaltır). Tahsilat ise borcunu artırır.
         const cariAyBakiye = (toplamSutDegeri + toplamOdemeTutari) - (toplamYemSatisTutari + toplamTahsilatTutari);
         const donemSonuBakiye = devredenBakiye + cariAyBakiye;
 
@@ -4129,7 +4144,6 @@ async function handleHesapOzetiRaporuOlustur() {
         raporDetayAlani.innerHTML = `<p style="color:red; font-weight:bold;">RAPOR OLUŞTURULAMADI!<br>Hata Detayı: ${error.message}.</p>`;
     }
 }
-
 
 function toggleReportButtons(reportPrefix, show) {
     const displayStyle = show ? 'inline-block' : 'none';
