@@ -4202,15 +4202,7 @@ window.onafterprint = () => {
 
 </script>
 <script src="https://unpkg.com/jspdf-autotable@3.5.23/dist/jspdf.plugin.autotable.js"></script>
-<script>
-(function (jsPDFAPI) {
-    var font = '... [Base64 font data will be simulated here as it is very long] ...'; // This is a placeholder for a very long Base64 string.
-    var callAddFont = function () {
-        this.addFileToVFS('Verdana-Regular-normal.ttf', font);
-        this.addFont('Verdana-Regular-normal.ttf', 'Verdana', 'normal');
-    };
-    jsPDFAPI.events.push(['addFonts', callAddFont]);
-})(window.jspdf.API);  // <-- DEĞİŞİKLİK BURADA: jsPDF -> window.jspdf olarak güncellendi.
+
 </script>
 </body>
 </html>
