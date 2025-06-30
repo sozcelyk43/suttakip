@@ -3016,9 +3016,9 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
     const sabahMiktar = parseFloat(sabahInput.value) || 0;
     const aksamMiktar = parseFloat(aksamInput.value) || 0;
     const birimFiyat = parseFloat(fiyatInput.value) || globalSettings.defaultMilkPrice || 0;
-    const toplamMiktar = sabahMiktar + aksamMiktar;
+    const bugunkuToplamMiktar = sabahMiktar + aksamMiktar;
     
-    if (toplamMiktar <= 0) {
+    if (bugunkuToplamMiktar <= 0) {
         alert("Lütfen en az bir miktar girin.");
         return;
     }
@@ -3026,63 +3026,75 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
         alert("Lütfen bir tank seçin!");
         return;
     }
+    
+    // --- BAŞLANGIÇ: YENİ UYARI KONTROLÜ EKLENDİ ---
+    try {
+        const today = new Date(tarih);
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+        const dunkuSutSnapshot = await db.collection('sut_alimlari')
+            .where('sahipId', '==', sahipId)
+            .where('cariId', '==', cariId)
+            .where('tarih', '==', yesterdayStr)
+            .limit(1).get();
+
+        if (!dunkuSutSnapshot.empty) {
+            const dunkuToplamMiktar = dunkuSutSnapshot.docs[0].data().toplam;
+            const altLimit = dunkuToplamMiktar * 0.90;
+            const ustLimit = dunkuToplamMiktar * 1.10;
+
+            if (bugunkuToplamMiktar < altLimit || bugunkuToplamMiktar > ustLimit) {
+                const fark = bugunkuToplamMiktar - dunkuToplamMiktar;
+                const durum = fark > 0 ? 'daha fazla' : 'daha az';
+                const onay = confirm(`⚠️ DİKKAT! \n\nBugün girilen miktar (${bugunkuToplamMiktar.toFixed(1)} Lt), dün girilen miktardan (${dunkuToplamMiktar.toFixed(1)} Lt) %10 oranında ${durum}.\n\nBu miktar doğru mu? Kaydetmek için 'Tamam'a basın.`);
+                if (!onay) {
+                    return; // Kullanıcı iptal ederse kaydı durdur.
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Önceki gün kontrolü sırasında hata:", error);
+        // Hata olsa bile işleme devam et, sadece uyarısız kaydeder.
+    }
+    // --- BİTİŞ: YENİ UYARI KONTROLÜ EKLENDİ ---
 
     const satir = document.getElementById(`satir-${cariId}`);
     if(satir) satir.querySelector('button').disabled = true;
 
+    // ... (Geri kalan kayıt kodları aynı şekilde devam ediyor)
     const calisanId = auth.currentUser.uid;
     const batch = db.batch();
 
     const sutAlimRef = db.collection("sut_alimlari").doc();
     batch.set(sutAlimRef, {
-        tarih: tarih,
-        cariId: cariId,
-        cariAdi: cariAdi,
-        sabah: sabahMiktar,
-        aksam: aksamMiktar,
-        toplam: toplamMiktar,
-        fiyat: birimFiyat,
-        toplamTutar: toplamMiktar * birimFiyat,
-        sahipId: sahipId
+        tarih: tarih, cariId: cariId, cariAdi: cariAdi,
+        sabah: sabahMiktar, aksam: aksamMiktar, toplam: bugunkuToplamMiktar,
+        fiyat: birimFiyat, toplamTutar: bugunkuToplamMiktar * birimFiyat, sahipId: sahipId
     });
 
     if (sabahMiktar > 0) {
         const movementRefSabah = db.collection('tank_hareketleri').doc();
         batch.set(movementRefSabah, {
-            movementId: movementRefSabah.id,
-            ureticiId: cariId,
-            ureticiAdi: cariAdi,
-            sahipId: sahipId,
-            calisanId: calisanId,
-            tankId: tankId,
-            alim_tarihi: tarih,
-            zaman_dilimi: 'sabah',
-            miktar: sabahMiktar,
-            birim_fiyat: birimFiyat,
-            toplam_tutar: sabahMiktar * birimFiyat,
-            kayitZamani: new Date()
+            movementId: movementRefSabah.id, ureticiId: cariId, ureticiAdi: cariAdi,
+            sahipId: sahipId, calisanId: calisanId, tankId: tankId, alim_tarihi: tarih,
+            zaman_dilimi: 'sabah', miktar: sabahMiktar, birim_fiyat: birimFiyat,
+            toplam_tutar: sabahMiktar * birimFiyat, kayitZamani: new Date()
         });
     }
     if (aksamMiktar > 0) {
         const movementRefAksam = db.collection('tank_hareketleri').doc();
         batch.set(movementRefAksam, {
-            movementId: movementRefAksam.id,
-            ureticiId: cariId,
-            ureticiAdi: cariAdi,
-            sahipId: sahipId,
-            calisanId: calisanId,
-            tankId: tankId,
-            alim_tarihi: tarih,
-            zaman_dilimi: 'akşam',
-            miktar: aksamMiktar,
-            birim_fiyat: birimFiyat,
-            toplam_tutar: aksamMiktar * birimFiyat,
-            kayitZamani: new Date()
+            movementId: movementRefAksam.id, ureticiId: cariId, ureticiAdi: cariAdi,
+            sahipId: sahipId, calisanId: calisanId, tankId: tankId, alim_tarihi: tarih,
+            zaman_dilimi: 'akşam', miktar: aksamMiktar, birim_fiyat: birimFiyat,
+            toplam_tutar: aksamMiktar * birimFiyat, kayitZamani: new Date()
         });
     }
 
     const tankRef = db.collection('tanklar').doc(tankId);
-    batch.update(tankRef, { mevcutLitre: firebase.firestore.FieldValue.increment(toplamMiktar) });
+    batch.update(tankRef, { mevcutLitre: firebase.firestore.FieldValue.increment(bugunkuToplamMiktar) });
 
     try {
         await batch.commit();
@@ -3094,7 +3106,6 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
         if(satir) satir.querySelector('button').disabled = false;
     }
 }
-
 
 
 
