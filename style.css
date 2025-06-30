@@ -566,3 +566,9 @@ body.pdf-generating .pdf-source-section .container {
     font-weight: bold;
     margin-left: 4px;
 }
+
+.required {
+    color: red;
+    font-weight: bold;
+    margin-left: 2px;
+}
