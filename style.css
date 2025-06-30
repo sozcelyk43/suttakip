@@ -560,3 +560,9 @@ body.pdf-generating .pdf-source-section .container {
     width: auto; /* Genişliği içeriğe göre ayarla */
     margin-right: 8px;
 }
+/* ZORUNLU ALAN YILDIZI İÇİN STİL */
+.required-star {
+    color: #dc3545; /* Kırmızı renk */
+    font-weight: bold;
+    margin-left: 4px;
+}
