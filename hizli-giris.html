@@ -594,11 +594,18 @@ async function handleUpdate() {
     if (currentProducerIndex >= routeProducers.length) return;
     const currentProducer = routeProducers[currentProducerIndex];
 
-    if (!unitPrice || !quantity || !tankId || quantity <= 0 || !alimTarihi) {
-        alert('Lütfen Fiyat, Miktar, Tarih ve Tank seçimlerini doğru yapın.'); return;
+   // ...fonksiyonun başı
+    // GÜNCELLENDİ: Miktar (quantity) kontrolü, 0'dan küçükse hata verecek şekilde değiştirildi.
+    if (!unitPrice || !tankId || quantity < 0 || !alimTarihi || quantity === null || quantity === undefined) {
+        alert('Lütfen Fiyat, Miktar, Tarih ve Tank seçimlerini doğru yapın. Miktar negatif olamaz.'); return;
     }
-    
-    // --- BAŞLANGIÇ: YENİ UYARI KONTROLÜ EKLENDİ ---
+
+    if (quantity > 0) { 
+      try {
+      } catch (error) {
+          console.error("Önceki gün kontrolü sırasında hata:", error);
+      }
+    }
     try {
         // 1. Bugünün diğer vakit girişini bulup toplamı hesapla
         let bugunkuToplamMiktar = quantity;
