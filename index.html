@@ -709,6 +709,10 @@
     let aylikSutunChartInstance = null;
     let tankDataMap = new Map();
 
+let sutAlimGecmisiListener = null; // Süt alım geçmişi için dinleyici
+let topluGirisListener = null;     // Toplu giriş formu için dinleyici
+let dashboardTankListener = null;  // Kontrol paneli tankları için dinleyici
+
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('sw.js').catch(err => console.error('Service Worker registration failed: ', err));
@@ -2953,49 +2957,64 @@ async function renderTopluSutGirisFormu() {
     const container = document.getElementById('topluSutGirisTablosuAlani');
     const yokMesaji = document.getElementById('topluGirisTedarikciYokMesaji');
     const currentUser = auth.currentUser;
-    if (!currentUser || !tarih) { return; }
 
-    try {
-        const [sutAlimSnapshot, carilerSnapshot] = await Promise.all([
-             db.collection('sut_alimlari').where('sahipId', '==', sahipId).where('tarih', '==', tarih).get(),
-             db.collection('cariler').where('sahipId', '==', sahipId).where('kategori', '==', kategori || null).where('durum', '==', 'aktif').where('cariGrup', 'array-contains', 'üretici').orderBy('rotaSirasi').get()
-        ]);
-
-        const kayitliCariIdleri = new Set(sutAlimSnapshot.docs.map(doc => doc.data().cariId));
-
-        // --- BAŞLANGIÇ: YENİ FİLTRELEME EKLENDİ ---
-        // Gelen tüm carileri, cari tipine göre filtreliyoruz.
-        const filtrelenmisCariler = carilerSnapshot.docs.filter(doc => {
-            const cariTipi = doc.data().cariTipi;
-            // Eğer cariTipi 'sadece_yem' DEĞİLSE listeye dahil et.
-            return cariTipi !== 'sadece_yem'; 
-        });
-        // --- BİTİŞ: YENİ FİLTRELEME EKLENDİ ---
-
-        // Artık carilerSnapshot.docs yerine bizim filtrelenmisCariler listemizi kullanıyoruz.
-        const gosterilecekCariler = filtrelenmisCariler.filter(doc => !kayitliCariIdleri.has(doc.id));
-
-        if (gosterilecekCariler.length === 0) {
-            container.innerHTML = '';
-            yokMesaji.style.display = 'block';
-            return;
-        }
-        yokMesaji.style.display = 'none';
-        
-        let tableHTML = `<table><thead><tr><th>Cari Adı</th><th>Akşam (Lt)</th><th>Sabah (Lt)</th><th>Toplam (Lt)</th><th>Fiyat</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr></thead><tbody>`;
-        const defaultFiyat = (globalSettings.defaultMilkPrice || 15.50).toFixed(2);
-        gosterilecekCariler.forEach(doc => {
-            const cari = { id: doc.id, ...doc.data() };
-            const escapedCariAdi = cari.adiSoyadi.replace(/'/g, "\\'").replace(/"/g, '\\"');
-            tableHTML += `<tr id="satir-${cari.id}"><td>${cari.adiSoyadi} (${cari.kategori || 'Belirtilmemiş'})</td><td><input type="number" id="aksam-${cari.id}" class="sut-input" step="0.1" min="0" oninput="sutMiktarGuncelle('${cari.id}')"></td><td><input type="number" id="sabah-${cari.id}" class="sut-input" step="0.1" min="0" oninput="sutMiktarGuncelle('${cari.id}')"></td><td><span id="toplam-lt-${cari.id}">0.00</span></td><td><input type="number" id="fiyat-${cari.id}" class="sut-input" step="0.01" min="0" value="${defaultFiyat}" oninput="sutMiktarGuncelle('${cari.id}')"></td><td><span id="toplam-tutar-${cari.id}">0,00 ₺</span></td><td class="dont-print"><button id="kaydet-btn-${cari.id}" class="btn btn-primary btn-sm" onclick="handleTopluSutKaydet('${cari.id}', '${escapedCariAdi}', '${tarih}')">Kaydet</button></td></tr>`;
-        });
-        tableHTML += `</tbody></table>`;
-        container.innerHTML = tableHTML;
-    } catch (error) {
-        console.error("Süt girişi için cariler getirilirken hata:", error);
+    // Önceki dinleyiciyi durdur
+    if (topluGirisListener) {
+        topluGirisListener();
     }
-}
 
+    if (!currentUser || !tarih || !kategori) {
+        container.innerHTML = '';
+        yokMesaji.style.display = 'block';
+        yokMesaji.textContent = 'Lütfen tarih ve kategori seçimi yapın.';
+        return;
+    }
+
+    // Sorguları hazırla
+    const carilerQuery = db.collection('cariler')
+        .where('sahipId', '==', sahipId)
+        .where('kategori', '==', kategori)
+        .where('durum', '==', 'aktif')
+        .where('cariGrup', 'array-contains', 'üretici')
+        .where('cariTipi', '!=', 'sadece_yem') // Sadece yem olanları hariç tut
+        .orderBy('cariTipi') // Firestore'un '!=' sorgusu için ek bir sıralama alanı gerekir
+        .orderBy('rotaSirasi');
+
+    const sutAlimlariQuery = db.collection('sut_alimlari')
+        .where('sahipId', '==', sahipId)
+        .where('tarih', '==', tarih);
+    
+    // Her iki sorguyu da dinle
+    topluGirisListener = carilerQuery.onSnapshot(async carilerSnapshot => {
+        const tumCariler = carilerSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Sadece cariler değiştiğinde süt alımlarını tekrar dinlemeye gerek yok,
+        // bu yüzden süt alım dinleyicisini cariler dinleyicisinin içine koyuyoruz.
+        sutAlimlariQuery.onSnapshot(sutAlimSnapshot => {
+            const kayitliCariIdleri = new Set(sutAlimSnapshot.docs.map(doc => doc.data().cariId));
+            const gosterilecekCariler = tumCariler.filter(cari => !kayitliCariIdleri.has(cari.id));
+
+            if (gosterilecekCariler.length === 0) {
+                container.innerHTML = '';
+                yokMesaji.style.display = 'block';
+                yokMesaji.textContent = 'Bu kriterlere uygun, süt girişi bekleyen cari bulunmuyor.';
+                return;
+            }
+            yokMesaji.style.display = 'none';
+            
+            let tableHTML = `<table><thead><tr><th>Cari Adı</th><th>Akşam (Lt)</th><th>Sabah (Lt)</th><th>Toplam (Lt)</th><th>Fiyat</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr></thead><tbody>`;
+            const defaultFiyat = (globalSettings.defaultMilkPrice || 15.50).toFixed(2);
+            gosterilecekCariler.forEach(cari => {
+                const escapedCariAdi = cari.adiSoyadi.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                tableHTML += `<tr id="satir-${cari.id}"><td>${cari.adiSoyadi} (${cari.kategori || 'Belirtilmemiş'})</td><td><input type="number" id="aksam-${cari.id}" class="sut-input" step="0.1" min="0" oninput="sutMiktarGuncelle('${cari.id}')"></td><td><input type="number" id="sabah-${cari.id}" class="sut-input" step="0.1" min="0" oninput="sutMiktarGuncelle('${cari.id}')"></td><td><span id="toplam-lt-${cari.id}">0.00</span></td><td><input type="number" id="fiyat-${cari.id}" class="sut-input" step="0.01" min="0" value="${defaultFiyat}" oninput="sutMiktarGuncelle('${cari.id}')"></td><td><span id="toplam-tutar-${cari.id}">0,00 ₺</span></td><td class="dont-print"><button id="kaydet-btn-${cari.id}" class="btn btn-primary btn-sm" onclick="handleTopluSutKaydet('${cari.id}', '${escapedCariAdi}', '${tarih}')">Kaydet</button></td></tr>`;
+            });
+            tableHTML += `</tbody></table>`;
+            container.innerHTML = tableHTML;
+        });
+    }, error => {
+        console.error("Toplu süt girişi için cariler dinlenirken hata:", error);
+    });
+}
 
 function sutMiktarGuncelle(cariId) {
     const sabah = parseFloat(document.getElementById(`sabah-${cariId}`).value) || 0;
@@ -3138,39 +3157,44 @@ async function renderSutAlimGecmisi() {
     const gecmisTarihSpan = document.getElementById('gecmisTarihSpan');
     const header = document.getElementById('sutAlimGecmisiHeader');
     const body = document.getElementById('sutAlimGecmisiBody');
-    const footer = document.getElementById('sutAlimGecmisiFooter'); // Footer elemanını seç
+    const footer = document.getElementById('sutAlimGecmisiFooter');
     const currentUser = auth.currentUser;
+
+    // Önceki dinleyiciyi durdur (varsa)
+    if (sutAlimGecmisiListener) {
+        sutAlimGecmisiListener();
+    }
+
     if (!currentUser || !tarih) {
         header.innerHTML = '';
         body.innerHTML = '';
-        footer.innerHTML = ''; // Tarih yoksa footer'ı da temizle
+        footer.innerHTML = '';
         return;
     }
 
     gecmisTarihSpan.textContent = formatDate(tarih);
     header.innerHTML = `<tr><th>Cari Adı</th><th>Akşam (Lt)</th><th>Sabah (Lt)</th><th>Toplam</th><th>Fiyat</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr>`;
     body.innerHTML = '<tr><td colspan="7">Yükleniyor...</td></tr>';
-    footer.innerHTML = ''; // Her yeni render'da footer'ı temizle
+    footer.innerHTML = '';
 
-    try {
-        const snapshot = await db.collection('sut_alimlari')
-            .where('sahipId', '==', sahipId).where('tarih', '==', tarih).orderBy('cariAdi').get();
+    const query = db.collection('sut_alimlari')
+        .where('sahipId', '==', sahipId)
+        .where('tarih', '==', tarih)
+        .orderBy('cariAdi');
 
+    // .get() yerine .onSnapshot() kullanarak gerçek zamanlı dinleyici kur
+    sutAlimGecmisiListener = query.onSnapshot(snapshot => {
         if (snapshot.empty) {
             body.innerHTML = '<tr><td colspan="7" style="text-align:center;">Bu tarih için süt alım kaydı bulunmuyor.</td></tr>';
+            footer.innerHTML = ''; // Kayıt yoksa alt toplamı da temizle
             return;
         }
 
         let bodyHTML = '';
-        // Toplamları hesaplamak için değişkenler
-        let toplamAksam = 0;
-        let toplamSabah = 0;
-        let toplamLitre = 0;
-        let toplamTutar = 0;
+        let toplamAksam = 0, toplamSabah = 0, toplamLitre = 0, toplamTutar = 0;
 
         snapshot.forEach(doc => {
             const alim = doc.data();
-            // Değişkenlere değerleri ekle
             toplamAksam += alim.aksam || 0;
             toplamSabah += alim.sabah || 0;
             toplamLitre += alim.toplam || 0;
@@ -3191,10 +3215,7 @@ async function renderSutAlimGecmisi() {
         });
         body.innerHTML = bodyHTML;
 
-        // Ortalama fiyatı hesapla
         const ortalamaFiyat = toplamLitre > 0 ? (toplamTutar / toplamLitre) : 0;
-
-        // Footer satırını oluştur ve ekle
         footer.innerHTML = `
             <tr style="background-color: #f0f0f0; font-weight: bold;">
                 <td><strong>GÜNLÜK TOPLAM</strong></td>
@@ -3204,16 +3225,12 @@ async function renderSutAlimGecmisi() {
                 <td><strong>${formatCurrency(ortalamaFiyat)}</strong></td>
                 <td><strong>${formatCurrency(toplamTutar)}</strong></td>
                 <td class="dont-print"></td>
-            </tr>
-        `;
-
-    } catch (error) {
-        console.error("Süt alım geçmişi yüklenirken hata:", error);
+            </tr>`;
+    }, error => {
+        console.error("Süt alım geçmişi dinlenirken hata:", error);
         body.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Geçmiş yüklenirken bir hata oluştu.</td></tr>';
-    }
+    });
 }
-
-
 
  
 async function deleteYemAlisi(id) {
@@ -3822,33 +3839,43 @@ async function handleTankAktarim(event) {
 async function renderDashboardTanks() {
     const container = document.getElementById('dashboardTanklar');
     if (!container) return;
-    container.innerHTML = 'Yükleniyor...';
 
-    const snapshot = await db.collection('tanklar').orderBy('ad').get();
-    if (snapshot.empty) {
-        container.innerHTML = '<p>Tanımlı tank bulunmuyor.</p>';
-        return;
+    // Önceki dinleyiciyi durdur
+    if (dashboardTankListener) {
+        dashboardTankListener();
     }
-    let html = '';
-    snapshot.forEach(doc => {
-        const tank = doc.data();
-        const dolulukOrani = (tank.mevcutLitre / tank.kapasite) * 100;
-        const barClass = dolulukOrani > 95 ? 'tank-bar full' : 'tank-bar';
-        html += `
-            <div class="tank-item">
-                <div class="tank-item-header">
-                    <span>${tank.ad}</span>
-                    <span>${tank.mevcutLitre.toLocaleString('tr-TR', {maximumFractionDigits:1})} / ${tank.kapasite.toLocaleString('tr-TR')} Lt</span>
-                </div>
-                <div class="tank-bar-wrapper">
-                    <div class="${barClass}" style="width: ${dolulukOrani.toFixed(2)}%;">
-                        %${dolulukOrani.toFixed(1)}
+
+    const query = db.collection('tanklar').where('sahipId', '==', sahipId).orderBy('ad');
+
+    dashboardTankListener = query.onSnapshot(snapshot => {
+        if (snapshot.empty) {
+            container.innerHTML = '<p>Tanımlı tank bulunmuyor.</p>';
+            return;
+        }
+        let html = '';
+        snapshot.forEach(doc => {
+            const tank = doc.data();
+            const dolulukOrani = tank.kapasite > 0 ? (tank.mevcutLitre / tank.kapasite) * 100 : 0;
+            const barClass = dolulukOrani > 95 ? 'tank-bar full' : 'tank-bar';
+            html += `
+                <div class="tank-item">
+                    <div class="tank-item-header">
+                        <span>${tank.ad}</span>
+                        <span>${tank.mevcutLitre.toLocaleString('tr-TR', {maximumFractionDigits:1})} / ${tank.kapasite.toLocaleString('tr-TR')} Lt</span>
+                    </div>
+                    <div class="tank-bar-wrapper">
+                        <div class="${barClass}" style="width: ${dolulukOrani.toFixed(2)}%;">
+                            %${dolulukOrani.toFixed(1)}
+                        </div>
                     </div>
                 </div>
-            </div>
-        `;
+            `;
+        });
+        container.innerHTML = html;
+    }, error => {
+        console.error("Dashboard tankları dinlenirken hata:", error);
+        container.innerHTML = '<p style="color:red;">Tank verileri yüklenemedi.</p>';
     });
-    container.innerHTML = html;
 }
 
 

@@ -572,3 +572,18 @@ body.pdf-generating .pdf-source-section .container {
     font-weight: bold;
     margin-left: 2px;
 }
+
+/* Tank Yenileme Butonu Stili */
+#refresh-tanks-btn {
+    background: none;
+    border: none;
+    font-size: 1.1em; /* İkonu biraz büyütelim */
+    cursor: pointer;
+    padding: 0 5px;
+    vertical-align: middle; /* Yazı ile hizala */
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+#refresh-tanks-btn:hover {
+    background-color: rgba(0,0,0,0.1);
+}
