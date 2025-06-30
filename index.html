@@ -1448,40 +1448,76 @@ function exportTableToExcel(containerId, fileName = 'rapor') {
         alert('Rapor konteyneri bulunamadı.');
         return;
     }
-    const table = container.querySelector('table'); // Tabloyu konteyner içinde ara
-    if (!table) {
-        alert('Rapor içeriği bulunamadı, lütfen önce bir rapor oluşturun.');
-        return;
-    }
 
-    const tableClone = table.cloneNode(true);
-    Array.from(tableClone.querySelectorAll('.dont-print')).forEach(el => el.remove());
+    // 1. Excel'e aktarmak için bellekte yeni, tek bir ana tablo oluştur.
+    const masterTable = document.createElement('table');
+    const masterTbody = masterTable.createTBody();
 
-    const wb = XLSX.utils.table_to_book(tableClone, {sheet:"Rapor"});
+    // 2. Rapor konteyneri içindeki tüm rapor bloklarını bul.
+    const reportBlocks = container.querySelectorAll('.report-block');
+
+    // 3. Her bir bloğu gez ve içeriğini ana tabloya satır olarak ekle.
+    reportBlocks.forEach(block => {
+        // Blok başlığı için bir satır ekle
+        const headerRow = masterTbody.insertRow();
+        const headerCell = headerRow.insertCell();
+        // Geniş bir alana yayılması için colspan kullan (Excel'de daha iyi görünür)
+        headerCell.colSpan = 5; 
+        headerCell.innerHTML = `<strong>${block.querySelector('h5')?.textContent || ''}</strong>`;
+        
+        // Bloğun içindeki asıl tabloyu bul
+        const innerTable = block.querySelector('table.summary-table');
+        if (innerTable) {
+            // Eğer blok içinde bir tablo varsa, o tablonun tüm satırlarını kopyala
+            Array.from(innerTable.rows).forEach(row => {
+                const newRow = masterTbody.insertRow();
+                Array.from(row.cells).forEach(cell => {
+                    const newCell = newRow.insertCell();
+                    newCell.innerHTML = cell.innerHTML;
+                    if (cell.colSpan > 1) {
+                        newCell.colSpan = cell.colSpan;
+                    }
+                });
+            });
+        } else {
+            // Eğer blok içinde tablo yoksa, paragraf (<p>) içeriğini al
+            const pElements = block.querySelectorAll('p.block-total, p:not(.final-summary *)');
+            pElements.forEach(p => {
+                 const contentRow = masterTbody.insertRow();
+                 const contentCell = contentRow.insertCell();
+                 contentCell.colSpan = 5;
+                 contentCell.textContent = p.textContent.trim();
+            });
+        }
+        
+        // Final özet bloğundaki her bir satırı ayrı ayrı ekle
+        const finalSummaryLines = block.querySelectorAll('.final-summary p');
+        if (finalSummaryLines.length > 0) {
+             finalSummaryLines.forEach(p => {
+                 const summaryRow = masterTbody.insertRow();
+                 const labelCell = summaryRow.insertCell();
+                 const valueCell = summaryRow.insertCell();
+                 valueCell.colSpan = 4;
+                 
+                 const label = p.querySelector('span:first-child')?.textContent || '';
+                 const value = p.querySelector('span:last-child, strong:last-child')?.textContent || p.textContent;
+                 
+                 labelCell.innerHTML = `<strong>${label}</strong>`;
+                 valueCell.textContent = value;
+             });
+        }
+
+        // Okunabilirliği artırmak için her blok arasına boş bir satır ekle
+        const spacerRow = masterTbody.insertRow();
+        const spacerCell = spacerRow.insertCell();
+        spacerCell.colSpan = 5;
+        spacerCell.innerHTML = '&nbsp;';
+    });
+
+    // 4. Şimdi, oluşturduğumuz bu yeni ana tabloyu Excel'e aktar.
+    const wb = XLSX.utils.table_to_book(masterTable, {sheet: "Rapor"});
     XLSX.writeFile(wb, `${fileName}_${new Date().toLocaleDateString('tr-TR')}.xlsx`);
 }
-
-function exportTableToExcel(containerId, fileName = 'rapor') {
-    const container = document.getElementById(containerId);
-    if (!container) {
-        alert('Rapor konteyneri bulunamadı. Lütfen tekrar deneyin.');
-        console.error(`Konteyner bulunamadı: #${containerId}`);
-        return;
-    }
-    const table = container.querySelector('table');
-    if (!table) {
-        alert('Rapor içeriğinde indirilecek bir tablo bulunamadı.');
-        console.error(`Tablo bulunamadı: #${containerId}`);
-        return;
-    }
-
-    const tableClone = table.cloneNode(true);
-    Array.from(tableClone.querySelectorAll('.dont-print')).forEach(el => el.remove());
-
-    const wb = XLSX.utils.table_to_book(tableClone, {sheet:"Rapor"});
-    XLSX.writeFile(wb, `${fileName}_${new Date().toLocaleDateString('tr-TR')}.xlsx`);
-}
-
 
 
 // --- EKRAN GÖRÜNTÜSÜ YÖNTEMİ İLE ÇALIŞAN NİHAİ PDF FONKSİYONU ---
