@@ -3341,7 +3341,7 @@ async function handleSutAlimRaporuOlustur(options) {
     }
     
     sutRaporuDetayAlani.innerHTML = '<p>Rapor oluşturuluyor, lütfen bekleyin...</p>';
-    document.getElementById('sut-raporu-export-area').innerHTML = ''; // Önceki dışa aktarma verisini temizle
+    document.getElementById('sut-raporu-export-area').innerHTML = '';
 
     try {
         const [year, month] = ayYil.split('-');
@@ -3378,10 +3378,10 @@ async function handleSutAlimRaporuOlustur(options) {
                     tableHTML += `<tr><td>${formatDate(alim.tarih)}</td><td>${(alim.aksam || 0).toFixed(2)}</td><td>${(alim.sabah || 0).toFixed(2)}</td><td>${(alim.toplam || 0).toFixed(2)}</td><td>${formatCurrency(alim.fiyat)}</td><td>${formatCurrency(alim.toplamTutar)}</td></tr>`;
                 });
                 const ortalamaFiyat = toplamLitre > 0 ? (toplamTutar / toplamLitre) : 0;
-                tableHTML += `</tbody><tfoot><tr class="report-totals-row"><td>AYLIK TOPLAM</td><td>${toplamAksam.toFixed(2)}</td><td>${toplamSabah.toFixed(2)}</td><td>${toplamLitre.toFixed(2)}</td><td>${formatCurrency(ortalamaFiyat)}</td><td>${formatCurrency(toplamTutar)}</td></tr></tfoot></table>`;
+                tableHTML += `</tbody><tfoot><tr class="report-totals-row"><td><strong>AYLIK TOPLAM</strong></td><td><strong>${toplamAksam.toFixed(2)}</strong></td><td><strong>${toplamSabah.toFixed(2)}</strong></td><td><strong>${toplamLitre.toFixed(2)}</strong></td><td><strong>${formatCurrency(ortalamaFiyat)}</strong></td><td><strong>${formatCurrency(toplamTutar)}</strong></td></tr></tfoot></table>`;
             }
         } else { // Kategori veya Toplu Rapor
-            if(options.kategori) {
+            if(options.kategori && kategori) {
                 raporBaslik.textContent = `${kategori} Kategorisi - ${formatMonthYear(ayYil)} Aylık Özet`;
             } else {
                 raporBaslik.textContent = `Tüm Cariler - ${formatMonthYear(ayYil)} Aylık Özet`;
@@ -3417,29 +3417,53 @@ async function handleSutAlimRaporuOlustur(options) {
                 });
 
                 tableHTML = `<table class="report-table"><thead><tr><th>Cari Adı</th><th>Toplam Akşam</th><th>Toplam Sabah</th><th>Toplam Litre</th><th>Ortalama Fiyat</th><th>Toplam Tutar</th></tr></thead><tbody>`;
+                
+                // YENİ EKLENDİ: Genel Toplam için değişkenler tanımlandı
+                let genelToplamAksam = 0;
+                let genelToplamSabah = 0;
+                let genelToplamLitre = 0;
+                let genelToplamTutar = 0;
+
                 Object.values(raporData).sort((a,b) => a.cariAdi.localeCompare(b.cariAdi)).forEach(data => {
                     const ortalamaFiyat = data.toplamLitre > 0 ? (data.toplamTutar / data.toplamLitre) : 0;
                     tableHTML += `<tr><td>${data.cariAdi}</td><td>${data.toplamAksam.toFixed(2)}</td><td>${data.toplamSabah.toFixed(2)}</td><td><strong>${data.toplamLitre.toFixed(2)}</strong></td><td>${formatCurrency(ortalamaFiyat)}</td><td><strong>${formatCurrency(data.toplamTutar)}</strong></td></tr>`;
+                
+                    // YENİ EKLENDİ: Her bir cari verisi genel toplama eklendi
+                    genelToplamAksam += data.toplamAksam;
+                    genelToplamSabah += data.toplamSabah;
+                    genelToplamLitre += data.toplamLitre;
+                    genelToplamTutar += data.toplamTutar;
                 });
-                tableHTML += `</tbody></table>`;
+                
+                // YENİ EKLENDİ: Genel Ortalama Fiyat hesaplandı
+                const genelOrtalamaFiyat = genelToplamLitre > 0 ? (genelToplamTutar / genelToplamLitre) : 0;
+
+                // YENİ EKLENDİ: Raporun sonuna Genel Toplam satırını ekleyen <tfoot> bölümü
+                tableHTML += `</tbody>
+                              <tfoot>
+                                  <tr class="report-totals-row">
+                                      <td><strong>GENEL TOPLAM</strong></td>
+                                      <td><strong>${genelToplamAksam.toFixed(2)}</strong></td>
+                                      <td><strong>${genelToplamSabah.toFixed(2)}</strong></td>
+                                      <td><strong>${genelToplamLitre.toFixed(2)}</strong></td>
+                                      <td><strong>${formatCurrency(genelOrtalamaFiyat)}</strong></td>
+                                      <td><strong>${formatCurrency(genelToplamTutar)}</strong></td>
+                                  </tr>
+                              </tfoot>
+                            </table>`;
             }
         }
         
-        // Ekranda görünen raporu güncelle
         sutRaporuDetayAlani.innerHTML = tableHTML;
-
-        // --- GÜNCELLEME: Oluşturulan rapor tablosunun bir kopyası GİZLİ ALANA DA YAZILIYOR ---
         document.getElementById('sut-raporu-export-area').innerHTML = tableHTML;
-
         toggleReportButtons('sutRaporu', true);
         
     } catch (error) {
         console.error("Aylık Süt Raporu oluşturulurken hata:", error);
         sutRaporuDetayAlani.innerHTML = `<p style="color:red; font-weight:bold;">RAPOR OLUŞTURULAMADI!<br>Hata Detayı: ${error.message}</p>`;
-        document.getElementById('sut-raporu-export-area').innerHTML = ''; // Hata durumunda gizli alanı temizle
+        document.getElementById('sut-raporu-export-area').innerHTML = '';
     }
 }
-
 
 
 // --- BAŞLANGIÇ: AYLIK SÜT RAPORU İÇİN YENİ ÖZEL EXCEL FONKSİYONU ---
