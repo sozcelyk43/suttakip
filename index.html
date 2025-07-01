@@ -3469,11 +3469,9 @@ async function deleteYemAlisi(id) {
     }
 }
        
-
 async function handleSutAlimRaporuOlustur(options) {
     toggleReportButtons('sutRaporu', false);
     
-    // Değerler yeni tarih aralığı input'larından okunuyor
     const cariId = document.getElementById('sutRaporuTedarikciSecimi').value;
     const startDateStr = document.getElementById('sutRaporuBaslangicTarihi').value;
     const endDateStr = document.getElementById('sutRaporuBitisTarihi').value;
@@ -3481,7 +3479,6 @@ async function handleSutAlimRaporuOlustur(options) {
     const raporBaslik = document.getElementById('sutRaporuBaslik');
     const sutRaporuDetayAlani = document.getElementById('sutRaporuDetayAlani');
 
-    // Tarihlerin seçilip seçilmediği kontrol ediliyor
     if (!startDateStr || !endDateStr) {
         alert("Rapor oluşturmak için lütfen başlangıç ve bitiş tarihlerini seçin.");
         return;
@@ -3495,7 +3492,6 @@ async function handleSutAlimRaporuOlustur(options) {
     document.getElementById('sut-raporu-export-area').innerHTML = '';
 
     try {
-        // Sorgu artık doğrudan başlangıç ve bitiş tarihlerini kullanıyor
         let baseQuery = db.collection('sut_alimlari')
             .where('sahipId', '==', sahipId)
             .where('tarih', '>=', startDateStr)
@@ -3515,47 +3511,77 @@ async function handleSutAlimRaporuOlustur(options) {
             if (snapshot.empty) {
                 tableHTML = '<p>Seçili cari için bu tarih aralığında süt alım kaydı bulunamadı.</p>';
             } else {
-                tableHTML = `<table class="report-table"><thead><tr><th>Tarih</th><th>Akşam</th><th>Sabah</th><th>Toplam (Lt)</th><th>Fiyat</th><th>Tutar</th></tr></thead><tbody>`;
-                let toplamSabah = 0, toplamAksam = 0, toplamLitre = 0, toplamTutar = 0;
+                // GÜNCELLEME 1: Veriler artık tarihe göre gruplanıyor, böylece her gün için tek bir satır oluşur.
+                const gunlukVeri = new Map();
                 snapshot.forEach(doc => {
                     const alim = doc.data();
-                    toplamSabah += alim.sabah || 0;
-                    toplamAksam += alim.aksam || 0;
-                    toplamLitre += alim.toplam || 0;
-                    toplamTutar += alim.toplamTutar || 0;
-                    tableHTML += `<tr><td>${formatDate(alim.tarih)}</td><td>${(alim.aksam || 0).toFixed(2)}</td><td>${(alim.sabah || 0).toFixed(2)}</td><td>${(alim.toplam || 0).toFixed(2)}</td><td>${formatCurrency(alim.fiyat)}</td><td>${formatCurrency(alim.toplamTutar)}</td></tr>`;
+                    if (!gunlukVeri.has(alim.tarih)) {
+                        gunlukVeri.set(alim.tarih, { tarih: alim.tarih, sabah: 0, aksam: 0, toplam: 0, toplamTutar: 0 });
+                    }
+                    const gun = gunlukVeri.get(alim.tarih);
+                    gun.sabah += alim.sabah || 0;
+                    gun.aksam += alim.aksam || 0;
+                    gun.toplam += alim.toplam || 0;
+                    gun.toplamTutar += alim.toplamTutar || 0;
                 });
-                const ortalamaFiyat = toplamLitre > 0 ? (toplamTutar / toplamLitre) : 0;
-                tableHTML += `</tbody><tfoot><tr class="report-totals-row"><td><strong>TOPLAM</strong></td><td><strong>${toplamAksam.toFixed(2)}</strong></td><td><strong>${toplamSabah.toFixed(2)}</strong></td><td><strong>${toplamLitre.toFixed(2)}</strong></td><td><strong>${formatCurrency(ortalamaFiyat)}</strong></td><td><strong>${formatCurrency(toplamTutar)}</strong></td></tr></tfoot></table>`;
+                
+                tableHTML = `<table class="report-table"><thead><tr><th>Tarih</th><th>Akşam</th><th>Sabah</th><th>Toplam (Lt)</th><th>Ort. Fiyat</th><th>Tutar</th></tr></thead><tbody>`;
+                let toplamSabah = 0, toplamAksam = 0, toplamLitre = 0, toplamTutar = 0;
+                
+                // Gruplanmış veriler ekrana yazdırılıyor.
+                gunlukVeri.forEach(alim => {
+                    const ortalamaFiyat = alim.toplam > 0 ? alim.toplamTutar / alim.toplam : 0;
+                    toplamSabah += alim.sabah;
+                    toplamAksam += alim.aksam;
+                    toplamLitre += alim.toplam;
+                    toplamTutar += alim.toplamTutar;
+                    tableHTML += `<tr><td>${formatDate(alim.tarih)}</td><td>${alim.aksam.toFixed(2)}</td><td>${alim.sabah.toFixed(2)}</td><td>${alim.toplam.toFixed(2)}</td><td>${formatCurrency(ortalamaFiyat)}</td><td>${formatCurrency(alim.toplamTutar)}</td></tr>`;
+                });
+
+                const genelOrtalamaFiyat = toplamLitre > 0 ? (toplamTutar / toplamLitre) : 0;
+                tableHTML += `</tbody><tfoot><tr class="report-totals-row"><td><strong>TOPLAM</strong></td><td><strong>${toplamAksam.toFixed(2)}</strong></td><td><strong>${toplamSabah.toFixed(2)}</strong></td><td><strong>${toplamLitre.toFixed(2)}</strong></td><td><strong>${formatCurrency(genelOrtalamaFiyat)}</strong></td><td><strong>${formatCurrency(toplamTutar)}</strong></td></tr></tfoot></table>`;
             }
-        } else { // Kategori veya Toplu Rapor
+        } 
+        // Kategori veya Toplu Rapor
+        else { 
             if(options.kategori && kategori) {
                 raporBaslik.textContent = `${kategori} Kategorisi - ${raporTarihEtiketi} Özet Raporu`;
             } else {
-                raporBaslik.textContent = `Tüm Cariler - ${raporTarihEtiketi} Özet Raporu`;
+                raporBaslik.textContent = `Tüm Üreticiler - ${raporTarihEtiketi} Özet Raporu`;
             }
 
-            const allCarilerSnapshot = await db.collection('cariler').where('sahipId', '==', sahipId).get();
+            // GÜNCELLEME 2: Sadece "üretici" grubundaki cariler çekiliyor.
+            const allCarilerSnapshot = await db.collection('cariler')
+                .where('sahipId', '==', sahipId)
+                .where('cariGrup', 'array-contains', 'üretici')
+                .get();
+                
             const allProducers = new Map(allCarilerSnapshot.docs.map(doc => [doc.id, doc.data()]));
 
             let alimlarSnapshot = await baseQuery.get();
-            let alimlar = alimlarSnapshot.docs.map(doc => doc.data());
+            // Sadece üreticilere ait alımlar filtreleniyor
+            let alimlar = alimlarSnapshot.docs.map(doc => doc.data()).filter(alim => allProducers.has(alim.cariId));
 
             if (options.kategori && kategori) {
-                const cariIdsInKategori = [];
-                allProducers.forEach((value, key) => {
-                    if (value.kategori === kategori) cariIdsInKategori.push(key);
-                });
-                alimlar = alimlar.filter(alim => cariIdsInKategori.includes(alim.cariId));
+                alimlar = alimlar.filter(alim => allProducers.get(alim.cariId)?.kategori === kategori);
             }
             
             if (alimlar.length === 0) {
-                tableHTML = '<p>Seçili kriterlere uygun süt alım kaydı bulunamadı.</p>';
+                tableHTML = '<p>Seçili kriterlere uygun üretici süt alım kaydı bulunamadı.</p>';
             } else {
                 const raporData = {};
                 alimlar.forEach(alim => {
                     if (!raporData[alim.cariId]) {
-                        raporData[alim.cariId] = { cariAdi: allProducers.get(alim.cariId)?.adiSoyadi || 'Silinmiş Cari', toplamSabah: 0, toplamAksam: 0, toplamLitre: 0, toplamTutar: 0 };
+                        const producerInfo = allProducers.get(alim.cariId);
+                        raporData[alim.cariId] = { 
+                            cariAdi: producerInfo?.adiSoyadi || 'Silinmiş Cari',
+                            // GÜNCELLEME 3: Rota sırası bilgisi de veriye ekleniyor.
+                            rotaSirasi: producerInfo?.rotaSirasi || 9999,
+                            toplamSabah: 0, 
+                            toplamAksam: 0, 
+                            toplamLitre: 0, 
+                            toplamTutar: 0 
+                        };
                     }
                     const ozet = raporData[alim.cariId];
                     ozet.toplamSabah += alim.sabah || 0;
@@ -3568,7 +3594,8 @@ async function handleSutAlimRaporuOlustur(options) {
                 
                 let genelToplamAksam = 0, genelToplamSabah = 0, genelToplamLitre = 0, genelToplamTutar = 0;
 
-                Object.values(raporData).sort((a,b) => a.cariAdi.localeCompare(b.cariAdi)).forEach(data => {
+                // GÜNCELLEME 3: Sıralama artık rota sırasına göre yapılıyor.
+                Object.values(raporData).sort((a,b) => a.rotaSirasi - b.rotaSirasi).forEach(data => {
                     const ortalamaFiyat = data.toplamLitre > 0 ? (data.toplamTutar / data.toplamLitre) : 0;
                     tableHTML += `<tr><td>${data.cariAdi}</td><td>${data.toplamAksam.toFixed(2)}</td><td>${data.toplamSabah.toFixed(2)}</td><td><strong>${data.toplamLitre.toFixed(2)}</strong></td><td>${formatCurrency(ortalamaFiyat)}</td><td><strong>${formatCurrency(data.toplamTutar)}</strong></td></tr>`;
                 
@@ -3600,13 +3627,13 @@ async function handleSutAlimRaporuOlustur(options) {
         toggleReportButtons('sutRaporu', true);
         
     } catch (error) {
-        console.error("Aylık Süt Raporu oluşturulurken hata:", error);
+        console.error("Süt Alım Raporu oluşturulurken hata:", error);
         sutRaporuDetayAlani.innerHTML = `<p style="color:red; font-weight:bold;">RAPOR OLUŞTURULAMADI!<br>Hata Detayı: ${error.message}</p>`;
         document.getElementById('sut-raporu-export-area').innerHTML = '';
     }
 }
 
-// --- BAŞLANGIÇ: AYLIK SÜT RAPORU İÇİN YENİ ÖZEL EXCEL FONKSİYONU ---
+	
 async function exportSutRaporuToExcel() {
     console.log("Özel Aylık Süt Raporu Excel dışa aktarma işlemi başlatıldı.");
 
