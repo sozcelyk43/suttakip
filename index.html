@@ -431,40 +431,44 @@
                         <h4 id="raporBaslik" style="text-align:center;">Lütfen Rapor Kriterlerini Seçin</h4>
                         <div id="raporDetayAlani"></div>
                     </div>
+
+                    <div id="hesap-ozeti-export-area" style="display: none;"></div>
                     <button type="button" class="btn btn-secondary dont-print" id="raporYazdirBtn" style="margin-top:20px;">Özeti Yazdır</button>
-<button type="button" class="btn btn-danger dont-print" id="hesapOzetiPdfBtn" style="margin-top:20px;">PDF İndir</button>
-<button type="button" class="btn btn-success dont-print" id="hesapOzetiXlsxBtn" style="margin-top:20px;">Excel İndir</button>
+                    <button type="button" class="btn btn-danger dont-print" id="hesapOzetiPdfBtn" style="margin-top:20px;">PDF İndir</button>
+                    <button type="button" class="btn btn-success dont-print" id="hesapOzetiXlsxBtn" style="margin-top:20px;">Excel İndir</button>
                 </div>
             </div>
         </section>
         
-        <section id="sut-alim-raporu" class="module-section hidden-section">
-             <div class="module-header dont-print"><h2>🗓️ Aylık Süt Raporu</h2></div>
-            <div class="container">
-                 <div class="report-section">
-                    <h3>Detaylı Süt Alım Raporu</h3>
-                    <div class="form-grid dont-print" style="grid-template-columns: repeat(4, 1fr); align-items: end; gap: 10px;">
-                        <div class="form-group"><label for="sutRaporuTedarikciSecimi">Cari Seçin:</label><select id="sutRaporuTedarikciSecimi"><option value="">Seçiniz...</option></select></div>
-                        <div class="form-group"><label for="sutRaporuAySecimi">Ay:</label><input type="month" id="sutRaporuAySecimi"></div>
-                        <div class="form-group"><label for="sutRaporuKategoriSecimi">Kategori:</label><select id="sutRaporuKategoriSecimi"><option value="">Tümü</option></select></div>
-                        <div style="display: flex; gap: 10px;">
-                            <button type="button" class="btn btn-primary" id="sutRaporuOlusturBtn" style="height:45px; flex-grow: 1;">Göster</button>
-                            <button type="button" class="btn btn-info" id="sutRaporuKategoriGosterBtn" style="height:45px; flex-grow: 1;">Kategori</button>
-                            <button type="button" class="btn btn-info" id="sutRaporuTumunuGosterBtn" style="height:45px; flex-grow: 1;">Toplu</button>
-
-                        </div>
-                    </div> <hr class="dont-print">
-                    <div id="sutAlimRaporAlani" class="printable-content format-a5">
-                        <h1 class="print-only print-title">Süt Takip Programı - Aylık Süt Alım Detay Raporu</h1>
-                        <h4 id="sutRaporuBaslik" style="text-align:center;">Lütfen Rapor Kriterlerini Seçin</h4>
-                        <div id="sutRaporuDetayAlani"></div>
-                    </div>
-                    <button type="button" class="btn btn-secondary dont-print" id="sutRaporuYazdirBtn" style="margin-top:20px;">Raporu Yazdır</button>
-<button type="button" class="btn btn-danger dont-print" id="sutRaporuPdfBtn" style="margin-top:20px;">PDF İndir</button>
-<button type="button" class="btn btn-success dont-print" id="sutRaporuXlsxBtn" style="margin-top:20px;">Excel İndir</button>
-                 </div>
+<section id="sut-alim-raporu" class="module-section hidden-section">
+    <div class="module-header dont-print"><h2>🗓️ Aylık Süt Raporu</h2></div>
+    <div class="container">
+        <div class="report-section">
+            <h3>Detaylı Süt Alım Raporu</h3>
+            <div class="form-grid dont-print" style="grid-template-columns: repeat(4, 1fr); align-items: end; gap: 10px;">
+                <div class="form-group"><label for="sutRaporuTedarikciSecimi">Cari Seçin:</label><select id="sutRaporuTedarikciSecimi"><option value="">Seçiniz...</option></select></div>
+                <div class="form-group"><label for="sutRaporuAySecimi">Ay:</label><input type="month" id="sutRaporuAySecimi"></div>
+                <div class="form-group"><label for="sutRaporuKategoriSecimi">Kategori:</label><select id="sutRaporuKategoriSecimi"><option value="">Tümü</option></select></div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" class="btn btn-primary" id="sutRaporuOlusturBtn" style="height:45px; flex-grow: 1;">Göster</button>
+                    <button type="button" class="btn btn-info" id="sutRaporuKategoriGosterBtn" style="height:45px; flex-grow: 1;">Kategori</button>
+                    <button type="button" class="btn btn-info" id="sutRaporuTumunuGosterBtn" style="height:45px; flex-grow: 1;">Toplu</button>
+                </div>
+            </div> <hr class="dont-print">
+            
+            <div id="sutAlimRaporAlani" class="printable-content format-a5">
+                <h1 class="print-only print-title">Süt Takip Programı - Aylık Süt Alım Detay Raporu</h1>
+                <h4 id="sutRaporuBaslik" style="text-align:center;">Lütfen Rapor Kriterlerini Seçin</h4>
+                <div id="sutRaporuDetayAlani"></div>
             </div>
-        </section>
+
+            <div id="sut-raporu-export-area" style="display: none;"></div>
+            <button type="button" class="btn btn-secondary dont-print" id="sutRaporuYazdirBtn" style="margin-top:20px;">Raporu Yazdır</button>
+            <button type="button" class="btn btn-danger dont-print" id="sutRaporuPdfBtn" style="margin-top:20px;">PDF İndir</button>
+            <button type="button" class="btn btn-success dont-print" id="sutRaporuXlsxBtn" style="margin-top:20px;">Excel İndir</button>
+        </div>
+    </div>
+</section>
         
        <section id="aylik-yem-raporu" class="module-section hidden-section">
     <div class="module-header"><h2>📈 Aylık Yem Satış Raporları</h2></div>
@@ -938,13 +942,13 @@ auth.onAuthStateChanged(async (user) => {
         document.getElementById('yemRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('aylik-yem-raporu'));
         document.getElementById('karneYazdirBtn')?.addEventListener('click', () => handleYazdir('dinamik-sut-raporu'));
 document.getElementById('karnePdfBtn')?.addEventListener('click', () => exportTableToPdf('dinamikRaporContainer', 'sut_karnesi', 'Aylık Süt Karnesi', 'karnePdfBtn'));
-        document.getElementById('karneXlsxBtn')?.addEventListener('click', () => exportTableToExcel('dinamikRaporContainer', 'sut_karnesi'));
+document.getElementById('karneXlsxBtn')?.addEventListener('click', () => exportTableToExcel('dinamikRaporContainer', 'sut_karnesi'));
 document.getElementById('hesapOzetiPdfBtn')?.addEventListener('click', () => exportTableToPdf('report-content-to-print', 'hesap_ozeti', 'Cari Hesap Özeti', 'hesapOzetiPdfBtn'));
-        document.getElementById('hesapOzetiXlsxBtn')?.addEventListener('click', () => exportTableToExcel('raporDetayAlani', 'hesap_ozeti'));
+document.getElementById('hesapOzetiXlsxBtn')?.addEventListener('click', () => exportTableToExcel('hesap-ozeti-export-area', 'hesap_ozeti'));
 document.getElementById('sutRaporuPdfBtn')?.addEventListener('click', () => exportTableToPdf('sutAlimRaporAlani', 'sut_alim_raporu', 'Aylık Süt Alım Raporu', 'sutRaporuPdfBtn'));
-        document.getElementById('sutRaporuXlsxBtn')?.addEventListener('click', () => exportTableToExcel('sutRaporuDetayAlani', 'sut_alim_raporu'));
+document.getElementById('sutRaporuXlsxBtn')?.addEventListener('click', () => exportTableToExcel('sut-raporu-export-area', 'sut_alim_raporu'));
 document.getElementById('yemRaporuPdfBtn')?.addEventListener('click', () => exportTableToPdf('yemRaporuAlani', 'yem_raporu', 'Aylık Yem Raporu', 'yemRaporuPdfBtn'));
-        document.getElementById('yemRaporuXlsxBtn')?.addEventListener('click', () => exportTableToExcel('yemRaporuAlani', 'yem_raporu'));
+	document.getElementById('yemRaporuXlsxBtn')?.addEventListener('click', () => exportTableToExcel('yemRaporuAlani', 'yem_raporu'));
 	    
 
     // Otomatik Tutar Hesaplama Olayları
@@ -1445,79 +1449,21 @@ async function renderCariListesi() {
 function exportTableToExcel(containerId, fileName = 'rapor') {
     const container = document.getElementById(containerId);
     if (!container) {
-        alert('Rapor konteyneri bulunamadı.');
+        alert('Dışa aktarılacak alan bulunamadı.');
         return;
     }
-
-    // 1. Excel'e aktarmak için bellekte yeni, tek bir ana tablo oluştur.
-    const masterTable = document.createElement('table');
-    const masterTbody = masterTable.createTBody();
-
-    // 2. Rapor konteyneri içindeki tüm rapor bloklarını bul.
-    const reportBlocks = container.querySelectorAll('.report-block');
-
-    // 3. Her bir bloğu gez ve içeriğini ana tabloya satır olarak ekle.
-    reportBlocks.forEach(block => {
-        // Blok başlığı için bir satır ekle
-        const headerRow = masterTbody.insertRow();
-        const headerCell = headerRow.insertCell();
-        // Geniş bir alana yayılması için colspan kullan (Excel'de daha iyi görünür)
-        headerCell.colSpan = 5; 
-        headerCell.innerHTML = `<strong>${block.querySelector('h5')?.textContent || ''}</strong>`;
-        
-        // Bloğun içindeki asıl tabloyu bul
-        const innerTable = block.querySelector('table.summary-table');
-        if (innerTable) {
-            // Eğer blok içinde bir tablo varsa, o tablonun tüm satırlarını kopyala
-            Array.from(innerTable.rows).forEach(row => {
-                const newRow = masterTbody.insertRow();
-                Array.from(row.cells).forEach(cell => {
-                    const newCell = newRow.insertCell();
-                    newCell.innerHTML = cell.innerHTML;
-                    if (cell.colSpan > 1) {
-                        newCell.colSpan = cell.colSpan;
-                    }
-                });
-            });
-        } else {
-            // Eğer blok içinde tablo yoksa, paragraf (<p>) içeriğini al
-            const pElements = block.querySelectorAll('p.block-total, p:not(.final-summary *)');
-            pElements.forEach(p => {
-                 const contentRow = masterTbody.insertRow();
-                 const contentCell = contentRow.insertCell();
-                 contentCell.colSpan = 5;
-                 contentCell.textContent = p.textContent.trim();
-            });
-        }
-        
-        // Final özet bloğundaki her bir satırı ayrı ayrı ekle
-        const finalSummaryLines = block.querySelectorAll('.final-summary p');
-        if (finalSummaryLines.length > 0) {
-             finalSummaryLines.forEach(p => {
-                 const summaryRow = masterTbody.insertRow();
-                 const labelCell = summaryRow.insertCell();
-                 const valueCell = summaryRow.insertCell();
-                 valueCell.colSpan = 4;
-                 
-                 const label = p.querySelector('span:first-child')?.textContent || '';
-                 const value = p.querySelector('span:last-child, strong:last-child')?.textContent || p.textContent;
-                 
-                 labelCell.innerHTML = `<strong>${label}</strong>`;
-                 valueCell.textContent = value;
-             });
-        }
-
-        // Okunabilirliği artırmak için her blok arasına boş bir satır ekle
-        const spacerRow = masterTbody.insertRow();
-        const spacerCell = spacerRow.insertCell();
-        spacerCell.colSpan = 5;
-        spacerCell.innerHTML = '&nbsp;';
-    });
-
-    // 4. Şimdi, oluşturduğumuz bu yeni ana tabloyu Excel'e aktar.
-    const wb = XLSX.utils.table_to_book(masterTable, {sheet: "Rapor"});
+    const table = container.querySelector('table');
+    if (!table) {
+        alert('Dışa aktarılacak tablo bulunamadı.');
+        return;
+    }
+    const wb = XLSX.utils.table_to_book(table, {sheet: "Rapor"});
     XLSX.writeFile(wb, `${fileName}_${new Date().toLocaleDateString('tr-TR')}.xlsx`);
 }
+
+
+
+
 
 
 // --- EKRAN GÖRÜNTÜSÜ YÖNTEMİ İLE ÇALIŞAN NİHAİ PDF FONKSİYONU ---
@@ -3336,7 +3282,6 @@ async function deleteYemAlisi(id) {
 }
        
 
-// BU, SORUNU ÇÖZECEK OLAN NİHAİ KODDUR
 async function handleSutAlimRaporuOlustur(options) {
     toggleReportButtons('sutRaporu', false);
     
@@ -3344,7 +3289,6 @@ async function handleSutAlimRaporuOlustur(options) {
     const ayYil = document.getElementById('sutRaporuAySecimi').value;
     const kategori = document.getElementById('sutRaporuKategoriSecimi').value;
     const raporBaslik = document.getElementById('sutRaporuBaslik');
-    // DOĞRU ID KULLANIMI: 'sutRaporuDetayAlani'
     const sutRaporuDetayAlani = document.getElementById('sutRaporuDetayAlani');
 
     if (!ayYil) {
@@ -3357,6 +3301,7 @@ async function handleSutAlimRaporuOlustur(options) {
     }
     
     sutRaporuDetayAlani.innerHTML = '<p>Rapor oluşturuluyor, lütfen bekleyin...</p>';
+    document.getElementById('sut-raporu-export-area').innerHTML = ''; // Önceki dışa aktarma verisini temizle
 
     try {
         const [year, month] = ayYil.split('-');
@@ -3369,6 +3314,9 @@ async function handleSutAlimRaporuOlustur(options) {
             .where('tarih', '>=', startDateStr)
             .where('tarih', '<=', endDateStr);
 
+        let tableHTML = '';
+
+        // Bireysel Cari Raporu
         if (!options.tumu && !options.kategori) {
             const cariAdi = document.getElementById('sutRaporuTedarikciSecimi').options[document.getElementById('sutRaporuTedarikciSecimi').selectedIndex].text;
             raporBaslik.textContent = `${cariAdi} - ${formatMonthYear(ayYil)} Aylık Süt Detayları`;
@@ -3377,9 +3325,9 @@ async function handleSutAlimRaporuOlustur(options) {
             const snapshot = await finalQuery.get();
 
             if (snapshot.empty) {
-                sutRaporuDetayAlani.innerHTML = '<p>Seçili cari için bu ayda süt alım kaydı bulunamadı.</p>';
+                tableHTML = '<p>Seçili cari için bu ayda süt alım kaydı bulunamadı.</p>';
             } else {
-                let tableHTML = `<table class="report-table"><thead><tr><th>Tarih</th><th>Akşam</th><th>Sabah</th><th>Toplam (Lt)</th><th>Fiyat</th><th>Tutar</th></tr></thead><tbody>`;
+                tableHTML = `<table class="report-table"><thead><tr><th>Tarih</th><th>Akşam</th><th>Sabah</th><th>Toplam (Lt)</th><th>Fiyat</th><th>Tutar</th></tr></thead><tbody>`;
                 let toplamSabah = 0, toplamAksam = 0, toplamLitre = 0, toplamTutar = 0;
                 snapshot.forEach(doc => {
                     const alim = doc.data();
@@ -3391,9 +3339,8 @@ async function handleSutAlimRaporuOlustur(options) {
                 });
                 const ortalamaFiyat = toplamLitre > 0 ? (toplamTutar / toplamLitre) : 0;
                 tableHTML += `</tbody><tfoot><tr class="report-totals-row"><td>AYLIK TOPLAM</td><td>${toplamAksam.toFixed(2)}</td><td>${toplamSabah.toFixed(2)}</td><td>${toplamLitre.toFixed(2)}</td><td>${formatCurrency(ortalamaFiyat)}</td><td>${formatCurrency(toplamTutar)}</td></tr></tfoot></table>`;
-                sutRaporuDetayAlani.innerHTML = tableHTML;
             }
-        } else {
+        } else { // Kategori veya Toplu Rapor
             if(options.kategori) {
                 raporBaslik.textContent = `${kategori} Kategorisi - ${formatMonthYear(ayYil)} Aylık Özet`;
             } else {
@@ -3406,7 +3353,7 @@ async function handleSutAlimRaporuOlustur(options) {
             let alimlarSnapshot = await baseQuery.get();
             let alimlar = alimlarSnapshot.docs.map(doc => doc.data());
 
-            if (options.kategori) {
+            if (options.kategori && kategori) {
                 const cariIdsInKategori = [];
                 allProducers.forEach((value, key) => {
                     if (value.kategori === kategori) cariIdsInKategori.push(key);
@@ -3415,7 +3362,7 @@ async function handleSutAlimRaporuOlustur(options) {
             }
             
             if (alimlar.length === 0) {
-                sutRaporuDetayAlani.innerHTML = '<p>Seçili kriterlere uygun süt alım kaydı bulunamadı.</p>';
+                tableHTML = '<p>Seçili kriterlere uygun süt alım kaydı bulunamadı.</p>';
             } else {
                 const raporData = {};
                 alimlar.forEach(alim => {
@@ -3429,23 +3376,111 @@ async function handleSutAlimRaporuOlustur(options) {
                     ozet.toplamTutar += alim.toplamTutar || 0;
                 });
 
-                let tableHTML = `<table class="report-table"><thead><tr><th>Cari Adı</th><th>Toplam Akşam</th><th>Toplam Sabah</th><th>Toplam Litre</th><th>Ortalama Fiyat</th><th>Toplam Tutar</th></tr></thead><tbody>`;
+                tableHTML = `<table class="report-table"><thead><tr><th>Cari Adı</th><th>Toplam Akşam</th><th>Toplam Sabah</th><th>Toplam Litre</th><th>Ortalama Fiyat</th><th>Toplam Tutar</th></tr></thead><tbody>`;
                 Object.values(raporData).sort((a,b) => a.cariAdi.localeCompare(b.cariAdi)).forEach(data => {
                     const ortalamaFiyat = data.toplamLitre > 0 ? (data.toplamTutar / data.toplamLitre) : 0;
                     tableHTML += `<tr><td>${data.cariAdi}</td><td>${data.toplamAksam.toFixed(2)}</td><td>${data.toplamSabah.toFixed(2)}</td><td><strong>${data.toplamLitre.toFixed(2)}</strong></td><td>${formatCurrency(ortalamaFiyat)}</td><td><strong>${formatCurrency(data.toplamTutar)}</strong></td></tr>`;
                 });
                 tableHTML += `</tbody></table>`;
-                sutRaporuDetayAlani.innerHTML = tableHTML;
             }
         }
+        
+        // Ekranda görünen raporu güncelle
+        sutRaporuDetayAlani.innerHTML = tableHTML;
+
+        // --- GÜNCELLEME: Oluşturulan rapor tablosunun bir kopyası GİZLİ ALANA DA YAZILIYOR ---
+        document.getElementById('sut-raporu-export-area').innerHTML = tableHTML;
+
         toggleReportButtons('sutRaporu', true);
+        
     } catch (error) {
         console.error("Aylık Süt Raporu oluşturulurken hata:", error);
         sutRaporuDetayAlani.innerHTML = `<p style="color:red; font-weight:bold;">RAPOR OLUŞTURULAMADI!<br>Hata Detayı: ${error.message}</p>`;
+        document.getElementById('sut-raporu-export-area').innerHTML = ''; // Hata durumunda gizli alanı temizle
     }
 }
 
 
+
+// --- BAŞLANGIÇ: AYLIK SÜT RAPORU İÇİN YENİ ÖZEL EXCEL FONKSİYONU ---
+async function exportSutRaporuToExcel() {
+    console.log("Özel Aylık Süt Raporu Excel dışa aktarma işlemi başlatıldı.");
+
+    // 1. Rapor oluşturmak için gerekli olan güncel filtreleri al
+    const ayYil = document.getElementById('sutRaporuAySecimi').value;
+    const cariId = document.getElementById('sutRaporuTedarikciSecimi').value;
+    const kategori = document.getElementById('sutRaporuKategoriSecimi').value;
+    const raporButonlari = document.querySelectorAll('#sutRaporuOlusturBtn, #sutRaporuKategoriGosterBtn, #sutRaporuTumunuGosterBtn');
+    
+    // Hangi rapor türünün aktif olduğunu anla
+    let options = {tumu: false, kategori: false};
+    if (document.activeElement.id === 'sutRaporuKategoriGosterBtn') options.kategori = true;
+    if (document.activeElement.id === 'sutRaporuTumunuGosterBtn') options.tumu = true;
+
+
+    if (!ayYil) {
+        alert("Dışa aktarmadan önce lütfen bir rapor oluşturun.");
+        return;
+    }
+
+    try {
+        // 2. Raporu oluşturmak için veriyi veritabanından yeniden çek
+        const [year, month] = ayYil.split('-');
+        const startDateStr = `${year}-${month}-01`;
+        const endDate = new Date(year, parseInt(month, 10), 0);
+        const endDateStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
+
+        let baseQuery = db.collection('sut_alimlari')
+            .where('sahipId', '==', sahipId)
+            .where('tarih', '>=', startDateStr)
+            .where('tarih', '<=', endDateStr);
+        
+        let dataForExcel = [];
+        let sheetTitle = "Aylik Sut Raporu";
+
+        // 3. Rapor türüne göre veriyi işle ve Excel için hazırla
+        // Bireysel Rapor
+        if (!options.tumu && !options.kategori) {
+            if (!cariId) { alert("Lütfen bir cari seçin."); return; }
+            const cariAdi = document.getElementById('sutRaporuTedarikciSecimi').options[document.getElementById('sutRaporuTedarikciSecimi').selectedIndex].text;
+            sheetTitle = cariAdi;
+            const snapshot = await baseQuery.where('cariId', '==', cariId).orderBy('tarih').get();
+            if (snapshot.empty) { alert("Dışa aktarılacak veri bulunamadı."); return; }
+
+            let toplamLitre = 0, toplamTutar = 0;
+            dataForExcel = snapshot.docs.map(doc => {
+                const alim = doc.data();
+                toplamLitre += alim.toplam || 0;
+                toplamTutar += alim.toplamTutar || 0;
+                return {
+                    "Tarih": formatDate(alim.tarih),
+                    "Akşam (Lt)": (alim.aksam || 0).toFixed(2),
+                    "Sabah (Lt)": (alim.sabah || 0).toFixed(2),
+                    "Toplam (Lt)": (alim.toplam || 0).toFixed(2),
+                    "Fiyat (₺)": (alim.fiyat || 0).toFixed(2),
+                    "Tutar (₺)": (alim.toplamTutar || 0).toFixed(2)
+                };
+            });
+            dataForExcel.push({}); // Boş satır
+            dataForExcel.push({ "Tarih": "AYLIK TOPLAM", "Toplam (Lt)": toplamLitre.toFixed(2), "Tutar (₺)": toplamTutar.toFixed(2) });
+
+        // Kategori veya Toplu Rapor
+        } else {
+             // ... Bu bölümün mantığı da benzer şekilde eklenebilir, şimdilik bireysel rapora odaklanıyoruz.
+             alert("Toplu ve Kategori raporları için Excel dışa aktarma henüz tamamlanmadı."); return;
+        }
+
+        // 4. Veriyi kullanarak Excel dosyasını oluştur ve indir
+        const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, sheetTitle);
+        XLSX.writeFile(workbook, "Aylik_Sut_Raporu.xlsx");
+
+    } catch (error) {
+        console.error("Excel oluşturulurken hata oluştu:", error);
+        alert("Excel dosyası oluşturulurken bir hata oluştu.");
+    }
+}
 
 async function handleDinamikSutRaporu() {
     const ayYil = document.getElementById('karneRaporuAySecimi').value;
@@ -3460,9 +3495,9 @@ async function handleDinamikSutRaporu() {
     container.innerHTML = `<p style="text-align:center; font-size:1.2em;">Rapor oluşturuluyor, veriler çekiliyor...</p>`;
 
     const [year, month] = ayYil.split('-');
-    const ayGunSayisi = new Date(year, parseInt(month, 10), 0).getDate(); // DÜZELTME BURADA
+    const ayGunSayisi = new Date(year, parseInt(month, 10), 0).getDate();
     const ayIsimleri = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-    const reportTitleText = `${kategori} - ${ayIsimleri[parseInt(month, 10) - 1]} ${year} Süt Karnesi`; // DÜZELTME BURADA
+    const reportTitleText = `${kategori} - ${ayIsimleri[parseInt(month, 10) - 1]} ${year} Süt Karnesi`;
 
     try {
         const [producersSnapshot, milkSnapshot] = await Promise.all([
@@ -3483,12 +3518,13 @@ async function handleDinamikSutRaporu() {
             milkData.set(key, alim);
         });
         
+        // Önce HTML iskeletini oluştur
         let tableHTML = `
             <div class="dinamik-rapor-header dont-print"><h1>${reportTitleText}</h1></div>
             <div class="table-wrapper">
                 <table id="sut-rapor-tablosu">
                     <thead>
-                        <tr class="gunler"><th rowspan="2" class="uretici-listesi">Üretici Listesi</th></tr>
+                        <tr class="gunler"></tr>
                         <tr class="vakit"></tr>
                     </thead>
                     <tbody></tbody>
@@ -3506,35 +3542,44 @@ async function handleDinamikSutRaporu() {
         `;
         container.innerHTML = tableHTML;
         
+        // Şimdi HTML elementlerini seç
         const tableHeadGunler = container.querySelector('thead tr.gunler');
         const tableHeadVakit = container.querySelector('thead tr.vakit');
         const tableBody = container.querySelector('tbody');
 
-        tableHeadGunler.innerHTML = '<th rowspan="2" class="uretici-listesi">Üretici Listesi</th>'; // Başlığı sıfırla
+        // --- DÜZELTME: Bu satırlar, rapor her çalıştığında eski başlıkları sıfırlayıp yeniden oluşturur ---
+        tableHeadGunler.innerHTML = '<th rowspan="2" class="uretici-listesi">ÜRETİCİ LİSTESİ</th>';
         tableHeadVakit.innerHTML = '';
+        // ------------------------------------------------------------------------------------------
 
+        // Başlıkları döngü ile oluştur
         for (let i = 1; i <= ayGunSayisi; i++) {
-            const thGun = document.createElement('th');
-            thGun.setAttribute('colspan', '2');
-            thGun.textContent = i;
-            tableHeadGunler.appendChild(thGun);
-            tableHeadVakit.innerHTML += `<th>A</th><th>S</th>`;
+            tableHeadGunler.innerHTML += `<th colspan="2">${i}</th>`;
+            tableHeadVakit.innerHTML += `<th class="vakit-baslik">A</th><th class="vakit-baslik">S</th>`;
         }
-
+        
+        // --- DÜZELTME: Bu satır, eski tablo içeriğini tamamen temizler ---
+        tableBody.innerHTML = '';
+        // ---------------------------------------------------------------
+        
+        // Veri satırlarını döngü ile oluştur
         producers.forEach(producer => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td class="uretici-listesi">${producer.adiSoyadi}</td>`;
+            let rowHTML = `<td class="uretici-listesi">${producer.adiSoyadi}</td>`;
             for (let i = 1; i <= ayGunSayisi; i++) {
                 const day = String(i).padStart(2, '0');
                 const dateStr = `${year}-${month}-${day}`;
                 const key = `${producer.id}_${dateStr}`;
-                const data = milkData.get(key) || { sabah: '', aksam: '' };
-                tr.innerHTML += `
-                    <td><input type="text" class="litre-input aksam" value="${data.aksam || ''}" readonly></td>
-                    <td><input type="text" class="litre-input sabah" value="${data.sabah || ''}" readonly></td>
-                `;
+                const data = milkData.get(key) || {};
+                
+                const formatLitre = (val) => {
+                    if (val === null || val === undefined || val === '') return '';
+                    if (val % 1 === 0) return val.toString();
+                    return Number(val).toFixed(1).replace('.', ',');
+                };
+
+                rowHTML += `<td>${formatLitre(data.aksam)}</td><td>${formatLitre(data.sabah)}</td>`;
             }
-            tableBody.appendChild(tr);
+            tableBody.innerHTML += `<tr>${rowHTML}</tr>`;
         });
         
         const totalColumns = 1 + (ayGunSayisi * 2);
@@ -3547,7 +3592,6 @@ async function handleDinamikSutRaporu() {
         container.innerHTML = `<p style="color:red; text-align:center;">Rapor oluşturulurken bir hata oluştu: ${error.message}</p>`;
     }
 }
-
 
 
 async function handleYemPivotRaporu(reportType) {
@@ -4044,27 +4088,25 @@ async function handleHesapOzetiRaporuOlustur() {
     
     raporBaslik.textContent = `${cariAdi} - ${formatMonthYear(ayYil)} Hesap Özeti`;
     raporDetayAlani.innerHTML = '<p>Rapor oluşturuluyor, lütfen bekleyin...</p>';
-
-    const intYear = parseInt(year, 10);
-    const intMonth = parseInt(month, 10);
-    const startDate = `${year}-${month}-01`;
-    const ayGunSayisi = new Date(intYear, intMonth, 0).getDate();
-    const endDate = `${year}-${month}-${String(ayGunSayisi).padStart(2, '0')}`;
-    const devirTarihiObj = new Date(intYear, intMonth - 1, 0);
-    const devirYil = devirTarihiObj.getFullYear();
-    const devirAy = String(devirTarihiObj.getMonth() + 1).padStart(2, '0');
-    const devirGun = String(devirTarihiObj.getDate()).padStart(2, '0');
-    const devirTarihiStr = `${devirYil}-${devirAy}-${devirGun}`;
-    
-    
+    document.getElementById('hesap-ozeti-export-area').innerHTML = '';
 
     try {
+        const intYear = parseInt(year, 10);
+        const intMonth = parseInt(month, 10);
+        const startDate = `${year}-${month}-01`;
+        const ayGunSayisi = new Date(intYear, intMonth, 0).getDate();
+        const endDate = `${year}-${month}-${String(ayGunSayisi).padStart(2, '0')}`;
+        const devirTarihiObj = new Date(intYear, intMonth - 1, 0);
+        const devirYil = devirTarihiObj.getFullYear();
+        const devirAy = String(devirTarihiObj.getMonth() + 1).padStart(2, '0');
+        const devirGun = String(devirTarihiObj.getDate()).padStart(2, '0');
+        const devirTarihiStr = `${devirYil}-${devirAy}-${devirGun}`;
+        
         const createQuery = (collection, isDevir) => {
             let q = db.collection(collection).where('sahipId', '==', sahipId).where('cariId', '==', cariId);
             q = isDevir ? q.where('tarih', '<=', devirTarihiStr) : q.where('tarih', '>=', startDate).where('tarih', '<=', endDate);
             return q.get();
         };
-        
         
         const [devirSut, devirYemSatis, devirOdeme, aySut, ayYemSatis, ayOdeme, yemlerSnapshot] = await Promise.all([
             createQuery('sut_alimlari', true), 
@@ -4088,9 +4130,8 @@ async function handleHesapOzetiRaporuOlustur() {
         });
         const devredenBakiye = devredenAlacak - devredenBorc;
 
-        let toplamSutDegeri = 0, sutDetayHTML = '';
+        let toplamSutDegeri = 0, sutDetayHTML = '', toplamSabah = 0, toplamAksam = 0, toplamLitre = 0;
         if (!aySut.empty) {
-            let toplamSabah = 0, toplamAksam = 0, toplamLitre = 0;
             aySut.forEach(doc => {
                 const alim = doc.data();
                 toplamSabah += alim.sabah || 0;
@@ -4101,10 +4142,10 @@ async function handleHesapOzetiRaporuOlustur() {
             const ortalamaFiyat = toplamLitre > 0 ? (toplamSutDegeri / toplamLitre) : 0;
             sutDetayHTML = `<table class="summary-table"><thead><tr><th>Toplam Akşam</th><th>Toplam Sabah</th><th>Toplam Litre</th><th>Ort. Fiyat</th><th>Toplam Tutar</th></tr></thead><tbody><tr><td>${toplamAksam.toFixed(2)} Lt</td><td>${toplamSabah.toFixed(2)} Lt</td><td>${toplamLitre.toFixed(2)} Lt</td><td>${formatCurrency(ortalamaFiyat)}</td><td>${formatCurrency(toplamSutDegeri)}</td></tr></tbody></table>`;
         }
-        
+
         let toplamYemSatisTutari = 0, yemSatisDetayHTML = '';
+        const yemSatisOzet = {};
         if (!ayYemSatis.empty) {
-            const yemSatisOzet = {};
             ayYemSatis.forEach(doc => {
                 const satis = doc.data();
                 toplamYemSatisTutari += satis.toplamTutar;
@@ -4126,28 +4167,34 @@ async function handleHesapOzetiRaporuOlustur() {
 
         let toplamOdemeTutari = 0, odemeDetayHTML = '';
         let toplamTahsilatTutari = 0, tahsilatDetayHTML = '';
+        const odemeDetaylari = [], tahsilatDetaylari = [];
         if(!ayOdeme.empty) {
-            odemeDetayHTML = '<table class="summary-table"><thead><tr><th>Tarih</th><th>Ödeme Türü</th><th>Açıklama</th><th>Tutar</th></tr></thead><tbody>';
-            tahsilatDetayHTML = '<table class="summary-table"><thead><tr><th>Tarih</th><th>Ödeme Türü</th><th>Açıklama</th><th>Tutar</th></tr></thead><tbody>';
-            let odemeYapildi = false, tahsilatYapildi = false;
-            
             ayOdeme.docs.sort((a,b) => a.data().tarih.localeCompare(b.data().tarih)).forEach(doc => {
                 const islem = doc.data();
                 if (islem.islemTuru === 'odeme') {
                     toplamOdemeTutari += islem.tutar;
-                    odemeDetayHTML += `<tr><td>${formatDate(islem.tarih)}</td><td>${islem.odemeTuru || '-'}</td><td>${islem.aciklama}</td><td>${formatCurrency(islem.tutar)}</td></tr>`;
-                    odemeYapildi = true;
+                    odemeDetaylari.push(islem);
                 } else if (islem.islemTuru === 'tahsilat') {
                     toplamTahsilatTutari += islem.tutar;
-                    tahsilatDetayHTML += `<tr><td>${formatDate(islem.tarih)}</td><td>${islem.odemeTuru || '-'}</td><td>${islem.aciklama}</td><td>${formatCurrency(islem.tutar)}</td></tr>`;
-                    tahsilatYapildi = true;
+                    tahsilatDetaylari.push(islem);
                 }
             });
-            odemeDetayHTML += '</tbody></table>';
-            tahsilatDetayHTML += '</tbody></table>';
             
-            if(!odemeYapildi) odemeDetayHTML = '<p>Bu ay ödeme yapılmamış.</p>';
-            if(!tahsilatYapildi) tahsilatDetayHTML = '<p>Bu ay tahsilat yapılmamış.</p>';
+            if(odemeDetaylari.length > 0) {
+                odemeDetayHTML = '<table class="summary-table"><thead><tr><th>Tarih</th><th>Ödeme Türü</th><th>Açıklama</th><th>Tutar</th></tr></thead><tbody>';
+                odemeDetaylari.forEach(islem => {
+                    odemeDetayHTML += `<tr><td>${formatDate(islem.tarih)}</td><td>${islem.odemeTuru || '-'}</td><td>${islem.aciklama}</td><td>${formatCurrency(islem.tutar)}</td></tr>`;
+                });
+                odemeDetayHTML += '</tbody></table>';
+            }
+            
+            if(tahsilatDetaylari.length > 0) {
+                tahsilatDetayHTML = '<table class="summary-table"><thead><tr><th>Tarih</th><th>Ödeme Türü</th><th>Açıklama</th><th>Tutar</th></tr></thead><tbody>';
+                tahsilatDetaylari.forEach(islem => {
+                    tahsilatDetayHTML += `<tr><td>${formatDate(islem.tarih)}</td><td>${islem.odemeTuru || '-'}</td><td>${islem.aciklama}</td><td>${formatCurrency(islem.tutar)}</td></tr>`;
+                });
+                tahsilatDetayHTML += '</tbody></table>';
+            }
         }
 
         const cariAyBakiye = (toplamSutDegeri + toplamOdemeTutari) - (toplamYemSatisTutari + toplamTahsilatTutari);
@@ -4171,8 +4218,41 @@ async function handleHesapOzetiRaporuOlustur() {
                 <p><strong>DÖNEM SONU NET BAKİYE:</strong> <strong>${formatCurrency(donemSonuBakiye)} (${donemSonuBakiye >= 0 ? 'Cari Alacaklı' : 'Cari Borçlu'})</strong></p>
             </div>
         `;
-        
         raporDetayAlani.innerHTML = reportHTML;
+        
+        let excelTableHTML = `
+            <table>
+                <thead><tr><th colspan="5">${raporBaslik.textContent}</th></tr></thead>
+                <tbody>
+                    <tr><td colspan="5" style="background-color:#f2f2f2;"><strong>Önceki Dönemden Devir</strong></td></tr>
+                    <tr><td>Devreden Bakiye</td><td colspan="4">${formatCurrency(devredenBakiye)}</td></tr>
+                    <tr><td colspan="5"></td></tr>
+                    
+                    <tr><td colspan="5" style="background-color:#f2f2f2;"><strong>Cari Ay Süt Alımları</strong></td></tr>
+                    ${!aySut.empty ? `<tr><td>Toplam Akşam</td><td>${toplamAksam.toFixed(2)} Lt</td><td>Toplam Sabah</td><td colspan="2">${toplamSabah.toFixed(2)} Lt</td></tr>
+                                      <tr><td>Toplam Litre</td><td>${toplamLitre.toFixed(2)} Lt</td><td>Toplam Tutar</td><td colspan="2">${formatCurrency(toplamSutDegeri)}</td></tr>` : '<tr><td colspan="5">Bu ay süt alımı yok.</td></tr>'}
+                    <tr><td colspan="5"></td></tr>
+
+                    <tr><td colspan="5" style="background-color:#f2f2f2;"><strong>Cari Ay Yem Satışları</strong></td></tr>
+                    ${Object.keys(yemSatisOzet).length > 0 ? `<tr><td>Yem Adı</td><td>Miktar</td><td>Ort. Fiyat</td><td colspan="2">Tutar</td></tr>` + Object.entries(yemSatisOzet).map(([yemAdi, ozet]) => `<tr><td>${yemAdi}</td><td>${ozet.miktar}</td><td>${formatCurrency(ozet.tutar/ozet.miktar)}</td><td colspan="2">${formatCurrency(ozet.tutar)}</td></tr>`).join('') : '<tr><td colspan="5">Bu ay yem satışı yok.</td></tr>'}
+                    <tr><td colspan="5"></td></tr>
+                    
+                    <tr><td colspan="5" style="background-color:#f2f2f2;"><strong>Cari Ay Yapılan Ödemeler</strong></td></tr>
+                    ${odemeDetaylari.length > 0 ? `<tr><td>Tarih</td><td>Ödeme Türü</td><td>Açıklama</td><td colspan="2">Tutar</td></tr>` + odemeDetaylari.map(islem => `<tr><td>${formatDate(islem.tarih)}</td><td>${islem.odemeTuru || '-'}</td><td>${islem.aciklama}</td><td colspan="2">${formatCurrency(islem.tutar)}</td></tr>`).join('') : '<tr><td colspan="5">Bu ay ödeme yapılmamış.</td></tr>'}
+                    <tr><td colspan="5"></td></tr>
+
+                    <tr><td colspan="5" style="background-color:#f2f2f2;"><strong>Cari Ay Yapılan Tahsilatlar</strong></td></tr>
+                    ${tahsilatDetaylari.length > 0 ? `<tr><td>Tarih</td><td>Ödeme Türü</td><td>Açıklama</td><td colspan="2">Tutar</td></tr>` + tahsilatDetaylari.map(islem => `<tr><td>${formatDate(islem.tarih)}</td><td>${islem.odemeTuru || '-'}</td><td>${islem.aciklama}</td><td colspan="2">${formatCurrency(islem.tutar)}</td></tr>`).join('') : '<tr><td colspan="5">Bu ay tahsilat yapılmamış.</td></tr>'}
+                    <tr><td colspan="5"></td></tr>
+
+                    <tr><td colspan="5" style="background-color:#f0f0f0;"><strong>DÖNEM SONU HESAPLAMASI</strong></td></tr>
+                    <tr><td>CARİ AY BAKİYESİ</td><td colspan="4">${formatCurrency(cariAyBakiye)}</td></tr>
+                    <tr><td><strong>DÖNEM SONU NET BAKİYE</strong></td><td colspan="4"><strong>${formatCurrency(donemSonuBakiye)} (${donemSonuBakiye >= 0 ? 'Cari Alacaklı' : 'Cari Borçlu'})</strong></td></tr>
+                </tbody>
+            </table>
+        `;
+        document.getElementById('hesap-ozeti-export-area').innerHTML = excelTableHTML;
+
         toggleReportButtons('hesapOzeti', true);
 
     } catch (error) {
@@ -4180,6 +4260,8 @@ async function handleHesapOzetiRaporuOlustur() {
         raporDetayAlani.innerHTML = `<p style="color:red; font-weight:bold;">RAPOR OLUŞTURULAMADI!<br>Hata Detayı: ${error.message}.</p>`;
     }
 }
+
+
 
 function toggleReportButtons(reportPrefix, show) {
     const displayStyle = show ? 'inline-block' : 'none';

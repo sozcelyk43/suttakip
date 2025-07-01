@@ -414,7 +414,10 @@ body.pdf-generating .pdf-source-section .container {
     transform: scale(1.03); /* Hafif büyüme efekti */
 }
 
-/* === AYLIK SÜT KARNESİ RAPORU STİLLERİ (DİKEY YAZI VERSİYONU) === */
+
+/* === AYLIK SÜT KARNESİ RAPORU STİLLERİ (EKRANA SIĞAN GÖRÜNÜM) === */
+
+/* Rapor başlığı stilleri (değişiklik yok) */
 .dinamik-rapor-header {
     display: flex;
     justify-content: space-between;
@@ -429,100 +432,90 @@ body.pdf-generating .pdf-source-section .container {
     margin: 0;
     border: none;
 }
-.dinamik-rapor-header .button-group {
-    display: flex;
-    gap: 10px;
-}
-.dinamik-rapor-header .button-group button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-}
 
+/* Tablonun etrafındaki sarmalayıcı */
 .table-wrapper {
     width: 100%;
-   // overflow-x: hidden; /* Yatay kaydırmayı engelle */
+    /* DEĞİŞİKLİK: Yatay kaydırma çubuğu kaldırıldı */
+    overflow-x: hidden; 
     border: 1px solid #dee2e6;
 }
+
+/* Rapor tablosunun genel yapısı */
 #sut-rapor-tablosu {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13px;
     background-color: #ffffff;
-    table-layout: fixed;
+    /* DEĞİŞİKLİK: Sütun genişliklerini hassas kontrol için 'fixed' yapıldı */
+    table-layout: fixed; 
+    /* DEĞİŞİKLİK: Yazı boyutu küçültülerek daha fazla alan kazanıldı */
+    font-size: 11px; 
 }
+
+/* Tablodaki tüm hücrelerin ortak stili */
 #sut-rapor-tablosu th, #sut-rapor-tablosu td {
     border: 1px solid #dee2e6;
-    text-align: center;
-    padding: 5px 2px; /* Dikey boşluğu ayarla */
+    vertical-align: middle;
+    /* DEĞİŞİKLİK: Hücre içi boşluklar minimuma indirildi */
+    padding: 4px 3px; 
+    text-align: right;
+    /* DEĞİŞİKLİK: Kelimelerin uzun olması durumunda kırılmasını sağlar */
+    /word-break: break-word; 
 }
+
+/* Tablonun en üstündeki başlık satırı */
 #sut-rapor-tablosu thead th {
-    background-color: #e9ecef;
-    color: #212529;
+    background-color: #f8f9fa;
+    color: #343a40;
     position: sticky;
     top: 0;
     z-index: 2;
-    white-space: nowrap;
+    text-align: center;
+    font-weight: 600;
 }
+
 #sut-rapor-tablosu .uretici-listesi {
     text-align: left;
     font-weight: 600;
     background-color: #f8f9fa;
-    position: sticky;
+    /position: sticky;
     left: 0;
     z-index: 1;
-    width: 9%; /* Üretici sütununa biraz daha yer verelim */
-    min-width: 160px;
-    padding-left: 8px;
+    padding: 0 !important;     /* ← tüm iç boşluklar sıfırlandı */
+    margin: 0 !important;      /* ← dış boşluklar sıfırlandı */
+    min-width: 10px;
+    width: 9%; 
+    white-space: normal;
 }
+
+
+/* "A" ve "S" yazan başlık hücreleri */
 #sut-rapor-tablosu .vakit th { 
-    background-color: #f1f3f5;
-    font-size: 11px;
-    font-weight: 600;
+    font-weight: bold;
+    min-width: 10px;/* DEĞİŞİKLİK: Genişlik yüzde olarak verildi ve 'min-width' kaldırıldı */
+    width: 6%; /* (100 - 25) / 20 = 3.75, yaklaşık değer */
 }
 
-/* === GÜNCELLEME: YAZIYI DİKEY YAPMA === */
-#sut-rapor-tablosu input.litre-input {
-    width: 100%;
-    height: 35px; /* Dikey yazı için yükseklik ver */
-    border: none;
-    text-align: center;
-    padding: 0;
-    box-sizing: border-box;
-    background-color: transparent;
-    font-size: 10px;
-    font-weight: 500;
-    cursor: default;
-    
-    /* Yazıyı dikey hale getiren sihirli kodlar */
-    writing-mode: vertical-rl;
-    transform: rotate(180deg); /* Rakamların doğru yönde görünmesi için */
-}
-
-#sut-rapor-tablosu tfoot {
-    position: sticky;
-    bottom: 0;
-    z-index: 2;
-}
+/* Tablonun en altındaki toplam satırı */
 #sut-rapor-tablosu tfoot td {
     background-color: #e9ecef;
     font-weight: bold;
     color: #2c3e50;
     font-size: 1.1em;
-    padding: 12px;
+    padding: 8px; /* Toplam satırı biraz daha ferah olabilir */
     text-align: center;
+    border-top: 2px solid #ccc;
 }
 #sut-rapor-tablosu tfoot span {
-    margin: 0 15px;
+    margin: 0 10px;
 }
 #sut-rapor-tablosu tfoot strong {
     color: var(--primary-color);
 }
-/* ÇIKIŞ BUTONU KULLANICI ADI STİLİ */
+
+
+
+
 #logoutButton {
     /* Buton içeriğini ortala ve satır yüksekliğini ayarla */
     text-align: center;
