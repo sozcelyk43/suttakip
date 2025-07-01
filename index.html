@@ -56,37 +56,21 @@
                 <h3>Genel Durum</h3>
 
                 <div class="dashboard-grid">
-                    <div class="stat-card"><h4>☀️ Bugünkü Sabah Sütü</h4><p><span id="dashSabahSut">0.00</span> Lt</p></div>
-                    <div class="stat-card"><h4>🌙 Bugünkü Akşam Sütü</h4><p><span id="dashAksamSut">0.00</span> Lt</p></div>
-                    <div class="stat-card">
-                        <h4>📈 Bugünkü Toplam Süt</h4>
-                        <p><span id="dashToplamSut">0.00</span> Lt</p>
-                        <small id="dunKarsilastirma">(Düne göre...)</small>
-                    </div>
+                    <div class="stat-card"><h4>☀️ Bugünkü Sabah Sütü</h4><p><span id="dashSabahSut">0.00</span> Lt</p><small id="sabahSutTarih" style="font-weight: bold;"></small></div>
+                    <div class="stat-card"><h4>🌙 Bugünkü Akşam Sütü</h4><p><span id="dashAksamSut">0.00</span> Lt</p><small id="aksamSutTarih" style="font-weight: bold;"></small></div>
+                    <div class="stat-card"><h4>📈 Bugünkü Toplam Süt</h4><p><span id="dashToplamSut">0.00</span> Lt</p>
+				<small id="toplamSutTarihAraligi" style="display: block; font-weight: bold;"></small><small id="dunKarsilastirma">(Düne göre...)</small></div>
                     <div class="stat-card"><h4>👥 Aktif Müşteri Sayısı</h4><p><span id="dashAktifMusteri">0</span></p></div>
-
-
-		<div class="stat-card" id="bakiyeDurumKarti">
-                        <h4>💰 Toplam Bakiye</h4>
-                        <p><span id="dashToplamBakiye">0,00</span> ₺</p>
-                        <small id="bakiyeDurumUyarisi" style="font-weight: bold;"></small>
-                    </div>
-
-                   <div class="stat-card" style="border-left: 5px solid #3498db; grid-column: span 1;">
-                        <h4>Bu Ayki Süt Üretimi</h4>
-                        <p style="font-size: 2.2em; color: #2980b9;"><span id="dashBuAykiToplamSut">0</span> Lt</p>
-                        <small>(<span id="aylikGunOrtalamasi">0</span> Lt/Gün Ort.)</small>
-                    </div>
-
-                    <div class="stat-card" style="border-left: 5px solid #1abc9c; grid-column: span 1;">
-                        <h4>Üretimin Parasal Değeri</h4>
-                        <p style="font-size: 2.2em; color: #16a085;"><span id="dashBuAykiSutDegeri">0,00</span> ₺</p>
-                        <small>(Potansiyel Gelir)</small>
-                    </div>
-                 
-
-
+	            <div class="stat-card" id="bakiyeDurumKarti"><h4>💰 Toplam Bakiye</h4><p><span id="dashToplamBakiye">0,00</span> ₺</p>
+				<small id="bakiyeDurumUyarisi" style="font-weight: bold;"></small></div>
+                   <div class="stat-card" style="border-left: 5px solid #3498db; grid-column: span 1;"><h4>Bu Ayki Süt Üretimi</h4><p style="font-size: 2.2em; color: #2980b9;">
+				<span id="dashBuAykiToplamSut">0</span> Lt</p><small>(<span id="aylikGunOrtalamasi">0</span> Lt/Gün Ort.)</small></div>
+                   <div class="stat-card" style="border-left: 5px solid #1abc9c; grid-column: span 1;"><h4>Üretimin Parasal Değeri</h4><p style="font-size: 2.2em; color: #16a085;">
+				<span id="dashBuAykiSutDegeri">0,00</span> ₺</p><small>(Potansiyel Gelir)</small></div>
+                   <div class="stat-card" style="border-left: 5px solid #f39c12;"><h4>📦 Tanımlı Yem Sayısı</h4><p style="font-size: 2.2em; color: #d35400;">
+				<span id="dashYemSayisi">0</span></p><small>(Toplam Çeşit)</small></div>
                 </div>
+
                 <div class="balance-bars">
                     <div class="balance-bar-item">
                         <div class="balance-bar-header">
@@ -451,16 +435,30 @@
     <div class="container">
         <div class="report-section">
             <h3>Detaylı Süt Alım Raporu</h3>
-            <div class="form-grid dont-print" style="grid-template-columns: repeat(4, 1fr); align-items: end; gap: 10px;">
-                <div class="form-group"><label for="sutRaporuTedarikciSecimi">Cari Seçin:</label><select id="sutRaporuTedarikciSecimi"><option value="">Seçiniz...</option></select></div>
-                <div class="form-group"><label for="sutRaporuAySecimi">Ay:</label><input type="month" id="sutRaporuAySecimi"></div>
-                <div class="form-group"><label for="sutRaporuKategoriSecimi">Kategori:</label><select id="sutRaporuKategoriSecimi"><option value="">Tümü</option></select></div>
-                <div style="display: flex; gap: 10px;">
-                    <button type="button" class="btn btn-primary" id="sutRaporuOlusturBtn" style="height:45px; flex-grow: 1;">Göster</button>
-                    <button type="button" class="btn btn-info" id="sutRaporuKategoriGosterBtn" style="height:45px; flex-grow: 1;">Kategori</button>
-                    <button type="button" class="btn btn-info" id="sutRaporuTumunuGosterBtn" style="height:45px; flex-grow: 1;">Toplu</button>
-                </div>
-            </div> <hr class="dont-print">
+            <<div class="form-grid dont-print" style="grid-template-columns: 1fr 2fr 1fr auto; align-items: end; gap: 10px;">
+    <div class="form-group">
+        <label for="sutRaporuTedarikciSecimi">Cari Seçin:</label>
+        <select id="sutRaporuTedarikciSecimi"><option value="">Seçiniz...</option></select>
+    </div>
+    <div class="form-group">
+        <label>Tarih Aralığı Seçin:</label>
+        <div style="display: flex; gap: 10px;">
+            <input type="date" id="sutRaporuBaslangicTarihi" style="flex: 1;">
+            <input type="date" id="sutRaporuBitisTarihi" style="flex: 1;">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="sutRaporuKategoriSecimi">Kategori:</label>
+        <select id="sutRaporuKategoriSecimi"><option value="">Tümü</option></select>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <button type="button" class="btn btn-primary" id="sutRaporuOlusturBtn" style="height:45px; flex-grow: 1;">Göster</button>
+        <button type="button" class="btn btn-info" id="sutRaporuKategoriGosterBtn" style="height:45px; flex-grow: 1;">Kategori</button>
+        <button type="button" class="btn btn-info" id="sutRaporuTumunuGosterBtn" style="height:45px; flex-grow: 1;">Toplu</button>
+    </div>
+</div>
+
+<hr class="dont-print">
             
             <div id="sutAlimRaporAlani" class="printable-content format-a5">
                 <h1 class="print-only print-title">Süt Takip Programı - Aylık Süt Alım Detay Raporu</h1>
@@ -688,7 +686,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Tarih</th>
+                        <th>Tarih / Saat</th>
                         <th>Kaynak Tank</th>
                         <th>Hedef Cari</th>
                         <th>Miktar (Lt)</th>
@@ -840,6 +838,7 @@ auth.onAuthStateChanged(async (user) => {
 
         applyRolePermissions();
         loadAndRenderAllData();
+                updateMonthlyStats(); 
         
         sidebarNav.addEventListener('click', function(event) {
             const link = event.target.closest('a.nav-link');
@@ -854,14 +853,30 @@ auth.onAuthStateChanged(async (user) => {
             const activeSection = document.getElementById(targetId);
             if(activeSection) activeSection.style.display = 'block';
             
-            if (targetId === 'dashboard') { updateDashboardStats(); }
+            if (targetId === 'dashboard') { updateDashboardStats();  updateMonthlyStats();}
             if (targetId === 'cari-yonetimi') {populateCariKategoriFiltre();renderCariListesi();populateCariKategoriSelect(document.getElementById('cariKategori'));generateNextCariKodu();}
             if (targetId === 'sut-alimi') { if(topluGirisTarihInput) topluGirisTarihInput.value = getTodayForInput(); populateCariKategoriSelect(topluGirisKategoriSelect); populateTankSelect(document.getElementById('topluGirisTank')); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); }
             if (targetId === 'yem-stok-yonetimi') { populateCariSelect(document.getElementById('yemAlisTedarikci'), 'tedarikçi'); populateYemSelect(document.getElementById('yemSecimiAlis')); renderYemAlisHareketleri(); renderYemStokListesi(); }
             if (targetId === 'yem-satisi') { populateCariSelect(document.getElementById('yemAlanTedarikci'), 'üretici'); populateYemSelect(document.getElementById('yemSecimiSatis')); renderYemSatisListesi(); }
             if (targetId === 'tahsilat-ve-odemeler') { populateCariSelect(document.getElementById('odemeYapilanTedarikci')); renderOdemeListesi(); }
             if (targetId === 'hesap-ozeti'){ populateCariSelect(document.getElementById('raporCariSecimi')); if(!document.getElementById('raporTarihAraligi').value) document.getElementById('raporTarihAraligi').value = getMonthYearForInput(); }
-            if (targetId === 'sut-alim-raporu'){ populateCariSelect(document.getElementById('sutRaporuTedarikciSecimi'), 'üretici'); populateCariKategoriSelect(document.getElementById('sutRaporuKategoriSecimi'), "Tümü"); if(!document.getElementById('sutRaporuAySecimi').value) document.getElementById('sutRaporuAySecimi').value = getMonthYearForInput(); }
+            if (targetId === 'sut-alim-raporu'){ populateCariSelect(document.getElementById('sutRaporuTedarikciSecimi'), 'üretici'); populateCariKategoriSelect(document.getElementById('sutRaporuKategoriSecimi'), "Tümü"); // Tarih aralığına varsayılan değerleri ata (bu ayın başı ve bugün)
+const baslangicTarihiInput = document.getElementById('sutRaporuBaslangicTarihi');
+const bitisTarihiInput = document.getElementById('sutRaporuBitisTarihi');
+if (baslangicTarihiInput && !baslangicTarihiInput.value && bitisTarihiInput && !bitisTarihiInput.value) {
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    
+    const formatForInput = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    baslangicTarihiInput.value = formatForInput(firstDayOfMonth);
+    bitisTarihiInput.value = formatForInput(today);
+} }
             if (targetId === 'aylik-yem-raporu'){ if(!document.getElementById('yemRaporuAySecimi').value) document.getElementById('yemRaporuAySecimi').value = getMonthYearForInput(); }
             if (targetId === 'dinamik-sut-raporu'){ populateCariKategoriSelect(document.getElementById('karneRaporuKategoriSecimi'), "Tüm Kategoriler"); if(!document.getElementById('karneRaporuAySecimi').value) document.getElementById('karneRaporuAySecimi').value = getMonthYearForInput(); }
             if (targetId === 'hareket-dokumu') { renderHareketDokumu(); }
@@ -1094,37 +1109,117 @@ async function handleSifreDegistir(event) {
     }
 }
 
-// İLGİLİ FONKSİYON
+
+// NEW, ISOLATED FUNCTION FOR MONTHLY STATS
+async function updateMonthlyStats() {
+    try {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        
+        const startDateStr = new Date(year, month, 1).toISOString().split('T')[0];
+        const endDateStr = new Date(year, month + 1, 0).toISOString().split('T')[0];
+
+        const thisMonthSutSnapshot = await db.collection('sut_alimlari')
+            .where("sahipId", "==", sahipId)
+            .where("tarih", ">=", startDateStr)
+            .where("tarih", "<=", endDateStr)
+            .get();
+
+        let buAykiToplamSut = 0;
+        let buAykiToplamDeger = 0; // We will calculate this again here
+
+        thisMonthSutSnapshot.forEach(doc => {
+            const alim = doc.data();
+            if (alim.islemKaynagi !== 'tank-aktarim') {
+                buAykiToplamSut += alim.toplam || 0;
+                buAykiToplamDeger += alim.toplamTutar || 0; // Also calculate the monetary value
+            }
+        });
+        
+        const bugunAyinKaci = now.getDate();
+        const gunlukOrtalama = (buAykiToplamSut > 0) ? (buAykiToplamSut / bugunAyinKaci) : 0;
+
+        // This function will now ONLY update the monthly cards
+        document.getElementById('dashBuAykiToplamSut').textContent = Math.floor(buAykiToplamSut);
+        document.getElementById('dashBuAykiSutDegeri').textContent = formatCurrency(buAykiToplamDeger);
+        document.getElementById('aylikGunOrtalamasi').textContent = gunlukOrtalama.toFixed(1);
+
+    } catch(e) {
+        console.error("Aylık süt istatistikleri alınırken hata:", e);
+        document.getElementById('dashBuAykiToplamSut').textContent = 'Hata';
+        document.getElementById('dashBuAykiSutDegeri').textContent = 'Hata';
+    }
+}
+
 async function updateDashboardStats() {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
 
-    // --- Süt ve Müşteri İstatistikleri ---
+    // --- 1. GÜNLÜK SÜT İSTATİSTİKLERİ (YENİ MANTIK) ---
     try {
-        const today = new Date();
-        const yesterday = new Date();
-        yesterday.setDate(today.getDate() - 1);
-        
-        const todayStr = today.toISOString().split('T')[0];
-        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        // --- Gerekli Tarihlerin Hesaplanması ---
+        const localDate = new Date(); // Bugün
+        const today = new Date(localDate);
+        const yesterday = new Date(localDate);
+        yesterday.setDate(localDate.getDate() - 1);
+        const dayBeforeYesterday = new Date(localDate);
+        dayBeforeYesterday.setDate(localDate.getDate() - 2);
 
+        // Tarihleri Veritabanı için Formatlama (YYYY-AA-GG)
+        const formatForDB = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+        const todayStr = formatForDB(today);
+        const yesterdayStr = formatForDB(yesterday);
+        const dayBeforeYesterdayStr = formatForDB(dayBeforeYesterday);
+        
+        // Tarihleri Ekranda Göstermek İçin Formatlama (örn: "2 Temmuz")
+        const formatForDisplay = (date) => {
+            return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' });
+        };
+        const todayLabel = formatForDisplay(today);
+        const yesterdayLabel = formatForDisplay(yesterday);
+
+        // --- Gerekli Verilerin Veritabanından Çekilmesi ---
         const todaySutPromise = db.collection('sut_alimlari').where("sahipId", "==", sahipId).where("tarih", "==", todayStr).get();
         const yesterdaySutPromise = db.collection('sut_alimlari').where("sahipId", "==", sahipId).where("tarih", "==", yesterdayStr).get();
+        const dayBeforeYestSutPromise = db.collection('sut_alimlari').where("sahipId", "==", sahipId).where("tarih", "==", dayBeforeYesterdayStr).get();
         const carilerPromise = db.collection('cariler').where("sahipId", "==", sahipId).where("durum", "==", "aktif").get();
+        const yemlerPromise = db.collection('yemler').where("sahipId", "==", sahipId).get();
 
-        const [sutSnapshot, dunkuSutSnapshot, carilerSnapshot] = await Promise.all([todaySutPromise, yesterdaySutPromise, carilerPromise]);
-        
-        let sabahToplam = 0, aksamToplam = 0;
-        sutSnapshot.forEach(doc => {
-            sabahToplam += doc.data().sabah || 0;
-            aksamToplam += doc.data().aksam || 0;
-        });
-        const gunlukToplamSut = sabahToplam + aksamToplam;
+        const [todaySnapshot, yesterdaySnapshot, dayBeforeYestSnapshot, carilerSnapshot, yemlerSnapshot] = await Promise.all([
+            todaySutPromise,
+            yesterdaySutPromise,
+            dayBeforeYestSutPromise,
+            carilerPromise,
+            yemlerPromise
+        ]);
 
-        let dunkuToplamSut = 0;
-        dunkuSutSnapshot.forEach(doc => { dunkuToplamSut += doc.data().toplam || 0; });
+        // --- Verilerin Güvenli Bir Şekilde Alınması ---
+        const getSutData = (snapshot) => {
+            if (snapshot.empty) return { sabah: 0, aksam: 0 };
+            let totalSabah = 0, totalAksam = 0;
+            snapshot.forEach(doc => {
+                totalSabah += doc.data().sabah || 0;
+                totalAksam += doc.data().aksam || 0;
+            });
+            return { sabah: totalSabah, aksam: totalAksam };
+        };
+
+        const todayData = getSutData(todaySnapshot);
+        const yesterdayData = getSutData(yesterdaySnapshot);
+        const dayBeforeYestData = getSutData(dayBeforeYestSnapshot);
+
+        // --- YENİ MANTIĞA GÖRE HESAPLAMALAR ---
+        const bugunkuUretimGunuToplami = yesterdayData.aksam + todayData.sabah;
+        const dunkuUretimGunuToplami = dayBeforeYestData.aksam + yesterdayData.sabah;
+        const fark = bugunkuUretimGunuToplami - dunkuUretimGunuToplami;
         
-        const fark = gunlukToplamSut - dunkuToplamSut;
+        // --- Arayüzün Güncellenmesi ---
         const karsilastirmaEl = document.getElementById('dunKarsilastirma');
         if (fark > 0) {
             karsilastirmaEl.textContent = `(Düne göre +${fark.toFixed(2)} Lt)`;
@@ -1137,63 +1232,48 @@ async function updateDashboardStats() {
             karsilastirmaEl.style.color = '#7f8c8d';
         }
 
-        document.getElementById('dashToplamSut').textContent = gunlukToplamSut.toFixed(2);
-        document.getElementById('dashSabahSut').textContent = sabahToplam.toFixed(2);
-        document.getElementById('dashAksamSut').textContent = aksamToplam.toFixed(2);
+        document.getElementById('dashToplamSut').textContent = bugunkuUretimGunuToplami.toFixed(2);
+        document.getElementById('dashSabahSut').textContent = todayData.sabah.toFixed(2);
+        document.getElementById('dashAksamSut').textContent = yesterdayData.aksam.toFixed(2);
         document.getElementById('dashAktifMusteri').textContent = carilerSnapshot.size;
+        
+        document.getElementById('sabahSutTarih').textContent = `(${todayLabel})`;
+        document.getElementById('aksamSutTarih').textContent = `(${yesterdayLabel})`;
+        document.getElementById('toplamSutTarihAraligi').textContent = `${yesterdayLabel} Akşam - ${todayLabel} Sabah`;
+
+        document.getElementById('dashYemSayisi').textContent = yemlerSnapshot.size;
 
     } catch (e) { console.error("Dashboard günlük istatistikleri alınırken hata", e); }
     
-    // --- BAŞLANGIÇ: AYLIK SÜT VE DEĞER HESAPLAMASI ---
+    // --- 2. AYLIK SÜT VE DEĞER HESAPLAMASI ---
     try {
         const now = new Date();
         const year = now.getFullYear();
         const month = now.getMonth();
-        
         const startDateStr = new Date(year, month, 1).toISOString().split('T')[0];
         const endDateStr = new Date(year, month + 1, 0).toISOString().split('T')[0];
-
-        // HATA DÜZELTMESİ: Firestore kısıtlaması nedeniyle sorgu basitleştirildi.
-        // Eşitsizlik filtresi sadece 'tarih' alanı için kullanılıyor.
-        const thisMonthSutSnapshot = await db.collection('sut_alimlari')
-            .where("sahipId", "==", sahipId)
-            .where("tarih", ">=", startDateStr)
-            .where("tarih", "<=", endDateStr)
-            .get();
-
+        const thisMonthSutSnapshot = await db.collection('sut_alimlari').where("sahipId", "==", sahipId).where("tarih", ">=", startDateStr).where("tarih", "<=", endDateStr).get();
         let buAykiToplamSut = 0;
         let buAykiToplamDeger = 0;
-
-        // HATA DÜZELTMESİ: 'tank-aktarim' filtresi artık kod içinde yapılıyor.
         thisMonthSutSnapshot.forEach(doc => {
             const alim = doc.data();
-            // Sadece gerçek üretimleri (tank aktarımları hariç) hesaba kat.
             if (alim.islemKaynagi !== 'tank-aktarim') {
                 buAykiToplamSut += alim.toplam || 0;
                 buAykiToplamDeger += alim.toplamTutar || 0;
             }
         });
-
         const bugunAyinKaci = now.getDate();
         const gunlukOrtalama = (buAykiToplamSut > 0) ? (buAykiToplamSut / bugunAyinKaci) : 0;
-
-        document.getElementById('dashBuAykiToplamSut').textContent = buAykiToplamSut.toFixed(0);
+        document.getElementById('dashBuAykiToplamSut').textContent = Math.floor(buAykiToplamSut);
         document.getElementById('dashBuAykiSutDegeri').textContent = formatCurrency(buAykiToplamDeger);
         document.getElementById('aylikGunOrtalamasi').textContent = gunlukOrtalama.toFixed(1);
-
-    } catch(e) {
-        console.error("Dashboard aylık süt istatistikleri alınırken hata:", e);
-        document.getElementById('dashBuAykiToplamSut').textContent = 'Hata';
-        document.getElementById('dashBuAykiSutDegeri').textContent = 'Hata';
-    }
-    // --- BİTİŞ: AYLIK SÜT VE DEĞER HESAPLAMASI ---
+    } catch(e) { console.error("Dashboard aylık süt istatistikleri alınırken hata:", e); }
     
-    // --- Bakiye Toplamları ve İlerleme Çubukları ---
+    // --- 3. BAKİYE TOPLAMLARI ---
     try {
         const allCarilerSnapshot = await db.collection('cariler').where("sahipId", "==", sahipId).get();
         let toplamMusteriBorcu = 0;
         let toplamMusteriAlacagi = 0;
-        
         if(!allCarilerSnapshot.empty) {
             const bakiyePromises = allCarilerSnapshot.docs.map(doc => calculateCariBakiyeDetayli(doc.id));
             const tumBakiyeler = await Promise.all(bakiyePromises);
@@ -1205,17 +1285,13 @@ async function updateDashboardStats() {
                 }
             });
         }
-        
         document.getElementById('dashToplamAlacak').textContent = formatCurrency(toplamMusteriBorcu);
         document.getElementById('dashToplamBorc').textContent = formatCurrency(toplamMusteriAlacagi);
-
-       const toplamBakiye = toplamMusteriAlacagi - toplamMusteriBorcu;
+        const toplamBakiye = toplamMusteriAlacagi - toplamMusteriBorcu;
         const toplamBakiyeSpan = document.getElementById('dashToplamBakiye');
         const bakiyeUyariSpan = document.getElementById('bakiyeDurumUyarisi');
         const bakiyeKarti = document.getElementById('bakiyeDurumKarti');
-
         toplamBakiyeSpan.textContent = formatCurrency(toplamBakiye);
-        
         if (toplamBakiye < 0) {
             bakiyeUyariSpan.textContent = "Genel Bakiye Borçlu!";
             bakiyeUyariSpan.style.color = 'red';
@@ -1227,16 +1303,14 @@ async function updateDashboardStats() {
             toplamBakiyeSpan.style.color = 'green';
             bakiyeKarti.style.borderColor = '#ddd';
         }
-
         const total = toplamMusteriBorcu + toplamMusteriAlacagi;
         const alacakYuzde = total > 0 ? (toplamMusteriBorcu / total) * 100 : 0;
         const borcYuzde = total > 0 ? (toplamMusteriAlacagi / total) * 100 : 0;
         document.getElementById('alacakBar').style.width = alacakYuzde + '%';
         document.getElementById('borcBar').style.width = borcYuzde + '%';
-
     } catch (e) { console.error("Dashboard bakiye toplamları alınırken hata", e); }
     
-    // --- Dashboard açıldığında tank grafikleri ve diğer grafikler yüklenir ---
+    // --- 4. GRAFİKLER ---
     try {
         if (typeof renderGunlukSutGrafik === 'function') await renderGunlukSutGrafik();
         if (typeof renderDashboardTanks === 'function') await renderDashboardTanks();
@@ -1247,6 +1321,8 @@ async function updateDashboardStats() {
         if (typeof renderAylikSutunGrafik === 'function') await renderAylikSutunGrafik();
     } catch(e) { console.error("Kontrol paneli grafikleri oluşturulurken hata", e); }
 }
+
+
 
 
 async function handleCariKaydet(event) {
@@ -3397,14 +3473,17 @@ async function deleteYemAlisi(id) {
 async function handleSutAlimRaporuOlustur(options) {
     toggleReportButtons('sutRaporu', false);
     
+    // Değerler yeni tarih aralığı input'larından okunuyor
     const cariId = document.getElementById('sutRaporuTedarikciSecimi').value;
-    const ayYil = document.getElementById('sutRaporuAySecimi').value;
+    const startDateStr = document.getElementById('sutRaporuBaslangicTarihi').value;
+    const endDateStr = document.getElementById('sutRaporuBitisTarihi').value;
     const kategori = document.getElementById('sutRaporuKategoriSecimi').value;
     const raporBaslik = document.getElementById('sutRaporuBaslik');
     const sutRaporuDetayAlani = document.getElementById('sutRaporuDetayAlani');
 
-    if (!ayYil) {
-        alert("Rapor oluşturmak için lütfen bir ay seçin.");
+    // Tarihlerin seçilip seçilmediği kontrol ediliyor
+    if (!startDateStr || !endDateStr) {
+        alert("Rapor oluşturmak için lütfen başlangıç ve bitiş tarihlerini seçin.");
         return;
     }
     if (!options.tumu && !options.kategori && !cariId) {
@@ -3416,28 +3495,25 @@ async function handleSutAlimRaporuOlustur(options) {
     document.getElementById('sut-raporu-export-area').innerHTML = '';
 
     try {
-        const [year, month] = ayYil.split('-');
-        const startDateStr = `${year}-${month}-01`;
-        const endDate = new Date(year, parseInt(month, 10), 0);
-        const endDateStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
-
+        // Sorgu artık doğrudan başlangıç ve bitiş tarihlerini kullanıyor
         let baseQuery = db.collection('sut_alimlari')
             .where('sahipId', '==', sahipId)
             .where('tarih', '>=', startDateStr)
             .where('tarih', '<=', endDateStr);
 
         let tableHTML = '';
+        const raporTarihEtiketi = `${formatDate(startDateStr)} - ${formatDate(endDateStr)}`;
 
         // Bireysel Cari Raporu
         if (!options.tumu && !options.kategori) {
             const cariAdi = document.getElementById('sutRaporuTedarikciSecimi').options[document.getElementById('sutRaporuTedarikciSecimi').selectedIndex].text;
-            raporBaslik.textContent = `${cariAdi} - ${formatMonthYear(ayYil)} Aylık Süt Detayları`;
+            raporBaslik.textContent = `${cariAdi} - ${raporTarihEtiketi} Süt Detayları`;
             
             const finalQuery = baseQuery.where('cariId', '==', cariId).orderBy('tarih');
             const snapshot = await finalQuery.get();
 
             if (snapshot.empty) {
-                tableHTML = '<p>Seçili cari için bu ayda süt alım kaydı bulunamadı.</p>';
+                tableHTML = '<p>Seçili cari için bu tarih aralığında süt alım kaydı bulunamadı.</p>';
             } else {
                 tableHTML = `<table class="report-table"><thead><tr><th>Tarih</th><th>Akşam</th><th>Sabah</th><th>Toplam (Lt)</th><th>Fiyat</th><th>Tutar</th></tr></thead><tbody>`;
                 let toplamSabah = 0, toplamAksam = 0, toplamLitre = 0, toplamTutar = 0;
@@ -3450,13 +3526,13 @@ async function handleSutAlimRaporuOlustur(options) {
                     tableHTML += `<tr><td>${formatDate(alim.tarih)}</td><td>${(alim.aksam || 0).toFixed(2)}</td><td>${(alim.sabah || 0).toFixed(2)}</td><td>${(alim.toplam || 0).toFixed(2)}</td><td>${formatCurrency(alim.fiyat)}</td><td>${formatCurrency(alim.toplamTutar)}</td></tr>`;
                 });
                 const ortalamaFiyat = toplamLitre > 0 ? (toplamTutar / toplamLitre) : 0;
-                tableHTML += `</tbody><tfoot><tr class="report-totals-row"><td><strong>AYLIK TOPLAM</strong></td><td><strong>${toplamAksam.toFixed(2)}</strong></td><td><strong>${toplamSabah.toFixed(2)}</strong></td><td><strong>${toplamLitre.toFixed(2)}</strong></td><td><strong>${formatCurrency(ortalamaFiyat)}</strong></td><td><strong>${formatCurrency(toplamTutar)}</strong></td></tr></tfoot></table>`;
+                tableHTML += `</tbody><tfoot><tr class="report-totals-row"><td><strong>TOPLAM</strong></td><td><strong>${toplamAksam.toFixed(2)}</strong></td><td><strong>${toplamSabah.toFixed(2)}</strong></td><td><strong>${toplamLitre.toFixed(2)}</strong></td><td><strong>${formatCurrency(ortalamaFiyat)}</strong></td><td><strong>${formatCurrency(toplamTutar)}</strong></td></tr></tfoot></table>`;
             }
         } else { // Kategori veya Toplu Rapor
             if(options.kategori && kategori) {
-                raporBaslik.textContent = `${kategori} Kategorisi - ${formatMonthYear(ayYil)} Aylık Özet`;
+                raporBaslik.textContent = `${kategori} Kategorisi - ${raporTarihEtiketi} Özet Raporu`;
             } else {
-                raporBaslik.textContent = `Tüm Cariler - ${formatMonthYear(ayYil)} Aylık Özet`;
+                raporBaslik.textContent = `Tüm Cariler - ${raporTarihEtiketi} Özet Raporu`;
             }
 
             const allCarilerSnapshot = await db.collection('cariler').where('sahipId', '==', sahipId).get();
@@ -3490,27 +3566,20 @@ async function handleSutAlimRaporuOlustur(options) {
 
                 tableHTML = `<table class="report-table"><thead><tr><th>Cari Adı</th><th>Toplam Akşam</th><th>Toplam Sabah</th><th>Toplam Litre</th><th>Ortalama Fiyat</th><th>Toplam Tutar</th></tr></thead><tbody>`;
                 
-                // YENİ EKLENDİ: Genel Toplam için değişkenler tanımlandı
-                let genelToplamAksam = 0;
-                let genelToplamSabah = 0;
-                let genelToplamLitre = 0;
-                let genelToplamTutar = 0;
+                let genelToplamAksam = 0, genelToplamSabah = 0, genelToplamLitre = 0, genelToplamTutar = 0;
 
                 Object.values(raporData).sort((a,b) => a.cariAdi.localeCompare(b.cariAdi)).forEach(data => {
                     const ortalamaFiyat = data.toplamLitre > 0 ? (data.toplamTutar / data.toplamLitre) : 0;
                     tableHTML += `<tr><td>${data.cariAdi}</td><td>${data.toplamAksam.toFixed(2)}</td><td>${data.toplamSabah.toFixed(2)}</td><td><strong>${data.toplamLitre.toFixed(2)}</strong></td><td>${formatCurrency(ortalamaFiyat)}</td><td><strong>${formatCurrency(data.toplamTutar)}</strong></td></tr>`;
                 
-                    // YENİ EKLENDİ: Her bir cari verisi genel toplama eklendi
                     genelToplamAksam += data.toplamAksam;
                     genelToplamSabah += data.toplamSabah;
                     genelToplamLitre += data.toplamLitre;
                     genelToplamTutar += data.toplamTutar;
                 });
                 
-                // YENİ EKLENDİ: Genel Ortalama Fiyat hesaplandı
                 const genelOrtalamaFiyat = genelToplamLitre > 0 ? (genelToplamTutar / genelToplamLitre) : 0;
 
-                // YENİ EKLENDİ: Raporun sonuna Genel Toplam satırını ekleyen <tfoot> bölümü
                 tableHTML += `</tbody>
                               <tfoot>
                                   <tr class="report-totals-row">
@@ -3536,7 +3605,6 @@ async function handleSutAlimRaporuOlustur(options) {
         document.getElementById('sut-raporu-export-area').innerHTML = '';
     }
 }
-
 
 // --- BAŞLANGIÇ: AYLIK SÜT RAPORU İÇİN YENİ ÖZEL EXCEL FONKSİYONU ---
 async function exportSutRaporuToExcel() {
@@ -4046,7 +4114,7 @@ async function handleTankAktarim(event) {
                 if (!aktarimDoc.exists) throw "Düzenlenecek kayıt bulunamadı.";
 
                 const eskiMiktar = aktarimDoc.data().toplam;
-                const miktarFarki = eskiMiktar - aktarimMiktar; // Stoğa geri eklenecek/düşülecek fark
+                const miktarFarki = eskiMiktar - aktarimMiktar; 
 
                 const guncelVeri = {
                     tarih: tarih,
@@ -4098,6 +4166,7 @@ async function handleTankAktarim(event) {
                     toplamTutar: aktarimMiktar * birimFiyat,
                     aciklama: `${tankDoc.data().ad} tankından aktarıldı.`,
                     islemKaynagi: 'tank-aktarim',
+                    kayitZamani: new Date(), // <-- YENİ EKLENDİ: İşlem anının saati kaydediliyor.
                     sahipId: sahipId
                 });
 
@@ -4125,8 +4194,6 @@ async function renderAktarimGecmisi() {
     listBody.innerHTML = `<tr><td colspan="7">Yükleniyor...</td></tr>`;
 
     try {
-        // İYİLEŞTİRME: Tüm cari isimlerini önceden çekip bir haritada saklayarak
-        // cari adı görüntülemesini daha güvenilir hale getiriyoruz.
         const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', sahipId).get();
         const cariMap = new Map();
         carilerSnapshot.forEach(doc => cariMap.set(doc.id, doc.data().adiSoyadi));
@@ -4147,11 +4214,21 @@ async function renderAktarimGecmisi() {
         snapshot.forEach(doc => {
             const alim = doc.data();
             const kaynakTank = alim.aciklama ? alim.aciklama.split(' ')[0] : 'Bilinmiyor';
-            // Cari adını haritadan al, eğer belgede yoksa bile doğru görünsün.
             const hedefCariAdi = cariMap.get(alim.cariId) || alim.cariAdi || 'Bilinmeyen Cari';
 
+            // YENİ: Saati alıp formatlıyoruz.
+            let saat = '';
+            // Firestore'dan gelen tarih objesini kontrol edip saate çeviriyoruz.
+            if (alim.kayitZamani && typeof alim.kayitZamani.toDate === 'function') {
+                saat = alim.kayitZamani.toDate().toLocaleTimeString('tr-TR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+
+            // YENİ: HTML'e saat bilgisi ekleniyor.
             rows += `<tr>
-                <td>${formatDate(alim.tarih)}</td>
+                <td>${formatDate(alim.tarih)} <br> <small style="color: #555;">${saat}</small></td>
                 <td>${kaynakTank}</td>
                 <td>${hedefCariAdi}</td>
                 <td>${alim.toplam.toFixed(2)}</td>
@@ -4170,7 +4247,6 @@ async function renderAktarimGecmisi() {
         listBody.innerHTML = `<tr><td colspan="7" style="color:red; text-align:center;">Geçmiş yüklenemedi. Veritabanı dizini gerekebilir.</td></tr>`;
     }
 }
-
 
 // YENİ FONKSİYON: Aktarım düzenleme formunu doldurur.
 async function editAktarim(id) {
