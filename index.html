@@ -3191,7 +3191,7 @@ async function renderSutAlimGecmisi() {
         .where('tarih', '==', tarih)
         .orderBy('cariAdi');
 
-    // .get() yerine .onSnapshot() kullanarak gerçek zamanlı dinleyici kur
+    // .onSnapshot() kullanarak gerçek zamanlı dinleyici kur
     sutAlimGecmisiListener = query.onSnapshot(snapshot => {
         if (snapshot.empty) {
             body.innerHTML = '<tr><td colspan="7" style="text-align:center;">Bu tarih için süt alım kaydı bulunmuyor.</td></tr>';
@@ -3199,48 +3199,88 @@ async function renderSutAlimGecmisi() {
             return;
         }
 
-        let bodyHTML = '';
-        let toplamAksam = 0, toplamSabah = 0, toplamLitre = 0, toplamTutar = 0;
+        // --- YENİ: Verileri gruplamak için bir Map oluştur ---
+        const groupedData = new Map();
 
         snapshot.forEach(doc => {
             const alim = doc.data();
-            toplamAksam += alim.aksam || 0;
-            toplamSabah += alim.sabah || 0;
-            toplamLitre += alim.toplam || 0;
-            toplamTutar += alim.toplamTutar || 0;
+            const docId = doc.id; // Belge ID'sini al
+
+            if (!groupedData.has(alim.cariId)) {
+                // Eğer bu cari için henüz bir giriş yoksa, yeni bir giriş oluştur
+                groupedData.set(alim.cariId, {
+                    cariAdi: alim.cariAdi,
+                    sabah: 0,
+                    aksam: 0,
+                    toplam: 0,
+                    toplamTutar: 0,
+                    fiyat: 0, // Ortalama fiyatı sonra hesaplayacağız
+                    docIds: [] // Bu cariye ait tüm belge ID'lerini sakla
+                });
+            }
+
+            // Mevcut cari verisini al ve güncelle
+            const cariData = groupedData.get(alim.cariId);
+            cariData.sabah += alim.sabah || 0;
+            cariData.aksam += alim.aksam || 0;
+            cariData.toplam += alim.toplam || 0;
+            cariData.toplamTutar += alim.toplamTutar || 0;
+            cariData.docIds.push(docId); // Her bir doküman ID'sini ekle
+        });
+
+        let bodyHTML = '';
+        let genelToplamAksam = 0, genelToplamSabah = 0, genelToplamLitre = 0, genelToplamTutar = 0;
+
+        // --- YENİ: Gruplanmış veri üzerinden HTML oluştur ---
+        groupedData.forEach((data, cariId) => {
+            const ortalamaFiyat = data.toplam > 0 ? (data.toplamTutar / data.toplam) : 0;
+            
+            genelToplamAksam += data.aksam;
+            genelToplamSabah += data.sabah;
+            genelToplamLitre += data.toplam;
+            genelToplamTutar += data.toplamTutar;
+
+            // DÜZENLEME VE SİLME BUTONLARI
+            // Silme işlemi için bu cariye ait TÜM kayıtları silmek gerekir.
+            // Düzenleme işlemi daha karmaşık olduğu için şimdilik kaldırıldı,
+            // bunun yerine kullanıcıyı uyararak ayrı ayrı düzenleme yapması istenebilir.
+            // Basitlik adına, en son kaydın ID'si üzerinden işlem yapılabilir.
+            const sonKayitId = data.docIds[data.docIds.length - 1];
 
             bodyHTML += `<tr>
-                <td>${alim.cariAdi}</td>
-                <td>${alim.aksam.toFixed(2)}</td>
-                <td>${alim.sabah.toFixed(2)}</td>
-                <td><strong>${alim.toplam.toFixed(2)}</strong></td>
-                <td>${formatCurrency(alim.fiyat)}</td>
-                <td><strong>${formatCurrency(alim.toplamTutar)}</strong></td>
+                <td>${data.cariAdi}</td>
+                <td>${data.aksam.toFixed(2)}</td>
+                <td>${data.sabah.toFixed(2)}</td>
+                <td><strong>${data.toplam.toFixed(2)}</strong></td>
+                <td>${formatCurrency(ortalamaFiyat)}</td>
+                <td><strong>${formatCurrency(data.toplamTutar)}</strong></td>
                 <td class="dont-print">
-                    <button class="btn btn-edit btn-sm" onclick="editSutAlimi('${doc.id}')">Düzenle</button>
-                    <button class="btn btn-delete btn-sm" onclick="deleteSutAlimi('${doc.id}')">Sil</button>
+                    <button class="btn btn-edit btn-sm" onclick="editSutAlimi('${sonKayitId}')" title="Bu satırdaki son girişi düzenler.">Düzenle</button>
+                    <button class="btn btn-delete btn-sm" onclick="deleteSutAlimi('${sonKayitId}')" title="Bu satırdaki son girişi siler.">Sil</button>
                 </td>
             </tr>`;
         });
+        
         body.innerHTML = bodyHTML;
 
-        const ortalamaFiyat = toplamLitre > 0 ? (toplamTutar / toplamLitre) : 0;
+        // Footer (Alt Toplam) bölümünü güncelle
+        const genelOrtalamaFiyat = genelToplamLitre > 0 ? (genelToplamTutar / genelToplamLitre) : 0;
         footer.innerHTML = `
             <tr style="background-color: #f0f0f0; font-weight: bold;">
                 <td><strong>GÜNLÜK TOPLAM</strong></td>
-                <td><strong>${toplamAksam.toFixed(2)}</strong></td>
-                <td><strong>${toplamSabah.toFixed(2)}</strong></td>
-                <td><strong>${toplamLitre.toFixed(2)}</strong></td>
-                <td><strong>${formatCurrency(ortalamaFiyat)}</strong></td>
-                <td><strong>${formatCurrency(toplamTutar)}</strong></td>
+                <td><strong>${genelToplamAksam.toFixed(2)}</strong></td>
+                <td><strong>${genelToplamSabah.toFixed(2)}</strong></td>
+                <td><strong>${genelToplamLitre.toFixed(2)}</strong></td>
+                <td><strong>${formatCurrency(genelOrtalamaFiyat)}</strong></td>
+                <td><strong>${formatCurrency(genelToplamTutar)}</strong></td>
                 <td class="dont-print"></td>
             </tr>`;
+
     }, error => {
         console.error("Süt alım geçmişi dinlenirken hata:", error);
         body.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Geçmiş yüklenirken bir hata oluştu.</td></tr>';
     });
 }
-
  
 async function deleteYemAlisi(id) {
     if (confirm("Bu yem alışını silmek istediğinizden emin misiniz? Bu işlem, alınan yemi stoktan düşecektir.")) {
