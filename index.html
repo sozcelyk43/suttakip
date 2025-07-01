@@ -251,10 +251,16 @@
                 <div id="cariRotaSirasiUyari" style="display: none;"></div>
 
                 <div class="list-header-with-filter">
-                    <h3>Cari Listesi (<span id="raporTarihEtiketi">Güncel Durum</span>)</h3>
-                    <div class="search-container"><input type="text" id="cariSearchInput" placeholder="Cari Ara..." aria-label="Cari Arama Kutusu"></div>
-                    <select id="cariKategoriFiltre"><option value="">Tüm Kategoriler</option></select>
-                </div>
+    <h3>Cari Listesi (<span id="raporTarihEtiketi">Güncel Durum</span>)</h3>
+    <div class="search-container"><input type="text" id="cariSearchInput" placeholder="Cari Ara..." aria-label="Cari Arama Kutusu"></div>
+    <select id="cariKategoriFiltre"><option value="">Tüm Kategoriler</option></select>
+    
+    <select id="cariDurumFiltre">
+        <option value="">Tüm Durumlar</option>
+        <option value="aktif">Aktif</option>
+        <option value="pasif">Pasif</option>
+    </select>
+</div>
 
                 <table>
                     <thead>
@@ -648,31 +654,33 @@
         <div class="form-section">
             <h3>Tanktan Süt Aktarımı</h3>
             <form id="tankAktarimForm">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="aktarimKaynakTank">Kaynak Tank:</label>
-                        <select id="aktarimKaynakTank" required></select>
-                        <small>Mevcut Miktar: <strong id="kaynakTankMiktar">0.00 Lt</strong></small>
-                    </div>
-                    <div class="form-group">
-                        <label for="aktarimHedefCari">Hedef Cari (Sütün Satıldığı Firma):</label>
-                        <select id="aktarimHedefCari" required></select>
-                    </div>
-                    <div class="form-group">
-                        <label for="aktarimMiktar">Aktarılacak Miktar (Litre):</label>
-                        <input type="number" id="aktarimMiktar" step="0.1" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="aktarimFiyat">Birim Fiyat (TL/Litre):</label>
-                        <input type="number" id="aktarimFiyat" step="0.01" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="aktarimTarih">İşlem Tarihi:</label>
-                        <input type="date" id="aktarimTarih" required>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary">Aktarımı Tamamla</button>
-            </form>
+    <input type="hidden" id="aktarimEditId">
+    <div class="form-grid">
+        <div class="form-group">
+            <label for="aktarimKaynakTank">Kaynak Tank:</label>
+            <select id="aktarimKaynakTank" required></select>
+            <small>Mevcut Miktar: <strong id="kaynakTankMiktar">0.00 Lt</strong></small>
+        </div>
+        <div class="form-group">
+            <label for="aktarimHedefCari">Hedef Cari (Sütün Satıldığı Firma):</label>
+            <select id="aktarimHedefCari" required></select>
+        </div>
+        <div class="form-group">
+            <label for="aktarimMiktar">Aktarılacak Miktar (Litre):</label>
+            <input type="number" id="aktarimMiktar" step="0.1" required>
+        </div>
+        <div class="form-group">
+            <label for="aktarimFiyat">Birim Fiyat (TL/Litre):</label>
+            <input type="number" id="aktarimFiyat" step="0.01" required>
+        </div>
+        <div class="form-group">
+            <label for="aktarimTarih">İşlem Tarihi:</label>
+            <input type="date" id="aktarimTarih" required>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary" id="aktarimKaydetBtn">Aktarımı Tamamla</button>
+    <button type="button" class="btn" id="aktarimFormTemizleBtn" style="display:none;" onclick="resetAktarimForm()">Yeni Aktarım</button>
+</form>
         </div>
 
         <div class="list-section" style="margin-top: 40px;">
@@ -937,6 +945,8 @@ auth.onAuthStateChanged(async (user) => {
         document.getElementById('karneRaporuOlusturBtn')?.addEventListener('click', handleDinamikSutRaporu);
 
         cariListesiYazdirBtn?.addEventListener('click', () => handleYazdir('cari-yonetimi'));
+document.getElementById('cariDurumFiltre')?.addEventListener('change', renderCariListesi);
+
         document.getElementById('raporYazdirBtn')?.addEventListener('click', () => handleYazdir('hesap-ozeti'));
         document.getElementById('sutRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('sut-alim-raporu'));
         document.getElementById('yemRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('aylik-yem-raporu'));
@@ -1134,6 +1144,50 @@ async function updateDashboardStats() {
 
     } catch (e) { console.error("Dashboard günlük istatistikleri alınırken hata", e); }
     
+    // --- BAŞLANGIÇ: AYLIK SÜT VE DEĞER HESAPLAMASI ---
+    try {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        
+        const startDateStr = new Date(year, month, 1).toISOString().split('T')[0];
+        const endDateStr = new Date(year, month + 1, 0).toISOString().split('T')[0];
+
+        // HATA DÜZELTMESİ: Firestore kısıtlaması nedeniyle sorgu basitleştirildi.
+        // Eşitsizlik filtresi sadece 'tarih' alanı için kullanılıyor.
+        const thisMonthSutSnapshot = await db.collection('sut_alimlari')
+            .where("sahipId", "==", sahipId)
+            .where("tarih", ">=", startDateStr)
+            .where("tarih", "<=", endDateStr)
+            .get();
+
+        let buAykiToplamSut = 0;
+        let buAykiToplamDeger = 0;
+
+        // HATA DÜZELTMESİ: 'tank-aktarim' filtresi artık kod içinde yapılıyor.
+        thisMonthSutSnapshot.forEach(doc => {
+            const alim = doc.data();
+            // Sadece gerçek üretimleri (tank aktarımları hariç) hesaba kat.
+            if (alim.islemKaynagi !== 'tank-aktarim') {
+                buAykiToplamSut += alim.toplam || 0;
+                buAykiToplamDeger += alim.toplamTutar || 0;
+            }
+        });
+
+        const bugunAyinKaci = now.getDate();
+        const gunlukOrtalama = (buAykiToplamSut > 0) ? (buAykiToplamSut / bugunAyinKaci) : 0;
+
+        document.getElementById('dashBuAykiToplamSut').textContent = buAykiToplamSut.toFixed(0);
+        document.getElementById('dashBuAykiSutDegeri').textContent = formatCurrency(buAykiToplamDeger);
+        document.getElementById('aylikGunOrtalamasi').textContent = gunlukOrtalama.toFixed(1);
+
+    } catch(e) {
+        console.error("Dashboard aylık süt istatistikleri alınırken hata:", e);
+        document.getElementById('dashBuAykiToplamSut').textContent = 'Hata';
+        document.getElementById('dashBuAykiSutDegeri').textContent = 'Hata';
+    }
+    // --- BİTİŞ: AYLIK SÜT VE DEĞER HESAPLAMASI ---
+    
     // --- Bakiye Toplamları ve İlerleme Çubukları ---
     try {
         const allCarilerSnapshot = await db.collection('cariler').where("sahipId", "==", sahipId).get();
@@ -1182,10 +1236,10 @@ async function updateDashboardStats() {
 
     } catch (e) { console.error("Dashboard bakiye toplamları alınırken hata", e); }
     
-    // --- GÜNCELLEME: Dashboard açıldığında tank grafikleri ve diğer grafikler yüklenir ---
+    // --- Dashboard açıldığında tank grafikleri ve diğer grafikler yüklenir ---
     try {
         if (typeof renderGunlukSutGrafik === 'function') await renderGunlukSutGrafik();
-        if (typeof renderDashboardTanks === 'function') await renderDashboardTanks(); // TANK GRAFİĞİ ÇAĞIRILIYOR
+        if (typeof renderDashboardTanks === 'function') await renderDashboardTanks();
         const aylikChartInput = document.getElementById('aylikChartAySecimi');
         if (aylikChartInput && !aylikChartInput.value) {
             aylikChartInput.value = getMonthYearForInput();
@@ -1193,7 +1247,6 @@ async function updateDashboardStats() {
         if (typeof renderAylikSutunGrafik === 'function') await renderAylikSutunGrafik();
     } catch(e) { console.error("Kontrol paneli grafikleri oluşturulurken hata", e); }
 }
-
 
 
 async function handleCariKaydet(event) {
@@ -1349,6 +1402,9 @@ async function renderCariListesi() {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
 
+    // YENİ: Durum filtresinin değeri okunuyor.
+    const durumFiltresi = document.getElementById('cariDurumFiltre').value;
+
     const tarihFiltresi = document.getElementById('cariTarihFiltresi').value;
     const raporTarihEtiketi = document.getElementById('raporTarihEtiketi');
     raporTarihEtiketi.textContent = tarihFiltresi ? `${formatDate(tarihFiltresi)} Tarihi İtibarıyla` : 'Güncel Durum';
@@ -1357,6 +1413,12 @@ async function renderCariListesi() {
     if (kategori) {
         query = query.where("kategori", "==", kategori);
     }
+    
+    // YENİ: Eğer bir durum seçilmişse, sorguya durum filtresi ekleniyor.
+    if (durumFiltresi) {
+        query = query.where("durum", "==", durumFiltresi);
+    }
+
     query = query.orderBy('rotaSirasi').orderBy('adiSoyadi');
 
     try {
@@ -1445,6 +1507,7 @@ async function renderCariListesi() {
         cariListesiBody.innerHTML = '<tr><td colspan="10" style="color:red; text-align:center;">Liste yüklenirken bir hata oluştu. Firestore index\'i gerekebilir.</td></tr>';
     }
 }
+
 
 function exportTableToExcel(containerId, fileName = 'rapor') {
     const container = document.getElementById(containerId);
@@ -2687,7 +2750,6 @@ async function calculateCariBakiyeDetayli(cariId, endDate = null) {
     if (!currentUser) return { alacak: 0, borc: 0, bakiye: 0 };
 
     try {
-        // --- GÜNCELLEME: Tüm sorgulara tarih filtresi eklendi ---
         const createQuery = (collectionName) => {
             let query = db.collection(collectionName).where('sahipId', '==', sahipId).where('cariId', '==', cariId);
             if (endDate) {
@@ -2705,7 +2767,19 @@ async function calculateCariBakiyeDetayli(cariId, endDate = null) {
             sutQuery, yemSatisQuery, odemeQuery, yemAlimQuery
         ]);
 
-        sutSnapshot.forEach(doc => alacak += doc.data().toplamTutar);
+        // DÜZELTME: Süt işlemleri artık kaynağına göre Borç veya Alacak olarak ayrılıyor.
+        sutSnapshot.forEach(doc => {
+            const alim = doc.data();
+            // Eğer işlem 'tank-aktarim' ise bu bir SATIŞTIR. Cari BORÇLANIR.
+            if (alim.islemKaynagi === 'tank-aktarim') {
+                borc += alim.toplamTutar || 0;
+            } 
+            // Değilse, bu bir ALIŞTIR. Cari ALACAKLI olur.
+            else {
+                alacak += alim.toplamTutar || 0;
+            }
+        });
+
         yemAlimSnapshot.forEach(doc => alacak += doc.data().toplamTutar);
         yemSatisSnapshot.forEach(doc => borc += doc.data().toplamTutar);
         
@@ -2714,7 +2788,9 @@ async function calculateCariBakiyeDetayli(cariId, endDate = null) {
             if (data.islemTuru === 'odeme' || data.islemTuru === 'alacak') alacak += data.tutar;
             else if (data.islemTuru === 'tahsilat' || data.islemTuru === 'borc') borc += data.tutar;
         });
+        
         return { alacak, borc, bakiye: alacak - borc };
+
     } catch (error) {
         console.error(`Bakiye hesaplanırken hata (Cari ID: ${cariId}):`, error);
         return { alacak: 0, borc: 0, bakiye: 0 };
@@ -3193,45 +3269,46 @@ async function renderSutAlimGecmisi() {
 
     // .onSnapshot() kullanarak gerçek zamanlı dinleyici kur
     sutAlimGecmisiListener = query.onSnapshot(snapshot => {
-        if (snapshot.empty) {
-            body.innerHTML = '<tr><td colspan="7" style="text-align:center;">Bu tarih için süt alım kaydı bulunmuyor.</td></tr>';
+    
+        // DÜZELTME: Gelen veriler, tank aktarımlarını hariç tutacak şekilde burada filtreleniyor.
+        const ureticiAlimlari = snapshot.docs.filter(doc => doc.data().islemKaynagi !== 'tank-aktarim');
+
+        if (ureticiAlimlari.length === 0) {
+            body.innerHTML = '<tr><td colspan="7" style="text-align:center;">Bu tarih için üretici süt alım kaydı bulunmuyor.</td></tr>';
             footer.innerHTML = ''; // Kayıt yoksa alt toplamı da temizle
             return;
         }
 
-        // --- YENİ: Verileri gruplamak için bir Map oluştur ---
         const groupedData = new Map();
 
-        snapshot.forEach(doc => {
+        // Filtrelenmiş veri (`ureticiAlimlari`) üzerinden işlemler yapılıyor.
+        ureticiAlimlari.forEach(doc => {
             const alim = doc.data();
-            const docId = doc.id; // Belge ID'sini al
+            const docId = doc.id; 
 
             if (!groupedData.has(alim.cariId)) {
-                // Eğer bu cari için henüz bir giriş yoksa, yeni bir giriş oluştur
                 groupedData.set(alim.cariId, {
                     cariAdi: alim.cariAdi,
                     sabah: 0,
                     aksam: 0,
                     toplam: 0,
                     toplamTutar: 0,
-                    fiyat: 0, // Ortalama fiyatı sonra hesaplayacağız
-                    docIds: [] // Bu cariye ait tüm belge ID'lerini sakla
+                    fiyat: 0,
+                    docIds: []
                 });
             }
-
-            // Mevcut cari verisini al ve güncelle
+            
             const cariData = groupedData.get(alim.cariId);
             cariData.sabah += alim.sabah || 0;
             cariData.aksam += alim.aksam || 0;
             cariData.toplam += alim.toplam || 0;
             cariData.toplamTutar += alim.toplamTutar || 0;
-            cariData.docIds.push(docId); // Her bir doküman ID'sini ekle
+            cariData.docIds.push(docId);
         });
 
         let bodyHTML = '';
         let genelToplamAksam = 0, genelToplamSabah = 0, genelToplamLitre = 0, genelToplamTutar = 0;
 
-        // --- YENİ: Gruplanmış veri üzerinden HTML oluştur ---
         groupedData.forEach((data, cariId) => {
             const ortalamaFiyat = data.toplam > 0 ? (data.toplamTutar / data.toplam) : 0;
             
@@ -3240,11 +3317,6 @@ async function renderSutAlimGecmisi() {
             genelToplamLitre += data.toplam;
             genelToplamTutar += data.toplamTutar;
 
-            // DÜZENLEME VE SİLME BUTONLARI
-            // Silme işlemi için bu cariye ait TÜM kayıtları silmek gerekir.
-            // Düzenleme işlemi daha karmaşık olduğu için şimdilik kaldırıldı,
-            // bunun yerine kullanıcıyı uyararak ayrı ayrı düzenleme yapması istenebilir.
-            // Basitlik adına, en son kaydın ID'si üzerinden işlem yapılabilir.
             const sonKayitId = data.docIds[data.docIds.length - 1];
 
             bodyHTML += `<tr>
@@ -3263,7 +3335,6 @@ async function renderSutAlimGecmisi() {
         
         body.innerHTML = bodyHTML;
 
-        // Footer (Alt Toplam) bölümünü güncelle
         const genelOrtalamaFiyat = genelToplamLitre > 0 ? (genelToplamTutar / genelToplamLitre) : 0;
         footer.innerHTML = `
             <tr style="background-color: #f0f0f0; font-weight: bold;">
@@ -3281,6 +3352,7 @@ async function renderSutAlimGecmisi() {
         body.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Geçmiş yüklenirken bir hata oluştu.</td></tr>';
     });
 }
+
  
 async function deleteYemAlisi(id) {
     if (confirm("Bu yem alışını silmek istediğinizden emin misiniz? Bu işlem, alınan yemi stoktan düşecektir.")) {
@@ -3950,6 +4022,8 @@ async function populateTankSelect(selectElement) {
 async function handleTankAktarim(event) {
     event.preventDefault();
     const form = document.getElementById('tankAktarimForm');
+    const editId = document.getElementById('aktarimEditId').value;
+
     const kaynakTankId = document.getElementById('aktarimKaynakTank').value;
     const hedefCariId = document.getElementById('aktarimHedefCari').value;
     const aktarimMiktar = parseFloat(document.getElementById('aktarimMiktar').value);
@@ -3963,52 +4037,87 @@ async function handleTankAktarim(event) {
 
     const tankRef = db.collection('tanklar').doc(kaynakTankId);
     
-    try {
-        await db.runTransaction(async (transaction) => {
-            const tankDoc = await transaction.get(tankRef);
-            if (!tankDoc.exists) throw "Kaynak tank bulunamadı!";
+    // Düzenleme Modu
+    if (editId) {
+        const aktarimRef = db.collection('sut_alimlari').doc(editId);
+        try {
+            await db.runTransaction(async (transaction) => {
+                const aktarimDoc = await transaction.get(aktarimRef);
+                if (!aktarimDoc.exists) throw "Düzenlenecek kayıt bulunamadı.";
 
-            const mevcutLitre = tankDoc.data().mevcutLitre;
-            if (mevcutLitre < aktarimMiktar) {
-                throw `Yetersiz süt! Tankta sadece ${mevcutLitre.toFixed(2)} Lt süt var.`;
-            }
+                const eskiMiktar = aktarimDoc.data().toplam;
+                const miktarFarki = eskiMiktar - aktarimMiktar; // Stoğa geri eklenecek/düşülecek fark
 
-            const sutAlimRef = db.collection('sut_alimlari').doc();
-            const hedefCariAdi = document.getElementById('aktarimHedefCari').options[document.getElementById('aktarimHedefCari').selectedIndex].text;
-            
-            // GÜNCELLENDİ: Kaydın doğru etiketlendiğinden ve sahipId'nin doğru olduğundan emin oluyoruz.
-            transaction.set(sutAlimRef, {
-                tarih: tarih,
-                cariId: hedefCariId,
-                cariAdi: hedefCariAdi,
-                sabah: 0,
-                aksam: 0,
-                toplam: aktarimMiktar,
-                fiyat: birimFiyat,
-                toplamTutar: aktarimMiktar * birimFiyat,
-                aciklama: `${tankDoc.data().ad} tankından aktarıldı.`,
-                islemKaynagi: 'tank-aktarim', // Sorgulama için anahtar
-                sahipId: sahipId // Doğru sahipId kullanılıyor
+                const guncelVeri = {
+                    tarih: tarih,
+                    cariId: hedefCariId,
+                    cariAdi: document.getElementById('aktarimHedefCari').options[document.getElementById('aktarimHedefCari').selectedIndex].text,
+                    toplam: aktarimMiktar,
+                    fiyat: birimFiyat,
+                    toplamTutar: aktarimMiktar * birimFiyat,
+                    aciklama: `${document.getElementById('aktarimKaynakTank').options[document.getElementById('aktarimKaynakTank').selectedIndex].text} tankından aktarıldı.`
+                };
+
+                transaction.update(tankRef, { mevcutLitre: firebase.firestore.FieldValue.increment(miktarFarki) });
+                transaction.update(aktarimRef, guncelVeri);
+            });
+            alert("Aktarım başarıyla güncellendi!");
+            resetAktarimForm();
+            renderAktarimGecmisi();
+            renderDashboardTanks();
+
+        } catch (error) {
+            console.error("Aktarım güncellenirken hata:", error);
+            alert("Güncelleme sırasında bir hata oluştu: " + error);
+        }
+
+    } 
+    // Yeni Kayıt Modu
+    else {
+        try {
+            await db.runTransaction(async (transaction) => {
+                const tankDoc = await transaction.get(tankRef);
+                if (!tankDoc.exists) throw "Kaynak tank bulunamadı!";
+
+                const mevcutLitre = tankDoc.data().mevcutLitre;
+                if (mevcutLitre < aktarimMiktar) {
+                    throw `Yetersiz süt! Tankta sadece ${mevcutLitre.toFixed(2)} Lt süt var.`;
+                }
+
+                const sutAlimRef = db.collection('sut_alimlari').doc();
+                const hedefCariAdi = document.getElementById('aktarimHedefCari').options[document.getElementById('aktarimHedefCari').selectedIndex].text;
+                
+                transaction.set(sutAlimRef, {
+                    tarih: tarih,
+                    cariId: hedefCariId,
+                    cariAdi: hedefCariAdi,
+                    sabah: 0,
+                    aksam: 0,
+                    toplam: aktarimMiktar,
+                    fiyat: birimFiyat,
+                    toplamTutar: aktarimMiktar * birimFiyat,
+                    aciklama: `${tankDoc.data().ad} tankından aktarıldı.`,
+                    islemKaynagi: 'tank-aktarim',
+                    sahipId: sahipId
+                });
+
+                transaction.update(tankRef, {
+                    mevcutLitre: firebase.firestore.FieldValue.increment(-aktarimMiktar)
+                });
             });
 
-            transaction.update(tankRef, {
-                mevcutLitre: firebase.firestore.FieldValue.increment(-aktarimMiktar)
-            });
-        });
+            alert("Aktarım başarıyla tamamlandı!");
+            resetAktarimForm();
+            renderDashboardTanks();
+            renderAktarimGecmisi();
 
-        alert("Aktarım başarıyla tamamlandı!");
-        form.reset();
-        document.getElementById('kaynakTankMiktar').textContent = '0.00 Lt';
-        renderDashboardTanks(); // Kontrol panelini yenile
-        renderAktarimGecmisi(); // <-- GÜNCELLENDİ: Geçmiş listesini anında yenile
-
-    } catch (error) {
-        console.error("Tank aktarımı sırasında hata:", error);
-        alert("Aktarım sırasında bir hata oluştu: " + error);
+        } catch (error) {
+            console.error("Tank aktarımı sırasında hata:", error);
+            alert("Aktarım sırasında bir hata oluştu: " + error);
+        }
     }
 }
 
-// --- BAŞLANGIÇ: YENİ FONKSİYONLAR ---
 
 async function renderAktarimGecmisi() {
     const listBody = document.getElementById('aktarimGecmisiBody');
@@ -4016,9 +4125,15 @@ async function renderAktarimGecmisi() {
     listBody.innerHTML = `<tr><td colspan="7">Yükleniyor...</td></tr>`;
 
     try {
+        // İYİLEŞTİRME: Tüm cari isimlerini önceden çekip bir haritada saklayarak
+        // cari adı görüntülemesini daha güvenilir hale getiriyoruz.
+        const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', sahipId).get();
+        const cariMap = new Map();
+        carilerSnapshot.forEach(doc => cariMap.set(doc.id, doc.data().adiSoyadi));
+
         const snapshot = await db.collection('sut_alimlari')
             .where('sahipId', '==', sahipId)
-            .where('islemKaynagi', '==', 'tank-aktarim') // Yeni anahtar ile güvenilir sorgulama
+            .where('islemKaynagi', '==', 'tank-aktarim')
             .orderBy('tarih', 'desc')
             .limit(20)
             .get();
@@ -4032,14 +4147,18 @@ async function renderAktarimGecmisi() {
         snapshot.forEach(doc => {
             const alim = doc.data();
             const kaynakTank = alim.aciklama ? alim.aciklama.split(' ')[0] : 'Bilinmiyor';
+            // Cari adını haritadan al, eğer belgede yoksa bile doğru görünsün.
+            const hedefCariAdi = cariMap.get(alim.cariId) || alim.cariAdi || 'Bilinmeyen Cari';
+
             rows += `<tr>
                 <td>${formatDate(alim.tarih)}</td>
                 <td>${kaynakTank}</td>
-                <td>${alim.cariAdi}</td>
+                <td>${hedefCariAdi}</td>
                 <td>${alim.toplam.toFixed(2)}</td>
                 <td>${formatCurrency(alim.fiyat)}</td>
                 <td>${formatCurrency(alim.toplamTutar)}</td>
                 <td class="dont-print">
+                    <button class="btn btn-edit btn-sm" onclick="editAktarim('${doc.id}')">Düzenle</button>
                     <button class="btn btn-delete btn-sm" onclick="deleteAktarim('${doc.id}', '${kaynakTank}', ${alim.toplam})">Sil</button>
                 </td>
             </tr>`;
@@ -4051,6 +4170,55 @@ async function renderAktarimGecmisi() {
         listBody.innerHTML = `<tr><td colspan="7" style="color:red; text-align:center;">Geçmiş yüklenemedi. Veritabanı dizini gerekebilir.</td></tr>`;
     }
 }
+
+
+// YENİ FONKSİYON: Aktarım düzenleme formunu doldurur.
+async function editAktarim(id) {
+    try {
+        const doc = await db.collection('sut_alimlari').doc(id).get();
+        if (!doc.exists) {
+            alert("Düzenlenecek aktarım kaydı bulunamadı.");
+            return;
+        }
+        const alim = doc.data();
+
+        // Formu doldur
+        document.getElementById('aktarimEditId').value = id;
+        document.getElementById('aktarimTarih').value = alim.tarih;
+        document.getElementById('aktarimHedefCari').value = alim.cariId;
+        document.getElementById('aktarimMiktar').value = alim.toplam;
+        document.getElementById('aktarimFiyat').value = alim.fiyat;
+        
+        // Kaynak tankı seçili hale getir (bu kısım biraz dolaylı)
+        const kaynakTankAdi = alim.aciklama ? alim.aciklama.split(' ')[0] : '';
+        const tankSelect = document.getElementById('aktarimKaynakTank');
+        Array.from(tankSelect.options).forEach(option => {
+            if (option.text === kaynakTankAdi) {
+                option.selected = true;
+                tankSelect.dispatchEvent(new Event('change')); // Miktarı güncellemek için
+            }
+        });
+        
+        // Butonları düzenleme moduna geçir
+        document.getElementById('aktarimKaydetBtn').textContent = 'Güncelle';
+        document.getElementById('aktarimFormTemizleBtn').style.display = 'inline-block';
+        document.getElementById('tankAktarimForm').scrollIntoView({ behavior: 'smooth' });
+
+    } catch (error) {
+        console.error("Aktarım düzenleme için getirilirken hata:", error);
+        alert("Kayıt getirilirken bir hata oluştu.");
+    }
+}
+
+// YENİ FONKSİYON: Aktarım formunu sıfırlar ve düzenleme modundan çıkar.
+function resetAktarimForm() {
+    document.getElementById('tankAktarimForm').reset();
+    document.getElementById('aktarimEditId').value = '';
+    document.getElementById('kaynakTankMiktar').textContent = '0.00 Lt';
+    document.getElementById('aktarimKaydetBtn').textContent = 'Aktarımı Tamamla';
+    document.getElementById('aktarimFormTemizleBtn').style.display = 'none';
+}
+
 
 
 async function deleteAktarim(sutAlimId, tankAdi, miktar) {
