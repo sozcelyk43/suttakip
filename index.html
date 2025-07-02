@@ -1887,7 +1887,6 @@ async function renderAylikSutunGrafik() {
         aylikSutunChartInstance.destroy();
     }
     
-    // Her işlemden önce tuvali temizle
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     if (!ayYil) {
@@ -1917,14 +1916,12 @@ async function renderAylikSutunGrafik() {
             .where('tarih', '<=', endDateStr)
             .get();
 
-        // --- İSTEDİĞİNİZ KONTROL VE MESAJ ---
         if (alimlarSnapshot.empty) {
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
             ctx.fillText("Bu ayda süt alımı yok.", ctx.canvas.width / 2, ctx.canvas.height / 2);
-            return; // Fonksiyonu burada sonlandır.
+            return; 
         }
         
-        // --- Veri Varsa Grafik Çizim Kodları ---
         const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', sahipId).get();
         const kategoriMap = new Map();
         carilerSnapshot.forEach(doc => {
@@ -1938,11 +1935,18 @@ async function renderAylikSutunGrafik() {
             if (!dataByKategori[kategori]) {
                 dataByKategori[kategori] = 0;
             }
-            dataByKategori[kategori] += alim.toplam;
+            if (alim.islemKaynagi !== 'tank-aktarim') {
+                dataByKategori[kategori] += alim.toplam;
+            }
         });
 
         const labels = Object.keys(dataByKategori);
         const data = Object.values(dataByKategori);
+
+        // YENİ: En yüksek çubuk değerini bulup üzerine %15 ekleyerek
+        // grafiğin üst sınırını (max) belirliyoruz.
+        const maxValue = data.length > 0 ? Math.max(...data) : 0;
+        const chartMax = maxValue > 0 ? maxValue * 1.15 : 100;
         
         aylikSutunChartInstance = new Chart(ctx, {
             type: 'bar',
@@ -1969,14 +1973,19 @@ async function renderAylikSutunGrafik() {
                         font: { weight: 'bold' }
                     }
                 },
-                scales: { y: { beginAtZero: true } }
+                scales: { 
+                    y: { 
+                        beginAtZero: true,
+                        // GÜNCELLEME: Y ekseninin tepe noktası dinamik olarak ayarlandı.
+                        max: chartMax 
+                    } 
+                }
             }
         });
     } catch (error) {
         console.error("Aylık süt grafiği oluşturulurken hata:", error);
     }
 }
-
         
 async function editCari(id) {
     try {
@@ -2312,11 +2321,18 @@ async function renderGunlukSutGrafik() {
             if (!dataByKategori[kategori]) {
                 dataByKategori[kategori] = 0;
             }
-            dataByKategori[kategori] += alim.toplam;
+            if (alim.islemKaynagi !== 'tank-aktarim') {
+                dataByKategori[kategori] += alim.toplam;
+            }
         });
 
         const labels = Object.keys(dataByKategori);
         const data = Object.values(dataByKategori);
+
+        // YENİ: En yüksek çubuk değerini bulup üzerine %15 ekleyerek
+        // grafiğin üst sınırını (max) belirliyoruz.
+        const maxValue = data.length > 0 ? Math.max(...data) : 0;
+        const chartMax = maxValue > 0 ? maxValue * 1.15 : 100; // Veri yoksa veya 0 ise varsayılan bir tepe noktası
 
         gunlukSutunChartInstance = new Chart(ctx, {
             type: 'bar',
@@ -2331,26 +2347,28 @@ async function renderGunlukSutGrafik() {
                 }]
             },
             options: {
-                // indexAxis: 'y' satırı kaldırılarak grafik dikey hale getirildi.
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
                         display: false
                     },
+                    // Orijinal etiket ayarları geri yüklendi
                     datalabels: {
                         anchor: 'end',
                         align: 'end',
                         formatter: (value) => value.toFixed(1) + ' Lt',
-                        color: '#111',
+                        color: '#333',
                         font: {
                             weight: 'bold'
                         }
                     }
                 },
                 scales: {
-                    y: { // Değerler artık Y ekseninde
-                        beginAtZero: true
+                    y: { 
+                        beginAtZero: true,
+                        // GÜNCELLEME: Y ekseninin tepe noktası dinamik olarak ayarlandı.
+                        max: chartMax 
                     }
                 }
             }
@@ -2359,8 +2377,6 @@ async function renderGunlukSutGrafik() {
         console.error("Günlük süt grafiği oluşturulurken hata:", error);
     }
 }
-
-
 
 async function handleKullaniciKaydet(event) {
     event.preventDefault();
