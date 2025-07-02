@@ -152,26 +152,23 @@ header h1 {
     </style>
 </head>
 <body>
-    <div id="toast-message" class="toast-message"></div>
 
-<div class="container">
-        <header>
-            <h1>Gelişmiş Süt Girişi</h1>
-            <button id="logoutButton">🚪 Çıkış Yap</button>
-        </header>
-        <main>
+	<div id="toast-message" class="toast-message"></div>
+	<div class="container">
+        <header><h1>Gelişmiş Süt Girişi</h1><button id="logoutButton">🚪 Çıkış Yap</button></header>
+<main>
             <form id="setup-form" onsubmit="return false;">
                 <input type="hidden" id="editingMovementId">
                 <div class="form-group"><label for="collection-date">Süt Alım Tarihi</label><input type="date" id="collection-date" name="collection-date"></div>
                 <div class="form-group"><label for="unit-price">Süt Birim Fiyatı (₺)</label><input type="number" id="unit-price" name="unit-price" step="0.01"></div>
                 <div class="form-group"><label>Zaman</label><div class="time-selection"><input type="radio" id="aksam" name="time" value="akşam" checked><label for="aksam">AKŞAM</label><input type="radio" id="sabah" name="time" value="sabah"><label for="sabah">SABAH</label></div></div>
                 <div class="form-group">
-    <label for="tank">Tank Seçimi <button id="refresh-tanks-btn" title="Tank listesini yenile">🔄</button></label>
-    <select id="tank" name="tank"></select>
-    <small id="tankMevcutLitre" style="display: block; margin-top: 8px; font-weight: 500; color: #007bff;"></small>
-</div>
+    		<label for="tank">Tank Seçimi <button id="refresh-tanks-btn" title="Tank listesini yenile">🔄</button></label>
+   			 <select id="tank" name="tank"></select>
+    			<small id="tankMevcutLitre" style="display: block; margin-top: 8px; font-weight: 500; color: #007bff;"></small></div>
                 <div class="form-group"><label for="category">Kategori/Köy (Rota)</label><select id="category" name="category"></select></div>
             </form>
+
             <div id="producer-panel" style="display: none;">
                 <h2 id="current-producer-name">Üretici Adı</h2>
                 <div class="form-group"><label for="producer-select">Rota Dışı Seçim / Üretici Atlama</label><select id="producer-select" name="producer-select"></select></div>
@@ -180,6 +177,7 @@ header h1 {
                 <div class="action-buttons"><button type="button" id="skip-btn" class="btn btn-secondary">Pas Geç</button><button type="button" id="save-btn" class="btn btn-success">Kaydet ve Sonraki</button></div>
                 <button type="button" id="cancel-edit-btn" class="btn">Düzenlemeyi İptal Et</button>
             </div>
+
             <section id="history-section" style="display: none;">
                 <h2>Süt Alım Geçmişi (Bu Oturum)</h2><div id="session-summary"></div><ul id="history-list"></ul>
             </section>
@@ -198,17 +196,12 @@ header h1 {
             appId: "1:512756958486:web:13cceb6835e2c575e9fc37"
         };
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-document.getElementById('logoutButton').addEventListener('click', () => {
-    auth.signOut().then(() => {
-        window.location.href = 'login.html';
-    }).catch(error => {
-        console.error("Çıkış yaparken hata oluştu:", error);
-    });
+        const auth = firebase.auth();document.getElementById('logoutButton').addEventListener('click', () => {auth.signOut().then(() => {window.location.href = 'login.html';}).catch(error => {console.error("Çıkış yaparken hata oluştu:", error);    });
 });
         const db = firebase.firestore();
 
         let sahipId = '';
+        let currentUserRole = ''; 
         let routeProducers = [], collectionHistory = [];
         let currentProducerIndex = 0;
         let editingEntry = null;
@@ -233,11 +226,23 @@ document.getElementById('logoutButton').addEventListener('click', () => {
 
         auth.onAuthStateChanged(user => {
             if (user) {
+                // GÜNCELLEME: Kullanıcının rolü de alınıyor
                 db.collection('kullanicilar').doc(user.uid).get().then(doc => {
-                    if (doc.exists && doc.data().sahipId) {
-                        sahipId = doc.data().sahipId;
-                        initializeApp();
-                    } else { alert("Kullanıcı profili veya sahip bilgisi bulunamadı."); auth.signOut(); }
+                    if (doc.exists) {
+                        const userData = doc.data();
+                        sahipId = userData.sahipId;
+                        currentUserRole = userData.rol; // Rol bilgisi değişkene atanıyor
+
+                        if (sahipId) {
+                            initializeApp();
+                        } else {
+                             alert("Kullanıcı profili veya sahip bilgisi bulunamadı.");
+                             auth.signOut();
+                        }
+                    } else {
+                        alert("Kullanıcı profili bulunamadı.");
+                        auth.signOut();
+                    }
                 });
             } else { window.location.href = 'login.html'; }
         });
@@ -273,8 +278,21 @@ document.getElementById('logoutButton').addEventListener('click', () => {
 }
 
 
+function getDayDifference(dateStr) {
+    const today = new Date();
+    const entryDate = new Date(dateStr);
 
-// saveMilkEntry Fonksiyonu (Uyarı Mekanizması Düzeltilmiş Hali)
+    // Saat dilimi farklarından kaynaklanabilecek hataları önlemek için saatleri sıfırla
+    today.setHours(0, 0, 0, 0);
+    entryDate.setHours(0, 0, 0, 0);
+
+    const diffTime = today - entryDate; // İki tarih arasındaki fark (milisaniye)
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Farkı güne çevir
+    
+    return diffDays;
+}
+
+
 async function saveMilkEntry(quantity, notes) {
     const unitPrice = parseFloat(unitPriceInput.value);
     const tankId = tankSelect.value;
@@ -421,7 +439,11 @@ async function handleSkip() {
         displayCurrentProducer();
     }
 }
-// BU FONKSİYONU OLDUĞU GİBİ KOPYALAYIP SCRIPT'İNİZE EKLEYİN
+
+
+
+
+
 function cancelEditMode() {
     editingEntry = null;
     editingMovementIdInput.value = '';
@@ -439,6 +461,8 @@ function cancelEditMode() {
     // Mevcut üreticiyi tekrar göster
     displayCurrentProducer();
 }
+
+
 async function populateTanks() {
     const tankSelect = document.getElementById('tank');
     if (!tankSelect) return;
@@ -498,6 +522,8 @@ function updateTankInfoDisplay(tankId) {
         displayElement.textContent = '';
     }
 }
+
+
 async function populateCategories() {
     const categorySelect = document.getElementById('category');
     if (!categorySelect) return;
@@ -517,6 +543,8 @@ async function populateCategories() {
         categorySelect.innerHTML = '<option value="" disabled selected>Hata: Rotalar yüklenemedi</option>';
     }
 }
+
+
 
 function getSessionKey(category) {
     const date = document.getElementById('collection-date').value;
@@ -555,7 +583,9 @@ async function startRoute() {
     displayCurrentProducer();
     producerPanel.style.display = 'block';
 }
-        function displayCurrentProducer() {
+
+
+function displayCurrentProducer() {
             if (currentProducerIndex >= routeProducers.length) {
                 producerPanel.style.display = 'none';
                 alert(`${categorySelect.options[categorySelect.selectedIndex].text} rotası tamamlandı!`);
@@ -780,15 +810,9 @@ function renderHistory() {
     }
     historySection.style.display = 'block';
     historyList.innerHTML = '';
-    
-    // --- YENİ: Sadece seçili tanka ait verileri filtrele ---
-    const selectedTankId = document.getElementById('tank').value;
-    const filteredHistory = collectionHistory.filter(item => item.tankId === selectedTankId);
+    let totalMilk = 0,
+        totalValue = 0;
 
-    let totalMilk = 0;
-    let totalValue = 0;
-
-    // --- GÜNCELLEME: Artık tüm geçmiş değil, filtrelenmiş geçmiş üzerinde işlem yapılıyor ---
     collectionHistory.sort((a, b) => {
         const timeA = a.kayitZamani.seconds ? a.kayitZamani.toMillis() : a.kayitZamani.getTime();
         const timeB = b.kayitZamani.seconds ? b.kayitZamani.toMillis() : b.kayitZamani.getTime();
@@ -797,36 +821,51 @@ function renderHistory() {
         const listItem = document.createElement('li');
         listItem.className = 'history-item';
         
+        // --- YENİ: Butonları göstermeden önce tarih kontrolü yapılıyor ---
+        const dayDifference = getDayDifference(item.alim_tarihi);
+        let buttonsHTML = ''; // Butonlar için boş bir değişken
+
+        // Eğer kullanıcı admin ise VEYA kaydın tarihi 2 günden eski değilse butonları göster
+        if (currentUserRole === 'admin' || dayDifference <= 2) {
+            buttonsHTML = `
+            <div>
+                <button class="btn edit-btn" onclick="editHistoryItem('${item.movementId}')">Düzenle</button>
+                <button class="btn delete-btn" onclick="deleteHistoryItem('${item.movementId}')">Sil</button>
+            </div>
+            `;
+        }
+        
         listItem.innerHTML = `
             <div class="history-item-info">${item.ureticiAdi}</div>
             <div class="history-item-details">
                 <span>${item.miktar.toFixed(1)} Litre</span>
                 <span class="price">${item.toplam_tutar.toFixed(2)} ₺</span>
             </div>
-            <div>
-                <button class="btn edit-btn" onclick="editHistoryItem('${item.movementId}')">Düzenle</button>
-                <button class="btn delete-btn" onclick="deleteHistoryItem('${item.movementId}')">Sil</button>
-            </div>
+            ${buttonsHTML} 
         `;
+        // --- GÜNCELLEME SONU ---
+
         historyList.appendChild(listItem);
-        
-        // Toplamlar, sadece filtrelenmiş (seçili tanka ait) girişlerden hesaplanıyor.
-        if(item.tankId === selectedTankId) {
-            totalMilk += item.miktar;
-            totalValue += item.toplam_tutar;
-        }
+        totalMilk += item.miktar;
+        totalValue += item.toplam_tutar;
     });
 
-    sessionSummary.innerHTML = `<p><b>Seçili Tank Oturum Özeti</b></p><p>Toplam Süt: <span>${totalMilk.toFixed(1)} Litre</span></p><p>Toplam Tutar: <span>${totalValue.toFixed(2)} ₺</span></p>`;
+    sessionSummary.innerHTML = `<p>Toplam Süt: <span>${totalMilk.toFixed(1)} Litre</span></p><p>Toplam Tutar: <span>${totalValue.toFixed(2)} ₺</span></p>`;
 }
 
-function editHistoryItem(movementId) {
-    // Tarayıcı konsoluna bilgi yazdırarak başladığını görelim
-    console.log("editHistoryItem fonksiyonu çalıştı. Aranan ID:", movementId);
 
+function editHistoryItem(movementId) {
     const entry = collectionHistory.find(item => item.movementId === movementId);
     
     if (entry) {
+        // --- YENİ GÜVENLİK KONTROLÜ ---
+        const dayDifference = getDayDifference(entry.alim_tarihi);
+        if (currentUserRole !== 'admin' && dayDifference > 2) {
+            alert('Bu kaydı düzenleme yetkiniz yok. Sadece son 2 güne ait kayıtlar düzenlenebilir.');
+            return; // Fonksiyonu durdur
+        }
+        // --- KONTROL SONU ---
+        
         console.log("Kayıt bulundu:", entry);
         setEditMode(entry);
     } else {
@@ -834,19 +873,29 @@ function editHistoryItem(movementId) {
         alert("Düzenlenecek kayıt bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin.");
     }
 }
-    async function deleteHistoryItem(movementId) {
+
+
+async function deleteHistoryItem(movementId) {
     const entryToDelete = collectionHistory.find(item => item.movementId === movementId);
     if (!entryToDelete) {
         alert("Silinecek kayıt oturum geçmişinde bulunamadı.");
         return;
     }
+
+    // --- YENİ GÜVENLİK KONTROLÜ ---
+    const dayDifference = getDayDifference(entryToDelete.alim_tarihi);
+    if (currentUserRole !== 'admin' && dayDifference > 2) {
+        alert('Bu kaydı silme yetkiniz yok. Sadece son 2 güne ait kayıtlar silinebilir.');
+        return; // Fonksiyonu durdur
+    }
+    // --- KONTROL SONU ---
     
-    // Güvenilir anahtar kontrolü
     if (!entryToDelete.sutAlimId) {
         alert("Hata: Silinecek ana kayıt kimliği bulunamadı. Lütfen sayfayı yenileyin.");
         return;
     }
     
+    // ... fonksiyonun geri kalanı aynı ...
     if (!confirm(`'${entryToDelete.ureticiAdi}' için girilen ${entryToDelete.miktar} Lt süt kaydını kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!`)) {
         return;
     }
@@ -858,23 +907,16 @@ function editHistoryItem(movementId) {
 
     const tankRef = db.collection('tanklar').doc(entryToDelete.tankId);
     const movementRef = db.collection('tank_hareketleri').doc(entryToDelete.movementId);
-    
-    // --- GÜNCELLEME: Güvenilir ID ile doğrudan referans alınıyor ---
     const sutAlimRef = db.collection('sut_alimlari').doc(entryToDelete.sutAlimId);
-
     const batch = db.batch();
 
-    // Tank miktarını azalt
     batch.update(tankRef, { mevcutLitre: firebase.firestore.FieldValue.increment(-entryToDelete.miktar) });
-    // Hareket kaydını sil
     batch.delete(movementRef);
-    // Ana süt alım kaydını sil
     batch.delete(sutAlimRef);
     
     try {
         await batch.commit();
         alert("Kayıt başarıyla silindi.");
-        // Oturumu yeniden yükleyerek güncel verileri göster
         await startRoute(); 
     } catch (error) {
         console.error("Silme hatası:", error);
@@ -885,7 +927,9 @@ function editHistoryItem(movementId) {
     }
 }
 
-        
-    </script>
+
+
+
+</script>
 </body>
 </html>
