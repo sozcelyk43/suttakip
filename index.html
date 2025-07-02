@@ -1156,17 +1156,13 @@ async function updateDashboardStats() {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
 
-    // --- 1. GÜNLÜK SÜT İSTATİSTİKLERİ (YENİ MANTIK) ---
+    // --- 1. GÜNLÜK SÜT İSTATİSTİKLERİ (YENİ BASİT MANTIK) ---
     try {
-        // --- Gerekli Tarihlerin Hesaplanması ---
-        const localDate = new Date(); // Bugün
-        const today = new Date(localDate);
-        const yesterday = new Date(localDate);
-        yesterday.setDate(localDate.getDate() - 1);
-        const dayBeforeYesterday = new Date(localDate);
-        dayBeforeYesterday.setDate(localDate.getDate() - 2);
+        // --- Gerekli Tarihlerin Hesaplanması (Sadeleştirildi) ---
+        const today = new Date();
+        const yesterday = new Date();
+        yesterday.setDate(today.getDate() - 1);
 
-        // Tarihleri Veritabanı için Formatlama (YYYY-AA-GG)
         const formatForDB = (date) => {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -1175,31 +1171,26 @@ async function updateDashboardStats() {
         };
         const todayStr = formatForDB(today);
         const yesterdayStr = formatForDB(yesterday);
-        const dayBeforeYesterdayStr = formatForDB(dayBeforeYesterday);
         
-        // Tarihleri Ekranda Göstermek İçin Formatlama (örn: "2 Temmuz")
         const formatForDisplay = (date) => {
             return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' });
         };
         const todayLabel = formatForDisplay(today);
-        const yesterdayLabel = formatForDisplay(yesterday);
 
-        // --- Gerekli Verilerin Veritabanından Çekilmesi ---
+        // --- Gerekli Verilerin Veritabanından Çekilmesi (Sadeleştirildi) ---
         const todaySutPromise = db.collection('sut_alimlari').where("sahipId", "==", sahipId).where("tarih", "==", todayStr).get();
         const yesterdaySutPromise = db.collection('sut_alimlari').where("sahipId", "==", sahipId).where("tarih", "==", yesterdayStr).get();
-        const dayBeforeYestSutPromise = db.collection('sut_alimlari').where("sahipId", "==", sahipId).where("tarih", "==", dayBeforeYesterdayStr).get();
         const carilerPromise = db.collection('cariler').where("sahipId", "==", sahipId).where("durum", "==", "aktif").get();
         const yemlerPromise = db.collection('yemler').where("sahipId", "==", sahipId).get();
 
-        const [todaySnapshot, yesterdaySnapshot, dayBeforeYestSnapshot, carilerSnapshot, yemlerSnapshot] = await Promise.all([
+        const [todaySnapshot, yesterdaySnapshot, carilerSnapshot, yemlerSnapshot] = await Promise.all([
             todaySutPromise,
             yesterdaySutPromise,
-            dayBeforeYestSutPromise,
             carilerPromise,
             yemlerPromise
         ]);
 
-        // --- Verilerin Güvenli Bir Şekilde Alınması ---
+        // --- Verilerin Alınması ---
         const getSutData = (snapshot) => {
             if (snapshot.empty) return { sabah: 0, aksam: 0 };
             let totalSabah = 0, totalAksam = 0;
@@ -1212,12 +1203,11 @@ async function updateDashboardStats() {
 
         const todayData = getSutData(todaySnapshot);
         const yesterdayData = getSutData(yesterdaySnapshot);
-        const dayBeforeYestData = getSutData(dayBeforeYestSnapshot);
 
-        // --- YENİ MANTIĞA GÖRE HESAPLAMALAR ---
-        const bugunkuUretimGunuToplami = yesterdayData.aksam + todayData.sabah;
-        const dunkuUretimGunuToplami = dayBeforeYestData.aksam + yesterdayData.sabah;
-        const fark = bugunkuUretimGunuToplami - dunkuUretimGunuToplami;
+        // --- YENİ BASİT MANTIĞA GÖRE HESAPLAMALAR ---
+        const bugunkuToplamSut = todayData.sabah + todayData.aksam;
+        const dunkuToplamSut = yesterdayData.sabah + yesterdayData.aksam;
+        const fark = bugunkuToplamSut - dunkuToplamSut;
         
         // --- Arayüzün Güncellenmesi ---
         const karsilastirmaEl = document.getElementById('dunKarsilastirma');
@@ -1232,18 +1222,22 @@ async function updateDashboardStats() {
             karsilastirmaEl.style.color = '#7f8c8d';
         }
 
-        document.getElementById('dashToplamSut').textContent = bugunkuUretimGunuToplami.toFixed(2);
+        // Kartlar bugünün verileriyle güncelleniyor
+        document.getElementById('dashToplamSut').textContent = bugunkuToplamSut.toFixed(2);
         document.getElementById('dashSabahSut').textContent = todayData.sabah.toFixed(2);
-        document.getElementById('dashAksamSut').textContent = yesterdayData.aksam.toFixed(2);
+        document.getElementById('dashAksamSut').textContent = todayData.aksam.toFixed(2);
         document.getElementById('dashAktifMusteri').textContent = carilerSnapshot.size;
         
+        // Tarih etiketleri yeni mantığa göre güncelleniyor
         document.getElementById('sabahSutTarih').textContent = `(${todayLabel})`;
-        document.getElementById('aksamSutTarih').textContent = `(${yesterdayLabel})`;
-        document.getElementById('toplamSutTarihAraligi').textContent = `${yesterdayLabel} Akşam - ${todayLabel} Sabah`;
+        document.getElementById('aksamSutTarih').textContent = `(${todayLabel})`;
+        document.getElementById('toplamSutTarihAraligi').textContent = `${todayLabel} Toplamı`;
 
         document.getElementById('dashYemSayisi').textContent = yemlerSnapshot.size;
 
     } catch (e) { console.error("Dashboard günlük istatistikleri alınırken hata", e); }
+    
+    // --- DİĞER BÖLÜMLERDE DEĞİŞİKLİK YOK ---
     
     // --- 2. AYLIK SÜT VE DEĞER HESAPLAMASI ---
     try {
@@ -1321,8 +1315,6 @@ async function updateDashboardStats() {
         if (typeof renderAylikSutunGrafik === 'function') await renderAylikSutunGrafik();
     } catch(e) { console.error("Kontrol paneli grafikleri oluşturulurken hata", e); }
 }
-
-
 
 
 async function handleCariKaydet(event) {
