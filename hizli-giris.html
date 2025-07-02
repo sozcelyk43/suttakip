@@ -125,12 +125,35 @@ header h1 {
     background-color: #28a745; /* Canlı Yeşil */
 }
 
-
+/* YENİ EKLENEN STİL: Onay mesajı için */
+.toast-message {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #28a745; /* Yeşil başarı rengi */
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+    font-size: 1.1em;
+    font-weight: 500;
+    display: none; /* Varsayılan olarak gizli */
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+.toast-message.show {
+    display: block;
+    opacity: 1;
+}
 
 
     </style>
 </head>
 <body>
+    <div id="toast-message" class="toast-message"></div>
+
 <div class="container">
         <header>
             <h1>Gelişmiş Süt Girişi</h1>
@@ -246,6 +269,146 @@ document.getElementById('logoutButton').addEventListener('click', () => {
     } catch (e) {
         console.error("Ayarlar alınamadı:", e);
         return {};
+    }
+}
+
+
+
+async function saveMilkEntry(quantity, notes) {
+    const unitPrice = parseFloat(unitPriceInput.value);
+    const tankId = tankSelect.value;
+    const alimTarihi = collectionDateInput.value;
+    const zamanDilimi = document.querySelector('input[name="time"]:checked').value;
+    const currentProducer = routeProducers[currentProducerIndex];
+
+    if (!unitPrice || !tankId || !alimTarihi) {
+        alert('Lütfen Fiyat, Tarih ve Tank seçimlerini doğru yapın.');
+        return;
+    }
+
+    saveBtn.disabled = true;
+    skipBtn.disabled = true;
+
+    try {
+        // GÜNCELLEME: Mükerrer Kayıt Engelleme Kontrolü
+        const existingMovementSnapshot = await db.collection('tank_hareketleri')
+            .where('sahipId', '==', sahipId)
+            .where('ureticiId', '==', currentProducer.id)
+            .where('alim_tarihi', '==', alimTarihi)
+            .where('zaman_dilimi', '==', zamanDilimi)
+            .limit(1).get();
+
+        if (!existingMovementSnapshot.empty) {
+            alert("Hata: Bu üretici için bu zaman diliminde zaten bir süt girişi yapılmış!");
+            saveBtn.disabled = false;
+            skipBtn.disabled = false;
+            return;
+        }
+
+        // GÜNCELLEME: %20'lik Değişim Uyarısı (Sabah-Sabah, Akşam-Akşam Karşılaştırması)
+        if (quantity > 0) { // Sadece miktar 0'dan büyükse karşılaştır
+            const yesterday = new Date(alimTarihi);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+            const dunkuSutSnapshot = await db.collection('sut_alimlari')
+                .where('sahipId', '==', sahipId)
+                .where('cariId', '==', currentProducer.id)
+                .where('tarih', '==', yesterdayStr)
+                .limit(1).get();
+            
+            if (!dunkuSutSnapshot.empty) {
+                const dunkuData = dunkuSutSnapshot.docs[0].data();
+                const dunkuIlgiliMiktar = dunkuData[zamanDilimi] || 0; // 'sabah' veya 'aksam' miktarını alır
+
+                if (dunkuIlgiliMiktar > 0) { // Sadece dünkü miktar 0'dan büyükse karşılaştır
+                    const altLimit = dunkuIlgiliMiktar * 0.80; // %20 az
+                    const ustLimit = dunkuIlgiliMiktar * 1.20; // %20 fazla
+
+                    if (quantity < altLimit || quantity > ustLimit) {
+                        const durum = quantity > dunkuIlgiliMiktar ? 'daha fazla' : 'daha az';
+                        const onay = confirm(`⚠️ DİKKAT! \n\nGirilen miktar (${quantity.toFixed(1)} Lt), dünkü ${zamanDilimi} miktarından (${dunkuIlgiliMiktar.toFixed(1)} Lt) %20 oranında ${durum}.\n\nBu miktar doğru mu? Kaydetmek için 'Tamam'a basın.`);
+                        if (!onay) {
+                            saveBtn.disabled = false;
+                            skipBtn.disabled = false;
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Kaydetme işlemi (önceki versiyondaki güncellenmiş hali)
+        const totalPrice = (quantity * unitPrice);
+        const movementRef = db.collection('tank_hareketleri').doc();
+        const batch = db.batch();
+
+        const sutAlimQuery = db.collection('sut_alimlari').where('sahipId', '==', sahipId).where('cariId', '==', currentProducer.id).where('tarih', '==', alimTarihi);
+        const existingSutAlimSnapshot = await sutAlimQuery.get();
+        let sutAlimRef;
+        if (existingSutAlimSnapshot.empty) {
+            sutAlimRef = db.collection('sut_alimlari').doc();
+            const sutData = { tarih: alimTarihi, cariId: currentProducer.id, cariAdi: currentProducer.adiSoyadi, sabah: (zamanDilimi === 'sabah' ? quantity : 0), aksam: (zamanDilimi === 'akşam' ? quantity : 0), toplam: quantity, fiyat: unitPrice, toplamTutar: totalPrice, sahipId: sahipId };
+            batch.set(sutAlimRef, sutData);
+        } else {
+            const doc = existingSutAlimSnapshot.docs[0];
+            sutAlimRef = doc.ref;
+            const data = doc.data();
+            const newSabah = (zamanDilimi === 'sabah') ? quantity : (data.sabah || 0);
+            const newAksam = (zamanDilimi === 'akşam') ? quantity : (data.aksam || 0);
+            const newToplam = newSabah + newAksam;
+            const newTutar = (data.toplamTutar - (data[zamanDilimi] || 0) * data.fiyat) + totalPrice;
+            const newFiyat = newTutar / newToplam;
+            const sutUpdates = { sabah: newSabah, aksam: newAksam, toplam: newToplam, toplamTutar: newTutar, fiyat: newFiyat };
+            batch.update(sutAlimRef, sutUpdates);
+        }
+
+        const entryData = { movementId: movementRef.id, sutAlimId: sutAlimRef.id, ureticiId: currentProducer.id, ureticiAdi: currentProducer.adiSoyadi, sahipId: sahipId, calisanId: auth.currentUser.uid, tankId: tankId, alim_tarihi: alimTarihi, zaman_dilimi: zamanDilimi, miktar: quantity, birim_fiyat: unitPrice, toplam_tutar: totalPrice, not: notes, kayitZamani: new Date() };
+        batch.set(movementRef, entryData);
+        batch.update(tankRef, { mevcutLitre: firebase.firestore.FieldValue.increment(quantity) });
+
+        await batch.commit();
+        
+        // GÜNCELLEME: Anlık Onay Mesajı Gösterme
+        const toast = document.getElementById('toast-message');
+        toast.textContent = `✅ ${currentProducer.adiSoyadi} için ${quantity} Lt kaydedildi.`;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000); // Mesaj 3 saniye sonra kaybolur
+
+        collectionHistory.push(entryData);
+        renderHistory();
+        routeProducers.splice(currentProducerIndex, 1);
+        populateProducerSelect();
+        displayCurrentProducer();
+
+    } catch (error) {
+        console.error("Kayıt hatası:", error);
+        alert("Veri kaydedilirken bir hata oluştu: " + error.message);
+    } finally {
+        saveBtn.disabled = false;
+        skipBtn.disabled = false;
+    }
+}
+
+
+async function handleSkip() {
+    const producerName = routeProducers[currentProducerIndex]?.adiSoyadi || 'Bu üretici';
+
+    const confirmation = confirm(
+        `'${producerName}' için işlem seçin:\n\n` +
+        `➡️ SÜT YOK ise -> 'Tamam'a basın (0 Lt olarak kaydedilecektir).\n\n` +
+        `➡️ ULAŞILAMADIYSA veya başka bir sebeple atlamak için -> 'İptal'e basın.`
+    );
+
+    if (confirmation) {
+        // Kullanıcı "Tamam" dedi, yani süt yok. 0 Lt olarak kaydet.
+        await saveMilkEntry(0, "Süt yok");
+    } else {
+        // Kullanıcı "İptal" dedi, sadece bir sonraki üreticiye geç.
+        currentProducerIndex++;
+        displayCurrentProducer();
     }
 }
 // BU FONKSİYONU OLDUĞU GİBİ KOPYALAYIP SCRIPT'İNİZE EKLEYİN
@@ -586,151 +749,16 @@ async function handleUpdate() {
 
         
 async function handleSaveAndNext() {
-    const unitPrice = parseFloat(unitPriceInput.value);
     const quantity = parseFloat(quantityInput.value);
-    const tankId = tankSelect.value;
-    const alimTarihi = collectionDateInput.value;
-    const zamanDilimi = document.querySelector('input[name="time"]:checked').value;
+    const notes = notesInput.value;
 
-    if (currentProducerIndex >= routeProducers.length) return;
-    const currentProducer = routeProducers[currentProducerIndex];
-
-    if (!unitPrice || !tankId || !alimTarihi || quantity === null || quantity === undefined || quantity < 0) {
-        alert('Lütfen Fiyat, Miktar, Tarih ve Tank seçimlerini doğru yapın. Miktar negatif olamaz.');
+    // GÜNCELLEME: Miktar 0 ise veya boşsa da kayda izin veriyoruz (Süt Yok durumu için)
+    if (quantity === null || quantity === undefined || isNaN(quantity) || quantity < 0) {
+        alert('Lütfen geçerli bir miktar girin. Miktar negatif olamaz.');
         return;
     }
     
-    // UYARI MEKANİZMASI (Bu kısımda değişiklik yok, olduğu gibi kalmalı)
-    if (quantity > 0) {
-        try {
-            let bugunkuToplamMiktar = quantity;
-            const digerZamanDilimi = zamanDilimi === 'sabah' ? 'akşam' : 'sabah';
-            const bugunDigerGirisSnapshot = await db.collection('tank_hareketleri')
-                .where('sahipId', '==', sahipId)
-                .where('ureticiId', '==', currentProducer.id)
-                .where('alim_tarihi', '==', alimTarihi)
-                .where('zaman_dilimi', '==', digerZamanDilimi)
-                .limit(1).get();
-
-            if (!bugunDigerGirisSnapshot.empty) {
-                bugunkuToplamMiktar += bugunDigerGirisSnapshot.docs[0].data().miktar;
-            }
-
-            const today = new Date(alimTarihi);
-            const yesterday = new Date(today);
-            yesterday.setDate(today.getDate() - 1);
-            const yesterdayStr = yesterday.toISOString().split('T')[0];
-
-            const dunkuSutSnapshot = await db.collection('sut_alimlari')
-                .where('sahipId', '==', sahipId)
-                .where('cariId', '==', currentProducer.id)
-                .where('tarih', '==', yesterdayStr)
-                .limit(1).get();
-                
-            if (!dunkuSutSnapshot.empty) {
-                const dunkuToplamMiktar = dunkuSutSnapshot.docs[0].data().toplam;
-                const altLimit = dunkuToplamMiktar * 0.90;
-                const ustLimit = dunkuToplamMiktar * 1.10;
-
-                if (bugunkuToplamMiktar < altLimit || bugunkuToplamMiktar > ustLimit) {
-                    const fark = bugunkuToplamMiktar - dunkuToplamMiktar;
-                    const durum = fark > 0 ? 'daha fazla' : 'daha az';
-                    const onay = confirm(`⚠️ DİKKAT! \n\nBugünkü toplam miktar (${bugunkuToplamMiktar.toFixed(1)} Lt), dün girilen miktardan (${dunkuToplamMiktar.toFixed(1)} Lt) %10 oranında ${durum}.\n\nBu miktar doğru mu? Kaydetmek için 'Tamam'a basın.`);
-                    if (!onay) return;
-                }
-            }
-        } catch (error) {
-            console.error("Önceki gün kontrolü sırasında hata:", error);
-        }
-    }
-
-    saveBtn.disabled = true;
-    skipBtn.disabled = true;
-    
-    const totalPrice = (quantity * unitPrice);
-    const tankRef = db.collection('tanklar').doc(tankId);
-    const movementRef = db.collection('tank_hareketleri').doc(); // Bu her zaman yeni bir hareket kaydıdır.
-    const batch = db.batch();
-
-    try {
-        // --- BAŞLANGIÇ: YENİ VE DÜZELTİLMİŞ KAYIT MANTIĞI ---
-
-        // 1. O gün için ana süt kaydı var mı diye kontrol et.
-        const sutAlimQuery = db.collection('sut_alimlari')
-            .where('sahipId', '==', sahipId)
-            .where('cariId', '==', currentProducer.id)
-            .where('tarih', '==', alimTarihi);
-            
-        const existingSutAlimSnapshot = await sutAlimQuery.get();
-
-        let sutAlimRef;
-        let finalSutData;
-
-        if (existingSutAlimSnapshot.empty) {
-            // 2a. Kayıt YOKSA: Yeni bir ana süt kaydı oluştur.
-            sutAlimRef = db.collection('sut_alimlari').doc(); // Yeni ID al
-            finalSutData = {
-                tarih: alimTarihi, cariId: currentProducer.id, cariAdi: currentProducer.adiSoyadi,
-                sabah: zamanDilimi === 'sabah' ? quantity : 0,
-                aksam: zamanDilimi === 'akşam' ? quantity : 0,
-                toplam: quantity,
-                fiyat: unitPrice, // Ortalama fiyatı ilk kayıtta doğrudan ayarla
-                toplamTutar: totalPrice,
-                sahipId: sahipId
-            };
-            batch.set(sutAlimRef, finalSutData);
-        } else {
-            // 2b. Kayıt VARSA: Mevcut kaydı güncelle.
-            const existingDoc = existingSutAlimSnapshot.docs[0];
-            sutAlimRef = existingDoc.ref;
-            const existingData = existingDoc.data();
-
-            const newSabah = (zamanDilimi === 'sabah') ? quantity : (existingData.sabah || 0);
-            const newAksam = (zamanDilimi === 'akşam') ? quantity : (existingData.aksam || 0);
-            const newToplam = newSabah + newAksam;
-            const newToplamTutar = (newSabah * unitPrice) + (newAksam * unitPrice); // Basitlik adına son girilen fiyatı kullanıyoruz
-
-            finalSutData = {
-                sabah: newSabah,
-                aksam: newAksam,
-                toplam: newToplam,
-                toplamTutar: newToplamTutar,
-                fiyat: newToplam > 0 ? newToplamTutar / newToplam : 0 // Yeni ortalama fiyat
-            };
-            batch.update(sutAlimRef, finalSutData);
-        }
-
-        // 3. Her halükarda yeni tank hareketini ve tankın litresini güncelle.
-        const entryData = {
-            movementId: movementRef.id,
-            sutAlimId: sutAlimRef.id, // Ana kaydın ID'sini tank hareketine de ekle
-            ureticiId: currentProducer.id, ureticiAdi: currentProducer.adiSoyadi,
-            sahipId: sahipId, calisanId: auth.currentUser.uid, tankId: tankId, alim_tarihi: alimTarihi,
-            zaman_dilimi: zamanDilimi, miktar: quantity, birim_fiyat: unitPrice,
-            toplam_tutar: totalPrice, not: notesInput.value, kayitZamani: new Date()
-        };
-
-        batch.set(movementRef, entryData);
-        batch.update(tankRef, { mevcutLitre: firebase.firestore.FieldValue.increment(quantity) });
-        
-        // --- BİTİŞ: YENİ VE DÜZELTİLMİŞ KAYIT MANTIĞI ---
-
-        await batch.commit();
-        
-        // Arayüzü güncelle
-        collectionHistory.push(entryData);
-        renderHistory();
-        routeProducers.splice(currentProducerIndex, 1);
-        populateProducerSelect();
-        displayCurrentProducer();
-
-    } catch (error) {
-        console.error("Kayıt hatası:", error);
-        alert("Veri kaydedilirken bir hata oluştu: " + error.message);
-    } finally {
-        saveBtn.disabled = false;
-        skipBtn.disabled = false;
-    }
+    await saveMilkEntry(quantity, notes);
 }
 
 
