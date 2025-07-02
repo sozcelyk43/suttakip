@@ -273,32 +273,39 @@ body.pdf-generating .pdf-source-section .container {
 }
 
 @media print {
-    /* Yazdırmada renklerin ve arka planların görünmesini zorunlu kıl */
+    /* YENİ: Sayfa kenar boşlukları daha kontrollü hale getirildi */
+    @page {
+        size: A4 portrait;
+        margin: 1.2cm;
+    }
+
+    /* Yazdırmada renklerin ve arka planların görünmesini zorunlu kıl (Mevcut kodunuzdan alındı) */
     body {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
 
-    /* Yazdırma sırasında tüm arka planları beyaz, metinleri siyah yap */
+    /* Yazdırma sırasında tüm arka planları beyaz, metinleri siyah yap (Mevcut kodunuzdan alındı) */
     html, body, .main-content, .print-section-active, .container, .report-block {
         background: #ffffff !important;
         color: #000000 !important;
+        /* GÜNCELLEME: Genel yazı tipi boyutu ayarlandı */
+        font-size: 10pt;
     }
 
-    /* Genel yazdırma düzeni: tüm boşlukları kaldır */
+    /* Genel yazdırma düzeni (Mevcut kodunuzdan alındı) */
     html, body, .main-content {
-        font-size: 10pt;
         margin: 0 !important;
         padding: 0 !important;
         display: block !important;
     }
     
-    /* Yazdırmada görünmemesi gereken tüm elementleri gizle */
+    /* Yazdırmada görünmemesi gereken tüm elementleri gizle (Mevcut kodunuzdan alındı) */
     .dont-print, .sidebar, .module-header, .form-section, .report-section > .form-grid, .report-section > hr, [id$="YazdirBtn"], [id$="PdfBtn"], [id$="XlsxBtn"], .menu-toggle-btn {
         display: none !important;
     }
 
-    /* Sadece yazdırılacak bölümü göster */
+    /* Sadece yazdırılacak bölümü göster (Mevcut kodunuzdan alındı) */
     body > * { display: none !important; }
     body > .main-content { display: block !important; }
     .main-content > .module-section { display: none !important; }
@@ -308,7 +315,7 @@ body.pdf-generating .pdf-source-section .container {
         box-shadow: none !important;
     }
 
-    /* Yazdırma için özel başlığı göster ve ortala */
+    /* Yazdırma için özel başlığı göster ve ortala (Mevcut kodunuzdan alındı) */
     .print-only.print-title {
         display: block !important;
         text-align: center;
@@ -316,39 +323,61 @@ body.pdf-generating .pdf-source-section .container {
         margin-bottom: 15px;
     }
 
-    /* İçeriğin sayfaya sığması için boşlukları ve puntoları küçült */
+    /* ----- RAPOR İÇERİĞİNİ SIKIŞTIRMA GÜNCELLEMELERİ ----- */
+
+    /* Rapor blokları arasındaki ve içindeki boşluklar azaltıldı */
     .report-block {
-        padding: 8px 10px !important;
-        margin-bottom: 8px !important;
-        border: 1px solid #ddd !important;
-        page-break-inside: avoid; /* Blokları sayfa ortasında bölme */
+        padding: 5px 8px !important;
+        margin-bottom: 5px !important;
+        border: 1px solid #ccc !important;
+        page-break-inside: avoid;
     }
+
+    /* Blok başlıklarının boşlukları azaltıldı */
     .report-block h5 {
         font-size: 10pt;
-        padding-bottom: 3px;
-        margin-bottom: 5px;
+        padding-bottom: 2px;
+        margin-top: 0;
+        margin-bottom: 4px;
+        border-bottom: 1px solid #eee;
     }
-    p, .block-total, details, summary, table {
+
+    /* Tüm paragraflar için satır yüksekliği ve boşluklar daraltıldı */
+    p, .block-total, details, summary {
         font-size: 9pt !important;
+        line-height: 1.2;
+        margin: 2px 0;
     }
-    .final-summary p, p.block-total {
+
+    /* Dönem sonu özetindeki boşluklar daha da daraltıldı */
+    .final-summary p {
+        margin: 3px 0;
+        padding: 1px 0;
+    }
+    .final-summary hr {
         margin: 4px 0;
-        padding: 2px 0;
     }
+
+    /* Tüm tabloların hücrelerindeki iç boşluklar azaltıldı */
     table, .report-table, .summary-table {
-        margin-top: 5px !important;
+        margin-top: 4px !important;
         width: 100% !important;
         border-collapse: collapse !important;
     }
     td, th {
-        padding: 4px 5px !important;
+        padding: 3px 4px !important;
         border: 1px solid #ccc !important;
+        font-size: 8.5pt; /* Tablo içi yazılar biraz daha küçültüldü */
     }
+
+    /* Tablo başlıklarının her sayfada tekrar etmesini sağlar (Mevcut kodunuzdan alındı) */
     thead {
-        display: table-header-group; /* Tablo başlıklarının her sayfada tekrar etmesini sağlar */
+        display: table-header-group; 
     }
 }
-/* === TANK GÖSTERGE STİLLERİ === */
+
+
+
 .tank-dashboard-container {
     background-color: #fff;
     padding: 20px;
