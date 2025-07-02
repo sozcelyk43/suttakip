@@ -274,6 +274,7 @@ document.getElementById('logoutButton').addEventListener('click', () => {
 
 
 
+// saveMilkEntry Fonksiyonu (Düzeltilmiş Hali)
 async function saveMilkEntry(quantity, notes) {
     const unitPrice = parseFloat(unitPriceInput.value);
     const tankId = tankSelect.value;
@@ -286,11 +287,14 @@ async function saveMilkEntry(quantity, notes) {
         return;
     }
 
+    // HATA DÜZELTMESİ: Eksik olan tank referansı burada tanımlandı.
+    const tankRef = db.collection('tanklar').doc(tankId);
+
     saveBtn.disabled = true;
     skipBtn.disabled = true;
 
     try {
-        // GÜNCELLEME: Mükerrer Kayıt Engelleme Kontrolü
+        // Mükerrer Kayıt Engelleme Kontrolü
         const existingMovementSnapshot = await db.collection('tank_hareketleri')
             .where('sahipId', '==', sahipId)
             .where('ureticiId', '==', currentProducer.id)
@@ -305,8 +309,8 @@ async function saveMilkEntry(quantity, notes) {
             return;
         }
 
-        // GÜNCELLEME: %20'lik Değişim Uyarısı (Sabah-Sabah, Akşam-Akşam Karşılaştırması)
-        if (quantity > 0) { // Sadece miktar 0'dan büyükse karşılaştır
+        // %20'lik Değişim Uyarısı
+        if (quantity > 0) {
             const yesterday = new Date(alimTarihi);
             yesterday.setDate(yesterday.getDate() - 1);
             const yesterdayStr = yesterday.toISOString().split('T')[0];
@@ -319,11 +323,11 @@ async function saveMilkEntry(quantity, notes) {
             
             if (!dunkuSutSnapshot.empty) {
                 const dunkuData = dunkuSutSnapshot.docs[0].data();
-                const dunkuIlgiliMiktar = dunkuData[zamanDilimi] || 0; // 'sabah' veya 'aksam' miktarını alır
+                const dunkuIlgiliMiktar = dunkuData[zamanDilimi] || 0;
 
-                if (dunkuIlgiliMiktar > 0) { // Sadece dünkü miktar 0'dan büyükse karşılaştır
-                    const altLimit = dunkuIlgiliMiktar * 0.80; // %20 az
-                    const ustLimit = dunkuIlgiliMiktar * 1.20; // %20 fazla
+                if (dunkuIlgiliMiktar > 0) {
+                    const altLimit = dunkuIlgiliMiktar * 0.80;
+                    const ustLimit = dunkuIlgiliMiktar * 1.20;
 
                     if (quantity < altLimit || quantity > ustLimit) {
                         const durum = quantity > dunkuIlgiliMiktar ? 'daha fazla' : 'daha az';
@@ -338,7 +342,7 @@ async function saveMilkEntry(quantity, notes) {
             }
         }
 
-        // Kaydetme işlemi (önceki versiyondaki güncellenmiş hali)
+        // Kaydetme işlemi
         const totalPrice = (quantity * unitPrice);
         const movementRef = db.collection('tank_hareketleri').doc();
         const batch = db.batch();
@@ -358,7 +362,7 @@ async function saveMilkEntry(quantity, notes) {
             const newAksam = (zamanDilimi === 'akşam') ? quantity : (data.aksam || 0);
             const newToplam = newSabah + newAksam;
             const newTutar = (data.toplamTutar - (data[zamanDilimi] || 0) * data.fiyat) + totalPrice;
-            const newFiyat = newTutar / newToplam;
+            const newFiyat = newToplam > 0 ? newTutar / newToplam : 0;
             const sutUpdates = { sabah: newSabah, aksam: newAksam, toplam: newToplam, toplamTutar: newTutar, fiyat: newFiyat };
             batch.update(sutAlimRef, sutUpdates);
         }
@@ -369,13 +373,12 @@ async function saveMilkEntry(quantity, notes) {
 
         await batch.commit();
         
-        // GÜNCELLEME: Anlık Onay Mesajı Gösterme
         const toast = document.getElementById('toast-message');
         toast.textContent = `✅ ${currentProducer.adiSoyadi} için ${quantity} Lt kaydedildi.`;
         toast.classList.add('show');
         setTimeout(() => {
             toast.classList.remove('show');
-        }, 3000); // Mesaj 3 saniye sonra kaybolur
+        }, 3000);
 
         collectionHistory.push(entryData);
         renderHistory();
@@ -391,7 +394,6 @@ async function saveMilkEntry(quantity, notes) {
         skipBtn.disabled = false;
     }
 }
-
 
 async function handleSkip() {
     const producerName = routeProducers[currentProducerIndex]?.adiSoyadi || 'Bu üretici';
