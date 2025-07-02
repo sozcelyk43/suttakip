@@ -1972,7 +1972,7 @@ async function renderAylikSutunGrafik() {
             return; 
         }
         
-        const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', sahipId).get();
+        const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', sahipId).where('cariGrup', 'array-contains', 'üretici').get();
         const kategoriMap = new Map();
         carilerSnapshot.forEach(doc => {
             kategoriMap.set(doc.id, doc.data().kategori || 'Belirtilmemiş');
@@ -1981,22 +1981,39 @@ async function renderAylikSutunGrafik() {
         const dataByKategori = {};
         alimlarSnapshot.forEach(doc => {
             const alim = doc.data();
-            const kategori = kategoriMap.get(alim.cariId) || "Diğer";
-            if (!dataByKategori[kategori]) {
-                dataByKategori[kategori] = 0;
-            }
-            if (alim.islemKaynagi !== 'tank-aktarim') {
-                dataByKategori[kategori] += alim.toplam;
+            if (kategoriMap.has(alim.cariId)) {
+                const kategori = kategoriMap.get(alim.cariId);
+                if (!dataByKategori[kategori]) {
+                    dataByKategori[kategori] = 0;
+                }
+                if (alim.islemKaynagi !== 'tank-aktarim') {
+                    dataByKategori[kategori] += alim.toplam;
+                }
             }
         });
 
         const labels = Object.keys(dataByKategori);
         const data = Object.values(dataByKategori);
 
-        // YENİ: En yüksek çubuk değerini bulup üzerine %15 ekleyerek
-        // grafiğin üst sınırını (max) belirliyoruz.
-        const maxValue = data.length > 0 ? Math.max(...data) : 0;
-        const chartMax = maxValue > 0 ? maxValue * 1.15 : 100;
+        // YENİ: Dinamik Renk Oluşturma Mantığı
+        let backgroundColors = [];
+        if (data.length > 0) {
+            const maxValue = Math.max(...data);
+            const minValue = Math.min(...data.filter(val => val > 0)); // 0'dan büyük en küçük değeri bul
+
+            backgroundColors = data.map(value => {
+                if (value === maxValue) {
+                    return 'rgba(40, 167, 69, 0.7)'; // Yeşil
+                } else if (value === minValue) {
+                    return 'rgba(220, 53, 69, 0.7)'; // Kırmızı
+                } else {
+                    return 'rgba(255, 193, 7, 0.7)'; // Sarı
+                }
+            });
+        }
+        
+        const maxValueForScale = data.length > 0 ? Math.max(...data) : 0;
+        const chartMax = maxValueForScale > 0 ? maxValueForScale * 1.15 : 100;
         
         aylikSutunChartInstance = new Chart(ctx, {
             type: 'bar',
@@ -2005,7 +2022,8 @@ async function renderAylikSutunGrafik() {
                 datasets: [{
                     label: 'Toplam Süt (Lt)',
                     data: data,
-                    backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                    // GÜNCELLEME: Tek renk yerine dinamik renk dizisi kullanılıyor
+                    backgroundColor: backgroundColors,
                     borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 1
                 }]
@@ -2026,7 +2044,6 @@ async function renderAylikSutunGrafik() {
                 scales: { 
                     y: { 
                         beginAtZero: true,
-                        // GÜNCELLEME: Y ekseninin tepe noktası dinamik olarak ayarlandı.
                         max: chartMax 
                     } 
                 }
@@ -2358,7 +2375,7 @@ async function renderGunlukSutGrafik() {
             return;
         }
 
-        const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', sahipId).get();
+        const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', sahipId).where('cariGrup', 'array-contains', 'üretici').get();
         const kategoriMap = new Map();
         carilerSnapshot.forEach(doc => {
             kategoriMap.set(doc.id, doc.data().kategori || 'Belirtilmemiş');
@@ -2367,22 +2384,39 @@ async function renderGunlukSutGrafik() {
         const dataByKategori = {};
         alimlarSnapshot.forEach(doc => {
             const alim = doc.data();
-            const kategori = kategoriMap.get(alim.cariId) || "Diğer";
-            if (!dataByKategori[kategori]) {
-                dataByKategori[kategori] = 0;
-            }
-            if (alim.islemKaynagi !== 'tank-aktarim') {
-                dataByKategori[kategori] += alim.toplam;
+            if (kategoriMap.has(alim.cariId)) {
+                const kategori = kategoriMap.get(alim.cariId);
+                if (!dataByKategori[kategori]) {
+                    dataByKategori[kategori] = 0;
+                }
+                if (alim.islemKaynagi !== 'tank-aktarim') {
+                    dataByKategori[kategori] += alim.toplam;
+                }
             }
         });
 
         const labels = Object.keys(dataByKategori);
         const data = Object.values(dataByKategori);
 
-        // YENİ: En yüksek çubuk değerini bulup üzerine %15 ekleyerek
-        // grafiğin üst sınırını (max) belirliyoruz.
-        const maxValue = data.length > 0 ? Math.max(...data) : 0;
-        const chartMax = maxValue > 0 ? maxValue * 1.15 : 100; // Veri yoksa veya 0 ise varsayılan bir tepe noktası
+        // YENİ: Dinamik Renk Oluşturma Mantığı
+        let backgroundColors = [];
+        if (data.length > 0) {
+            const maxValue = Math.max(...data);
+            const minValue = Math.min(...data.filter(val => val > 0)); // 0'dan büyük en küçük değeri bul
+
+            backgroundColors = data.map(value => {
+                if (value === maxValue) {
+                    return 'rgba(40, 167, 69, 0.7)'; // Yeşil
+                } else if (value === minValue) {
+                    return 'rgba(220, 53, 69, 0.7)'; // Kırmızı
+                } else {
+                    return 'rgba(255, 193, 7, 0.7)'; // Sarı
+                }
+            });
+        }
+        
+        const maxValueForScale = data.length > 0 ? Math.max(...data) : 0;
+        const chartMax = maxValueForScale > 0 ? maxValueForScale * 1.15 : 100;
 
         gunlukSutunChartInstance = new Chart(ctx, {
             type: 'bar',
@@ -2391,7 +2425,8 @@ async function renderGunlukSutGrafik() {
                 datasets: [{
                     label: 'Toplam Süt (Lt)',
                     data: data,
-                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    // GÜNCELLEME: Tek renk yerine dinamik renk dizisi kullanılıyor
+                    backgroundColor: backgroundColors,
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 1
                 }]
@@ -2400,33 +2435,23 @@ async function renderGunlukSutGrafik() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        display: false
-                    },
-                    // Orijinal etiket ayarları geri yüklendi
+                    legend: { display: false },
                     datalabels: {
                         anchor: 'end',
                         align: 'end',
                         formatter: (value) => value.toFixed(1) + ' Lt',
                         color: '#333',
-                        font: {
-                            weight: 'bold'
-                        }
+                        font: { weight: 'bold' }
                     }
                 },
-                scales: {
-                    y: { 
-                        beginAtZero: true,
-                        // GÜNCELLEME: Y ekseninin tepe noktası dinamik olarak ayarlandı.
-                        max: chartMax 
-                    }
-                }
+                scales: { y: { beginAtZero: true, max: chartMax } }
             }
         });
     } catch(error) {
         console.error("Günlük süt grafiği oluşturulurken hata:", error);
     }
 }
+
 
 async function handleKullaniciKaydet(event) {
     event.preventDefault();
