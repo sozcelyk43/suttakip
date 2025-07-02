@@ -3286,8 +3286,8 @@ async function renderOdemeListesi() {
             
             // Metinlerin gösterim mantığı aynı kalıyor
             let islemTuruText = islem.islemTuru;
-            if(islem.islemTuru === 'tahsilat') islemTuruText = 'Ödeme';
-            if(islem.islemTuru === 'odeme') islemTuruText = 'Tahsilat';
+            if(islem.islemTuru === 'odeme') islemTuruText = 'Ödeme';
+            if(islem.islemTuru === 'tahsilat') islemTuruText = 'Tahsilat';
             if(islem.islemTuru === 'borc') islemTuruText = 'Açılış Borcu';
             if(islem.islemTuru === 'alacak') islemTuruText = 'Açılış Alacağı';
 

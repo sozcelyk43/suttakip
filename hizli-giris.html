@@ -25,28 +25,25 @@
     align-items: center;
 }
 
-header h1 { 
-    margin: 0; 
-    font-size: 1.5em; /* Mobil için biraz küçülttük */
-}
+header h1 {     margin: 0;     font-size: 1.5em; }
         main { padding: 20px 0; }
-        #logoutButton {
-    position: static; 
-    background-color: #e74c3c; 
+#logoutButton {
+    position: static;
+    background-color: #e74c3c;
     color: white;
     border: none;
-    padding: 8px 12px; 
-    border-radius: 5px;
+    padding: 6px 12px; /* Dikey boşluğu ayarladık */
+    border-radius: 8px; /* Diğer butonlarla uyumlu hale getirdik */
     cursor: pointer;
-    font-size: 0.8em; 
-    font-weight: 500;
+    font-size: 0.9em; /* Yazıyı biraz büyüttük */
+    font-weight: 600;
     transition: background-color 0.2s;
-   
+    line-height: 1.3; /* Satırlar arası boşluk */
+    text-align: right; /* İçeriği sağa yasladık */
 }
-#logoutButton:hover {
-    background-color: #c0392b;
-}
-}
+
+#logoutButton:hover {    background-color: #c0392b;}}
+
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 1.1em; }
         .form-group select, .form-group input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1em; box-sizing: border-box; }
@@ -226,8 +223,10 @@ header h1 {
 
         auth.onAuthStateChanged(user => {
             if (user) {
-                // GÜNCELLEME: Kullanıcının rolü de alınıyor
-                db.collection('kullanicilar').doc(user.uid).get().then(doc => {
+const logoutButton = document.getElementById('logoutButton');
+        if (logoutButton && user.email) {
+            logoutButton.innerHTML = `🚪 Çıkış Yap<br><small style="font-weight:normal; font-size:0.8em;">${user.email}</small>`;
+        }                db.collection('kullanicilar').doc(user.uid).get().then(doc => {
                     if (doc.exists) {
                         const userData = doc.data();
                         sahipId = userData.sahipId;
@@ -311,7 +310,7 @@ async function saveMilkEntry(quantity, notes) {
     skipBtn.disabled = true;
 
     try {
-        // Mükerrer Kayıt Engelleme Kontrolü
+        // Mükerrer Kayıt Engelleme...
         const existingMovementSnapshot = await db.collection('tank_hareketleri')
             .where('sahipId', '==', sahipId)
             .where('ureticiId', '==', currentProducer.id)
@@ -326,10 +325,8 @@ async function saveMilkEntry(quantity, notes) {
             return;
         }
 
-        // %20'lik Değişim Uyarısı
+        // Uyarı Mekanizması...
         if (quantity > 0) {
-            // HATA DÜZELTMESİ: Saat dilimi sorununu önlemek için dünün tarihi
-            // yerel saate göre doğru formatta (YYYY-AA-GG) oluşturuluyor.
             const todayForCalc = new Date(alimTarihi);
             const yesterdayForCalc = new Date(todayForCalc);
             yesterdayForCalc.setDate(todayForCalc.getDate() - 1);
@@ -338,25 +335,31 @@ async function saveMilkEntry(quantity, notes) {
             const month = String(yesterdayForCalc.getMonth() + 1).padStart(2, '0');
             const day = String(yesterdayForCalc.getDate()).padStart(2, '0');
             const yesterdayStr = `${year}-${month}-${day}`;
-            // Düzeltme Sonu
 
             const dunkuSutSnapshot = await db.collection('sut_alimlari')
                 .where('sahipId', '==', sahipId)
                 .where('cariId', '==', currentProducer.id)
-                .where('tarih', '==', yesterdayStr) // Artık doğru tarihi sorguluyor
+                .where('tarih', '==', yesterdayStr)
                 .limit(1).get();
             
             if (!dunkuSutSnapshot.empty) {
                 const dunkuData = dunkuSutSnapshot.docs[0].data();
-                const dunkuIlgiliMiktar = dunkuData[zamanDilimi] || 0;
+                let karsilastirmaMiktari = dunkuData[zamanDilimi] || 0;
+                let karsilastirmaTuru = zamanDilimi;
 
-                if (dunkuIlgiliMiktar > 0) {
-                    const altLimit = dunkuIlgiliMiktar * 0.80;
-                    const ustLimit = dunkuIlgiliMiktar * 1.20;
+                if (karsilastirmaMiktari === 0) {
+                    const digerZamanDilimi = zamanDilimi === 'sabah' ? 'akşam' : 'sabah';
+                    karsilastirmaMiktari = dunkuData[digerZamanDilimi] || 0;
+                    karsilastirmaTuru = digerZamanDilimi;
+                }
+                
+                if (karsilastirmaMiktari > 0) {
+                    const altLimit = karsilastirmaMiktari * 0.80;
+                    const ustLimit = karsilastirmaMiktari * 1.20;
 
                     if (quantity < altLimit || quantity > ustLimit) {
-                        const durum = quantity > dunkuIlgiliMiktar ? 'daha fazla' : 'daha az';
-                        const onay = confirm(`⚠️ DİKKAT! \n\nGirilen miktar (${quantity.toFixed(1)} Lt), dünkü ${zamanDilimi} miktarından (${dunkuIlgiliMiktar.toFixed(1)} Lt) %20 oranında ${durum}.\n\nBu miktar doğru mu? Kaydetmek için 'Tamam'a basın.`);
+                        const durum = quantity > karsilastirmaMiktari ? 'daha fazla' : 'daha az';
+                        const onay = confirm(`⚠️ DİKKAT! \n\nGirilen miktar (${quantity.toFixed(1)} Lt), dünkü ${karsilastirmaTuru} miktarından (${karsilastirmaMiktari.toFixed(1)} Lt) %20 oranında ${durum}.\n\nBu miktar doğru mu? Kaydetmek için 'Tamam'a basın.`);
                         if (!onay) {
                             saveBtn.disabled = false;
                             skipBtn.disabled = false;
@@ -366,12 +369,11 @@ async function saveMilkEntry(quantity, notes) {
                 }
             }
         }
-
-        // Kaydetme işlemi (Bu kısımda değişiklik yok)
+        
+        // Kaydetme işlemi
         const totalPrice = (quantity * unitPrice);
         const movementRef = db.collection('tank_hareketleri').doc();
         const batch = db.batch();
-
         const sutAlimQuery = db.collection('sut_alimlari').where('sahipId', '==', sahipId).where('cariId', '==', currentProducer.id).where('tarih', '==', alimTarihi);
         const existingSutAlimSnapshot = await sutAlimQuery.get();
         let sutAlimRef;
@@ -380,24 +382,37 @@ async function saveMilkEntry(quantity, notes) {
             const sutData = { tarih: alimTarihi, cariId: currentProducer.id, cariAdi: currentProducer.adiSoyadi, sabah: (zamanDilimi === 'sabah' ? quantity : 0), aksam: (zamanDilimi === 'akşam' ? quantity : 0), toplam: quantity, fiyat: unitPrice, toplamTutar: totalPrice, sahipId: sahipId };
             batch.set(sutAlimRef, sutData);
         } else {
+            // --- GÜNCELLEME: Hatalı olan güncelleme mantığı düzeltildi ---
             const doc = existingSutAlimSnapshot.docs[0];
             sutAlimRef = doc.ref;
             const data = doc.data();
+            
+            // Yeni sabah ve akşam miktarlarını doğru şekilde hesapla
             const newSabah = (zamanDilimi === 'sabah') ? quantity : (data.sabah || 0);
             const newAksam = (zamanDilimi === 'akşam') ? quantity : (data.aksam || 0);
             const newToplam = newSabah + newAksam;
-            const newTutar = (data.toplamTutar - (data[zamanDilimi] || 0) * data.fiyat) + totalPrice;
-            const newFiyat = newToplam > 0 ? newTutar / newToplam : 0;
-            const sutUpdates = { sabah: newSabah, aksam: newAksam, toplam: newToplam, toplamTutar: newTutar, fiyat: newFiyat };
+            
+            // Toplam tutarı ve ortalama fiyatı yeniden ve doğru şekilde hesapla
+            // Not: Bu hesaplama, gün içindeki tüm girişlerin aynı fiyattan yapıldığını varsayar.
+            // Bu, en tutarlı ve basit yöntemdir.
+            const newToplamTutar = newToplam * unitPrice;
+            const newFiyat = unitPrice;
+
+            const sutUpdates = { 
+                sabah: newSabah, 
+                aksam: newAksam, 
+                toplam: newToplam, 
+                toplamTutar: newToplamTutar, 
+                fiyat: newFiyat 
+            };
             batch.update(sutAlimRef, sutUpdates);
         }
-
+        
         const entryData = { movementId: movementRef.id, sutAlimId: sutAlimRef.id, ureticiId: currentProducer.id, ureticiAdi: currentProducer.adiSoyadi, sahipId: sahipId, calisanId: auth.currentUser.uid, tankId: tankId, alim_tarihi: alimTarihi, zaman_dilimi: zamanDilimi, miktar: quantity, birim_fiyat: unitPrice, toplam_tutar: totalPrice, not: notes, kayitZamani: new Date() };
         batch.set(movementRef, entryData);
         batch.update(tankRef, { mevcutLitre: firebase.firestore.FieldValue.increment(quantity) });
-
         await batch.commit();
-        
+
         const toast = document.getElementById('toast-message');
         toast.textContent = `✅ ${currentProducer.adiSoyadi} için ${quantity} Lt kaydedildi.`;
         toast.classList.add('show');
@@ -410,7 +425,7 @@ async function saveMilkEntry(quantity, notes) {
         routeProducers.splice(currentProducerIndex, 1);
         populateProducerSelect();
         displayCurrentProducer();
-
+        
     } catch (error) {
         console.error("Kayıt hatası:", error);
         alert("Veri kaydedilirken bir hata oluştu: " + error.message);
@@ -419,6 +434,7 @@ async function saveMilkEntry(quantity, notes) {
         skipBtn.disabled = false;
     }
 }
+
 
 
 async function handleSkip() {
