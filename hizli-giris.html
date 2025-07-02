@@ -274,7 +274,7 @@ document.getElementById('logoutButton').addEventListener('click', () => {
 
 
 
-// saveMilkEntry Fonksiyonu (Düzeltilmiş Hali)
+// saveMilkEntry Fonksiyonu (Uyarı Mekanizması Düzeltilmiş Hali)
 async function saveMilkEntry(quantity, notes) {
     const unitPrice = parseFloat(unitPriceInput.value);
     const tankId = tankSelect.value;
@@ -287,7 +287,6 @@ async function saveMilkEntry(quantity, notes) {
         return;
     }
 
-    // HATA DÜZELTMESİ: Eksik olan tank referansı burada tanımlandı.
     const tankRef = db.collection('tanklar').doc(tankId);
 
     saveBtn.disabled = true;
@@ -311,14 +310,22 @@ async function saveMilkEntry(quantity, notes) {
 
         // %20'lik Değişim Uyarısı
         if (quantity > 0) {
-            const yesterday = new Date(alimTarihi);
-            yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = yesterday.toISOString().split('T')[0];
+            // HATA DÜZELTMESİ: Saat dilimi sorununu önlemek için dünün tarihi
+            // yerel saate göre doğru formatta (YYYY-AA-GG) oluşturuluyor.
+            const todayForCalc = new Date(alimTarihi);
+            const yesterdayForCalc = new Date(todayForCalc);
+            yesterdayForCalc.setDate(todayForCalc.getDate() - 1);
+            
+            const year = yesterdayForCalc.getFullYear();
+            const month = String(yesterdayForCalc.getMonth() + 1).padStart(2, '0');
+            const day = String(yesterdayForCalc.getDate()).padStart(2, '0');
+            const yesterdayStr = `${year}-${month}-${day}`;
+            // Düzeltme Sonu
 
             const dunkuSutSnapshot = await db.collection('sut_alimlari')
                 .where('sahipId', '==', sahipId)
                 .where('cariId', '==', currentProducer.id)
-                .where('tarih', '==', yesterdayStr)
+                .where('tarih', '==', yesterdayStr) // Artık doğru tarihi sorguluyor
                 .limit(1).get();
             
             if (!dunkuSutSnapshot.empty) {
@@ -342,7 +349,7 @@ async function saveMilkEntry(quantity, notes) {
             }
         }
 
-        // Kaydetme işlemi
+        // Kaydetme işlemi (Bu kısımda değişiklik yok)
         const totalPrice = (quantity * unitPrice);
         const movementRef = db.collection('tank_hareketleri').doc();
         const batch = db.batch();
@@ -394,6 +401,7 @@ async function saveMilkEntry(quantity, notes) {
         skipBtn.disabled = false;
     }
 }
+
 
 async function handleSkip() {
     const producerName = routeProducers[currentProducerIndex]?.adiSoyadi || 'Bu üretici';
