@@ -901,7 +901,7 @@ loadAllYemlerToCache();
 
 
         
-        sidebarNav.addEventListener('click', function(event) {
+sidebarNav.addEventListener('click', function(event) {
             const link = event.target.closest('a.nav-link');
             if (!link || link.id === 'logoutButton') return;
             event.preventDefault();
@@ -914,53 +914,97 @@ loadAllYemlerToCache();
             const activeSection = document.getElementById(targetId);
             if(activeSection) activeSection.style.display = 'block';
             
-            if (targetId === 'dashboard') { updateDashboardStats();  updateMonthlyStats();}
-            if (targetId === 'cari-yonetimi') {populateCariKategoriFiltre();renderCariListesi();populateCariKategoriSelect(document.getElementById('cariKategori'));generateNextCariKodu();}
-            if (targetId === 'sut-alimi') { if(topluGirisTarihInput) topluGirisTarihInput.value = getTodayForInput(); populateCariKategoriSelect(topluGirisKategoriSelect); populateTankSelect(document.getElementById('topluGirisTank')); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); }
-            if (targetId === 'yem-stok-yonetimi') { populateCariSelect(document.getElementById('yemAlisTedarikci'), 'tedarikçi'); populateYemSelect(document.getElementById('yemSecimiAlis')); renderYemAlisHareketleri(); renderYemStokListesi(); }
-            if (targetId === 'yem-satisi') { populateCariSelect(document.getElementById('yemAlanTedarikci'), 'üretici'); populateYemSelect(document.getElementById('yemSecimiSatis')); renderYemSatisListesi(); }
-            if (targetId === 'tahsilat-ve-odemeler') { populateCariSelect(document.getElementById('odemeYapilanTedarikci')); renderOdemeListesi(); }
-            if (targetId === 'hesap-ozeti'){ populateCariSelect(document.getElementById('raporCariSecimi')); if(!document.getElementById('raporTarihAraligi').value) document.getElementById('raporTarihAraligi').value = getMonthYearForInput(); }
-            if (targetId === 'sut-alim-raporu'){ populateCariSelect(document.getElementById('sutRaporuTedarikciSecimi'), 'üretici'); populateCariKategoriSelect(document.getElementById('sutRaporuKategoriSecimi'), "Tümü"); // Tarih aralığına varsayılan değerleri ata (bu ayın başı ve bugün)
-const baslangicTarihiInput = document.getElementById('sutRaporuBaslangicTarihi');
-const bitisTarihiInput = document.getElementById('sutRaporuBitisTarihi');
-if (baslangicTarihiInput && !baslangicTarihiInput.value && bitisTarihiInput && !bitisTarihiInput.value) {
-    const today = new Date();
-    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    
-    const formatForInput = (date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
-
-    baslangicTarihiInput.value = formatForInput(firstDayOfMonth);
-    bitisTarihiInput.value = formatForInput(today);
-} }
-
-
-
-if (targetId === 'yem-stok-yonetimi') { 
-    populateCariSelect(document.getElementById('yemAlisTedarikci'), 'tedarikçi'); 
-    populateYemSelect(document.getElementById('yemSecimiAlis')); 
-    // YENİ: Sayım formu için yem listesini ve geçmişi de yükle
-    populateYemSelect(document.getElementById('sayimYemSecimi')); 
-    renderStokSayimGecmisi(); 
-    
-    renderYemAlisHareketleri(); 
-    renderYemStokListesi(); 
-}
-            if (targetId === 'aylik-yem-raporu'){ if(!document.getElementById('yemRaporuAySecimi').value) document.getElementById('yemRaporuAySecimi').value = getMonthYearForInput(); }
-            if (targetId === 'dinamik-sut-raporu'){ populateCariKategoriSelect(document.getElementById('karneRaporuKategoriSecimi'), "Tüm Kategoriler"); if(!document.getElementById('karneRaporuAySecimi').value) document.getElementById('karneRaporuAySecimi').value = getMonthYearForInput(); }
-            if (targetId === 'hareket-dokumu') { renderHareketDokumu(); }
-            if (targetId === 'ayarlar') { renderCariKategoriListesi(); getSettings(); if (currentUserRole === 'admin') renderKullaniciListesi(); }
-            if (targetId === 'tank-yonetimi') { renderTankListesi(); }
+            // İlgili bölüme tıklandığında çalışacak fonksiyonlar
+            if (targetId === 'dashboard') { 
+                updateDashboardStats();
+                updateMonthlyStats();
+            }
+            if (targetId === 'cari-yonetimi') {
+                populateCariKategoriFiltre();
+                renderCariListesi();
+                populateCariKategoriSelect(document.getElementById('cariKategori'));
+                generateNextCariKodu();
+            }
+            if (targetId === 'sut-alimi') { 
+                if(topluGirisTarihInput) topluGirisTarihInput.value = getTodayForInput(); 
+                populateCariKategoriSelect(topluGirisKategoriSelect); 
+                populateTankSelect(document.getElementById('topluGirisTank')); 
+                renderTopluSutGirisFormu(); 
+                renderSutAlimGecmisi(); 
+            }
+            if (targetId === 'yem-stok-yonetimi') { 
+                populateCariSelect(document.getElementById('yemAlisTedarikci'), 'tedarikçi'); 
+                populateYemSelect(document.getElementById('yemSecimiAlis')); 
+                populateYemSelect(document.getElementById('sayimYemSecimi')); 
+                renderStokSayimGecmisi(); 
+                renderYemAlisHareketleri(); 
+                renderYemStokListesi(); 
+            }
+            if (targetId === 'yem-satisi') { 
+                populateCariSelect(document.getElementById('yemAlanTedarikci'), 'üretici'); 
+                populateYemSelect(document.getElementById('yemSecimiSatis')); 
+                renderYemSatisListesi(); 
+            }
+            if (targetId === 'tahsilat-ve-odemeler') { 
+                populateCariSelect(document.getElementById('odemeYapilanTedarikci')); 
+                renderOdemeListesi(); 
+            }
+            if (targetId === 'hesap-ozeti'){ 
+                populateCariSelect(document.getElementById('raporCariSecimi')); 
+                if(!document.getElementById('raporTarihAraligi').value) document.getElementById('raporTarihAraligi').value = getMonthYearForInput(); 
+            }
+            if (targetId === 'sut-alim-raporu'){ 
+                populateCariSelect(document.getElementById('sutRaporuTedarikciSecimi'), 'üretici'); 
+                populateCariKategoriSelect(document.getElementById('sutRaporuKategoriSecimi'), "Tümü"); 
+                
+                const baslangicTarihiInput = document.getElementById('sutRaporuBaslangicTarihi');
+                const bitisTarihiInput = document.getElementById('sutRaporuBitisTarihi');
+                if (baslangicTarihiInput && !baslangicTarihiInput.value && bitisTarihiInput && !bitisTarihiInput.value) {
+                    const today = new Date();
+                    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                    const formatForInput = (date) => {
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        return `${year}-${month}-${day}`;
+                    };
+                    baslangicTarihiInput.value = formatForInput(firstDayOfMonth);
+                    bitisTarihiInput.value = formatForInput(today);
+                }
+            }
+            if (targetId === 'aylik-yem-raporu'){ 
+                if(!document.getElementById('yemRaporuAySecimi').value) document.getElementById('yemRaporuAySecimi').value = getMonthYearForInput(); 
+            }
+            if (targetId === 'dinamik-sut-raporu'){ 
+                populateCariKategoriSelect(document.getElementById('karneRaporuKategoriSecimi'), "Tüm Kategoriler"); 
+                if(!document.getElementById('karneRaporuAySecimi').value) document.getElementById('karneRaporuAySecimi').value = getMonthYearForInput(); 
+            }
+            if (targetId === 'hareket-dokumu') { 
+                renderHareketDokumu(); 
+            }
+            if (targetId === 'ayarlar') { 
+                renderCariKategoriListesi(); 
+                getSettings(); 
+                if (currentUserRole === 'admin') renderKullaniciListesi(); 
+            }
+            if (targetId === 'tank-yonetimi') { 
+                renderTankListesi(); 
+            }
             if (targetId === 'tank-aktarim') { 
                 populateTankSelect(document.getElementById('aktarimKaynakTank'));
                 populateCariSelect(document.getElementById('aktarimHedefCari'), 'süt alıcı');
                 if(document.getElementById('aktarimTarih')) document.getElementById('aktarimTarih').value = getTodayForInput();
                 renderAktarimGecmisi();
+            }
+
+            // YENİ EKLENEN OTOMATİK KAPANMA ÖZELLİĞİ
+            // Küçük ekranlarda (1024px ve altı), bir menü linkine tıklandığında
+            // kenar çubuğunun otomatik olarak kapanmasını sağlar.
+            if (window.innerWidth <= 1024 && sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active');
+                if (menuToggleBtn) {
+                     menuToggleBtn.classList.remove('active');
+                }
             }
         });
         
@@ -3204,7 +3248,7 @@ async function renderOdemeListesi() {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
 
-    // Tablo başlığını dinamik olarak güncelle (yeni "Ödeme Türü" sütunu için)
+    // Tablo başlığı (değişiklik yok)
     const thead = listBody.parentElement.querySelector('thead');
     if (thead) {
         thead.innerHTML = `
@@ -3223,36 +3267,29 @@ async function renderOdemeListesi() {
         const snapshot = await db.collection('odemeVeTahsilatlar')
             .where('sahipId', '==', sahipId)
             .orderBy('tarih', 'desc')
-            .limit(30) // Performans için son 30 hareketi göster
+            .limit(30)
             .get();
         
         if(snapshot.empty){
-            // Yeni sütun eklendiği için colspan 7'ye güncellendi
             listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">İşlem hareketi bulunmuyor.</td></tr>';
             return;
         }
 
-        // Performans için tüm cari isimlerini tek seferde çek
-        const cariIds = [...new Set(snapshot.docs.map(doc => doc.data().cariId))];
-        const cariMap = new Map();
-        if (cariIds.length > 0) {
-            const cariSnapshot = await db.collection('cariler').where(firebase.firestore.FieldPath.documentId(), 'in', cariIds).get();
-            cariSnapshot.forEach(doc => cariMap.set(doc.id, doc.data().adiSoyadi));
-        }
+        // GÜNCELLEME: ID toplama ve 'in' sorgusu ile isim çekme kodları kaldırıldı.
+        // İsimler artık uygulama başında yüklenen 'window.cariDataMap' hafızasından okunacak.
 
         let rows = '';
         snapshot.forEach(doc => {
             const islem = doc.data();
-            const cariAdi = cariMap.get(islem.cariId) || 'Bilinmiyor';
+            // GÜNCELLEME: Cari adı artık hafızadaki haritadan (map) anında okunuyor.
+            const cariAdi = window.cariDataMap.get(islem.cariId)?.adiSoyadi || 'Bilinmiyor';
             
-            // "islemTuru" alanını daha okunaklı hale getir
+            // Metinlerin gösterim mantığı aynı kalıyor
             let islemTuruText = islem.islemTuru;
             if(islem.islemTuru === 'odeme') islemTuruText = 'Ödeme';
             if(islem.islemTuru === 'tahsilat') islemTuruText = 'Tahsilat';
-            // Açılış bakiyesinden gelen eski kayıtlar için de kontrol
             if(islem.islemTuru === 'borc') islemTuruText = 'Açılış Borcu';
             if(islem.islemTuru === 'alacak') islemTuruText = 'Açılış Alacağı';
-
 
             rows += `<tr>
                 <td>${formatDate(islem.tarih)}</td>
@@ -3274,6 +3311,7 @@ async function renderOdemeListesi() {
         listBody.innerHTML = '<tr><td colspan="7" style="color: red; text-align:center;">Ödeme listesi yüklenirken bir hata oluştu.</td></tr>';
     }
 }
+
 
 // YENİ EKLENEN FONKSİYON
 async function generateNextCariKodu() {
