@@ -881,7 +881,8 @@ auth.onAuthStateChanged(async (user) => {
         const tankFormTemizleBtn = document.getElementById('tankFormTemizleBtn');
         const tankAktarimForm = document.getElementById('tankAktarimForm');
         const aktarimKaynakTankSelect = document.getElementById('aktarimKaynakTank');
-
+ window.yemDataMap = new Map();
+    window.cariDataMap = new Map();
         if (menuToggleBtn && sidebar) {
             menuToggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
             sidebar.addEventListener('click', (event) => {
@@ -893,7 +894,12 @@ auth.onAuthStateChanged(async (user) => {
 
         applyRolePermissions();
         loadAndRenderAllData();
+
+loadAllYemlerToCache();
+    loadAllCarilerToCache();
                 updateMonthlyStats(); 
+
+
         
         sidebarNav.addEventListener('click', function(event) {
             const link = event.target.closest('a.nav-link');
@@ -2542,7 +2548,33 @@ async function renderYemStokListesi() {
     } catch (error) { console.error("Yem stok listesi yüklenirken hata:", error); }
 }
 
+// YENİ FONKSİYON 1: Tüm yemleri hafızadaki bir haritaya yükler
+async function loadAllYemlerToCache() {
+    window.yemDataMap = new Map();
+    try {
+        const snapshot = await db.collection('yemler').where("sahipId", "==", sahipId).get();
+        snapshot.forEach(doc => {
+            window.yemDataMap.set(doc.id, doc.data());
+        });
+        console.log(`${window.yemDataMap.size} adet yem bilgisi hafızaya alındı.`);
+    } catch (error) {
+        console.error("Tüm yemler yüklenirken hata:", error);
+    }
+}
 
+// YENİ FONKSİYON 2: Tüm carileri hafızadaki bir haritaya yükler
+async function loadAllCarilerToCache() {
+    window.cariDataMap = new Map();
+    try {
+        const snapshot = await db.collection('cariler').where("sahipId", "==", sahipId).get();
+        snapshot.forEach(doc => {
+            window.cariDataMap.set(doc.id, doc.data());
+        });
+        console.log(`${window.cariDataMap.size} adet cari bilgisi hafızaya alındı.`);
+    } catch (error) {
+        console.error("Tüm cariler yüklenirken hata:", error);
+    }
+}
 async function handleYemAlisKaydet(event) {
     event.preventDefault();
     const currentUser = auth.currentUser;
@@ -3081,28 +3113,24 @@ async function renderYemSatisListesi() {
     const listBody = document.getElementById('yemSatisListesiBody');
     const currentUser = auth.currentUser;
     if (!currentUser) return;
+
     try {
         const snapshot = await db.collection('yem_satislari').where('sahipId', '==', sahipId).orderBy('tarih', 'desc').limit(20).get();
-        if (snapshot.empty) { listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Yem satış hareketi bulunmuyor.</td></tr>'; return; }
-        
-        const yemIds = [...new Set(snapshot.docs.map(doc => doc.data().yemId))];
-        const cariIds = [...new Set(snapshot.docs.map(doc => doc.data().cariId))];
-        const yemMap = new Map();
-        const cariMap = new Map();
-        if (yemIds.length > 0) {
-            const yemSnapshot = await db.collection('yemler').where(firebase.firestore.FieldPath.documentId(), 'in', yemIds).get();
-            yemSnapshot.forEach(doc => yemMap.set(doc.id, doc.data().ad));
-        }
-        if (cariIds.length > 0) {
-            const cariSnapshot = await db.collection('cariler').where(firebase.firestore.FieldPath.documentId(), 'in', cariIds).get();
-            cariSnapshot.forEach(doc => cariMap.set(doc.id, doc.data().adiSoyadi));
+        if (snapshot.empty) {
+            listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Yem satış hareketi bulunmuyor.</td></tr>';
+            return;
         }
         
+        // GÜNCELLEME: Artık 'in' sorguları yapmak yerine doğrudan hafızadan okuyacağız.
+        // Bu yüzden ID toplama ve sorgulama kodları kaldırıldı.
+
         let rows = '';
         snapshot.forEach(doc => {
             const satis = doc.data();
-            const yemAdi = yemMap.get(satis.yemId) || 'Bilinmiyor';
-            const cariAdi = cariMap.get(satis.cariId) || 'Bilinmiyor';
+            // İsimler artık hafızadaki haritalardan (map) okunuyor.
+            const yemAdi = window.yemDataMap.get(satis.yemId)?.ad || 'Bilinmiyor';
+            const cariAdi = window.cariDataMap.get(satis.cariId)?.adiSoyadi || 'Bilinmiyor';
+            
             rows += `<tr>
                 <td>${formatDate(satis.tarih)}</td><td>${cariAdi}</td><td>${yemAdi}</td><td>${satis.miktar}</td>
                 <td>${formatCurrency(satis.satisFiyati)}</td><td>${formatCurrency(satis.toplamTutar)}</td>
@@ -3113,10 +3141,13 @@ async function renderYemSatisListesi() {
             </tr>`;
         });
         listBody.innerHTML = rows;
-    } catch(e) { console.error("Yem satış hareketleri yüklenirken hata:", e); }
+
+    } catch(e) { 
+        console.error("Yem satış hareketleri yüklenirken hata:", e);
+        // Hata mesajı güncellendi
+        listBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Liste yüklenirken bir hata oluştu.</td></tr>';
+    }
 }
-
-
 
 
 async function handleOdemeKaydet(event) {
