@@ -26,7 +26,7 @@
                 <li><a href="#dashboard" class="nav-link active">📝 Kontrol Paneli</a></li>
                 <li><a href="#cari-yonetimi" class="nav-link">👥 Cari Yönetimi</a></li>
                 <li><a href="#sut-alimi" class="nav-link">🥛 Günlük Süt Alımı</a></li>
-                <li><a href="#yem-stok-yonetimi" class="nav-link">📦 Yem Stok Yönetimi</a></li>
+                <li><a href="#yem-stok-yonetimi" class="nav-link">📦 Stok Yönetimi</a></li>
                 <li><a href="#yem-satisi" class="nav-link">🌾 Yem Satışı</a></li>
                 <li><a href="#tahsilat-ve-odemeler" class="nav-link">💳 Tahsilat ve Ödemeler</a></li>
                 <li><a href="#hesap-ozeti" class="nav-link">📊 Cari Hesap Özeti</a></li>
@@ -327,29 +327,84 @@
 </section>
         
         <section id="yem-stok-yonetimi" class="module-section hidden-section">
-            <div class="module-header"><h2>📦 Yem Stok Yönetimi</h2></div>
-            <div class="container">
-               <div class="form-section"><h3><span id="yemTanimFormBaslik">Yeni Yem Tanımla</span></h3><form id="yemTanimForm" action="#"><input type="hidden" id="yemTanimEditId"><div class="form-grid">
-                   <div class="form-group"><label for="yemKodu">Kod:</label><input type="text" id="yemKodu" required></div>
-                   <div class="form-group"><label for="yemAdi">Ad:</label><input type="text" id="yemAdi" required></div>
-                   <div class="form-group"><label for="yemKategorisi">Kategori:</label><select id="yemKategorisi"><option value="buyukbas">Büyükbaş</option><option value="kucukbas">Küçükbaş</option></select></div>
-                   <div class="form-group"><label for="yemBirimi">Birim:</label><input type="text" id="yemBirimi" value="Çuval"></div>
-                  
-                   <div class="form-group"><label for="yemSatisFiyati">Satış Fiyatı:</label><input type="number" id="yemSatisFiyati" step="0.01"></div>
-               </div><button type="submit" class="btn btn-primary" id="yemTanimKaydetBtn">Kaydet</button><button type="button" class="btn" id="yemTanimFormTemizleBtn" style="display:none;">Yeni</button></form></div>
-               <div class="list-section"><h3>Tanımlı Yemler & Stok</h3><table><thead><tr><th>Kod</th><th>Ad</th><th>Kategori</th><th>Birim</th><th>Alış F.</th><th>Satış F.</th><th>Stok</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemStokListesiBody"></tbody></table></div>
-               <hr>
-               <div class="form-section"><h3><span id="yemAlisFormBaslik">Yeni Yem Alışı</span></h3><form id="yemAlisForm" action="#"><input type="hidden" id="yemAlisEditId"><div class="form-grid">
-                   <div class="form-group"><label for="yemAlisTarih">Tarih:</label><input type="date" id="yemAlisTarih" required></div>
-                   <div class="form-group"><label for="yemSecimiAlis">Yem:</label><select id="yemSecimiAlis" required><option value="">Seçiniz...</option></select></div>
-                   <div class="form-group"><label for="yemAlisMiktar">Miktar:</label><input type="number" id="yemAlisMiktar" step="1" required></div>
-                   <div class="form-group"><label for="yemAlisTedarikci">Cari:</label><select id="yemAlisTedarikci"><option value="">Seçiniz...</option></select></div>
-                   <div class="form-group"><label for="yemAlisBirimFiyati">Alış Fiyatı:</label><input type="number" id="yemAlisBirimFiyati" step="0.01" required></div>
-                   <div class="form-group"><label for="yemAlisToplamTutar">Toplam Tutar:</label><input type="text" id="yemAlisToplamTutar" readonly></div>
-               </div><button type="submit" class="btn btn-primary" id="yemAlisKaydetBtn">Alışı Kaydet</button><button type="button" class="btn" id="yemAlisFormTemizleBtn" style="display:none;">Yeni</button></form></div>
-               <div class="list-section"><h3>Yem Alış Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Yem</th><th>Miktar</th><th>Cari</th><th>Alış F.</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemAlisHareketListesiBody"></tbody></table></div>
-            </div>
-        </section>
+    <div class="module-header"><h2>📦 Stok Yönetimi</h2></div>
+    <div class="container">
+       <div class="form-section"><h3><span id="yemTanimFormBaslik">Yeni Yem Tanımla</span></h3><form id="yemTanimForm" action="#"><input type="hidden" id="yemTanimEditId"><div class="form-grid">
+           <div class="form-group"><label for="yemKodu">Kod:</label><input type="text" id="yemKodu" required></div>
+           <div class="form-group"><label for="yemAdi">Ad:</label><input type="text" id="yemAdi" required></div>
+           <div class="form-group"><label for="yemKategorisi">Kategori:</label><select id="yemKategorisi"><option value="buyukbas">Büyükbaş</option><option value="kucukbas">Küçükbaş</option></select></div>
+           <div class="form-group"><label for="yemBirimi">Birim:</label><input type="text" id="yemBirimi" value="Çuval"></div>
+          
+           <div class="form-group"><label for="yemSatisFiyati">Satış Fiyatı:</label><input type="number" id="yemSatisFiyati" step="0.01"></div>
+       </div><button type="submit" class="btn btn-primary" id="yemTanimKaydetBtn">Kaydet</button><button type="button" class="btn" id="yemTanimFormTemizleBtn" style="display:none;">Yeni</button></form></div>
+       <div class="list-section"><h3>Tanımlı Yemler & Stok</h3><table><thead><tr><th>Kod</th><th>Ad</th><th>Kategori</th><th>Birim</th><th>Alış F.</th><th>Satış F.</th><th>Stok</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemStokListesiBody"></tbody></table></div>
+       <hr>
+       <div class="form-section"><h3><span id="yemAlisFormBaslik">Yeni Yem Alışı</span></h3><form id="yemAlisForm" action="#"><input type="hidden" id="yemAlisEditId"><div class="form-grid">
+           <div class="form-group"><label for="yemAlisTarih">Tarih:</label><input type="date" id="yemAlisTarih" required></div>
+           <div class="form-group"><label for="yemSecimiAlis">Yem:</label><select id="yemSecimiAlis" required><option value="">Seçiniz...</option></select></div>
+           <div class="form-group"><label for="yemAlisMiktar">Miktar:</label><input type="number" id="yemAlisMiktar" step="1" required></div>
+           <div class="form-group"><label for="yemAlisTedarikci">Cari:</label><select id="yemAlisTedarikci"><option value="">Seçiniz...</option></select></div>
+           <div class="form-group"><label for="yemAlisBirimFiyati">Alış Fiyatı:</label><input type="number" id="yemAlisBirimFiyati" step="0.01" required></div>
+           <div class="form-group"><label for="yemAlisToplamTutar">Toplam Tutar:</label><input type="text" id="yemAlisToplamTutar" readonly></div>
+       </div><button type="submit" class="btn btn-primary" id="yemAlisKaydetBtn">Alışı Kaydet</button><button type="button" class="btn" id="yemAlisFormTemizleBtn" style="display:none;">Yeni</button></form></div>
+       <div class="list-section"><h3>Yem Alış Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Yem</th><th>Miktar</th><th>Cari</th><th>Alış F.</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemAlisHareketListesiBody"></tbody></table></div>
+        
+        <hr style="margin: 40px 0;">
+
+        <div class="form-section">
+            <h3>Stok Sayım Girişi</h3>
+            <p>Fiziksel olarak saydığınız yem miktarını girerek sistemdeki stoğu güncelleyin.</p>
+            <form id="stokSayimForm" action="#">
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+                    <div class="form-group">
+                        <label for="sayimTarihi">Sayım Tarihi:</label>
+                        <input type="date" id="sayimTarihi" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sayimYemSecimi">Sayımı Yapılan Yem:</label>
+                        <select id="sayimYemSecimi" required>
+                            <option value="">Yem Seçiniz...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sayimMevcutStok">Sistemdeki Stok:</label>
+                        <input type="number" id="sayimMevcutStok" readonly style="background-color: #e9ecef;">
+                    </div>
+                    <div class="form-group">
+                        <label for="sayimFizikselStok">Sayılan Miktar (Fiziksel):</label>
+                        <input type="number" id="sayimFizikselStok" step="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sayimFarki">Fark:</label>
+                        <input type="text" id="sayimFarki" readonly style="background-color: #e9ecef; font-weight: bold;">
+                    </div>
+                    <div class="form-group" style="grid-column: span 3;">
+                        <label for="sayimNotu">Açıklama / Not:</label>
+                        <textarea id="sayimNotu" rows="2" placeholder="Örn: Fire, hatalı giriş düzeltmesi..."></textarea>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-warning" id="stokSayimKaydetBtn">Sayımı Kaydet ve Stoğu Güncelle</button>
+            </form>
+        </div>
+    
+        <div class="list-section" style="margin-top: 20px;">
+            <h3>Stok Sayım Hareketleri</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tarih</th>
+                        <th>Yem Adı</th>
+                        <th>Önceki Stok</th>
+                        <th>Sayılan Miktar</th>
+                        <th>Fark</th>
+                        <th>Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody id="stokSayimGecmisiBody"></tbody>
+            </table>
+        </div>
+        </div>
+</section>
         
         <section id="yem-satisi" class="module-section hidden-section">
              <div class="module-header"><h2>🌾 Yem Satışı</h2></div>
@@ -877,6 +932,19 @@ if (baslangicTarihiInput && !baslangicTarihiInput.value && bitisTarihiInput && !
     baslangicTarihiInput.value = formatForInput(firstDayOfMonth);
     bitisTarihiInput.value = formatForInput(today);
 } }
+
+
+
+if (targetId === 'yem-stok-yonetimi') { 
+    populateCariSelect(document.getElementById('yemAlisTedarikci'), 'tedarikçi'); 
+    populateYemSelect(document.getElementById('yemSecimiAlis')); 
+    // YENİ: Sayım formu için yem listesini ve geçmişi de yükle
+    populateYemSelect(document.getElementById('sayimYemSecimi')); 
+    renderStokSayimGecmisi(); 
+    
+    renderYemAlisHareketleri(); 
+    renderYemStokListesi(); 
+}
             if (targetId === 'aylik-yem-raporu'){ if(!document.getElementById('yemRaporuAySecimi').value) document.getElementById('yemRaporuAySecimi').value = getMonthYearForInput(); }
             if (targetId === 'dinamik-sut-raporu'){ populateCariKategoriSelect(document.getElementById('karneRaporuKategoriSecimi'), "Tüm Kategoriler"); if(!document.getElementById('karneRaporuAySecimi').value) document.getElementById('karneRaporuAySecimi').value = getMonthYearForInput(); }
             if (targetId === 'hareket-dokumu') { renderHareketDokumu(); }
@@ -962,6 +1030,10 @@ if (baslangicTarihiInput && !baslangicTarihiInput.value && bitisTarihiInput && !
         cariListesiYazdirBtn?.addEventListener('click', () => handleYazdir('cari-yonetimi'));
 document.getElementById('cariDurumFiltre')?.addEventListener('change', renderCariListesi);
 
+
+document.getElementById('stokSayimForm')?.addEventListener('submit', handleStokSayimKaydet);
+document.getElementById('sayimYemSecimi')?.addEventListener('change', updateSayimForm);
+document.getElementById('sayimFizikselStok')?.addEventListener('input', updateSayimForm);
         document.getElementById('raporYazdirBtn')?.addEventListener('click', () => handleYazdir('hesap-ozeti'));
         document.getElementById('sutRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('sut-alim-raporu'));
         document.getElementById('yemRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('aylik-yem-raporu'));
@@ -1541,20 +1613,21 @@ async function renderCariListesi() {
                 const bakiyeText = `${formatCurrency(bakiye)} ${bakiye >= 0 ? '(A)' : '(B)'}`;
                 
                 row.innerHTML = `
-                    <td>${c.kodu || ''}</td>
-                    <td>${c.adiSoyadi || ''}</td>
-                    <td>${c.kategori || ''}</td>
-                    <td>${c.cariGrup || 'Belirtilmemiş'}</td>
-                    <td style="${duplicates.includes(String(c.rotaSirasi)) ? 'background-color:#fff3cd; color:red; font-weight:bold;' : ''}">${c.rotaSirasi || ''}</td>
-                    <td style="${durumStyle}">${durumText}</td>
-                    <td>${c.telefon || ''}</td>
-                    <td>${formatCurrency(bakiyeDetay.borc)}</td>
-                    <td>${formatCurrency(bakiyeDetay.alacak)}</td>
-                    <td style="${bakiyeStyle}">${bakiyeText}</td>
-                    <td class="dont-print">
-                        <button class="btn btn-edit btn-sm" onclick="editCari('${c.id}')">Düzenle</button>
-                        <button class="btn btn-delete btn-sm" onclick="deleteCari('${c.id}')">Sil</button>
-                    </td>`;
+    <td>${c.kodu || ''}</td>
+    <td>${c.adiSoyadi || ''}</td>
+    <td>${c.kategori || ''}</td>
+    <td>${c.cariGrup || 'Belirtilmemiş'}</td>
+    <td style="${duplicates.includes(String(c.rotaSirasi)) ? 'background-color:#fff3cd; color:red; font-weight:bold;' : ''}">${c.rotaSirasi || ''}</td>
+    <td style="${durumStyle}">${durumText}</td>
+    <td>${c.telefon || ''}</td>
+    <td>${formatCurrency(bakiyeDetay.borc)}</td>
+    <td>${formatCurrency(bakiyeDetay.alacak)}</td>
+    <td style="${bakiyeStyle}">${bakiyeText}</td>
+    
+    <td class="dont-print" style="white-space: nowrap;">
+        <button class="btn btn-edit btn-sm" onclick="editCari('${c.id}')">Düzenle</button>
+        <button class="btn btn-delete btn-sm" onclick="deleteCari('${c.id}')">Sil</button>
+    </td>`;
             }
         });
 
@@ -1592,7 +1665,130 @@ function exportTableToExcel(containerId, fileName = 'rapor') {
     XLSX.writeFile(wb, `${fileName}_${new Date().toLocaleDateString('tr-TR')}.xlsx`);
 }
 
+async function updateSayimForm() {
+    const yemId = document.getElementById('sayimYemSecimi').value;
+    const mevcutStokInput = document.getElementById('sayimMevcutStok');
+    const fizikselStokInput = document.getElementById('sayimFizikselStok');
+    const farkInput = document.getElementById('sayimFarki');
+    
+    if (!yemId) {
+        mevcutStokInput.value = '';
+        fizikselStokInput.value = '';
+        farkInput.value = '';
+        return;
+    }
 
+    const yemData = window.yemDataMap.get(yemId);
+    const mevcutStok = yemData ? yemData.stokMiktari || 0 : 0;
+    mevcutStokInput.value = mevcutStok;
+
+    const fizikselStok = parseFloat(fizikselStokInput.value) || 0;
+    const fark = fizikselStok - mevcutStok;
+    
+    farkInput.value = `${fark > 0 ? '+' : ''}${fark}`;
+    farkInput.style.color = fark < 0 ? 'red' : 'green';
+}
+
+// Stok sayımını veritabanına kaydeden ana fonksiyon
+async function handleStokSayimKaydet(event) {
+    event.preventDefault();
+
+    const tarih = document.getElementById('sayimTarihi').value;
+    const yemId = document.getElementById('sayimYemSecimi').value;
+    const fizikselStok = parseFloat(document.getElementById('sayimFizikselStok').value);
+    const not = document.getElementById('sayimNotu').value;
+
+    if (!tarih || !yemId || isNaN(fizikselStok) || fizikselStok < 0) {
+        alert("Lütfen tarih, yem ve geçerli bir sayım miktarı girin.");
+        return;
+    }
+
+    const yemRef = db.collection('yemler').doc(yemId);
+    const sayimHareketRef = db.collection('stok_sayim_hareketleri').doc();
+
+    try {
+        await db.runTransaction(async (transaction) => {
+            const yemDoc = await transaction.get(yemRef);
+            if (!yemDoc.exists) {
+                throw new Error("Sayımı yapılacak yem bulunamadı!");
+            }
+            const yemData = yemDoc.data();
+            const mevcutStok = yemData.stokMiktari || 0;
+            const fark = fizikselStok - mevcutStok;
+
+            // 1. Yem stoğunu doğrudan yeni sayılan miktar ile güncelle
+            transaction.update(yemRef, { stokMiktari: fizikselStok });
+
+            // 2. Bu işlemi kayıt altına al
+            transaction.set(sayimHareketRef, {
+                sahipId: sahipId,
+                tarih: tarih,
+                yemId: yemId,
+                yemAdi: yemData.ad,
+                mevcutStok: mevcutStok,
+                fizikselStok: fizikselStok,
+                fark: fark,
+                not: not,
+                kayitZamani: new Date()
+            });
+        });
+
+        alert("Stok sayımı başarıyla kaydedildi ve yem stoğu güncellendi!");
+        document.getElementById('stokSayimForm').reset();
+        await Promise.all([
+            renderYemStokListesi(), 
+            renderStokSayimGecmisi(),
+            populateYemSelect(document.getElementById('sayimYemSecimi')) // Select menüsünü yenile
+        ]);
+
+    } catch (error) {
+        console.error("Stok sayımı kaydedilirken hata:", error);
+        alert("Hata: " + error.message);
+    }
+}
+
+// Stok sayım geçmişini listeleyen fonksiyon
+async function renderStokSayimGecmisi() {
+    const listBody = document.getElementById('stokSayimGecmisiBody');
+    if (!listBody) return;
+    listBody.innerHTML = '<tr><td colspan="6">Yükleniyor...</td></tr>';
+    
+    try {
+        const snapshot = await db.collection('stok_sayim_hareketleri')
+            .where('sahipId', '==', sahipId)
+            .orderBy('tarih', 'desc')
+            .limit(10)
+            .get();
+
+        if (snapshot.empty) {
+            listBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Kayıtlı stok sayım hareketi bulunmuyor.</td></tr>';
+            return;
+        }
+
+        let rows = '';
+        snapshot.forEach(doc => {
+            const sayim = doc.data();
+            const farkStyle = sayim.fark < 0 ? 'color:red;' : 'color:green;';
+            const farkText = `${sayim.fark > 0 ? '+' : ''}${sayim.fark}`;
+
+            rows += `
+                <tr>
+                    <td>${formatDate(sayim.tarih)}</td>
+                    <td>${sayim.yemAdi}</td>
+                    <td>${sayim.mevcutStok}</td>
+                    <td>${sayim.fizikselStok}</td>
+                    <td style="${farkStyle}; font-weight:bold;">${farkText}</td>
+                    <td>${sayim.not || ''}</td>
+                </tr>
+            `;
+        });
+        listBody.innerHTML = rows;
+
+    } catch (error) {
+        console.error("Stok sayım geçmişi yüklenirken hata:", error);
+        listBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">Geçmiş yüklenemedi.</td></tr>';
+    }
+}
 
 
 
@@ -3326,7 +3522,7 @@ async function renderSutAlimGecmisi() {
     }
 
     gecmisTarihSpan.textContent = formatDate(tarih);
-    header.innerHTML = `<tr><th>Cari Adı</th><th>Akşam (Lt)</th><th>Sabah (Lt)</th><th>Toplam</th><th>Fiyat</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr>`;
+    header.innerHTML = `<tr><th>Üretici</th><th>Akşam (Lt)</th><th>Sabah (Lt)</th><th>Toplam</th><th>Fiyat</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr>`;
     body.innerHTML = '<tr><td colspan="7">Yükleniyor...</td></tr>';
     footer.innerHTML = '';
 
@@ -4396,7 +4592,6 @@ async function renderDashboardTanks() {
     });
 }
 
-
 async function handleHesapOzetiRaporuOlustur() {
     toggleReportButtons('hesapOzeti', false);
     const cariId = document.getElementById('raporCariSecimi').value;
@@ -4531,15 +4726,17 @@ async function handleHesapOzetiRaporuOlustur() {
             <div class="report-block"><h5>Önceki Dönemden Devir</h5><p class="block-total"><strong>${formatCurrency(devredenBakiye)} (${devredenBakiye >= 0 ? 'Cari Alacaklı' : 'Cari Borçlu'})</strong></p></div>
             <div class="report-block"><h5>Cari Ay Süt Alımları</h5>${sutDetayHTML || '<p>Bu ay süt alımı yok.</p>'}</div>
             <div class="report-block"><h5>Cari Ay Yem Satışları</h5>${yemSatisDetayHTML || '<p>Bu ay yem satışı yok.</p>'}</div>
-            <div class="report-block"><h5>Cari Ay Yapılan Ödemeler</h5>${odemeDetayHTML || '<p>Bu ay ödeme yapılmamış.</p>'}</div>
-            <div class="report-block"><h5>Cari Ay Yapılan Tahsilatlar</h5>${tahsilatDetayHTML || '<p>Bu ay tahsilat yapılmamış.</p>'}</div>
+            
+            <div class="report-block"><h5>Cari Ay Yapılan Tahsilatlar</h5>${odemeDetayHTML || '<p>Bu ay tahsilat yapılmamış.</p>'}</div>
+            <div class="report-block"><h5>Cari Ay Yapılan Ödemeler</h5>${tahsilatDetayHTML || '<p>Bu ay ödeme yapılmamış.</p>'}</div>
+            
             <div class="report-block final-summary">
                 <h5>DÖNEM SONU HESAPLAMASI</h5>
                 <p><span>Önceki Aydan Devir:</span> <span>${formatCurrency(devredenBakiye)}</span></p>
                 <p><span>+ Cari Ay Süt Alımları:</span> <span>+ ${formatCurrency(toplamSutDegeri)}</span></p>
-                <p><span>+ Cari Ay Yapılan Ödemeler:</span> <span>+ ${formatCurrency(toplamOdemeTutari)}</span></p>
+                <p><span>+ Cari Ay Yapılan Tahsilatlar:</span> <span>+ ${formatCurrency(toplamOdemeTutari)}</span></p>
                 <p><span>- Cari Ay Yem Satışları:</span> <span>- ${formatCurrency(toplamYemSatisTutari)}</span></p>
-                <p><span>- Cari Ay Yapılan Tahsilatlar:</span> <span>- ${formatCurrency(toplamTahsilatTutari)}</span></p>
+                <p><span>- Cari Ay Yapılan Ödemeler:</span> <span>- ${formatCurrency(toplamTahsilatTutari)}</span></p>
                 <hr>
                 <p><strong>CARİ AY BAKİYESİ:</strong> <strong>${formatCurrency(cariAyBakiye)}</strong></p>
                 <p><strong>DÖNEM SONU NET BAKİYE:</strong> <strong>${formatCurrency(donemSonuBakiye)} (${donemSonuBakiye >= 0 ? 'Cari Alacaklı' : 'Cari Borçlu'})</strong></p>
@@ -4564,12 +4761,12 @@ async function handleHesapOzetiRaporuOlustur() {
                     ${Object.keys(yemSatisOzet).length > 0 ? `<tr><td>Yem Adı</td><td>Miktar</td><td>Ort. Fiyat</td><td colspan="2">Tutar</td></tr>` + Object.entries(yemSatisOzet).map(([yemAdi, ozet]) => `<tr><td>${yemAdi}</td><td>${ozet.miktar}</td><td>${formatCurrency(ozet.tutar/ozet.miktar)}</td><td colspan="2">${formatCurrency(ozet.tutar)}</td></tr>`).join('') : '<tr><td colspan="5">Bu ay yem satışı yok.</td></tr>'}
                     <tr><td colspan="5"></td></tr>
                     
-                    <tr><td colspan="5" style="background-color:#f2f2f2;"><strong>Cari Ay Yapılan Ödemeler</strong></td></tr>
-                    ${odemeDetaylari.length > 0 ? `<tr><td>Tarih</td><td>Ödeme Türü</td><td>Açıklama</td><td colspan="2">Tutar</td></tr>` + odemeDetaylari.map(islem => `<tr><td>${formatDate(islem.tarih)}</td><td>${islem.odemeTuru || '-'}</td><td>${islem.aciklama}</td><td colspan="2">${formatCurrency(islem.tutar)}</td></tr>`).join('') : '<tr><td colspan="5">Bu ay ödeme yapılmamış.</td></tr>'}
+                    <tr><td colspan="5" style="background-color:#f2f2f2;"><strong>Cari Ay Yapılan Tahsilatlar</strong></td></tr>
+                    ${odemeDetaylari.length > 0 ? `<tr><td>Tarih</td><td>Ödeme Türü</td><td>Açıklama</td><td colspan="2">Tutar</td></tr>` + odemeDetaylari.map(islem => `<tr><td>${formatDate(islem.tarih)}</td><td>${islem.odemeTuru || '-'}</td><td>${islem.aciklama}</td><td colspan="2">${formatCurrency(islem.tutar)}</td></tr>`).join('') : '<tr><td colspan="5">Bu ay tahsilat yapılmamış.</td></tr>'}
                     <tr><td colspan="5"></td></tr>
 
-                    <tr><td colspan="5" style="background-color:#f2f2f2;"><strong>Cari Ay Yapılan Tahsilatlar</strong></td></tr>
-                    ${tahsilatDetaylari.length > 0 ? `<tr><td>Tarih</td><td>Ödeme Türü</td><td>Açıklama</td><td colspan="2">Tutar</td></tr>` + tahsilatDetaylari.map(islem => `<tr><td>${formatDate(islem.tarih)}</td><td>${islem.odemeTuru || '-'}</td><td>${islem.aciklama}</td><td colspan="2">${formatCurrency(islem.tutar)}</td></tr>`).join('') : '<tr><td colspan="5">Bu ay tahsilat yapılmamış.</td></tr>'}
+                    <tr><td colspan="5" style="background-color:#f2f2f2;"><strong>Cari Ay Yapılan Ödemeler</strong></td></tr>
+                    ${tahsilatDetaylari.length > 0 ? `<tr><td>Tarih</td><td>Ödeme Türü</td><td>Açıklama</td><td colspan="2">Tutar</td></tr>` + tahsilatDetaylari.map(islem => `<tr><td>${formatDate(islem.tarih)}</td><td>${islem.odemeTuru || '-'}</td><td>${islem.aciklama}</td><td colspan="2">${formatCurrency(islem.tutar)}</td></tr>`).join('') : '<tr><td colspan="5">Bu ay ödeme yapılmamış.</td></tr>'}
                     <tr><td colspan="5"></td></tr>
 
                     <tr><td colspan="5" style="background-color:#f0f0f0;"><strong>DÖNEM SONU HESAPLAMASI</strong></td></tr>
@@ -4587,7 +4784,6 @@ async function handleHesapOzetiRaporuOlustur() {
         raporDetayAlani.innerHTML = `<p style="color:red; font-weight:bold;">RAPOR OLUŞTURULAMADI!<br>Hata Detayı: ${error.message}.</p>`;
     }
 }
-
 
 
 function toggleReportButtons(reportPrefix, show) {
