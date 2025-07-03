@@ -538,11 +538,13 @@ body.pdf-generating .pdf-source-section .container {
 #sut-rapor-tablosu tfoot span {
     margin: 0 10px;
 }
+
+
 #sut-rapor-tablosu tfoot strong {
-    color: var(--primary-color);
+   font-size: 0.7em;  
+    font-size: 10px; /* İstediğiniz boyutu ayarlayın, örneğin: 13px */
+    color: #0056b3;  /* Rengi değiştirmek isterseniz, örneğin: koyu mavi */
 }
-
-
 
 
 #logoutButton {
@@ -629,3 +631,19 @@ body.pdf-generating .pdf-source-section .container {
     cursor: not-allowed;
     opacity: 0.7;
 }
+
+
+.vakit-baslik {
+            width: 45px; /* Sütun genişliği, ihtiyaca göre ayarlayabilirsiniz */
+            min-width: 45px;
+            text-align: center;
+            padding: 4px 2px !important;
+        }
+
+#sut-rapor-tablosu td {
+            text-align: right;
+            padding-right: 4px !important;
+        }
+        #sut-rapor-tablosu td.uretici-listesi {
+            text-align: left;
+        }

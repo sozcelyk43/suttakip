@@ -4023,8 +4023,8 @@ async function handleDinamikSutRaporu() {
     const kategori = document.getElementById('karneRaporuKategoriSecimi').value;
     const container = document.getElementById('dinamikRaporContainer');
 
-    if (!periodValue || !kategori) {
-        alert("Lütfen bir dönem ve kategori seçin.");
+    if (!periodValue) {
+        alert("Lütfen bir dönem seçin.");
         return;
     }
     container.innerHTML = `<p style="text-align:center; font-size:1.2em;">Rapor oluşturuluyor, veriler çekiliyor...</p>`;
@@ -4048,37 +4048,43 @@ async function handleDinamikSutRaporu() {
     endDateStr = formatForDB(new Date(intYear, intMonth - 1, bitisGunu));
 
     const ayIsimleri = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-    const reportTitleText = `${kategori} - ${ayIsimleri[intMonth - 1]} ${intYear} / ${periodPart}. Yarı Süt Karnesi`;
+    const raporKategoriAdi = kategori ? `${kategori} -` : 'Tüm Kategoriler -';
+    const reportTitleText = `${raporKategoriAdi} ${ayIsimleri[intMonth - 1]} ${intYear} / ${periodPart}. Yarı Süt Karnesi`;
 
     try {
-        const [producersSnapshot, milkSnapshot] = await Promise.all([
-            db.collection('cariler').where('sahipId', '==', sahipId).where('kategori', '==', kategori).where('cariGrup', 'array-contains', 'üretici').orderBy('rotaSirasi').get(),
+        // GÜNCELLEME: Önce tüm üreticiler çekiliyor, sonra kod içinde filtreleniyor.
+        const producersQuery = db.collection('cariler')
+            .where('sahipId', '==', sahipId)
+            .where('cariGrup', 'array-contains', 'üretici');
+
+        const [allProducersSnapshot, milkSnapshot] = await Promise.all([
+            producersQuery.get(),
             db.collection('sut_alimlari').where('sahipId', '==', sahipId).where('tarih', '>=', startDateStr).where('tarih', '<=', endDateStr).get()
         ]);
         
-        if (producersSnapshot.empty) {
-            container.innerHTML = '<p style="text-align:center;">Bu kategoride kayıtlı üretici bulunamadı.</p>';
+        let allProducers = allProducersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // GÜNCELLEME: Kategori filtresi artık burada, JavaScript içinde yapılıyor.
+        let producers = kategori ? allProducers.filter(p => p.kategori === kategori) : allProducers;
+
+        if (producers.length === 0) {
+            container.innerHTML = '<p style="text-align:center;">Bu kriterlere uygun üretici bulunamadı.</p>';
             return;
         }
 
-        // YENİ: Rapordaki üreticilerin ID'lerini bir sette toplayarak verimli filtreleme sağlıyoruz.
-        const producerIdsInReport = new Set(producersSnapshot.docs.map(doc => doc.id));
-        const producers = producersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        const milkData = new Map();
+        producers.sort((a, b) => (a.rotaSirasi || 9999) - (b.rotaSirasi || 9999));
         
-        // YENİ: Her günün sabah ve akşam toplamlarını saklamak için bir harita oluşturuyoruz.
+        const producerIdsInReport = new Set(producers.map(p => p.id));
+        const milkData = new Map();
         const dailyTotals = new Map();
 
         milkSnapshot.forEach(doc => {
             const alim = doc.data();
-            // Sadece bu raporda listelenen üreticilere ait sütleri işleme alıyoruz.
             if (producerIdsInReport.has(alim.cariId)) {
-                // Her bir üreticinin verisini `milkData` haritasına ekliyoruz (mevcut mantık).
                 const key = `${alim.cariId}_${alim.tarih}`;
                 milkData.set(key, alim);
 
-                // YENİ: `dailyTotals` haritasını günlük toplamlarla dolduruyoruz.
-                const day = new Date(alim.tarih + 'T12:00:00').getDate(); // Saat dilimi sorununu önlemek için öğlen saati
+                const day = new Date(alim.tarih + 'T12:00:00').getDate();
                 if (!dailyTotals.has(day)) {
                     dailyTotals.set(day, { sabah: 0, aksam: 0 });
                 }
@@ -4125,7 +4131,6 @@ async function handleDinamikSutRaporu() {
             tableBody.innerHTML += `<tr>${rowHTML}</tr>`;
         });
         
-        // GÜNCELLEME: tfoot (alt toplam) bölümü dinamik olarak oluşturuluyor.
         const tfoot = container.querySelector('tfoot');
         let footerHTML = '<tr><td class="uretici-listesi"><strong>GÜNLÜK TOPLAM</strong></td>';
         for (let i = baslangicGunu; i <= bitisGunu; i++) {
@@ -4143,7 +4148,6 @@ async function handleDinamikSutRaporu() {
         container.innerHTML = `<p style="color:red; text-align:center;">Rapor oluşturulurken bir hata oluştu: ${error.message}</p>`;
     }
 }
-
 
 async function handleYemPivotRaporu(reportType) {
     const raporAlani = document.getElementById('yemRaporuAlani');
