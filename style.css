@@ -609,3 +609,23 @@ body.pdf-generating .pdf-source-section .container {
 #refresh-tanks-btn:hover {
     background-color: rgba(0,0,0,0.1);
 }
+
+.loader-spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 8px;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.is-loading {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
