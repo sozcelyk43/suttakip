@@ -10,7 +10,7 @@
             --danger-color: #dc3545; --warning-color: #ffc107; --light-color: #f8f9fa;
             --dark-color: #343a40; --border-color: #dee2e6; --white-color: #fff;
         }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding: 0; background-color: var(--light-color); color: var(--dark-color); }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding: 0; background-color: var(--light-color); color: 	var(--dark-color); }
         .container { max-width: 600px; margin: 0 auto; padding: 15px; }
         header { 
     background-color: var(--primary-color); 
@@ -26,128 +26,48 @@
 }
 
 header h1 {     margin: 0;     font-size: 1.5em; }
-        main { padding: 20px 0; }
-#logoutButton {
-    position: static;
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    padding: 6px 12px; /* Dikey boşluğu ayarladık */
-    border-radius: 8px; /* Diğer butonlarla uyumlu hale getirdik */
-    cursor: pointer;
-    font-size: 0.9em; /* Yazıyı biraz büyüttük */
-    font-weight: 600;
-    transition: background-color 0.2s;
-    line-height: 1.3; /* Satırlar arası boşluk */
-    text-align: right; /* İçeriği sağa yasladık */
-}
+main { padding: 20px 0; }
+#logoutButton {position: static;background-color: #e74c3c;color: white;border: none;padding: 6px 12px;border-radius: 8px;cursor: pointer;font-size: 0.9em; 
+    font-weight: 600;transition: background-color 0.2s;line-height: 1.3;text-align: right;}
 
 #logoutButton:hover {    background-color: #c0392b;}}
 
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 1.1em; }
-        .form-group select, .form-group input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1em; box-sizing: border-box; }
-        .time-selection { display: flex; gap: 10px; }
-        .time-selection input[type="radio"] { display: none; }
-        .time-selection label { flex: 1; text-align: center; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s ease-in-out; font-weight: 500; }
-        .time-selection input[type="radio"]:checked + label { background-color: var(--primary-color); color: var(--white-color); border-color: var(--primary-color); }
-        #producer-panel, #history-section { background-color: var(--white-color); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-top: 25px; }
-        #current-producer-name { font-size: 1.5em; font-weight: 700; color: var(--primary-color); margin-bottom: 15px; text-align: center; }
-        .action-buttons { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-top: 25px; }
-        .btn { padding: 15px; font-size: 1.1em; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-success { background-color: var(--success-color); color: var(--white-color); }
-        .btn-secondary { background-color: var(--secondary-color); color: var(--white-color); }
-        .btn-warning { background-color: var(--warning-color); color: var(--dark-color); }
-        #session-summary { background-color: #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
-        #history-list { list-style: none; padding: 0; margin: 0; }
-        .history-item { padding: 10px 0; border-bottom: 1px solid #f0f2f5; display: flex; align-items: center; gap: 10px; }
-        .history-item-info { font-weight: 600; flex-grow: 1; }
-        .history-item-details { text-align: right; }
-.history-item .delete-btn {
-    background-color: var(--danger-color);
-    color: var(--white-color);
-    padding: 8px 12px;
-    font-size: 0.9em;
-    flex-shrink: 0;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
-        .history-item .edit-btn { background-color: var(--warning-color); color: var(--dark-color); padding: 8px 12px; font-size: 0.9em; flex-shrink: 0; border-radius: 6px; border: none; cursor: pointer;}
-        #cancel-edit-btn { display: none; margin-top: 10px; width: 100%; background-color: var(--danger-color); color: var(--white-color); }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 1.1em; }
+.form-group select, .form-group input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1em; box-sizing: border-box; }
+.time-selection { display: flex; gap: 10px; }
+.time-selection input[type="radio"] { display: none; }
+.time-selection label { flex: 1; text-align: center; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s ease-in-out; font-weight: 500; }
+.time-selection input[type="radio"]:checked + label { background-color: var(--primary-color); color: var(--white-color); border-color: var(--primary-color); }
+#producer-panel, #history-section { background-color: var(--white-color); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-top: 25px; }
+#current-producer-name { font-size: 1.5em; font-weight: 700; color: var(--primary-color); margin-bottom: 15px; text-align: center; }
+.action-buttons { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-top: 25px; }
+.btn { padding: 15px; font-size: 1.1em; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-success { background-color: var(--success-color); color: var(--white-color); }
+.btn-secondary { background-color: var(--secondary-color); color: var(--white-color); }
+.btn-warning { background-color: var(--warning-color); color: var(--dark-color); }
+#session-summary { background-color: #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+#history-list { list-style: none; padding: 0; margin: 0; }
+.history-item { padding: 10px 0; border-bottom: 1px solid #f0f2f5; display: flex; align-items: center; gap: 10px; }
+.history-item-info { font-weight: 600; flex-grow: 1; }
+.history-item-details { text-align: right; }
+.history-item .delete-btn {background-color: var(--danger-color);color: var(--white-color);padding: 8px 12px;font-size: 0.9em;flex-shrink: 0;border: none;border-radius: 6px;cursor: pointer;}
+.history-item .edit-btn { background-color: var(--warning-color); color: var(--dark-color); padding: 8px 12px; font-size: 0.9em; flex-shrink: 0; border-radius: 6px; border: none; cursor: pointer;}
+#cancel-edit-btn { display: none; margin-top: 10px; width: 100%; background-color: var(--danger-color); color: var(--white-color); }
+.time-selection label {flex: 1;text-align: center;padding: 12px;border-radius: 8px;cursor: pointer;transition: all 0.2s ease-in-out;font-weight: 600; }
+.time-selection input:not(:checked) + label {    background-color: #f8f9fa;     border: 1px solid #dee2e6;     color: #6c757d;}
+.time-selection input:not(:checked) + label:hover {    background-color: #e9ecef;    border-color: #adb5bd;}
+.time-selection input:checked + label {color: white;font-weight: 700;transform: translateY(-2px);box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);border: 2px solid rgba(0,0,0,0.1); }
+.time-selection input[id="aksam"]:checked + label {    background-color: #ff8c00; }
+.time-selection input[id="sabah"]:checked + label {    background-color: #28a745; }
 
-/* === AKŞAM/SABAH BUTONLARI (ON/OFF STİLİ) === */
-
-/* Butonların genel yerleşimi ve geçiş efekti */
-.time-selection label {
-    flex: 1;
-    text-align: center;
-    padding: 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    font-weight: 600; /* Metinler biraz daha okunaklı olsun */
-}
-
-/* 1. SEÇİLİ OLMAYAN (OFF) BUTONUN STİLİ */
-.time-selection input:not(:checked) + label {
-    background-color: #f8f9fa; /* Soluk, neredeyse beyaz bir arkaplan */
-    border: 1px solid #dee2e6; /* İnce, açık gri bir çerçeve */
-    color: #6c757d;           /* Soluk metin rengi */
-}
-/* Seçili olmayan butonun üzerine gelince hafif bir tepki */
-.time-selection input:not(:checked) + label:hover {
-    background-color: #e9ecef;
-    border-color: #adb5bd;
-}
-
-
-/* 2. SEÇİLİ OLAN (ON) BUTONUN STİLİ */
-.time-selection input:checked + label {
-    color: white; /* Seçiliyken metin rengi her zaman beyaz */
-    font-weight: 700;
-    transform: translateY(-2px); /* Hafif yukarı kalkma efekti */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Belirgin bir gölge */
-    border: 2px solid rgba(0,0,0,0.1); /* Rengin etrafında hafif bir derinlik */
-}
-
-/* Seçili olan Akşam butonuna özel renk */
-.time-selection input[id="aksam"]:checked + label {
-    background-color: #ff8c00; /* Canlı Turuncu */
-}
-
-/* Seçili olan Sabah butonuna özel renk */
-.time-selection input[id="sabah"]:checked + label {
-    background-color: #28a745; /* Canlı Yeşil */
-}
-
-/* YENİ EKLENEN STİL: Onay mesajı için */
-.toast-message {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #28a745; /* Yeşil başarı rengi */
-    color: white;
-    padding: 12px 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    z-index: 1000;
-    font-size: 1.1em;
-    font-weight: 500;
-    display: none; /* Varsayılan olarak gizli */
-    opacity: 0;
-    transition: opacity 0.5s ease;
-}
-.toast-message.show {
-    display: block;
-    opacity: 1;
-}
-
-
-    </style>
+.toast-message {position: fixed;top: 20px;left: 50%;transform: translateX(-50%);background-color: #28a745;color: white;padding: 12px 20px;border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);z-index: 1000;font-size: 1.1em;font-weight: 500;display: none;opacity: 0;transition: opacity 0.5s ease;}
+.toast-message.show {    display: block;    opacity: 1;}
+</style>
 </head>
+
 <body>
 
 	<div id="toast-message" class="toast-message"></div>
@@ -158,11 +78,11 @@ header h1 {     margin: 0;     font-size: 1.5em; }
                 <input type="hidden" id="editingMovementId">
                 <div class="form-group"><label for="collection-date">Süt Alım Tarihi</label><input type="date" id="collection-date" name="collection-date"></div>
                 <div class="form-group"><label for="unit-price">Süt Birim Fiyatı (₺)</label><input type="number" id="unit-price" name="unit-price" step="0.01"></div>
-                <div class="form-group"><label>Zaman</label><div class="time-selection"><input type="radio" id="aksam" name="time" value="akşam" checked><label for="aksam">AKŞAM</label><input type="radio" id="sabah" name="time" value="sabah"><label for="sabah">SABAH</label></div></div>
+                <div class="form-group"><label>Zaman</label><div class="time-selection"><input type="radio" id="aksam" name="time" value="akşam" checked><label for="aksam">AKŞAM</label>		<input type="radio" id="sabah" name="time" value="sabah"><label for="sabah">SABAH</label></div></div>
                 <div class="form-group">
     		<label for="tank">Tank Seçimi <button id="refresh-tanks-btn" title="Tank listesini yenile">🔄</button></label>
-   			 <select id="tank" name="tank"></select>
-    			<small id="tankMevcutLitre" style="display: block; margin-top: 8px; font-weight: 500; color: #007bff;"></small></div>
+   		<select id="tank" name="tank"></select>
+		<small id="tankMevcutLitre" style="display: block; margin-top: 8px; font-weight: 500; color: #007bff;"></small></div>
                 <div class="form-group"><label for="category">Kategori/Köy (Rota)</label><select id="category" name="category"></select></div>
             </form>
 
@@ -171,7 +91,7 @@ header h1 {     margin: 0;     font-size: 1.5em; }
                 <div class="form-group"><label for="producer-select">Rota Dışı Seçim / Üretici Atlama</label><select id="producer-select" name="producer-select"></select></div>
                 <div class="form-group"><label for="quantity">Miktar (Litre)</label><input type="number" id="quantity" name="quantity" step="0.1" inputmode="decimal"></div>
                 <div class="form-group"><label for="notes">Açıklama</label><textarea id="notes" name="notes" rows="3"></textarea></div>
-                <div class="action-buttons"><button type="button" id="skip-btn" class="btn btn-secondary">Pas Geç</button><button type="button" id="save-btn" class="btn btn-success">Kaydet ve Sonraki</button></div>
+                <div class="action-buttons"><button type="button" id="skip-btn" class="btn btn-secondary">Pas Geç</button><button type="button" id="save-btn" class="btn btn-success">Kaydet 		ve Sonraki</button></div>
                 <button type="button" id="cancel-edit-btn" class="btn">Düzenlemeyi İptal Et</button>
             </div>
 
@@ -280,17 +200,12 @@ const logoutButton = document.getElementById('logoutButton');
 function getDayDifference(dateStr) {
     const today = new Date();
     const entryDate = new Date(dateStr);
-
-    // Saat dilimi farklarından kaynaklanabilecek hataları önlemek için saatleri sıfırla
     today.setHours(0, 0, 0, 0);
     entryDate.setHours(0, 0, 0, 0);
-
     const diffTime = today - entryDate; // İki tarih arasındaki fark (milisaniye)
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Farkı güne çevir
-    
     return diffDays;
 }
-
 
 async function saveMilkEntry(quantity, notes) {
     const unitPrice = parseFloat(unitPriceInput.value);
@@ -301,8 +216,7 @@ async function saveMilkEntry(quantity, notes) {
 
     if (!unitPrice || !tankId || !alimTarihi) {
         alert('Lütfen Fiyat, Tarih ve Tank seçimlerini doğru yapın.');
-        return;
-    }
+        return;    }
 
     const tankRef = db.collection('tanklar').doc(tankId);
 
@@ -310,7 +224,6 @@ async function saveMilkEntry(quantity, notes) {
     skipBtn.disabled = true;
 
     try {
-        // Mükerrer Kayıt Engelleme...
         const existingMovementSnapshot = await db.collection('tank_hareketleri')
             .where('sahipId', '==', sahipId)
             .where('ureticiId', '==', currentProducer.id)
@@ -325,7 +238,6 @@ async function saveMilkEntry(quantity, notes) {
             return;
         }
 
-        // Uyarı Mekanizması...
         if (quantity > 0) {
             const todayForCalc = new Date(alimTarihi);
             const yesterdayForCalc = new Date(todayForCalc);
@@ -370,7 +282,6 @@ async function saveMilkEntry(quantity, notes) {
             }
         }
         
-        // Kaydetme işlemi
         const totalPrice = (quantity * unitPrice);
         const movementRef = db.collection('tank_hareketleri').doc();
         const batch = db.batch();
@@ -382,22 +293,14 @@ async function saveMilkEntry(quantity, notes) {
             const sutData = { tarih: alimTarihi, cariId: currentProducer.id, cariAdi: currentProducer.adiSoyadi, sabah: (zamanDilimi === 'sabah' ? quantity : 0), aksam: (zamanDilimi === 'akşam' ? quantity : 0), toplam: quantity, fiyat: unitPrice, toplamTutar: totalPrice, sahipId: sahipId };
             batch.set(sutAlimRef, sutData);
         } else {
-            // --- GÜNCELLEME: Hatalı olan güncelleme mantığı düzeltildi ---
             const doc = existingSutAlimSnapshot.docs[0];
             sutAlimRef = doc.ref;
             const data = doc.data();
-            
-            // Yeni sabah ve akşam miktarlarını doğru şekilde hesapla
             const newSabah = (zamanDilimi === 'sabah') ? quantity : (data.sabah || 0);
             const newAksam = (zamanDilimi === 'akşam') ? quantity : (data.aksam || 0);
             const newToplam = newSabah + newAksam;
-            
-            // Toplam tutarı ve ortalama fiyatı yeniden ve doğru şekilde hesapla
-            // Not: Bu hesaplama, gün içindeki tüm girişlerin aynı fiyattan yapıldığını varsayar.
-            // Bu, en tutarlı ve basit yöntemdir.
-            const newToplamTutar = newToplam * unitPrice;
+	    const newToplamTutar = newToplam * unitPrice;
             const newFiyat = unitPrice;
-
             const sutUpdates = { 
                 sabah: newSabah, 
                 aksam: newAksam, 
@@ -439,7 +342,6 @@ async function saveMilkEntry(quantity, notes) {
 
 async function handleSkip() {
     const producerName = routeProducers[currentProducerIndex]?.adiSoyadi || 'Bu üretici';
-
     const confirmation = confirm(
         `'${producerName}' için işlem seçin:\n\n` +
         `➡️ SÜT YOK ise -> 'Tamam'a basın (0 Lt olarak kaydedilecektir).\n\n` +
@@ -447,34 +349,22 @@ async function handleSkip() {
     );
 
     if (confirmation) {
-        // Kullanıcı "Tamam" dedi, yani süt yok. 0 Lt olarak kaydet.
         await saveMilkEntry(0, "Süt yok");
     } else {
-        // Kullanıcı "İptal" dedi, sadece bir sonraki üreticiye geç.
         currentProducerIndex++;
         displayCurrentProducer();
     }
 }
 
-
-
-
-
 function cancelEditMode() {
     editingEntry = null;
     editingMovementIdInput.value = '';
-    
-    // Form elemanlarını tekrar aktif hale getir
     producerSelect.disabled = false;
     categorySelect.disabled = false;
-    
-    // Butonları başlangıç durumuna döndür
     skipBtn.style.display = 'block';
     saveBtn.textContent = 'Kaydet ve Sonraki';
     saveBtn.className = 'btn btn-success';
     cancelEditBtn.style.display = 'none';
-    
-    // Mevcut üreticiyi tekrar göster
     displayCurrentProducer();
 }
 
@@ -514,7 +404,6 @@ async function populateTanks() {
             tankSelect.appendChild(option);
         });
 
-        // Sayfa ilk yüklendiğinde, seçili olan ilk tankın miktarını göster
         if (tankSelect.value) {
             updateTankInfoDisplay(tankSelect.value);
         }
@@ -524,8 +413,6 @@ async function populateTanks() {
         tankSelect.innerHTML = '<option value="" disabled selected>Hata: Tanklar yüklenemedi.</option>';
     }
 }
-
-
         
 function updateTankInfoDisplay(tankId) {
     const displayElement = document.getElementById('tankMevcutLitre');
@@ -638,20 +525,17 @@ function displayCurrentProducer() {
 function setEditMode(entry) {
     console.log("--- setEditMode Fonksiyonu Başladı ---");
 
-    // Her bir HTML elemanının bulunup bulunamadığını kontrol edelim
     if (!producerPanel) {
         console.error("HATA: 'producerPanel' ID'li HTML elemanı bulunamadı!");
-        return; // Eleman yoksa fonksiyonu durdur
+        return; 
     }
     if (!saveBtn) {
         console.error("HATA: 'saveBtn' ID'li HTML elemanı bulunamadı!");
         return;
     }
-    // Diğer tüm elemanlar için de bu kontrolü yapabiliriz ama şimdilik en önemlileri bunlar.
 
     try {
         console.log("'producerPanel' bulundu, görünürlüğü kontrol ediliyor...");
-        // Panelin görünür olduğundan emin olalım.
         producerPanel.style.display = 'block';
 
         editingEntry = entry;
@@ -713,15 +597,11 @@ async function handleUpdate() {
     const tankRef = db.collection('tanklar').doc(editingEntry.tankId);
     const movementRef = db.collection('tank_hareketleri').doc(editingEntry.movementId);
 
-    // --- BAŞLANGIÇ: GÜVENİLİR KAYIT BULMA VE GÜNCELLEME MANTIĞI ---
     try {
         let sutAlimRef;
-        // 1. Ana süt alım kaydının referansını al
         if (editingEntry.sutAlimId) {
-            // Yeni sistemle kaydedilmişse, ID ile doğrudan al
             sutAlimRef = db.collection('sut_alimlari').doc(editingEntry.sutAlimId);
         } else {
-            // Eski sistemle kaydedilmişse, sorgu ile bulmayı dene (geri uyumluluk için)
             console.warn("Eski bir kayıt düzenleniyor, sutAlimId bulunamadı. Sorgu ile aranıyor...");
             const sutAlimSnapshot = await db.collection('sut_alimlari')
                 .where('sahipId', '==', sahipId)
@@ -738,7 +618,6 @@ async function handleUpdate() {
             }
         }
 
-        // 2. Günün diğer girişini (sabah/akşam) bul
         const digerZamanDilimi = zamanDilimi === 'sabah' ? 'akşam' : 'sabah';
         const digerGirisSnapshot = await db.collection('tank_hareketleri')
             .where('sahipId', '==', sahipId)
@@ -755,16 +634,13 @@ async function handleUpdate() {
             digerGirisTutar = digerData.toplam_tutar;
         }
 
-        // 3. Yeni toplamları doğru bir şekilde hesapla
         const yeniGunlukToplam = yeniMiktar + digerGirisMiktari;
         const yeniGunlukTutar = yeniToplamTutar + digerGirisTutar;
         
         const sutAlimUpdates = {
             toplam: yeniGunlukToplam,
             toplamTutar: yeniGunlukTutar,
-            // Ortalama fiyatı da güncelleyelim
-            fiyat: yeniGunlukToplam > 0 ? (yeniGunlukTutar / yeniGunlukToplam) : 0
-        };
+            fiyat: yeniGunlukToplam > 0 ? (yeniGunlukTutar / yeniGunlukToplam) : 0        };
 
         if (zamanDilimi === 'sabah') {
             sutAlimUpdates.sabah = yeniMiktar;
@@ -778,7 +654,6 @@ async function handleUpdate() {
             }
         }
         
-        // 4. Batch (Toplu Yazma) işlemlerini hazırla
         batch.update(sutAlimRef, sutAlimUpdates);
         batch.update(movementRef, {
             miktar: yeniMiktar,
@@ -790,7 +665,6 @@ async function handleUpdate() {
             mevcutLitre: firebase.firestore.FieldValue.increment(litreFarki)
         });
 
-        // --- BİTİŞ: GÜVENİLİR KAYIT BULMA VE GÜNCELLEME MANTIĞI ---
 
         await batch.commit();
         await startRoute(); // Listeyi en güncel haliyle yeniden yükle
@@ -808,7 +682,6 @@ async function handleSaveAndNext() {
     const quantity = parseFloat(quantityInput.value);
     const notes = notesInput.value;
 
-    // GÜNCELLEME: Miktar 0 ise veya boşsa da kayda izin veriyoruz (Süt Yok durumu için)
     if (quantity === null || quantity === undefined || isNaN(quantity) || quantity < 0) {
         alert('Lütfen geçerli bir miktar girin. Miktar negatif olamaz.');
         return;
@@ -837,11 +710,9 @@ function renderHistory() {
         const listItem = document.createElement('li');
         listItem.className = 'history-item';
         
-        // --- YENİ: Butonları göstermeden önce tarih kontrolü yapılıyor ---
         const dayDifference = getDayDifference(item.alim_tarihi);
         let buttonsHTML = ''; // Butonlar için boş bir değişken
 
-        // Eğer kullanıcı admin ise VEYA kaydın tarihi 2 günden eski değilse butonları göster
         if (currentUserRole === 'admin' || dayDifference <= 2) {
             buttonsHTML = `
             <div>
@@ -859,7 +730,6 @@ function renderHistory() {
             </div>
             ${buttonsHTML} 
         `;
-        // --- GÜNCELLEME SONU ---
 
         historyList.appendChild(listItem);
         totalMilk += item.miktar;
@@ -874,13 +744,11 @@ function editHistoryItem(movementId) {
     const entry = collectionHistory.find(item => item.movementId === movementId);
     
     if (entry) {
-        // --- YENİ GÜVENLİK KONTROLÜ ---
         const dayDifference = getDayDifference(entry.alim_tarihi);
         if (currentUserRole !== 'admin' && dayDifference > 2) {
             alert('Bu kaydı düzenleme yetkiniz yok. Sadece son 2 güne ait kayıtlar düzenlenebilir.');
             return; // Fonksiyonu durdur
         }
-        // --- KONTROL SONU ---
         
         console.log("Kayıt bulundu:", entry);
         setEditMode(entry);
@@ -898,20 +766,17 @@ async function deleteHistoryItem(movementId) {
         return;
     }
 
-    // --- YENİ GÜVENLİK KONTROLÜ ---
     const dayDifference = getDayDifference(entryToDelete.alim_tarihi);
     if (currentUserRole !== 'admin' && dayDifference > 2) {
         alert('Bu kaydı silme yetkiniz yok. Sadece son 2 güne ait kayıtlar silinebilir.');
         return; // Fonksiyonu durdur
     }
-    // --- KONTROL SONU ---
     
     if (!entryToDelete.sutAlimId) {
         alert("Hata: Silinecek ana kayıt kimliği bulunamadı. Lütfen sayfayı yenileyin.");
         return;
     }
     
-    // ... fonksiyonun geri kalanı aynı ...
     if (!confirm(`'${entryToDelete.ureticiAdi}' için girilen ${entryToDelete.miktar} Lt süt kaydını kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!`)) {
         return;
     }
@@ -942,9 +807,6 @@ async function deleteHistoryItem(movementId) {
         skipBtn.disabled = false;
     }
 }
-
-
-
 
 </script>
 </body>
