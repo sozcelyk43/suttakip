@@ -2404,11 +2404,7 @@ async function loadAllYemlerToCache() {
         snapshot.forEach(doc => {
             window.yemDataMap.set(doc.id, doc.data());
         });
-        console.log(`${window.yemDataMap.size} adet yem bilgisi hafızaya alındı.`);
-    } catch (error) {
-        console.error("Tüm yemler yüklenirken hata:", error);
-    }
-}
+    } catch (error) {}}
 
 async function loadAllCarilerToCache() {
     window.cariDataMap = new Map();
@@ -2416,11 +2412,7 @@ async function loadAllCarilerToCache() {
         const snapshot = await db.collection('cariler').where("sahipId", "==", sahipId).get();
         snapshot.forEach(doc => {
             window.cariDataMap.set(doc.id, doc.data());
-        });
-        console.log(`${window.cariDataMap.size} adet cari bilgisi hafızaya alındı.`);
-    } catch (error) {
-        console.error("Tüm cariler yüklenirken hata:", error);
-    }
+        });    } catch (error) {}
 }
 
 async function handleYemAlisKaydet(event) {
