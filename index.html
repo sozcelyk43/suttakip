@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -348,28 +349,42 @@
         </section>
         
         <section id="hesap-ozeti" class="module-section hidden-section">
-            <div class="module-header dont-print"><h2>📊 Cari Hesap Özeti</h2></div>
-            <div class="container">
-                <div class="report-section">
-                    <h3 class="dont-print">Cari Hesap Özeti</h3>
-                    <div class="form-grid dont-print" style="grid-template-columns: 1fr 1fr auto; align-items: end;">
-                        <div class="form-group"><label for="raporCariSecimi">Cari Seçin:</label><select id="raporCariSecimi"><option value="">Seçiniz...</option></select></div>
-                        <div class="form-group"><label for="raporTarihAraligi">Ay:</label><input type="month" id="raporTarihAraligi"></div>
-                        <button type="button" class="btn btn-primary" id="raporOlusturBtn" style="height:45px;">Rapor Oluştur</button>
-                    </div> <hr class="dont-print">
-                    <div id="report-content-to-print" class="printable-content format-a5">
-                        <h1 class="print-only print-title">Süt Takip Programı - Cari Hesap Özeti</h1>
-                        <h4 id="raporBaslik" style="text-align:center;">Lütfen Rapor Kriterlerini Seçin</h4>
-                        <div id="raporDetayAlani"></div>
-                    </div>
-
-                    <div id="hesap-ozeti-export-area" style="display: none;"></div>
-                    <button type="button" class="btn btn-secondary dont-print" id="raporYazdirBtn" style="margin-top:20px;">Özeti Yazdır</button>
-                    <button type="button" class="btn btn-danger dont-print" id="hesapOzetiPdfBtn" style="margin-top:20px;">PDF İndir</button>
-                    <button type="button" class="btn btn-success dont-print" id="hesapOzetiXlsxBtn" style="margin-top:20px;">Excel İndir</button>
-                </div>
+    <div class="module-header dont-print"><h2>📊 Cari Hesap Özeti</h2></div>
+    <div class="container">
+        <div class="report-section">
+            <h3 class="dont-print">Cari Hesap Özeti</h3>
+            
+          <div class="form-grid dont-print" style="grid-template-columns: 2fr 2fr 1fr auto; align-items: end; gap: 10px;">
+    <div class="form-group">
+        <label for="raporCariAramaInput">Cari Ara</label>
+        <input type="text" id="raporCariAramaInput" placeholder="Aramak için yazın...">
+    </div>
+    <div class="form-group">
+        <label for="raporCariSecimi">Sonuçlar</label>
+        <select id="raporCariSecimi">
+            <option value="">Tümü...</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="raporTarihAraligi">Ay</label>
+        <input type="month" id="raporTarihAraligi">
+    </div>
+    <button type="button" class="btn btn-primary" id="raporOlusturBtn" style="height:45px;">Rapor Oluştur</button>
+</div>
+            <hr class="dont-print">
+            <div id="report-content-to-print" class="printable-content format-a5">
+                <h1 class="print-only print-title">Süt Takip Programı - Cari Hesap Özeti</h1>
+                <h4 id="raporBaslik" style="text-align:center;">Lütfen Rapor Kriterlerini Seçin</h4>
+                <div id="raporDetayAlani"></div>
             </div>
-        </section>
+
+            <div id="hesap-ozeti-export-area" style="display: none;"></div>
+            <button type="button" class="btn btn-secondary dont-print" id="raporYazdirBtn" style="margin-top:20px;">Özeti Yazdır</button>
+            <button type="button" class="btn btn-danger dont-print" id="hesapOzetiPdfBtn" style="margin-top:20px;">PDF İndir</button>
+            <button type="button" class="btn btn-success dont-print" id="hesapOzetiXlsxBtn" style="margin-top:20px;">Excel İndir</button>
+        </div>
+    </div>
+</section>
         
 <section id="sut-alim-raporu" class="module-section hidden-section">
     <div class="module-header dont-print"><h2>🗓️ Aylık Süt Raporu</h2></div>
@@ -684,6 +699,7 @@
 	let gunlukSutunChartInstance = null;
 	let aylikSutunChartInstance = null;
 	let tankDataMap = new Map();
+	let raporCariSecimiOrjinalSecenekler = [];
 	let sutAlimGecmisiListener = null; // Süt alım geçmişi için dinleyici
 	let topluGirisListener = null;     // Toplu giriş formu için dinleyici
 	let dashboardTankListener = null;  // Kontrol paneli tankları için dinleyici
@@ -813,9 +829,34 @@ function initializeApp() {
                 populateYemSelect(document.getElementById('sayimYemSecimi'));renderStokSayimGecmisi();renderYemAlisHareketleri();renderYemStokListesi();}
 	if (targetId === 'yem-satisi') {populateCariSelect(document.getElementById('yemAlanTedarikci'), 'üretici');populateYemSelect(document.getElementById('yemSecimiSatis')); 
                 renderYemSatisListesi();}
-	if (targetId === 'tahsilat-ve-odemeler') {populateCariSelect(document.getElementById('odemeYapilanTedarikci'));renderOdemeListesi();}
-	if (targetId === 'hesap-ozeti'){populateCariSelect(document.getElementById('raporCariSecimi')); 
-	if(!document.getElementById('raporTarihAraligi').value) document.getElementById('raporTarihAraligi').value = getMonthYearForInput();}
+if (targetId === 'tahsilat-ve-odemeler') {
+        populateCariSelect(document.getElementById('odemeYapilanTedarikci'));
+        renderOdemeListesi();
+    }
+    
+
+
+    if (targetId === 'hesap-ozeti') {
+        populateCariSelect(document.getElementById('raporCariSecimi'));
+        if (!document.getElementById('raporTarihAraligi').value) {
+            document.getElementById('raporTarihAraligi').value = getMonthYearForInput();
+        }
+
+        const aramaInput = document.getElementById('raporCariAramaInput');
+        if (aramaInput) aramaInput.value = '';
+        const tumSecenekler = document.getElementById('raporCariSecimi').options;
+        for (let i = 0; i < tumSecenekler.length; i++) {
+            tumSecenekler[i].style.display = "";
+        }
+    }
+
+
+
+
+
+if (!document.getElementById('raporTarihAraligi').value) {
+    document.getElementById('raporTarihAraligi').value = getMonthYearForInput();
+}
 	if (targetId === 'sut-alim-raporu'){populateCariSelect(document.getElementById('sutRaporuTedarikciSecimi'), 'üretici'); 
                 populateCariKategoriSelect(document.getElementById('sutRaporuKategoriSecimi'), "Tümü"); const baslangicTarihiInput = document.getElementById('sutRaporuBaslangicTarihi');
                 const bitisTarihiInput = document.getElementById('sutRaporuBitisTarihi');if (baslangicTarihiInput && !baslangicTarihiInput.value && bitisTarihiInput && !				bitisTarihiInput.value) {
@@ -898,6 +939,30 @@ function initializeApp() {
                 miktarGosterge.textContent = '0.00 Lt';
             }
         });
+
+	const raporCariAramaInput = document.getElementById('raporCariAramaInput');
+if (raporCariAramaInput) {
+    raporCariAramaInput.addEventListener('input', function() {
+        const aramaMetni = this.value.toLowerCase();
+        const cariSelect = document.getElementById('raporCariSecimi');
+        
+        // Mevcut listeyi tamamen temizle
+        cariSelect.innerHTML = '';
+
+        // Orijinal (tam) liste üzerinden filtreleme yap
+        raporCariSecimiOrjinalSecenekler.forEach(secenek => {
+            const secenekMetni = secenek.text.toLowerCase();
+
+            // Arama metni boşsa veya eşleşme varsa seçeneği listeye geri ekle
+            if (aramaMetni === '' || secenekMetni.includes(aramaMetni)) {
+                // Seçeneği klonlayarak eklemek en güvenli yoldur
+                cariSelect.appendChild(secenek.cloneNode(true));
+            }
+        });
+    });
+}
+
+
 
         document.getElementById('raporOlusturBtn')?.addEventListener('click', handleHesapOzetiRaporuOlustur);
         document.getElementById('sutRaporuOlusturBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: false}));
@@ -1077,14 +1142,22 @@ async function handleSifreDegistir(event) {
 }
 
 
+// updateMonthlyStats fonksiyonunu bu nihai ve doğru kodla değiştirin:
+
 async function updateMonthlyStats() {
     try {
         const now = new Date();
         const year = now.getFullYear();
         const month = now.getMonth();
-        
-        const startDateStr = new Date(year, month, 1).toISOString().split('T')[0];
-        const endDateStr = new Date(year, month + 1, 0).toISOString().split('T')[0];
+
+        const ayinIlkGunu = new Date(year, month, 1);
+        const yyyy = ayinIlkGunu.getFullYear();
+        const mm = String(ayinIlkGunu.getMonth() + 1).padStart(2, '0');
+        const startDateStr = `${yyyy}-${mm}-01`;
+
+        const ayinSonGunu = new Date(year, month + 1, 0);
+        const dd_end = String(ayinSonGunu.getDate()).padStart(2, '0');
+        const endDateStr = `${yyyy}-${mm}-${dd_end}`;
 
         const thisMonthSutSnapshot = await db.collection('sut_alimlari')
             .where("sahipId", "==", sahipId)
@@ -1093,21 +1166,25 @@ async function updateMonthlyStats() {
             .get();
 
         let buAykiToplamSut = 0;
-        let buAykiToplamDeger = 0; // We will calculate this again here
+        let buAykiToplamDeger = 0; // Değişkeni burada sıfırlıyoruz
 
+        // --- DEĞİŞİKLİK BURADA ---
+        // Artık her kaydın kendi tutarını topluyoruz
         thisMonthSutSnapshot.forEach(doc => {
             const alim = doc.data();
             if (alim.islemKaynagi !== 'tank-aktarim') {
                 buAykiToplamSut += alim.toplam || 0;
-                buAykiToplamDeger += alim.toplamTutar || 0; // Also calculate the monetary value
+                buAykiToplamDeger += alim.toplamTutar || 0; // Her alımın kendi tutarını topluyoruz
             }
         });
         
         const bugunAyinKaci = now.getDate();
         const gunlukOrtalama = (buAykiToplamSut > 0) ? (buAykiToplamSut / bugunAyinKaci) : 0;
 
-        // This function will now ONLY update the monthly cards
+        // Varsayılan fiyatla çarpma işlemi kaldırıldı.
+
         document.getElementById('dashBuAykiToplamSut').textContent = Math.floor(buAykiToplamSut);
+        // Artık döngüde hesaplanan gerçek toplam değeri yazdırıyoruz.
         document.getElementById('dashBuAykiSutDegeri').textContent = formatCurrency(buAykiToplamDeger);
         document.getElementById('aylikGunOrtalamasi').textContent = gunlukOrtalama.toFixed(1);
 
@@ -1117,6 +1194,7 @@ async function updateMonthlyStats() {
         document.getElementById('dashBuAykiSutDegeri').textContent = 'Hata';
     }
 }
+
 
 async function updateDashboardStats() {
     const currentUser = auth.currentUser;
@@ -1195,28 +1273,6 @@ async function updateDashboardStats() {
 
     } catch (e) { console.error("Dashboard günlük istatistikleri alınırken hata", e); }
        
-    try {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = now.getMonth();
-        const startDateStr = new Date(year, month, 1).toISOString().split('T')[0];
-        const endDateStr = new Date(year, month + 1, 0).toISOString().split('T')[0];
-        const thisMonthSutSnapshot = await db.collection('sut_alimlari').where("sahipId", "==", sahipId).where("tarih", ">=", startDateStr).where("tarih", "<=", endDateStr).get();
-        let buAykiToplamSut = 0;
-        let buAykiToplamDeger = 0;
-        thisMonthSutSnapshot.forEach(doc => {
-            const alim = doc.data();
-            if (alim.islemKaynagi !== 'tank-aktarim') {
-                buAykiToplamSut += alim.toplam || 0;
-                buAykiToplamDeger += alim.toplamTutar || 0;
-            }
-        });
-        const bugunAyinKaci = now.getDate();
-        const gunlukOrtalama = (buAykiToplamSut > 0) ? (buAykiToplamSut / bugunAyinKaci) : 0;
-        document.getElementById('dashBuAykiToplamSut').textContent = Math.floor(buAykiToplamSut);
-        document.getElementById('dashBuAykiSutDegeri').textContent = formatCurrency(buAykiToplamDeger);
-        document.getElementById('aylikGunOrtalamasi').textContent = gunlukOrtalama.toFixed(1);
-    } catch(e) { console.error("Dashboard aylık süt istatistikleri alınırken hata:", e); }
     
     try {
         const allCarilerSnapshot = await db.collection('cariler').where("sahipId", "==", sahipId).get();
@@ -2103,6 +2159,11 @@ async function populateCariSelect(selectElement, filterGroup = null, defaultText
         console.error("Cariler yüklenirken hata:", error);
         selectElement.innerHTML = `<option value="">Hata oluştu!</option>`;
     }
+if (selectElement.id === 'raporCariSecimi') {
+        raporCariSecimiOrjinalSecenekler = Array.from(selectElement.options);
+    }
+
+
 }
 
 
@@ -3205,26 +3266,24 @@ function sutMiktarGuncelle(cariId) {
     document.getElementById(`toplam-tutar-${cariId}`).textContent = formatCurrency(toplamTutar);
 }
 
+// handleTopluSutKaydet fonksiyonunu bununla değiştirin:
 async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
     const sabahInput = document.getElementById(`sabah-${cariId}`);
     const aksamInput = document.getElementById(`aksam-${cariId}`);
     const fiyatInput = document.getElementById(`fiyat-${cariId}`);
     const tankId = document.getElementById('topluGirisTank').value;
 
-    const sabahMiktar = parseFloat(sabahInput.value) || 0;
-    const aksamMiktar = parseFloat(aksamInput.value) || 0;
-    const birimFiyat = parseFloat(fiyatInput.value) || globalSettings.defaultMilkPrice || 0;
+    // VİRGÜL TEMİZLEME DÜZELTMESİ
+    const sabahMiktar = parseFloat(String(sabahInput.value).replace(',', '.')) || 0;
+    const aksamMiktar = parseFloat(String(aksamInput.value).replace(',', '.')) || 0;
+    const birimFiyat = parseFloat(String(fiyatInput.value).replace(',', '.')) || globalSettings.defaultMilkPrice || 0;
+    
+    // ... (Fonksiyonun geri kalanı aynı)
     const bugunkuToplamMiktar = sabahMiktar + aksamMiktar;
+    if (bugunkuToplamMiktar <= 0) { alert("Lütfen en az bir miktar girin."); return; }
+    if (!tankId) { alert("Lütfen bir tank seçin!"); return; }
     
-    if (bugunkuToplamMiktar <= 0) {
-        alert("Lütfen en az bir miktar girin.");
-        return;
-    }
-    if (!tankId) {
-        alert("Lütfen bir tank seçin!");
-        return;
-    }
-    
+    // ... (Fonksiyonun geri kalanı aynı, onay mekanizması vb.)
     try {
         const today = new Date(tarih);
         const yesterday = new Date(today);
@@ -3247,27 +3306,24 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
                 const durum = fark > 0 ? 'daha fazla' : 'daha az';
                 const onay = confirm(`⚠️ DİKKAT! \n\nBugün girilen miktar (${bugunkuToplamMiktar.toFixed(1)} Lt), dün girilen miktardan (${dunkuToplamMiktar.toFixed(1)} Lt) %10 oranında ${durum}.\n\nBu miktar doğru mu? Kaydetmek için 'Tamam'a basın.`);
                 if (!onay) {
-                    return; // Kullanıcı iptal ederse kaydı durdur.
+                    return; 
                 }
             }
         }
     } catch (error) {
         console.error("Önceki gün kontrolü sırasında hata:", error);
     }
-
+    
     const satir = document.getElementById(`satir-${cariId}`);
     if(satir) satir.querySelector('button').disabled = true;
-
     const calisanId = auth.currentUser.uid;
     const batch = db.batch();
-
     const sutAlimRef = db.collection("sut_alimlari").doc();
     batch.set(sutAlimRef, {
         tarih: tarih, cariId: cariId, cariAdi: cariAdi,
         sabah: sabahMiktar, aksam: aksamMiktar, toplam: bugunkuToplamMiktar,
         fiyat: birimFiyat, toplamTutar: bugunkuToplamMiktar * birimFiyat, sahipId: sahipId
     });
-
     if (sabahMiktar > 0) {
         const movementRefSabah = db.collection('tank_hareketleri').doc();
         batch.set(movementRefSabah, {
@@ -3286,10 +3342,8 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
             toplam_tutar: aksamMiktar * birimFiyat, kayitZamani: new Date()
         });
     }
-
     const tankRef = db.collection('tanklar').doc(tankId);
     batch.update(tankRef, { mevcutLitre: firebase.firestore.FieldValue.increment(bugunkuToplamMiktar) });
-
     try {
         await batch.commit();
         if (satir) satir.style.display = 'none';
@@ -3300,6 +3354,34 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
         if(satir) satir.querySelector('button').disabled = false;
     }
 }
+
+
+// handleSutAlimiGuncelle fonksiyonunu bununla değiştirin:
+async function handleSutAlimiGuncelle(event) {
+    event.preventDefault();
+    const id = document.getElementById('sutDuzenleId').value;
+    
+    // VİRGÜL TEMİZLEME DÜZELTMESİ
+    const sabah = parseFloat(String(document.getElementById('sutDuzenleSabah').value).replace(',', '.')) || 0;
+    const aksam = parseFloat(String(document.getElementById('sutDuzenleAksam').value).replace(',', '.')) || 0;
+    const fiyat = parseFloat(String(document.getElementById('sutDuzenleFiyat').value).replace(',', '.')) || 0;
+
+    const toplam = sabah + aksam;
+    const guncelVeri = {
+        sabah: sabah,
+        aksam: aksam,
+        fiyat: fiyat,
+        toplam: toplam,
+        toplamTutar: toplam * fiyat
+    };
+    try {
+        await db.collection('sut_alimlari').doc(id).update(guncelVeri);
+        closeSutDuzenleForm();
+        await renderSutAlimGecmisi();
+    } catch (error) { console.error("Süt alımı güncellenirken hata:", error); }
+}
+
+
 
 function calculateKarneTotals() {
     let aksamGenelToplam = 0, sabahGenelToplam = 0;
@@ -3698,6 +3780,8 @@ async function exportSutRaporuToExcel() {
     }
 }
 
+// handleDinamikSutRaporu fonksiyonunu bu son versiyonla değiştirin:
+
 async function handleDinamikSutRaporu() {
     const periodValue = document.getElementById('karneRaporuPeriyotSecimi').value;
     const kategori = document.getElementById('karneRaporuKategoriSecimi').value;
@@ -3707,7 +3791,7 @@ async function handleDinamikSutRaporu() {
         alert("Lütfen bir dönem seçin.");
         return;
     }
-    container.innerHTML = `<p style="text-align:center; font-size:1.2em;">Rapor oluşturuluyor, veriler çekiliyor...</p>`;
+    container.innerHTML = `<p style="text-align:center; font-size:1.2em;">Rapor oluşturuluyor...</p>`;
 
     const [year, month, periodPart] = periodValue.split('-');
     const intYear = parseInt(year, 10);
@@ -3727,10 +3811,6 @@ async function handleDinamikSutRaporu() {
     startDateStr = formatForDB(new Date(intYear, intMonth - 1, baslangicGunu));
     endDateStr = formatForDB(new Date(intYear, intMonth - 1, bitisGunu));
 
-    const ayIsimleri = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-    const raporKategoriAdi = kategori ? `${kategori} -` : 'Tüm Kategoriler -';
-    const reportTitleText = `${raporKategoriAdi} ${ayIsimleri[intMonth - 1]} ${intYear} / ${periodPart}. Yarı Süt Karnesi`;
-
     try {
         const producersQuery = db.collection('cariler')
             .where('sahipId', '==', sahipId)
@@ -3738,10 +3818,11 @@ async function handleDinamikSutRaporu() {
 
         const [allProducersSnapshot, milkSnapshot] = await Promise.all([
             producersQuery.get(),
-            db.collection('sut_alimlari').where('sahipId', '==', sahipId).where('tarih', '>=', startDateStr).where('tarih', '<=', endDateStr).get()        ]);
+            db.collection('sut_alimlari').where('sahipId', '==', sahipId).where('tarih', '>=', startDateStr).where('tarih', '<=', endDateStr).get()
+        ]);
         
-        let allProducers = allProducersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        let producers = kategori ? allProducers.filter(p => p.kategori === kategori) : allProducers;
+        const allProducers = allProducersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        let producers = kategori ? allProducers.filter(p => p.kategori && p.kategori.trim().toLowerCase() === kategori.trim().toLowerCase()) : allProducers;
 
         if (producers.length === 0) {
             container.innerHTML = '<p style="text-align:center;">Bu kriterlere uygun üretici bulunamadı.</p>';
@@ -3750,44 +3831,40 @@ async function handleDinamikSutRaporu() {
 
         producers.sort((a, b) => (a.rotaSirasi || 9999) - (b.rotaSirasi || 9999));
         
-        const producerIdsInReport = new Set(producers.map(p => p.id));
-        const milkData = new Map();
-        const dailyTotals = new Map();
+        const toNumber = (val) => {
+            if (val === null || val === undefined) return 0;
+            if (typeof val === 'number') return val;
+            if (typeof val === 'string') {
+                return parseFloat(val.replace(',', '.')) || 0;
+            }
+            return 0;
+        };
 
+        const milkData = new Map();
         milkSnapshot.forEach(doc => {
             const alim = doc.data();
-            if (producerIdsInReport.has(alim.cariId)) {
-                const key = `${alim.cariId}_${alim.tarih}`;
-                milkData.set(key, alim);
-
-                const day = new Date(alim.tarih + 'T12:00:00').getDate();
-                if (!dailyTotals.has(day)) {
-                    dailyTotals.set(day, { sabah: 0, aksam: 0 });
-                }
-                const totals = dailyTotals.get(day);
-                totals.sabah += alim.sabah || 0;
-                totals.aksam += alim.aksam || 0;
+            const key = `${alim.cariId}_${alim.tarih}`;
+            if (milkData.has(key)) {
+                const mevcutKayit = milkData.get(key);
+                mevcutKayit.sabah += toNumber(alim.sabah);
+                mevcutKayit.aksam += toNumber(alim.aksam);
+                mevcutKayit.toplam += toNumber(alim.toplam);
+            } else {
+                milkData.set(key, { sabah: toNumber(alim.sabah), aksam: toNumber(alim.aksam), toplam: toNumber(alim.toplam) });
             }
         });
         
-        let tableHTML = `
-            <div class="dinamik-rapor-header dont-print"><h1>${reportTitleText}</h1></div>
-            <div class="table-wrapper">
-                <table id="sut-rapor-tablosu">
-                    <thead><tr class="gunler"></tr><tr class="vakit"></tr></thead>
-                    <tbody></tbody>
-                    <tfoot></tfoot>
-                </table>
-            </div>`;
+        const ayIsimleri = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+        const raporKategoriAdi = kategori ? `${kategori} -` : 'Tüm Kategoriler -';
+        const reportTitleText = `${raporKategoriAdi} ${ayIsimleri[intMonth - 1]} ${intYear} / ${periodPart}. Yarı Süt Karnesi`;
+        let tableHTML = `<div class="dinamik-rapor-header dont-print"><h1>${reportTitleText}</h1></div><div class="table-wrapper"><table id="sut-rapor-tablosu"><thead><tr class="gunler"></tr><tr class="vakit"></tr></thead><tbody></tbody><tfoot></tfoot></table></div>`;
         container.innerHTML = tableHTML;
         
         const tableHeadGunler = container.querySelector('thead tr.gunler');
         const tableHeadVakit = container.querySelector('thead tr.vakit');
         const tableBody = container.querySelector('tbody');
-
         tableHeadGunler.innerHTML = '<th rowspan="2" class="uretici-listesi">ÜRETİCİ LİSTESİ</th>';
         tableHeadVakit.innerHTML = '';
-
         for (let i = baslangicGunu; i <= bitisGunu; i++) {
             tableHeadGunler.innerHTML += `<th colspan="2">${i}</th>`;
             tableHeadVakit.innerHTML += `<th class="vakit-baslik">A</th><th class="vakit-baslik">S</th>`;
@@ -3798,20 +3875,51 @@ async function handleDinamikSutRaporu() {
             let rowHTML = `<td class="uretici-listesi">${producer.adiSoyadi}</td>`;
             for (let i = baslangicGunu; i <= bitisGunu; i++) {
                 const day = String(i).padStart(2, '0');
-                const dateStr = `${year}-${month}-${day}`;
+                const dateStr = `${year}-${String(month).padStart(2, '0')}-${day}`;
                 const key = `${producer.id}_${dateStr}`;
-                const data = milkData.get(key) || { sabah: null, aksam: null };
-                const formatLitre = (val) => (val === null || val === undefined) ? '' : (val % 1 === 0 ? val.toString() : Number(val).toFixed(1).replace('.', ','));
-                rowHTML += `<td>${formatLitre(data.aksam)}</td><td>${formatLitre(data.sabah)}</td>`;
+                const data = milkData.get(key) || { sabah: 0, aksam: 0, toplam: 0 };
+                
+                // === YENİ FORMATLAMA KURALI (TABLO GÖVDESİ) ===
+                const formatLitre = (val) => Number(val || 0).toFixed(1);
+
+                let aksamLitre = formatLitre(data.aksam);
+                let sabahLitre = formatLitre(data.sabah);
+                if (toNumber(data.aksam) === 0 && toNumber(data.sabah) === 0 && toNumber(data.toplam) > 0) {
+                    sabahLitre = formatLitre(data.toplam); 
+                }
+                rowHTML += `<td>${aksamLitre}</td><td>${sabahLitre}</td>`;
             }
             tableBody.innerHTML += `<tr>${rowHTML}</tr>`;
         });
         
+        const dailyTotals = new Map();
+        for (let i = baslangicGunu; i <= bitisGunu; i++) { dailyTotals.set(i, { sabah: 0, aksam: 0 }); }
+        producers.forEach(producer => {
+            for (let i = baslangicGunu; i <= bitisGunu; i++) {
+                const day = String(i).padStart(2, '0');
+                const dateStr = `${year}-${String(month).padStart(2, '0')}-${day}`;
+                const key = `${producer.id}_${dateStr}`;
+                if (milkData.has(key)) {
+                    const alim = milkData.get(key);
+                    const totals = dailyTotals.get(i);
+                    let sabahDegeri = alim.sabah;
+                    let aksamDegeri = alim.aksam;
+                    if (sabahDegeri === 0 && aksamDegeri === 0 && alim.toplam > 0) {
+                        sabahDegeri = alim.toplam;
+                    }
+                    totals.sabah += sabahDegeri;
+                    totals.aksam += aksamDegeri;
+                }
+            }
+        });
+
         const tfoot = container.querySelector('tfoot');
         let footerHTML = '<tr><td class="uretici-listesi"><strong>GÜNLÜK TOPLAM</strong></td>';
         for (let i = baslangicGunu; i <= bitisGunu; i++) {
             const totalsForDay = dailyTotals.get(i) || { sabah: 0, aksam: 0 };
-            const formatLitre = (val) => (val > 0 ? (val % 1 === 0 ? val.toString() : Number(val).toFixed(1).replace('.', ',')) : '0');
+            
+            // === YENİ FORMATLAMA KURALI (ALT TOPLAM) ===
+            const formatLitre = (val) => Number(val || 0).toFixed(1);
             
             footerHTML += `<td><strong>${formatLitre(totalsForDay.aksam)}</strong></td>`;
             footerHTML += `<td><strong>${formatLitre(totalsForDay.sabah)}</strong></td>`;
@@ -3824,6 +3932,7 @@ async function handleDinamikSutRaporu() {
         container.innerHTML = `<p style="color:red; text-align:center;">Rapor oluşturulurken bir hata oluştu: ${error.message}</p>`;
     }
 }
+
 
 async function handleYemPivotRaporu(reportType) {
     const raporAlani = document.getElementById('yemRaporuAlani');
