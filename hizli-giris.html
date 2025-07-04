@@ -208,6 +208,8 @@ let allProducersMap = new Map();
 
 
     showDailyGrandTotal();
+collectionDateInput.addEventListener('change', showDailyGrandTotal);
+
 
     collectionDateInput.addEventListener('change', () => fetchAndRenderHistory(collectionDateInput.value));
     categorySelect.addEventListener('change', startRoute);
@@ -461,41 +463,54 @@ function displayCurrentProducer() {
 
 async function showDailyGrandTotal() {
     const displayElement = document.getElementById('gunlukGenelToplamGosterge');
-    const date = collectionDateInput.value;
-    displayElement.textContent = 'Toplam yükleniyor...';
+    const date = collectionDateInput.value; // Üstten seçilen tarih
 
+    // Tarih seçili değilse uyarı verip çık
     if (!date) {
         displayElement.textContent = 'Lütfen bir tarih seçin.';
         return;
     }
 
+    displayElement.textContent = 'Toplam yükleniyor...'; // Yükleme durumunu göster
+
     try {
+        // Seçilen tarihe ait tüm süt alımlarını Firestore'dan çek
         const snapshot = await db.collection('sut_alimlari')
             .where('sahipId', '==', sahipId)
             .where('tarih', '==', date)
             .get();
-        
+
         if (snapshot.empty) {
-            // DEĞİŞİKLİK BURADA YAPILDI
+            // Eğer o tarihe ait hiç kayıt yoksa 0.0 Lt göster
             displayElement.textContent = `Mevcut: 0.0 Lt`;
         } else {
-            let toplamSabah = 0, toplamAksam = 0;
+            let toplamSabah = 0;
+            let toplamAksam = 0;
+
+            // Helper fonksiyon: Değeri güvenli bir şekilde sayıya çevirir
             const toNumber = (val) => parseFloat(String(val || 0).replace(',', '.')) || 0;
 
+            // Her bir süt alımı kaydını döngüye alarak sabah ve akşam toplamlarını hesapla
             snapshot.forEach(doc => {
                 const data = doc.data();
                 toplamSabah += toNumber(data.sabah);
                 toplamAksam += toNumber(data.aksam);
             });
 
+            // Sabah ve akşam toplamlarını birleştirerek genel toplamı bul
             const genelToplam = toplamSabah + toplamAksam;
+
+            // Hesaplanan genel toplamı ekranda göster
             displayElement.textContent = `Mevcut: ${genelToplam.toFixed(1)} Lt`;
         }
     } catch (error) {
+        // Hata durumunda konsola logla ve kullanıcıya mesaj göster
         console.error("Günlük genel toplam alınırken hata:", error);
         displayElement.textContent = 'Toplam alınamadı';
     }
 }
+
+
        
         function populateProducerSelect() {
              producerSelect.innerHTML = '';
@@ -521,12 +536,21 @@ function renderHistory(dataToRender) {
     
     historySection.style.display = 'block';
     historyList.innerHTML = '';
-    let totalMilk = 0;
+
+    let toplamSabah = 0;
+    let toplamAksam = 0;
 
     const groupedByProducer = {};
     dataToRender.forEach(item => {
         if (!groupedByProducer[item.cariId]) {
-            groupedByProducer[item.cariId] = { cariAdi: item.cariAdi, sabah: 0, aksam: 0, fiyat: item.fiyat, sutAlimId: item.sutAlimId, tarih: item.tarih };
+            groupedByProducer[item.cariId] = {
+                cariAdi: item.cariAdi,
+                sabah: 0,
+                aksam: 0,
+                fiyat: item.fiyat,
+                sutAlimId: item.sutAlimId,
+                tarih: item.tarih
+            };
         }
         groupedByProducer[item.cariId].sabah += item.sabah || 0;
         groupedByProducer[item.cariId].aksam += item.aksam || 0;
@@ -536,21 +560,28 @@ function renderHistory(dataToRender) {
         const listItem = document.createElement('li');
         listItem.className = 'history-item';
         const gunlukToplam = item.sabah + item.aksam;
-        totalMilk += gunlukToplam;
-        
+        toplamSabah += item.sabah;
+        toplamAksam += item.aksam;
+
         listItem.innerHTML = `
             <div class="history-item-info">${item.cariAdi}</div>
             <div class="history-item-details">
                 <span>${gunlukToplam.toFixed(1)} Lt (S:${item.sabah.toFixed(1)}, A:${item.aksam.toFixed(1)})</span>
             </div>
             <div>
-                 <button class="btn edit-btn" onclick="editHistoryItem('${item.sutAlimId}')">Düzenle</button>
-                 <button class="btn delete-btn" onclick="deleteHistoryItem('${item.sutAlimId}')">Sil</button>
+                <button class="btn edit-btn" onclick="editHistoryItem('${item.sutAlimId}')">Düzenle</button>
+                <button class="btn delete-btn" onclick="deleteHistoryItem('${item.sutAlimId}')">Sil</button>
             </div>`;
         historyList.appendChild(listItem);
     });
 
-    sessionSummary.innerHTML = `<p>Gösterilen Toplam Süt: <span>${totalMilk.toFixed(1)} Litre</span></p>`;
+    const toplamGenel = toplamSabah + toplamAksam;
+
+    sessionSummary.innerHTML = `
+        <p>Seçilen güne ait Sabah Sütü: <strong>${toplamSabah.toFixed(1)} Lt</strong></p>
+        <p>Seçilen güne ait Akşam Sütü: <strong>${toplamAksam.toFixed(1)} Lt</strong></p>
+        <p>Seçilen güne ait Toplam Süt: <strong>${toplamGenel.toFixed(1)} Lt</strong></p>
+    `;
 }
 
 
