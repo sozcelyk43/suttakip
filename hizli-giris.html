@@ -35,7 +35,50 @@
         .time-selection input[id="sabah"]:checked + label { background-color: #28a745; }
         #producer-panel, #history-section { background-color: var(--white-color); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-top: 25px; }
         #current-producer-name { font-size: 1.5em; font-weight: 700; color: var(--primary-color); margin-bottom: 15px; text-align: center; }
-        .action-buttons { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-top: 25px; }
+.action-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+
+#history-list li:nth-child(odd) {
+    background-color: #f1f1f1; }
+
+#history-list li:nth-child(even) {
+    background-color: #ffffff; }
+.history-item {
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    font-size: 1.1em;
+    margin: 0 3px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+
+.btn-icon:hover {
+    background-color: #e2e6ea;
+}
+
+.btn-delete {
+    color: #dc3545;
+}
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95em;
+}
+
         .btn { padding: 15px; font-size: 1.1em; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-success { background-color: var(--success-color); color: var(--white-color); }
@@ -46,6 +89,12 @@
         .history-item { padding: 10px 0; border-bottom: 1px solid #f0f2f5; display: flex; align-items: center; gap: 10px; }
         .history-item-info { font-weight: 600; flex-grow: 1; }
         .history-item-details { text-align: right; }
+.btn-sm {
+    padding: 6px 10px;
+    font-size: 0.8em;
+    font-weight: 500;
+    border-radius: 6px;
+}
         .history-item .delete-btn { background-color: var(--danger-color); color: var(--white-color); padding: 8px 12px; font-size: 0.9em; flex-shrink: 0; border: none; border-radius: 6px; cursor: pointer; }
         #cancel-edit-btn { display: none; margin-top: 10px; width: 100%; background-color: var(--danger-color); color: var(--white-color); }
         .toast-message { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #28a745; color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 1000; font-size: 1.1em; font-weight: 500; display: none; opacity: 0; transition: opacity 0.5s ease; }
@@ -109,11 +158,11 @@
                     <textarea id="notes" name="notes" rows="3"></textarea>
                 </div>
                 <div class="action-buttons">
-                    <button type="button" id="skip-btn" class="btn btn-secondary">Pas Geç</button>
-                    <button type="button" id="save-btn" class="btn btn-success">Kaydet ve Sonraki</button>
-                </div>
-                <button type="button" id="cancel-edit-btn" class="btn">Düzenlemeyi İptal Et</button>
-            </div>
+    <button type="button" id="skip-btn" class="btn btn-secondary">Pas Geç</button>
+    <button type="button" id="save-btn" class="btn btn-success">Kaydet ve Sonraki</button>
+    <button type="button" id="cancel-edit-btn" class="btn btn-danger">İptal</button>
+		</div>
+
 
             <section id="history-section" style="display: none;">
                 <h2>Süt Alım Geçmişi (Bu Oturum)</h2>
@@ -419,9 +468,13 @@ async function startRoute() {
         
         // `fullHistoryForDate` üzerinden kontrol yap
         fullHistoryForDate.forEach(entry => {
-            if ((zamanDilimi === 'sabah' && entry.sabah !== undefined) || (zamanDilimi === 'akşam' && entry.aksam !== undefined)) {
-                 savedProducerIds.add(entry.cariId);
-            }
+            if (
+    (zamanDilimi === 'sabah' && (entry.sabah || 0) > 0) ||
+    (zamanDilimi === 'akşam' && (entry.aksam || 0) > 0)
+) {
+    savedProducerIds.add(entry.cariId);
+}
+
         });
 
         routeProducers = producersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(p => {
@@ -533,7 +586,7 @@ function renderHistory(dataToRender) {
         historySection.style.display = 'none';
         return;
     }
-    
+
     historySection.style.display = 'block';
     historyList.innerHTML = '';
 
@@ -555,25 +608,33 @@ function renderHistory(dataToRender) {
         groupedByProducer[item.cariId].sabah += item.sabah || 0;
         groupedByProducer[item.cariId].aksam += item.aksam || 0;
     });
-    
-    Object.values(groupedByProducer).forEach(item => {
-        const listItem = document.createElement('li');
-        listItem.className = 'history-item';
-        const gunlukToplam = item.sabah + item.aksam;
-        toplamSabah += item.sabah;
-        toplamAksam += item.aksam;
 
-        listItem.innerHTML = `
-            <div class="history-item-info">${item.cariAdi}</div>
-            <div class="history-item-details">
-                <span>${gunlukToplam.toFixed(1)} Lt (S:${item.sabah.toFixed(1)}, A:${item.aksam.toFixed(1)})</span>
-            </div>
-            <div>
-                <button class="btn edit-btn" onclick="editHistoryItem('${item.sutAlimId}')">Düzenle</button>
-                <button class="btn delete-btn" onclick="deleteHistoryItem('${item.sutAlimId}')">Sil</button>
-            </div>`;
-        historyList.appendChild(listItem);
-    });
+		Object.values(groupedByProducer).forEach(item => {
+   	 const listItem = document.createElement('li');
+   	 listItem.className = 'history-item';
+
+   	 const gunlukToplam = item.sabah + item.aksam;
+    	toplamSabah += item.sabah;
+    	toplamAksam += item.aksam;
+
+    	let buttonHTML = '';
+	buttonHTML += `<button class="btn-icon" title="Sabah Düzenle" onclick="editHistoryItem('${item.sutAlimId}', 'sabah')">☀️✏️</button>`;
+	buttonHTML += `<button class="btn-icon" title="Akşam Düzenle" onclick="editHistoryItem('${item.sutAlimId}', 'aksam')">🌙✏️</button>`;
+	buttonHTML += `<button class="btn-icon btn-delete" title="Sil" onclick="deleteHistoryItem('${item.sutAlimId}')">🗑️</button>`;
+
+
+    listItem.innerHTML = `
+        <div class="history-item-info">${item.cariAdi}</div>
+        <div class="history-item-details">
+            <span>${gunlukToplam.toFixed(1)} Lt (S:${item.sabah.toFixed(1)}, A:${item.aksam.toFixed(1)})</span>
+        </div>
+        <div>
+            ${buttonHTML}
+        </div>`;
+        
+    historyList.appendChild(listItem);
+});
+
 
     const toplamGenel = toplamSabah + toplamAksam;
 
@@ -583,7 +644,6 @@ function renderHistory(dataToRender) {
         <p>Seçilen güne ait Toplam Süt: <strong>${toplamGenel.toFixed(1)} Lt</strong></p>
     `;
 }
-
 
 
 // Mevcut deleteHistoryItem fonksiyonunu silip bunu yapıştırın:
@@ -636,15 +696,11 @@ function handleSave() {
     }
 }
 
-// Bu fonksiyonları script'inize ekleyin
-
-function setEditMode(entry) {
+function setEditMode(entry, zamanDilimi) {
     producerPanel.style.display = 'block';
     editingEntry = entry;
-    editingSutAlimIdInput.value = entry.sutAlimId; // Ana sut_alimlari ID'sini sakla
+    editingSutAlimIdInput.value = entry.sutAlimId;
 
-    // Düzenlenen girdinin sabah mı akşam mı olduğunu belirle
-    const zamanDilimi = (entry.aksam > 0 && entry.sabah === 0) ? 'akşam' : 'sabah';
     const miktar = zamanDilimi === 'sabah' ? entry.sabah : entry.aksam;
 
     document.getElementById(zamanDilimi).checked = true;
@@ -737,9 +793,7 @@ async function handleUpdate() {
     }
 }
 
-// Mevcut editHistoryItem fonksiyonunu silip bunu yapıştırın:
-function editHistoryItem(sutAlimId) {
-    // DEĞİŞİKLİK: Artık doğru dizi olan 'fullHistoryForDate' içinde arama yapıyor
+function editHistoryItem(sutAlimId, zaman) {
     const entry = fullHistoryForDate.find(item => item.sutAlimId === sutAlimId);
     
     if (entry) {
@@ -748,7 +802,7 @@ function editHistoryItem(sutAlimId) {
             alert('Bu kaydı düzenleme yetkiniz yok. Sadece son 2 güne ait kayıtlar düzenlenebilir.');
             return;
         }
-        setEditMode(entry);
+        setEditMode(entry, zaman);
     } else {
         alert("Düzenlenecek kayıt bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin.");
     }
