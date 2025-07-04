@@ -200,18 +200,19 @@
             unitPriceInput.value = settings.defaultMilkPrice ? settings.defaultMilkPrice.toFixed(2) : "15.50";
             
             await populateCategories();
-            
+                await fetchAndRenderHistory(collectionDateInput.value);
+
 
 
     showDailyGrandTotal();
 
-    collectionDateInput.addEventListener('change', showDailyGrandTotal);
+    collectionDateInput.addEventListener('change', () => fetchAndRenderHistory(collectionDateInput.value));
 
-            categorySelect.addEventListener('change', startRoute);
-            producerSelect.addEventListener('change', jumpToProducer);
-            saveBtn.addEventListener('click', handleSaveAndNext);
-            skipBtn.addEventListener('click', handleSkip);
-            cancelEditBtn.addEventListener('click', cancelEditMode);
+     categorySelect.addEventListener('change', startRoute);
+    producerSelect.addEventListener('change', jumpToProducer);
+    saveBtn.addEventListener('click', handleSave); // handleSave'i çağırır
+    skipBtn.addEventListener('click', handleSkip);
+    cancelEditBtn.addEventListener('click', cancelEditMode);
             
             const inputsToTriggerRoute = [collectionDateInput, ...document.querySelectorAll('input[name="time"]')];
             inputsToTriggerRoute.forEach(el => {
@@ -226,10 +227,36 @@
                 return doc.exists ? doc.data() : {};
             } catch (e) { console.error("Ayarlar alınamadı:", e); return {}; }
         }
+async function fetchAndRenderHistory(date) {
+    if (!date) return;
+    historySection.style.display = 'none';
+    historyList.innerHTML = '';
 
+    try {
+        const existingEntriesSnapshot = await db.collection('sut_alimlari')
+            .where('sahipId', '==', sahipId)
+            .where('tarih', '==', date)
+            .get();
+        
+        collectionHistory = existingEntriesSnapshot.docs.map(doc => ({ ...doc.data(), sutAlimId: doc.id }));
+        renderHistory();
+    } catch (error) {
+        console.error("Geçmiş yüklenirken hata:", error);
+    }
+}
       
         
-       async function saveMilkEntry(quantity, notes) {
+function getDayDifference(dateStr) {
+    const today = new Date();
+    const entryDate = new Date(dateStr);
+    today.setHours(0, 0, 0, 0);
+    entryDate.setHours(0, 0, 0, 0);
+    const diffTime = today - entryDate;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+}
+
+async function saveMilkEntry(quantity, notes) {
     const unitPrice = parseFloat(String(unitPriceInput.value).replace(',', '.')) || 0;
     const alimTarihi = collectionDateInput.value;
     const zamanDilimi = document.querySelector('input[name="time"]:checked').value;
@@ -354,45 +381,38 @@
                 });
         }
 
-        async function startRoute() {
-            producerPanel.style.display = 'none';
-            historySection.style.display = 'none';
-            const category = categorySelect.value;
-            if (!category) return;
-            const alimTarihi = collectionDateInput.value;
-            
-            try {
-                const [producersSnapshot, existingEntriesSnapshot] = await Promise.all([
-                    db.collection('cariler').where('sahipId', '==', sahipId).where('kategori', '==', category).where('durum', '==', 'aktif').where('cariGrup', 'array-contains', 'üretici').orderBy('rotaSirasi').get(),
-                    db.collection('sut_alimlari').where('sahipId', '==', sahipId).where('tarih', '==', alimTarihi).get()
-                ]);
+async function startRoute() {
+    producerPanel.style.display = 'none';
+    const category = categorySelect.value;
+    if (!category) return;
+    
+    try {
+        const producersSnapshot = await db.collection('cariler').where('sahipId', '==', sahipId).where('kategori', '==', category).where('durum', '==', 'aktif').where('cariGrup', 'array-contains', 'üretici').orderBy('rotaSirasi').get();
 
-                collectionHistory = existingEntriesSnapshot.docs.map(doc => ({ ...doc.data(), sutAlimId: doc.id }));
-                renderHistory();
+        const zamanDilimi = document.querySelector('input[name="time"]:checked').value;
+        const savedProducerIds = new Set();
+        collectionHistory.forEach(entry => {
+            if ((zamanDilimi === 'sabah' && entry.sabah !== undefined) || (zamanDilimi === 'akşam' && entry.aksam !== undefined)) {
+                 savedProducerIds.add(entry.cariId);
+            }
+        });
 
-                const zamanDilimi = document.querySelector('input[name="time"]:checked').value;
-                const savedProducerIds = new Set();
-                collectionHistory.forEach(entry => {
-                    if ((zamanDilimi === 'sabah' && entry.sabah !== undefined) || (zamanDilimi === 'akşam' && entry.aksam !== undefined)) {
-                        savedProducerIds.add(entry.cariId);
-                    }
-                });
+        routeProducers = producersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(p => !savedProducerIds.has(p.id));
 
-                routeProducers = producersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(p => !savedProducerIds.has(p.id));
-
-                if(routeProducers.length === 0) {
-                    alert("Bu rota için bu zaman diliminde tüm süt girişleri tamamlanmış veya uygun üretici bulunamadı.");
-                    return;
-                }
-                
-                currentProducerIndex = 0;
-                populateProducerSelect();
-                displayCurrentProducer();
-                producerPanel.style.display = 'block';
-            } catch (error) { console.error("Rota başlatılırken hata:", error); alert("Rota başlatılamadı."); }
+        if(routeProducers.length === 0) {
+            alert("Bu rota için bu zaman diliminde tüm süt girişleri tamamlanmış veya uygun üretici bulunamadı.");
+            return;
         }
-
-
+        
+        currentProducerIndex = 0;
+        populateProducerSelect();
+        displayCurrentProducer();
+        producerPanel.style.display = 'block';
+    } catch (error) { 
+        console.error("Rota başlatılırken hata:", error); 
+        alert("Rota başlatılamadı."); 
+    }
+}
 
 function displayCurrentProducer() {
     if (currentProducerIndex >= routeProducers.length) {
@@ -463,13 +483,209 @@ async function showDailyGrandTotal() {
             currentProducerIndex = parseInt(this.value);
             displayCurrentProducer();
         }
+function renderHistory() {
+    if (!historySection || !historyList || !sessionSummary) return;
+    const alimTarihi = collectionDateInput.value;
+    const sessionData = collectionHistory.filter(item => item.tarih === alimTarihi);
+
+    if (sessionData.length === 0) { historySection.style.display = 'none'; return; }
+    
+    historySection.style.display = 'block';
+    historyList.innerHTML = '';
+    let totalMilk = 0, totalValue = 0;
+
+    const groupedByProducer = {};
+    sessionData.forEach(item => {
+        if (!groupedByProducer[item.cariId]) {
+            groupedByProducer[item.cariId] = { cariAdi: item.cariAdi, sabah: 0, aksam: 0, fiyat: item.fiyat, sutAlimId: item.sutAlimId, tarih: item.tarih };
+        }
+        groupedByProducer[item.cariId].sabah += item.sabah || 0;
+        groupedByProducer[item.cariId].aksam += item.aksam || 0;
+    });
+    
+    Object.values(groupedByProducer).forEach(item => {
+        const listItem = document.createElement('li');
+        listItem.className = 'history-item';
+        const gunlukToplam = item.sabah + item.aksam;
+        const gunlukTutar = gunlukToplam * item.fiyat;
+        totalMilk += gunlukToplam;
+        totalValue += gunlukTutar;
         
-        // Düzenleme ile ilgili tüm fonksiyonlar kaldırıldı
-        function handleSave() { handleSaveAndNext(); }
-        function cancelEditMode() {}
-        async function handleUpdate() {}
-        function renderHistory() { /* Basit bir renderHistory bırakılabilir veya tamamen kaldırılabilir */ }
-        async function deleteHistoryItem(sutAlimId) { /* Silme işleminin basitleştirilmiş hali */ }
+        listItem.innerHTML = `
+            <div class="history-item-info">${item.cariAdi}</div>
+            <div class="history-item-details">
+                <span>${gunlukToplam.toFixed(1)} Lt (S:${item.sabah.toFixed(1)}, A:${item.aksam.toFixed(1)})</span>
+            </div>
+            <div>
+                 <button class="btn edit-btn" onclick="editHistoryItem('${item.sutAlimId}')">Düzenle</button>
+                 <button class="btn delete-btn" onclick="deleteHistoryItem('${item.sutAlimId}')">Sil</button>
+            </div>`;
+        historyList.appendChild(listItem);
+    });
+
+    sessionSummary.innerHTML = `<p>Oturum Toplam Süt: <span>${totalMilk.toFixed(1)} Litre</span></p>`;
+}
+
+async function deleteHistoryItem(sutAlimId) {
+    const entryToDelete = collectionHistory.find(item => item.sutAlimId === sutAlimId);
+    if (!entryToDelete) {
+        alert("Silinecek kayıt oturum geçmişinde bulunamadı.");
+        return;
+    }
+
+    const dayDifference = getDayDifference(entryToDelete.tarih);
+    if (currentUserRole !== 'admin' && dayDifference > 2) {
+        alert('Bu kaydı silme yetkiniz yok. Sadece son 2 güne ait kayıtlar silinebilir.');
+        return;
+    }
+
+    if (!confirm(`'${entryToDelete.cariAdi}' için girilen tüm süt kayıtlarını kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!`)) {
+        return;
+    }
+
+    const saveBtn = document.getElementById('save-btn');
+    const skipBtn = document.getElementById('skip-btn');
+    saveBtn.disabled = true;
+    skipBtn.disabled = true;
+
+    try {
+        await db.collection('sut_alimlari').doc(sutAlimId).delete();
+        alert("Kayıt başarıyla silindi.");
+        await startRoute();
+    } catch (error) {
+        console.error("Silme hatası:", error);
+        alert("Kayıt silinirken bir hata oluştu: " + error.message);
+    } finally {
+        saveBtn.disabled = false;
+        skipBtn.disabled = false;
+    }
+}
+
+function handleSave() {
+    if (editingSutAlimIdInput.value) {
+        handleUpdate();
+    } else {
+        handleSaveAndNext();
+    }
+}
+
+// Bu fonksiyonları script'inize ekleyin
+
+function setEditMode(entry) {
+    producerPanel.style.display = 'block';
+    editingEntry = entry;
+    editingSutAlimIdInput.value = entry.sutAlimId; // Ana sut_alimlari ID'sini sakla
+
+    // Düzenlenen girdinin sabah mı akşam mı olduğunu belirle
+    const zamanDilimi = (entry.aksam > 0 && entry.sabah === 0) ? 'akşam' : 'sabah';
+    const miktar = zamanDilimi === 'sabah' ? entry.sabah : entry.aksam;
+
+    document.getElementById(zamanDilimi).checked = true;
+    
+    currentProducerName.textContent = `DÜZENLE: ${entry.cariAdi}`;
+    quantityInput.value = miktar;
+    notesInput.value = entry.not || '';
+    unitPriceInput.value = (entry.fiyat || 0).toFixed(2);
+    
+    producerSelect.disabled = true;
+    categorySelect.disabled = true;
+    
+    skipBtn.style.display = 'none';
+    saveBtn.textContent = 'Güncelle';
+    saveBtn.className = 'btn btn-warning';
+    cancelEditBtn.style.display = 'block';
+    
+    producerPanel.scrollIntoView({ behavior: 'smooth' });
+}
+
+function cancelEditMode() {
+    editingEntry = null;
+    editingSutAlimIdInput.value = '';
+    producerSelect.disabled = false;
+    categorySelect.disabled = false;
+    skipBtn.style.display = 'block';
+    saveBtn.textContent = 'Kaydet ve Sonraki';
+    saveBtn.className = 'btn btn-success';
+    cancelEditBtn.style.display = 'none';
+    
+    // Aktif üreticiyi tekrar göster
+    if(routeProducers.length > 0 && currentProducerIndex < routeProducers.length) {
+         displayCurrentProducer();
+    } else {
+         producerPanel.style.display = 'none';
+    }
+}
+
+async function handleUpdate() {
+    const yeniMiktar = parseFloat(String(quantityInput.value).replace(',', '.')) || 0;
+    if (isNaN(yeniMiktar) || yeniMiktar < 0) { alert('Lütfen geçerli bir miktar girin.'); return; }
+    if (!editingEntry) { alert("Hata: Düzenlenecek giriş bilgisi bulunamadı."); return; }
+
+    saveBtn.disabled = true;
+    
+    const yeniBirimFiyat = parseFloat(unitPriceInput.value);
+    const zamanDilimi = document.querySelector('input[name="time"]:checked').value;
+    const sutAlimId = editingSutAlimIdInput.value;
+    const alimTarihi = collectionDateInput.value;
+
+    const sutAlimRef = db.collection('sut_alimlari').doc(sutAlimId);
+
+    try {
+        await db.runTransaction(async (transaction) => {
+            const sutDoc = await transaction.get(sutAlimRef);
+            if (!sutDoc.exists) throw new Error("Ana süt alım kaydı bulunamadı!");
+            
+            const data = sutDoc.data();
+            const sutUpdates = {};
+            
+            // Diğer zaman dilimindeki değeri koru
+            let mevcutSabah = data.sabah || 0;
+            let mevcutAksam = data.aksam || 0;
+
+            if (zamanDilimi === 'sabah') {
+                mevcutSabah = yeniMiktar;
+            } else { 
+                mevcutAksam = yeniMiktar;
+            }
+
+            sutUpdates.sabah = mevcutSabah;
+            sutUpdates.aksam = mevcutAksam;
+            sutUpdates.toplam = mevcutSabah + mevcutAksam;
+            sutUpdates.fiyat = yeniBirimFiyat;
+            sutUpdates.toplamTutar = sutUpdates.toplam * yeniBirimFiyat;
+            sutUpdates.not = notesInput.value;
+
+            transaction.update(sutAlimRef, sutUpdates);
+        });
+
+        alert("Kayıt başarıyla güncellendi.");
+        await fetchAndRenderHistory(alimTarihi);
+        if (categorySelect.value) { await startRoute(); }
+        cancelEditMode(); 
+    } catch (error) {
+        alert("Güncelleme sırasında bir hata oluştu: " + error.message);
+        console.error("Update Error:", error);
+    } finally {
+        saveBtn.disabled = false;
+    }
+}
+
+function editHistoryItem(sutAlimId) {
+    const entry = collectionHistory.find(item => item.sutAlimId === sutAlimId);
+    if (entry) {
+        const dayDifference = getDayDifference(entry.tarih);
+        if (currentUserRole !== 'admin' && dayDifference > 2) {
+            alert('Bu kaydı düzenleme yetkiniz yok. Sadece son 2 güne ait kayıtlar düzenlenebilir.');
+            return;
+        }
+        setEditMode(entry);
+    } else {
+        alert("Düzenlenecek kayıt bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin.");
+    }
+}
+
+        
+        
     </script>
 </body>
 </html>
