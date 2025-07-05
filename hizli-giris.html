@@ -43,12 +43,31 @@
         .btn-warning { background-color: var(--warning-color); color: var(--dark-color); }
         #session-summary { background-color: #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-size: 1.1em; }
         #history-list { list-style: none; padding: 0; margin: 0; }
-        .history-item {display: flex; justify-content: space-between; align-items: center;padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 1em;}
+/* Geçmiş listesi satır düzenini iyileştiren stil */
+.history-item {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Öğeler arasına 8px boşluk ekler */
+}
+
+/* Üretici adının esneyip uzamasını sağlar */
+.history-item .history-info {
+    flex-grow: 1;
+    min-width: 0; /* Uzun isimlerin küçülmesine izin verir */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Sığmazsa sonuna ... ekler */
+}
+
+/* Butonların küçülmesini engeller */
+.history-item .history-actions {
+    flex-shrink: 0;
+}
+
+
         .history-item:nth-child(odd) { background-color: #f1f1f1; }
         .history-item:nth-child(even) { background-color: #ffffff; }
-        .history-info { flex-grow: 1; }
         .history-info strong { color: var(--primary-color); }
-        .history-actions { flex-shrink: 0; white-space: nowrap; }
         .btn-icon {background: none; border: none; font-size: 1.3em; margin: 0 4px; cursor: pointer;padding: 4px; border-radius: 6px; transition: background-color 0.2s; vertical-align: 	middle; }
         .btn-icon:hover { background-color: #e2e6ea; }
         .btn-delete { color: var(--danger-color); }
@@ -541,7 +560,7 @@ function jumpToProducer() {
             displayCurrentProducer();
         }
 
-// LÜTFEN MEVCUT renderHistory FONKSİYONUNU BU YENİ VERSİYONLA TAMAMEN DEĞİŞTİRİN.
+// LÜTFEN MEVCUT renderHistory FONKSİYONUNU BU NİHAİ VERSİYONLA DEĞİŞTİRİN
 function renderHistory(dataToRender) {
     if (!historySection || !historyList || !sessionSummary) return;
 
@@ -583,14 +602,12 @@ function renderHistory(dataToRender) {
             const listItem = document.createElement('li');
             listItem.className = 'history-item';
             
-            // --- SATIR TAŞMASINI ENGELLEMEK İÇİN YAPI GÜNCELLENDİ ---
+            // --- DAHA FERAH BİR GÖRÜNÜM İÇİN YAPI GÜNCELLENDİ ---
             listItem.innerHTML = `
-                <div class="history-info" style="flex-grow: 1; display: flex; justify-content: space-between; align-items: center; min-width: 0;">
-                    <span class="history-producer-name" title="${item.cariAdi}">${item.cariAdi}</span>
-                    <strong style="margin: 0 8px; white-space: nowrap;">${zamanLabel}: ${miktar.toFixed(1)} Lt</strong>
-                    <span style="color: var(--success-color); font-weight: 500; text-align: right; white-space: nowrap;">${kayitTutari.toFixed(2)} ₺</span>
-                </div>
-                <div class="history-actions" style="flex-shrink: 0; padding-left: 8px;">
+                <strong class="history-info" title="${item.cariAdi}">${item.cariAdi}</strong>
+                <span style="white-space: nowrap;">${zamanLabel}: ${miktar.toFixed(1)} Lt</span>
+                <span style="color: var(--success-color); font-weight: 500; margin-left: auto;">${kayitTutari.toFixed(2)} ₺</span>
+                <div class="history-actions">
                     <button class="btn-icon" onclick="editHistoryItem('${item.sutAlimId}', '${zaman}')" title="${editTitle}">${editIcon}</button>
                     <button class="btn-icon btn-delete" onclick="deleteHistoryItem('${item.sutAlimId}', '${zaman}')" title="Sil">🗑️</button>
                 </div>
@@ -608,7 +625,6 @@ function renderHistory(dataToRender) {
         historySection.style.display = 'none';
      }
 }
-
 
 // Lütfen mevcut deleteHistoryItem fonksiyonunu bununla değiştirin.
 async function deleteHistoryItem(sutAlimId, zaman) {
