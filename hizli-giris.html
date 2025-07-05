@@ -237,7 +237,7 @@
             </div>
 
             <section id="history-section" style="display: none;">
-                <h2>Süt Alım Geçmişi</h2>
+                <h2>Süt Alım Geçmişi (Bu Oturum)</h2>
                 <div id="session-summary"></div>
                 <ul id="history-list"></ul>
             </section>
@@ -296,7 +296,7 @@ auth.onAuthStateChanged(user => {
             if (user) {
                 const logoutButton = document.getElementById('logoutButton');
                 if (logoutButton && user.email) {
-                    logoutButton.innerHTML = `Çıkış<br><small style="font-weight:normal; font-size:0.8em;">${user.email}</small>`;
+                    logoutButton.innerHTML = `🚪 Çıkış Yap<br><small style="font-weight:normal; font-size:0.8em;">${user.email}</small>`;
                 }
                 db.collection('kullanicilar').doc(user.uid).get().then(doc => {
                     if (doc.exists) {
@@ -334,7 +334,7 @@ async function initializeApp() {
 
     quantityInput.addEventListener('focus', scrollToActivePanel);
     notesInput.addEventListener('focus', scrollToActivePanel);
-    quantityInput.addEventListener('change', checkPreviousDayDifference);
+    //quantityInput.addEventListener('change', checkPreviousDayDifference);
     categorySelect.addEventListener('change', startRoute);
     producerSelect.addEventListener('change', jumpToProducer);
     saveBtn.addEventListener('click', handleSave);
@@ -387,10 +387,17 @@ function getDayDifference(dateStr) {
 
 
 async function handleSaveAndNext() {
-            const quantity = parseFloat(String(quantityInput.value).replace(',', '.')) || 0;
-            if (isNaN(quantity) || quantity < 0) { alert('Lütfen geçerli bir miktar girin.'); return; }
-            await saveMilkEntry(quantity, notesInput.value);
-        }
+    const quantity = parseFloat(String(quantityInput.value).replace(',', '.')) || 0;
+    if (isNaN(quantity) || quantity < 0) {
+        alert('Lütfen geçerli bir miktar girin.');
+        return;
+    }
+
+    const proceed = await checkPreviousDayDifference();
+    if (!proceed) return;
+
+    await saveMilkEntry(quantity, notesInput.value);
+}
 
 function handleSkip() {
             const producerName = routeProducers[currentProducerIndex]?.adiSoyadi || 'Bu üretici';
@@ -790,11 +797,14 @@ function cancelEditMode() {
 
 async function handleUpdate() {
     const yeniMiktar = parseFloat(String(quantityInput.value).replace(',', '.')) || 0;
-    if (isNaN(yeniMiktar) || yeniMiktar < 0) { alert('Lütfen geçerli bir miktar girin.'); return; }
-    if (!editingEntry) { alert("Hata: Düzenlenecek giriş bilgisi bulunamadı."); return; }
+    if (isNaN(yeniMiktar) || yeniMiktar < 0) return;
+    if (!editingEntry) return;
+
+    const proceed = await checkPreviousDayDifference();
+    if (!proceed) return;
 
     saveBtn.disabled = true;
-    
+
     const yeniBirimFiyat = parseFloat(unitPriceInput.value);
     const zamanDilimi = document.querySelector('input[name="time"]:checked').value;
     const sutAlimId = editingSutAlimIdInput.value;
@@ -805,21 +815,27 @@ async function handleUpdate() {
     try {
         const mevcutVeri = editingEntry;
         const guncelleme = {
-             fiyat: yeniBirimFiyat,
-             not: notesInput.value
+            fiyat: yeniBirimFiyat,
+            not: notesInput.value
         };
 
         guncelleme[zamanDilimi] = yeniMiktar;
+
         const sabahDegeri = zamanDilimi === 'sabah' ? yeniMiktar : (mevcutVeri.sabah || 0);
         const aksamDegeri = zamanDilimi === 'aksam' ? yeniMiktar : (mevcutVeri.aksam || 0);
+
         guncelleme.toplam = sabahDegeri + aksamDegeri;
         guncelleme.toplamTutar = guncelleme.toplam * yeniBirimFiyat;
+
         await sutAlimRef.update(guncelleme);
-        alert("Kayıt başarıyla güncellendi.");
         await fetchAndRenderHistory(alimTarihi);
         await showDailyGrandTotal();
-        cancelEditMode(); 
-        if (categorySelect.value) { await startRoute(); }
+
+        cancelEditMode();
+
+        if (categorySelect.value) {
+            await startRoute();
+        }
 
     } catch (error) {
         alert("Güncelleme sırasında bir hata oluştu: " + error.message);
@@ -856,34 +872,27 @@ async function getPreviousDayQuantity(producerId, currentDateStr, timeSlot) {
 
 async function checkPreviousDayDifference() {
     const currentQuantity = parseFloat(String(quantityInput.value).replace(',', '.')) || 0;
-    if (currentQuantity <= 0) return;
+    if (currentQuantity <= 0) return true;
 
     const currentProducer = routeProducers[currentProducerIndex];
-    if (!currentProducer) return;
+    if (!currentProducer) return true;
 
     const timeSlot = document.querySelector('input[name="time"]:checked').value;
     const currentDateStr = collectionDateInput.value;
 
     const previousQuantity = await getPreviousDayQuantity(currentProducer.id, currentDateStr, timeSlot);
 
-    if (previousQuantity === null || previousQuantity <= 0) {
-        console.log("Karşılaştırma için önceki gün verisi bulunamadı.");
-        return;
-    }
+    if (previousQuantity === null || previousQuantity <= 0) return true;
 
     const difference = Math.abs(currentQuantity - previousQuantity);
     const percentageChange = (difference / previousQuantity) * 100;
 
     if (percentageChange > 35) {
-        const message = `DİKKAT!\n\nGirilen miktar (${currentQuantity.toFixed(1)} Lt), dünkü miktara (${previousQuantity.toFixed(1)} Lt) göre %${percentageChange.toFixed(0)} oranında farklı.\n\nYine de bu şekilde kaydetmek istiyor musunuz?`;
-        
-        const confirmation = confirm(message);
-
-        if (!confirmation) {
-            quantityInput.value = '';
-            quantityInput.focus();
-        }
+        const confirmation = confirm(`DİKKAT!\n\nGirilen miktar (${currentQuantity.toFixed(1)} Lt), dünkü miktara (${previousQuantity.toFixed(1)} Lt) göre %${percentageChange.toFixed(0)} oranında farklı.\n\nYine de bu şekilde kaydetmek istiyor musunuz?`);
+        return confirmation;
     }
+
+    return true;
 }
 
 
