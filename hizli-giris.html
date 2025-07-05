@@ -64,6 +64,52 @@
 	.history-producer-name {flex-shrink: 1;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;display: inline-block;max-width: 150px;vertical-align: middle; }
 	.action-buttons {position: -webkit-sticky;position: sticky;bottom: 0;z-index: 10;background-color: var(--light-color);padding-top: 10px;padding-bottom: 10px;
         	border-top: 1px solid var(--border-color);}
+.inline-edit-form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 8px;
+    width: 100%;
+    background-color: #f9f9f9;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+.inline-edit-form input {
+    width: 100%;
+    padding: 8px;
+    font-size: 1em;
+    box-sizing: border-box;
+}
+.inline-edit-form button {
+    padding: 6px 12px;
+    font-size: 1em;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+.btn-inline-save {
+    background-color: var(--success-color);
+    color: white;
+}
+.btn-inline-cancel {
+    background-color: var(--danger-color);
+    color: white;
+    margin-left: 8px;
+}
+.inline-edit-actions {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+
+
+
+
+
 
 </style>
 </head>
@@ -850,6 +896,9 @@ function scrollToActivePanel() {
         }
     }, 100);
 }
+
+
+
 function editHistoryItem(sutAlimId, zaman) {
     const entry = fullHistoryForDate.find(item => item.sutAlimId === sutAlimId);
     if (!entry) return;
@@ -871,15 +920,15 @@ function editHistoryItem(sutAlimId, zaman) {
     }
 
     const miktar = zaman === 'sabah' ? (entry.sabah || 0) : (entry.aksam || 0);
+
     const formDiv = document.createElement('div');
     formDiv.className = 'inline-edit-form';
-    formDiv.style.marginTop = '10px';
-    formDiv.style.display = 'flex';
-    formDiv.style.gap = '8px';
     formDiv.innerHTML = `
-        <input type="number" step="0.1" value="${miktar}" class="edit-inline-input" style="width: 80px; padding:5px;">
-        <button class="btn-inline-save">✔</button>
-        <button class="btn-inline-cancel">✖</button>
+        <input type="number" step="0.1" value="${miktar}" class="edit-inline-input">
+        <div class="inline-edit-actions">
+            <button class="btn-inline-save">✔ Güncelle</button>
+            <button class="btn-inline-cancel">✖ Vazgeç</button>
+        </div>
     `;
 
     targetItem.appendChild(formDiv);
@@ -912,6 +961,7 @@ function editHistoryItem(sutAlimId, zaman) {
         formDiv.remove();
     };
 }
+
 
 
 
