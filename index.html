@@ -301,18 +301,22 @@
         <div class="form-section">
             <h3>Toplu Satış Bilgileri</h3>
             <div id="toplu-satis-formu">
-                <div class="form-grid" style="grid-template-columns: 1fr 2fr; margin-bottom: 20px;">
-                    <div class="form-group">
-                        <label for="topluSatisTarih">Satış Tarihi:</label>
-                        <input type="date" id="topluSatisTarih" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="topluSatisCari">Alan Cari:</label>
-                        <select id="topluSatisCari" required>
-                            <option value="">Cari Seçiniz...</option>
-                        </select>
-                    </div>
-                </div>
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr; align-items: end; gap: 10px; margin-bottom: 20px;">
+    <div class="form-group">
+        <label for="topluSatisTarih">Satış Tarihi:</label>
+        <input type="date" id="topluSatisTarih" required>
+    </div>
+    <div class="form-group">
+        <label for="yemSatisCariAraInput">Cari Ara:</label>
+        <input type="text" id="yemSatisCariAraInput" placeholder="Aramak için yazın...">
+    </div>
+    <div class="form-group">
+        <label for="topluSatisCari">Sonuçlar:</label>
+        <select id="topluSatisCari" required>
+            <option value="">Cari Seçiniz...</option>
+        </select>
+    </div>
+</div>
 
                 <div id="yemSatisSatirlari">
                     </div>
@@ -904,6 +908,29 @@ if (targetId === 'hareket-dokumu') {
     
     const raporCariAramaInput = document.getElementById('raporCariAramaInput');
     if (raporCariAramaInput) { raporCariAramaInput.addEventListener('input', function() { /*...*/ }); }
+
+
+// YEM SATIŞI EKRANI İÇİN CARİ ARAMA FONKSİYONU
+const yemSatisCariAraInput = document.getElementById('yemSatisCariAraInput');
+if (yemSatisCariAraInput) {
+    yemSatisCariAraInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const select = document.getElementById('topluSatisCari');
+        
+        // select.options bir HTMLCollection olduğu için Array.from ile diziye çeviriyoruz
+        Array.from(select.options).forEach(option => {
+            const optionText = option.textContent.toLowerCase();
+            
+            // "Cari Seçiniz..." seçeneğini her zaman görünür yap
+            if (option.value === "") {
+                option.style.display = "";
+            } else {
+                // Seçenek metni, arama metnini içeriyorsa göster, içermiyorsa gizle
+                option.style.display = optionText.includes(searchTerm) ? "" : "none";
+            }
+        });
+    });
+}
 
     // Rapor Butonları
     document.getElementById('raporOlusturBtn')?.addEventListener('click', handleHesapOzetiRaporuOlustur);
