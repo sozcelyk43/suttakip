@@ -987,6 +987,19 @@ async function loadAndRenderAllData() {
     try { await updateDashboardStats(); } catch (e) { console.warn("Panel istatistikleri güncellenemedi.", e); }
     console.log("Veri yükleme denemeleri tamamlandı.");}
 
+
+function formatDateTime(timestamp) {
+    if (!timestamp) return 'Zaman Yok';
+    // Firestore timestamp objesini JavaScript Date objesine çevir
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    if (isNaN(date.getTime())) return 'Geçersiz Tarih';
+
+    const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
+    const timeOptions = { hour: '2-digit', minute: '2-digit' };
+
+    return `${date.toLocaleDateString('tr-TR', dateOptions)} ${date.toLocaleTimeString('tr-TR', timeOptions)}`;
+}
+
 function generateId() { return db.collection('_').doc().id; }
 
 function formatDate(dateString) { if (!dateString) return ''; const date = new Date(dateString); const userTimezoneOffset = date.getTimezoneOffset() * 60000; return new Date(date.getTime() + userTimezoneOffset).toLocaleDateString('tr-TR'); }
@@ -3011,9 +3024,30 @@ async function renderYemSatisListesi() {
     const listBody = document.getElementById('yemSatisListesiBody');
     const currentUser = auth.currentUser;
     if (!currentUser) return;
+    
+    // Sütun başlığını güncelle
+    const tableHeader = listBody.parentElement.querySelector('thead tr');
+    if(tableHeader) {
+        tableHeader.innerHTML = `
+            <th>Tarih ve Saat</th>
+            <th>Alan Cari</th>
+            <th>Yem</th>
+            <th>Miktar</th>
+            <th>Fiyat</th>
+            <th>Tutar</th>
+            <th class="dont-print">İşlemler</th>
+        `;
+    }
+
 
     try {
-        const snapshot = await db.collection('yem_satislari').where('sahipId', '==', sahipId).orderBy('tarih', 'desc').limit(20).get();
+        // SIRALAMA ALANI 'kayitZamani' OLARAK DEĞİŞTİRİLDİ
+        const snapshot = await db.collection('yem_satislari')
+            .where('sahipId', '==', sahipId)
+            .orderBy('kayitZamani', 'desc') // En yeni saat en üstte olacak şekilde sırala
+            .limit(20)
+            .get();
+
         if (snapshot.empty) {
             listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Yem satış hareketi bulunmuyor.</td></tr>';
             return;
@@ -3025,9 +3059,17 @@ async function renderYemSatisListesi() {
             const yemAdi = window.yemDataMap.get(satis.yemId)?.ad || 'Bilinmiyor';
             const cariAdi = window.cariDataMap.get(satis.cariId)?.adiSoyadi || 'Bilinmiyor';
             
+            // Tarih gösterimi yeni fonksiyona göre güncellendi
+            // Eski kayıtlarda 'kayitZamani' olmayacağı için 'tarih' alanını yedek olarak kullanıyoruz.
+            const tarihSaat = satis.kayitZamani ? formatDateTime(satis.kayitZamani) : formatDate(satis.tarih);
+
             rows += `<tr>
-                <td>${formatDate(satis.tarih)}</td><td>${cariAdi}</td><td>${yemAdi}</td><td>${satis.miktar}</td>
-                <td>${formatCurrency(satis.satisFiyati)}</td><td>${formatCurrency(satis.toplamTutar)}</td>
+                <td>${tarihSaat}</td>
+                <td>${cariAdi}</td>
+                <td>${yemAdi}</td>
+                <td>${satis.miktar}</td>
+                <td>${formatCurrency(satis.satisFiyati)}</td>
+                <td>${formatCurrency(satis.toplamTutar)}</td>
                 <td class="dont-print">
                     <button class="btn btn-edit btn-sm" onclick="editYemSatisi('${doc.id}')">Düzenle</button>
                     <button class="btn btn-delete btn-sm" onclick="deleteYemSatisi('${doc.id}')">Sil</button>
@@ -3038,7 +3080,12 @@ async function renderYemSatisListesi() {
 
     } catch(e) { 
         console.error("Yem satış hareketleri yüklenirken hata:", e);
-        listBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Liste yüklenirken bir hata oluştu.</td></tr>';
+        // ÖNEMLİ BİLGİ: Firestore dizin hatası burada görünebilir
+        if (e.code === 'failed-precondition') {
+             listBody.innerHTML = `<tr><td colspan="7" style="color: red; text-align:center;"><b>Hata:</b> Veritabanı sorgusu için bir dizin (index) oluşturmanız gerekiyor. Lütfen tarayıcınızın Geliştirici Konsolu'nu (F12) açın ve orada çıkan Firestore hata mesajındaki linke tıklayarak dizini oluşturun.</td></tr>`;
+        } else {
+            listBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Liste yüklenirken bir hata oluştu.</td></tr>';
+        }
     }
 }
 
@@ -4383,11 +4430,11 @@ function updateGenelToplam() {
 
 // YENİ FONKSİYON 5: Tüm satışları toplu olarak kaydeder
 async function handleTopluYemSatisKaydet() {
-    const tarih = document.getElementById('topluSatisTarih').value;
+    const tarihString = document.getElementById('topluSatisTarih').value; // Sadece tarih alınır
     const cariId = document.getElementById('topluSatisCari').value;
     const satirlar = document.querySelectorAll('.yem-satis-satiri');
 
-    if (!tarih || !cariId) {
+    if (!tarihString || !cariId) {
         alert("Lütfen Satış Tarihi ve Cari seçimi yapın!");
         return;
     }
@@ -4396,17 +4443,24 @@ async function handleTopluYemSatisKaydet() {
         return;
     }
 
+    // --- YENİ EKLENEN SAAT BİRLEŞTİRME KISMI ---
+    const now = new Date();
+    // Seçilen tarih ile o anki saati birleştirerek tam bir zaman damgası oluştur.
+    const kayitZamani = new Date(`${tarihString}T${now.toTimeString().split(' ')[0]}`);
+    // --- YENİ EKLENEN KISIM SONU ---
+
     const batch = db.batch(); // Toplu işlem başlat
     const satislar = [];
 
     for (const satir of satirlar) {
+        // ... (for döngüsünün içi aynı kalıyor)
         const yemId = satir.querySelector('.yem-secimi').value;
         const miktar = parseInt(satir.querySelector('.yem-miktari').value);
         const satisFiyati = parseFloat(satir.querySelector('.yem-fiyati').value);
 
         if (!yemId || isNaN(miktar) || miktar <= 0 || isNaN(satisFiyati)) {
             alert("Lütfen tüm satırlardaki yem, miktar ve fiyat bilgilerini eksiksiz doldurun.");
-            return; // Bir satır bile hatalıysa işlemi durdur
+            return;
         }
 
         satislar.push({ yemId, miktar, satisFiyati });
@@ -4422,10 +4476,11 @@ async function handleTopluYemSatisKaydet() {
              return;
         }
 
-        const satisRef = db.collection('yem_satislari').doc(); // Yeni satış kaydı referansı
+        const satisRef = db.collection('yem_satislari').doc(); 
         batch.set(satisRef, {
             sahipId: sahipId,
-            tarih: tarih,
+            tarih: tarihString, // Eski tarih alanı uyumluluk için kalabilir
+            kayitZamani: kayitZamani, // SAAT BİLGİSİNİ İÇEREN YENİ ALAN
             cariId: cariId,
             yemId: satis.yemId,
             miktar: satis.miktar,
@@ -4433,28 +4488,27 @@ async function handleTopluYemSatisKaydet() {
             toplamTutar: satis.miktar * satis.satisFiyati
         });
         
-        // Stoğu azaltma işlemi
         batch.update(yemRef, { stokMiktari: firebase.firestore.FieldValue.increment(-satis.miktar) });
     }
     
     try {
-        await batch.commit(); // Tüm işlemleri tek seferde veritabanına gönder
+        await batch.commit(); 
         alert(`${satislar.length} kalemlik yem satışı başarıyla kaydedildi!`);
         
-        // Formu temizle
         document.getElementById('yemSatisSatirlari').innerHTML = '';
         updateGenelToplam();
         
-        // Listeleri ve önbelleği yenile
         await renderYemSatisListesi();
-        await loadAllYemlerToCache(); // Stok miktarları değiştiği için yem önbelleğini yenile
-        await populateYemSelect(document.querySelector('.yem-secimi')); // Varsa kalan select'i yenile
+        await loadAllYemlerToCache();
+        addYemSatisRow(); // Formu temizlemek yerine yeni boş bir satır ekleyelim
 
     } catch(error) {
         console.error("Toplu yem satışı kaydedilirken hata:", error);
         alert("Satışlar kaydedilirken bir hata oluştu: " + error.message);
     }
 }
+
+
 
 
 function handleCariListeYazdir() {    handleYazdir('cari-yonetimi');}
