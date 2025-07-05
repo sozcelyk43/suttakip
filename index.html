@@ -4177,9 +4177,9 @@ function toggleReportButtons(reportPrefix, show) {
     if (printBtn) printBtn.style.display = displayStyle;
 }
 
-function addYemSatisRow() {
+async function addYemSatisRow() {
     const container = document.getElementById('yemSatisSatirlari');
-    const satirId = `satir-${Date.now()}`; // Her satıra benzersiz bir ID ver
+    const satirId = `satir-${Date.now()}`; 
     const satirDiv = document.createElement('div');
     satirDiv.className = 'form-grid yem-satis-satiri';
     satirDiv.id = satirId;
@@ -4207,11 +4207,18 @@ function addYemSatisRow() {
 
     container.appendChild(satirDiv);
     const yeniSelect = satirDiv.querySelector('.yem-secimi');
-    populateYemSelect(yeniSelect);
+    
+    // KRİTİK DEĞİŞİKLİK: Yem listesinin dolmasını bekle
+    await populateYemSelect(yeniSelect); 
+    
     yeniSelect.addEventListener('change', (e) => updateSatisSatiri(e.target));
     satirDiv.querySelector('.yem-miktari').addEventListener('input', (e) => updateSatisSatiri(e.target));
     satirDiv.querySelector('.yem-fiyati').addEventListener('input', (e) => updateSatisSatiri(e.target));
+
+    // Dışarıdan erişebilmek için oluşturulan satırı geri döndür
+    return satirDiv;
 }
+
 
 function removeYemSatisRow(satirId) {
     document.getElementById(satirId)?.remove();
@@ -4345,26 +4352,37 @@ async function editYemSatisi(id) {
         const data = doc.data();
         const formContainer = document.getElementById('toplu-satis-formu');
         const satirContainer = document.getElementById('yemSatisSatirlari');
-        satirContainer.innerHTML = ''; 
-        editingYemSatisId = id; 
+        
+        satirContainer.innerHTML = '';
+        editingYemSatisId = id;
+
         document.getElementById('topluSatisTarih').value = data.tarih;
         document.getElementById('topluSatisCari').value = data.cariId;
+        const cariBilgisi = window.cariDataMap.get(data.cariId);
+        document.getElementById('yemSatisCariAraInput').value = cariBilgisi ? cariBilgisi.adiSoyadi : 'Cari Bulunamadı';
+        
         document.getElementById('topluSatisCari').disabled = false;
-	document.getElementById('topluSatisTarih').disabled = false;
-	document.getElementById('yemSatisCariAraInput').disabled = false;
-        addYemSatisRow();
-        const yeniSatir = satirContainer.querySelector('.yem-satis-satiri');
+        document.getElementById('yemSatisCariAraInput').disabled = false;
+        document.getElementById('topluSatisTarih').disabled = false;
+        
+        // --- GÜNCELLENEN BÖLÜM ---
+        // 1. Satırın oluşmasını ve yem listesinin dolmasını BEKLE
+        const yeniSatir = await addYemSatisRow(); 
         const yemSelect = yeniSatir.querySelector('.yem-secimi');
+
+        // 2. Bekleme bittiği için artık `setTimeout` olmadan bilgileri GÜVENLE ata
         yemSelect.value = data.yemId;
         yeniSatir.querySelector('.yem-miktari').value = data.miktar;
         yeniSatir.querySelector('.yem-fiyati').value = data.satisFiyati;
-        yemSelect.disabled = false; // Yem türü de değiştirilemesin
+        yemSelect.disabled = false;
         updateSatisSatiri(yemSelect);
+        // --- GÜNCELLENEN BÖLÜM SONU ---
+        
         const anaKaydetBtn = document.getElementById('tumSatislariKaydetBtn');
         anaKaydetBtn.textContent = 'BİLGİLERİ GÜNCELLE';
         
         const satirEkleBtn = document.getElementById('yemSatirEkleBtn');
-        satirEkleBtn.style.display = 'none'; // "Yeni Satır Ekle" butonunu gizle
+        satirEkleBtn.style.display = 'none';
 
         let iptalBtn = document.getElementById('guncellemeIptalBtn');
         if (!iptalBtn) {
