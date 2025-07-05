@@ -127,3 +127,25 @@ body.pdf-generating .pdf-source-section .container{box-shadow:none!important;bor
 .btn-delete-row:hover{background-color:#c0392b}
 .yem-satis-aksiyonlar{display:flex;justify-content:space-between;align-items:center;margin-top:20px}
 #yemSatisGenelToplam{font-size:1.5em;font-weight:bold;color:#2c3e50}
+
+
+
+.autocomplete-box {
+    position: relative;
+    background: white;
+    border: 1px solid #ccc;
+    z-index: 1000;
+    max-height: 150px;
+    overflow-y: auto;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    font-size: 0.9em;
+}
+.autocomplete-box div {
+    padding: 8px;
+    cursor: pointer;
+}
+.autocomplete-box div:hover {
+    background-color: #f0f0f0;
+}
+

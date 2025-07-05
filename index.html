@@ -147,21 +147,44 @@
 
 <div class="list-header-with-filter">
     <h3>Cari Listesi (<span id="raporTarihEtiketi">Güncel Durum</span>)</h3>
-    <div class="search-container"><input type="text" id="cariSearchInput" placeholder="Cari Ara..." aria-label="Cari Arama Kutusu"></div>
-    <select id="cariKategoriFiltre"><option value="">Tüm Kategoriler</option></select>
-    
-    <select id="cariGrupFiltre">
-        <option value="">Tüm Gruplar</option>
-        <option value="üretici">Üretici</option>
-        <option value="tedarikçi">Tedarikçi</option>
-        <option value="süt alıcı">Süt Alıcı</option>
-    </select>
-    
-    <select id="cariDurumFiltre">
-        <option value="">Tüm Durumlar</option>
-        <option value="aktif">Aktif</option>
-        <option value="pasif">Pasif</option>
-    </select>
+
+    <div class="form-grid" style="grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; align-items: end; margin-top: 10px;">
+        <!-- Cari Ara -->
+        <div class="form-group" style="position: relative;">
+            <label for="cariSearchInput">Cari Ara:</label>
+            <input type="text" id="cariSearchInput" placeholder="Ad, firma, kod..." autocomplete="off">
+            <div id="cariSearchSuggestions" class="autocomplete-box"></div>
+        </div>
+
+        <!-- Kategori -->
+        <div class="form-group">
+            <label for="cariKategoriFiltre">Kategori:</label>
+            <select id="cariKategoriFiltre">
+                <option value="">Tüm Kategoriler</option>
+            </select>
+        </div>
+
+        <!-- Grup -->
+        <div class="form-group">
+            <label for="cariGrupFiltre">Grup:</label>
+            <select id="cariGrupFiltre">
+                <option value="">Tüm Gruplar</option>
+                <option value="üretici">Üretici</option>
+                <option value="tedarikçi">Tedarikçi</option>
+                <option value="süt alıcı">Süt Alıcı</option>
+            </select>
+        </div>
+
+        <!-- Durum -->
+        <div class="form-group">
+            <label for="cariDurumFiltre">Durum:</label>
+            <select id="cariDurumFiltre">
+                <option value="">Tüm Durumlar</option>
+                <option value="aktif">Aktif</option>
+                <option value="pasif">Pasif</option>
+            </select>
+        </div>
+    </div>
 </div>
 
                 <table><thead><tr><th>Kod</th><th>Ad/Firma</th><th>Kategori</th><th>Cari Grubu</th><th>Rota Sırası</th><th>Durum</th><th>Telefon</th>
@@ -295,43 +318,54 @@
         </div>
 </section>
         
-        <section id="yem-satisi" class="module-section hidden-section">
+<section id="yem-satisi" class="module-section hidden-section">
     <div class="module-header"><h2>🌾 Toplu Yem Satışı</h2></div>
+
     <div class="container">
         <div class="form-section">
             <h3>Toplu Satış Bilgileri</h3>
-            <div id="toplu-satis-formu">
-                <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr; align-items: end; gap: 10px; margin-bottom: 20px;">
-    <div class="form-group">
-        <label for="topluSatisTarih">Satış Tarihi:</label>
-        <input type="date" id="topluSatisTarih" required>
-    </div>
-    <div class="form-group">
-        <label for="yemSatisCariAraInput">Cari Ara:</label>
-        <input type="text" id="yemSatisCariAraInput" placeholder="Aramak için yazın...">
-    </div>
-    <div class="form-group">
-        <label for="topluSatisCari">Sonuçlar:</label>
-        <select id="topluSatisCari" required>
-            <option value="">Cari Seçiniz...</option>
-        </select>
-    </div>
-</div>
 
-                <div id="yemSatisSatirlari">
+            <div id="toplu-satis-formu">
+                <!-- Satış Tarihi ve Cari Ara aynı satırda, %50 %50 -->
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+                    <!-- Satış Tarihi -->
+                    <div class="form-group">
+                        <label for="topluSatisTarih">Satış Tarihi:</label>
+                        <input type="date" id="topluSatisTarih" required>
                     </div>
 
+                    <!-- Cari Ara + Otomatik Tamamlama -->
+                    <div class="form-group">
+                        <label for="yemSatisCariAraInput">Cari Ara:</label>
+                        <input type="text" id="yemSatisCariAraInput" placeholder="Ad veya firma adı yazın..." required>
+                        <input type="hidden" id="topluSatisCari"> <!-- Seçilen cariId -->
+                        <div id="cariOneriListesi" class="autocomplete-box"></div>
+                    </div>
+                </div>
+
+                <!-- Satış satırları -->
+                <div id="yemSatisSatirlari"></div>
+
+                <!-- Genel toplam ve butonlar -->
                 <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
                     <button type="button" class="btn" id="yemSatirEkleBtn">✚ Yeni Yem Satırı Ekle</button>
                     <div style="text-align: right;">
-                        <strong>Genel Toplam: <span id="genelToplamTutar" style="font-size: 1.5em; color: #2c3e50;">0,00 ₺</span></strong>
+                        <strong>Genel Toplam: <span id="genelToplamTutar" style="font-size: 1.5em; color: #2c3e50;">0,00 ₺</span></strong>
                     </div>
                 </div>
+
                 <hr style="margin: 20px 0;">
-                <button type="button" class="btn btn-primary btn-lg" id="tumSatislariKaydetBtn" style="width: 100%; padding: 15px; font-size: 1.2em;">TÜM SATIŞLARI KAYDET</button>
+
+                <button type="button" class="btn btn-primary btn-lg" id="tumSatislariKaydetBtn"
+                        style="width: 100%; padding: 15px; font-size: 1.2em;">
+                    TÜM SATIŞLARI KAYDET
+                </button>
             </div>
         </div>
+
         <hr>
+
+        <!-- Son Yem Satış Hareketleri -->
         <div class="list-section">
             <h3>Son Yem Satış Hareketleri</h3>
             <table>
@@ -351,6 +385,7 @@
         </div>
     </div>
 </section>
+
         
         <section id="tahsilat-ve-odemeler" class="module-section hidden-section">
             <div class="module-header"><h2>💳 Tahsilat ve Ödemeler</h2></div>
@@ -777,7 +812,6 @@ function initializeApp() {
     const cariKategoriForm = document.getElementById('cariKategoriForm');
     const kullaniciForm = document.getElementById('kullaniciForm');
     const sifreDegistirForm = document.getElementById('sifreDegistirForm');
-    const cariSearchInput = document.getElementById('cariSearchInput');
     const cariKategoriFiltre = document.getElementById('cariKategoriFiltre');
     const cariListesiYazdirBtn = document.getElementById('cariListesiYazdirBtn');
     const topluGirisTarihInput = document.getElementById('topluGirisTarih');
@@ -786,6 +820,73 @@ function initializeApp() {
     const odemeCariSecimi = document.getElementById('odemeYapilanTedarikci');
     const menuToggleBtn = document.getElementById('menuToggleBtn');
     const sidebar = document.querySelector('.sidebar');
+
+
+const cariSearchInput = document.getElementById('cariSearchInput');
+const cariSuggestionBox = document.getElementById('cariSearchSuggestions');
+
+cariSearchInput?.addEventListener('input', () => {
+    const query = cariSearchInput.value.trim().toLowerCase();
+    cariSuggestionBox.innerHTML = "";
+
+    if (!query) return;
+
+    const eslesenler = [];
+    window.cariDataMap.forEach((cari, id) => {
+        if ((cari.adiSoyadi || '').toLowerCase().includes(query) || (cari.kodu || '').toLowerCase().includes(query)) {
+            eslesenler.push({ id, ad: `${cari.kodu ? cari.kodu + " - " : ""}${cari.adiSoyadi}` });
+        }
+    });
+
+    eslesenler.slice(0, 10).forEach(cari => {
+        const div = document.createElement('div');
+        div.textContent = cari.ad;
+        div.addEventListener('click', () => {
+            cariSearchInput.value = cari.ad;
+            cariSuggestionBox.innerHTML = "";
+        });
+        cariSuggestionBox.appendChild(div);
+    });
+});
+
+cariSearchInput?.addEventListener('blur', () => {
+    setTimeout(() => cariSuggestionBox.innerHTML = "", 200); // Tıklamaya izin ver
+});
+
+
+const cariAraInput = document.getElementById('yemSatisCariAraInput');
+const cariIdHidden = document.getElementById('topluSatisCari');
+const oneriKutusu = document.getElementById('cariOneriListesi');
+
+if (cariAraInput) {
+    cariAraInput.addEventListener('input', function () {
+        const arama = this.value.toLowerCase();
+        const eslesenler = [];
+
+        window.cariDataMap.forEach((cari, id) => {
+            if (cari.adiSoyadi?.toLowerCase().includes(arama)) {
+                eslesenler.push({ id, ad: cari.adiSoyadi });
+            }
+        });
+
+        oneriKutusu.innerHTML = "";
+        eslesenler.slice(0, 10).forEach(cari => {
+            const div = document.createElement('div');
+            div.textContent = cari.ad;
+            div.addEventListener('click', () => {
+                cariAraInput.value = cari.ad;
+                cariIdHidden.value = cari.id;
+                oneriKutusu.innerHTML = "";
+            });
+            oneriKutusu.appendChild(div);
+        });
+    });
+
+    cariAraInput.addEventListener('blur', function () {
+        setTimeout(() => oneriKutusu.innerHTML = "", 150); // tıklamayı bekle
+    });
+}
+
 
     window.yemDataMap = new Map();
     window.cariDataMap = new Map();
