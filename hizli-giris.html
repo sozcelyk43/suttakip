@@ -43,31 +43,50 @@
         .btn-warning { background-color: var(--warning-color); color: var(--dark-color); }
         #session-summary { background-color: #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-size: 1.1em; }
         #history-list { list-style: none; padding: 0; margin: 0; }
-/* Geçmiş listesi satır düzenini iyileştiren stil */
+        .history-item:nth-child(odd) { background-color: #f1f1f1; }
+        .history-item:nth-child(even) { background-color: #ffffff; }
+
+/* Geçmiş Listesi Satır Düzeni - NİHAİ VERSİYON */
 .history-item {
     display: flex;
     align-items: center;
-    gap: 8px; /* Öğeler arasına 8px boşluk ekler */
+    gap: 10px; /* Öğeler arasındaki yatay boşluk */
+    padding: 10px 8px;
+    border-bottom: 1px solid #444; /* Koyu tema için daha uygun bir renk */
 }
 
-/* Üretici adının esneyip uzamasını sağlar */
-.history-item .history-info {
-    flex-grow: 1;
-    min-width: 0; /* Uzun isimlerin küçülmesine izin verir */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis; /* Sığmazsa sonuna ... ekler */
+/* Üretici adını içeren sol bölüm */
+.history-item-main {
+    flex-grow: 1; /* Mümkün olan tüm boşluğu kapla */
+    min-width: 0; /* Esnekliğe izin ver */
 }
 
-/* Butonların küçülmesini engeller */
-.history-item .history-actions {
+/* Üretici adının stili */
+.history-item-main .producer-name {
+    font-weight: 600;
+    font-size: 1em;
+    display: block; /* Gerekirse alt satıra geçmesine izin verir */
+}
+
+/* Miktar ve tutar bilgilerinin olduğu sağ bölüm */
+.history-item-details {
+    flex-shrink: 0; /* Bu alanın küçülmesini engelle */
+    text-align: right;
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+/* Butonların olduğu en sağ bölüm */
+.history-item-actions {
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
 }
 
 
-        .history-item:nth-child(odd) { background-color: #f1f1f1; }
-        .history-item:nth-child(even) { background-color: #ffffff; }
-        .history-info strong { color: var(--primary-color); }
+
+
+
         .btn-icon {background: none; border: none; font-size: 1.3em; margin: 0 4px; cursor: pointer;padding: 4px; border-radius: 6px; transition: background-color 0.2s; vertical-align: 	middle; }
         .btn-icon:hover { background-color: #e2e6ea; }
         .btn-delete { color: var(--danger-color); }
@@ -559,8 +578,7 @@ function jumpToProducer() {
             currentProducerIndex = parseInt(this.value);
             displayCurrentProducer();
         }
-
-// LÜTFEN MEVCUT renderHistory FONKSİYONUNU BU NİHAİ VERSİYONLA DEĞİŞTİRİN
+// LÜTFEN MEVCUT renderHistory FONKSİYONUNU BU NİHAİ VERSİYONLA TAMAMEN DEĞİŞTİRİN.
 function renderHistory(dataToRender) {
     if (!historySection || !historyList || !sessionSummary) return;
 
@@ -595,20 +613,24 @@ function renderHistory(dataToRender) {
             sessionTotalMilk += miktar;
             sessionTotalAmount += kayitTutari;
 
-            const zamanLabel = isSabah ? 'Sabah' : 'Akşam';
-            const editIcon = isSabah ? '☀️✏️' : '🌙✏️';
-            const editTitle = `${zamanLabel} Düzenle`;
+            // --- İSTEKLERİNİZE GÖRE SON DEĞİŞİKLİKLER ---
+            const zamanLabel = isSabah ? 'S' : 'A'; // "Sabah" -> "S", "Akşam" -> "A"
+            const editTitle = (isSabah ? 'Sabah' : 'Akşam') + ' Düzenle';
 
             const listItem = document.createElement('li');
             listItem.className = 'history-item';
             
-            // --- DAHA FERAH BİR GÖRÜNÜM İÇİN YAPI GÜNCELLENDİ ---
+            // --- OKUNABİLİRLİĞİ MAKSİMUMA ÇIKARAN YENİ YAPI ---
             listItem.innerHTML = `
-                <strong class="history-info" title="${item.cariAdi}">${item.cariAdi}</strong>
-                <span style="white-space: nowrap;">${zamanLabel}: ${miktar.toFixed(1)} Lt</span>
-                <span style="color: var(--success-color); font-weight: 500; margin-left: auto;">${kayitTutari.toFixed(2)} ₺</span>
-                <div class="history-actions">
-                    <button class="btn-icon" onclick="editHistoryItem('${item.sutAlimId}', '${zaman}')" title="${editTitle}">${editIcon}</button>
+                <div class="history-item-main">
+                    <span class="producer-name">${item.cariAdi}</span>
+                </div>
+                <div class="history-item-details">
+                    <span>${zamanLabel}: ${miktar.toFixed(1)} Lt</span><br>
+                    <strong style="color: var(--success-color);">${kayitTutari.toFixed(2)} ₺</strong>
+                </div>
+                <div class="history-item-actions">
+                    <button class="btn-icon" onclick="editHistoryItem('${item.sutAlimId}', '${zaman}')" title="${editTitle}">✏️</button>
                     <button class="btn-icon btn-delete" onclick="deleteHistoryItem('${item.sutAlimId}', '${zaman}')" title="Sil">🗑️</button>
                 </div>
             `;
@@ -625,6 +647,7 @@ function renderHistory(dataToRender) {
         historySection.style.display = 'none';
      }
 }
+
 
 // Lütfen mevcut deleteHistoryItem fonksiyonunu bununla değiştirin.
 async function deleteHistoryItem(sutAlimId, zaman) {
