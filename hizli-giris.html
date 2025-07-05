@@ -31,7 +31,7 @@
         .time-selection input:not(:checked) + label { background-color: #f8f9fa; border: 1px solid #dee2e6; color: #6c757d; }
         .time-selection input:not(:checked) + label:hover { background-color: #e9ecef; border-color: #adb5bd; }
         .time-selection input:checked + label { color: white; font-weight: 700; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); border: 2px solid rgba(0,0,0,0.1); }
-        .time-selection input[id="akşam"]:checked + label { background-color: #ff8c00; }
+        .time-selection input[id="aksam"]:checked + label { background-color: #ff8c00; }
         .time-selection input[id="sabah"]:checked + label { background-color: #28a745; }
         #producer-panel, #history-section { background-color: var(--white-color); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px 	rgba(0,0,0,0.05); margin-top: 25px; }
         #current-producer-name { font-size: 1.5em; font-weight: 700; color: var(--primary-color); margin-bottom: 15px; text-align: center; }
@@ -79,7 +79,7 @@
                 <div class="form-group">
                     <label>Zaman</label>
                     <div class="time-selection">
-                        <input type="radio" id="akşam" name="time" value="aksam" checked><label for="akşam">AKŞAM</label>
+                        <input type="radio" id="aksam" name="time" value="aksam" checked><label for="aksam">AKŞAM</label>
                         <input type="radio" id="sabah" name="time" value="sabah"><label for="sabah">SABAH</label>
                     </div>
                 </div>
@@ -298,6 +298,7 @@ function skipCurrentProducer() {
             }
         }
 
+// LÜTFEN MEVCUT startRoute FONKSİYONUNU BU NİHAİ VERSİYONLA TAMAMEN DEĞİŞTİRİN.
 async function startRoute() {
     filterAndRenderHistory();
     producerPanel.style.display = 'none';
@@ -314,14 +315,14 @@ async function startRoute() {
 
         const zamanDilimi = document.querySelector('input[name="time"]:checked').value;
         
+        // *** KONTROL MANTIĞI DAHA SAĞLAM HALE GETİRİLDİ ***
         const savedProducerIds = new Set(
             fullHistoryForDate
                 .filter(entry => {
-                    if (zamanDilimi === 'sabah') {
-                        return entry.hasOwnProperty('sabah') && entry.sabah !== null;
-                    } else { // 'akşam'
-                        return entry.hasOwnProperty('aksam') && entry.aksam !== null;
-                    }
+                    // Bir entry'nin o zaman dilimi için girilmiş sayılması için,
+                    // ilgili alanın (sabah/aksam) var olması VE değerinin null olmaması gerekir.
+                    // typeof kontrolü, alanın hiç olmaması (undefined) durumunu da yakalar.
+                    return typeof entry[zamanDilimi] !== 'undefined' && entry[zamanDilimi] !== null;
                 })
                 .map(entry => entry.cariId)
         );
@@ -330,26 +331,25 @@ async function startRoute() {
             .map(doc => ({ id: doc.id, ...doc.data() }))
             .filter(p => !savedProducerIds.has(p.id));
 
-        if (routeProducers.length > 0) {        } else {        }
-        
         currentProducerIndex = 0;
         populateProducerSelect();
-        displayCurrentProducer();
         
         if (routeProducers.length > 0) {
             producerPanel.style.display = 'block';
+            displayCurrentProducer();
         } else {
+            // Bu mesaj artık sadece gerçekten tüm girişler yapıldığında gösterilecek.
             alert("Bu rota için bu zaman diliminde tüm süt girişleri tamamlanmış veya uygun üretici bulunamadı.");
         }
 
     } catch (error) { 
         console.error("Rota başlatılırken hata:", error); 
-        alert("Rota başlatılamadı."); 
+        alert("Rota başlatılamadı. Lütfen konsol kayıtlarını kontrol edin."); 
     }
 }
 
 
-// LÜTFEN MEVCUT saveMilkEntry FONKSİYONUNUZU BU NİHAİ VERSİYONLA TAMAMEN DEĞİŞTİRİN.
+// LÜTFEN MEVCUT saveMilkEntry FONKSİYONUNUZU BU YENİ VERSİYONLA TAMAMEN DEĞİŞTİRİN.
 async function saveMilkEntry(quantity, notes) {
     const unitPrice = parseFloat(String(unitPriceInput.value).replace(',', '.')) || 0;
     const alimTarihi = collectionDateInput.value;
@@ -369,7 +369,7 @@ async function saveMilkEntry(quantity, notes) {
         const batch = db.batch();
 
         if (existingSutAlimSnapshot.empty) {
-            // YENİ KAYIT OLUŞTURMA
+            // YENİ KAYIT OLUŞTURMA (Bu kısım doğruydu, aynı kalıyor)
             const sutAlimRef = db.collection('sut_alimlari').doc();
             let newData = {
                 tarih: alimTarihi, cariId: currentProducer.id, cariAdi: currentProducer.adiSoyadi,
@@ -380,39 +380,23 @@ async function saveMilkEntry(quantity, notes) {
             newData.toplamTutar = quantity * unitPrice;
             batch.set(sutAlimRef, newData);
         } else {
-            // MEVCUT KAYDI GÜNCELLEME (EN GÜNCEL VE DOĞRU MANTIK)
+            // *** MEVCUT KAYDI GÜNCELLEME (HATALI MANTIK TAMAMEN YENİLENDİ) ***
             const sutAlimRef = existingSutAlimSnapshot.docs[0].ref;
-            const existingData = existingSutAlimSnapshot.docs[0].data();
+            const existingData = existingSutAlimSnapshot.docs[0].data() || {};
             
-            let updatePayload = {
+            const updatePayload = {
                 fiyat: unitPrice,
                 aciklama: `Hızlı giriş ile güncellendi. Not: ${notes || ''}`
             };
+
+            // Girilen değeri doğru zaman dilimine ata
+            updatePayload[zamanDilimi] = quantity;
             
-            // Toplamı doğru hesaplamak için geçici değişkenler kullanalım
-            let sabahForTotal = existingData.sabah;
-            let aksamForTotal = existingData.aksam;
+            // Toplamı, girilen yeni değer ve diğer zaman diliminin mevcut değerine göre hesapla
+            const sabahMiktari = (zamanDilimi === 'sabah') ? quantity : (existingData.sabah || 0);
+            const aksamMiktari = (zamanDilimi === 'aksam') ? quantity : (existingData.aksam || 0);
 
-            if (zamanDilimi === 'akşam') {
-                updatePayload.aksam = quantity;
-                aksamForTotal = quantity;
-                // Eğer sabah hatalı şekilde '0' ise, silmek için payload'a ekle ve toplam hesabından çıkar.
-                if (existingData.sabah === 0) {
-                    updatePayload.sabah = firebase.firestore.FieldValue.delete();
-                    sabahForTotal = undefined; 
-                }
-            } else { // zamanDilimi === 'sabah'
-                updatePayload.sabah = quantity;
-                sabahForTotal = quantity;
-                // Eğer akşam hatalı şekilde '0' ise, silmek için payload'a ekle ve toplam hesabından çıkar.
-                if (existingData.aksam === 0) {
-                    updatePayload.aksam = firebase.firestore.FieldValue.delete();
-                    aksamForTotal = undefined;
-                }
-            }
-
-            // Toplamı, silme işlemi dikkate alınarak HESAPLANMIŞ DEĞERLER üzerinden yap.
-            updatePayload.toplam = (sabahForTotal || 0) + (aksamForTotal || 0);
+            updatePayload.toplam = sabahMiktari + aksamMiktari;
             updatePayload.toplamTutar = updatePayload.toplam * unitPrice;
 
             batch.update(sutAlimRef, updatePayload);
@@ -427,7 +411,10 @@ async function saveMilkEntry(quantity, notes) {
         toast.classList.add('show');
         setTimeout(() => { toast.classList.remove('show'); }, 3000);
         
-        await startRoute();
+        // Rotayı yeniden başlatıp doğru üreticiyi göstermesi için
+        if (categorySelect.value) {
+            await startRoute();
+        }
         
     } catch (error) {
         console.error("Kayıt Hatası:", error);
@@ -437,6 +424,7 @@ async function saveMilkEntry(quantity, notes) {
         skipBtn.disabled = false;
     }
 }
+
 
 async function fetchAndRenderHistory(date) {
     if (!date) return;
@@ -706,26 +694,32 @@ async function handleUpdate() {
     const sutAlimRef = db.collection('sut_alimlari').doc(sutAlimId);
 
     try {
-        // Bu fonksiyondaki güncelleme mantığı biraz farklı, bu yüzden doğrudan yazalım
+        // *** GÜNCELLEME MANTIĞI TAMAMEN YENİLENDİ ***
         const mevcutVeri = editingEntry;
-        const guncelleme = {};
+        const guncelleme = {
+             fiyat: yeniBirimFiyat,
+             not: notesInput.value
+        };
+
+        // Değeri doğru zaman dilimine ata
         guncelleme[zamanDilimi] = yeniMiktar;
-        guncelleme.fiyat = yeniBirimFiyat;
-        
+
+        // Toplamı, girilen yeni değer ve diğer zaman diliminin mevcut değerine göre hesapla
         const sabahDegeri = zamanDilimi === 'sabah' ? yeniMiktar : (mevcutVeri.sabah || 0);
-        const aksamDegeri = zamanDilimi === 'akşam' ? yeniMiktar : (mevcutVeri.aksam || 0);
+        const aksamDegeri = zamanDilimi === 'aksam' ? yeniMiktar : (mevcutVeri.aksam || 0);
+        
         guncelleme.toplam = sabahDegeri + aksamDegeri;
         guncelleme.toplamTutar = guncelleme.toplam * yeniBirimFiyat;
-        guncelleme.not = notesInput.value;
         
         await sutAlimRef.update(guncelleme);
 
         alert("Kayıt başarıyla güncellendi.");
         await fetchAndRenderHistory(alimTarihi);
-        await showDailyGrandTotal(); // <<-- YENİ EKLENEN SATIR
+        await showDailyGrandTotal();
 
-        if (categorySelect.value) { await startRoute(); }
         cancelEditMode(); 
+        if (categorySelect.value) { await startRoute(); }
+
     } catch (error) {
         alert("Güncelleme sırasında bir hata oluştu: " + error.message);
         console.error("Update Error:", error);
@@ -733,6 +727,7 @@ async function handleUpdate() {
         saveBtn.disabled = false;
     }
 }
+
 
 function editHistoryItem(sutAlimId, zaman) {
             const entry = fullHistoryForDate.find(item => item.sutAlimId === sutAlimId);
