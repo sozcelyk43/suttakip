@@ -89,9 +89,17 @@
 
 .edit-header-icons {
     display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    font-size: 1.2em;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.1em;
+    gap: 8px;
+}
+
+.edit-producer-name {
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 1em;
+    flex-grow: 1;
 }
 
 .edit-summary {
@@ -950,23 +958,25 @@ function editHistoryItem(sutAlimId, zaman) {
     const editItem = document.createElement('li');
     editItem.className = 'edit-mode-item';
     editItem.style.listStyle = 'none';
-    editItem.innerHTML = `
-        <div class="edit-full-box">
-            <div class="edit-header-icons">
-                <span>✏️</span>
-                <span class="btn-delete" onclick="deleteHistoryItem('${sutAlimId}', '${zaman}')">🗑️</span>
-            </div>
-            <div class="edit-summary">
-                <div><strong>Mevcut:</strong> ${miktar.toFixed(1)} Lt</div>
-                <div><strong>Fiyat:</strong> ${fiyat} ₺</div>
-            </div>
-            <input type="number" class="edit-full-input" step="0.1" value="${miktar}" />
-            <div class="edit-full-actions">
-                <button class="btn-inline-save">✔ Güncelle</button>
-                <button class="btn-inline-cancel">✖ Vazgeç</button>
-            </div>
+editItem.innerHTML = `
+    <div class="edit-full-box">
+        <div class="edit-header-icons">
+            <span class="edit-producer-name"><strong>${entry.cariAdi}</strong></span>
+            <span>✏️</span>
+            <span class="btn-delete" onclick="deleteHistoryItem('${sutAlimId}', '${zaman}')">🗑️</span>
         </div>
-    `;
+        <div class="edit-summary">
+            <div><strong>Mevcut:</strong> ${miktar.toFixed(1)} Lt</div>
+            <div><strong>Fiyat:</strong> ${fiyat} ₺</div>
+        </div>
+        <input type="number" class="edit-full-input" step="0.1" value="${miktar}" />
+        <div class="edit-full-actions">
+            <button class="btn-inline-save">✔ Güncelle</button>
+            <button class="btn-inline-cancel">✖ Vazgeç</button>
+        </div>
+    </div>
+`;
+
 
     originalItem.insertAdjacentElement('afterend', editItem);
 
