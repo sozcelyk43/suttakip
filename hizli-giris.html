@@ -12,11 +12,7 @@
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding: 0; background-color: var(--light-color); 
 	color: var(--dark-color); }
         .container { max-width: 600px; margin: 0 auto; padding: 15px; }
-        
-
-
-
-header {
+	header {
     background-color: #053c75;
     color: white;
     padding: 16px 20px;
@@ -347,11 +343,9 @@ async function initializeApp() {
     const inputsToTriggerRoute = [...document.querySelectorAll('input[name="time"]')];
     inputsToTriggerRoute.forEach(el => {
         el.addEventListener('change', () => { 
-            // Eğer bir rota zaten seçilmişse, rotayı bu yeni zaman dilimi için yeniden hesapla.
             if (categorySelect.value) {
                 startRoute();
             } else {
-                // Rota seçilmemişse, sadece geçmiş listesini filtrele.
                 filterAndRenderHistory();
             }
         });
@@ -429,7 +423,6 @@ function skipCurrentProducer() {
             }
         }
 
-// LÜTFEN MEVCUT startRoute FONKSİYONUNU BU NİHAİ VERSİYONLA TAMAMEN DEĞİŞTİRİN.
 async function startRoute() {
     filterAndRenderHistory();
     producerPanel.style.display = 'none';
@@ -445,15 +438,10 @@ async function startRoute() {
             .orderBy('rotaSirasi').get();
 
         const zamanDilimi = document.querySelector('input[name="time"]:checked').value;
-        
-        // *** KONTROL MANTIĞI DAHA SAĞLAM HALE GETİRİLDİ ***
         const savedProducerIds = new Set(
             fullHistoryForDate
                 .filter(entry => {
-                    // Bir entry'nin o zaman dilimi için girilmiş sayılması için,
-                    // ilgili alanın (sabah/aksam) var olması VE değerinin null olmaması gerekir.
-                    // typeof kontrolü, alanın hiç olmaması (undefined) durumunu da yakalar.
-                    return typeof entry[zamanDilimi] !== 'undefined' && entry[zamanDilimi] !== null;
+                   return typeof entry[zamanDilimi] !== 'undefined' && entry[zamanDilimi] !== null;
                 })
                 .map(entry => entry.cariId)
         );
@@ -469,7 +457,6 @@ async function startRoute() {
             producerPanel.style.display = 'block';
             displayCurrentProducer();
         } else {
-            // Bu mesaj artık sadece gerçekten tüm girişler yapıldığında gösterilecek.
             alert("Bu rota için bu zaman diliminde tüm süt girişleri tamamlanmış veya uygun üretici bulunamadı.");
         }
 
@@ -479,8 +466,6 @@ async function startRoute() {
     }
 }
 
-
-// LÜTFEN BU FONKSİYONU YAZIM HATASI DÜZELTİLMİŞ HALİYLE DEĞİŞTİRİN
 async function saveMilkEntry(quantity, notes) {
     const unitPrice = parseFloat(String(unitPriceInput.value).replace(',', '.')) || 0;
     const alimTarihi = collectionDateInput.value;
@@ -521,7 +506,6 @@ async function saveMilkEntry(quantity, notes) {
                 aciklama: `Hızlı giriş ile güncellendi. Not: ${notes || ''}`
             };
             updatePayload[zamanDilimi] = quantity;
-            // *** YAZIM HATASI DÜZELTİLDİ: "sahah" -> "sabah" ***
             const sabahMiktari = (zamanDilimi === 'sabah') ? quantity : (existingData.sabah || 0);
             const aksamMiktari = (zamanDilimi === 'aksam') ? quantity : (existingData.aksam || 0);
             updatePayload.toplam = sabahMiktari + aksamMiktari;
@@ -551,10 +535,7 @@ async function saveMilkEntry(quantity, notes) {
 
 async function fetchAndRenderHistory(date) {
     if (!date) return;
-    
-    // --- YENİ EKLENEN SATIR: Her yeni çekimde geçmiş dizisini tamamen sıfırla ---
     fullHistoryForDate = []; 
-    
     historySection.style.display = 'none';
     historyList.innerHTML = '';
 
@@ -619,7 +600,6 @@ async function showDailyGrandTotal() {
         displayElement.textContent = `Mevcut: ${genelToplam.toFixed(1)} Lt`;
 
     } catch (error) {
-        // Bu konsol kaydı, sadece bir hata olursa çalışacağı için kalmasında fayda var.
         console.error("Günlük genel toplam alınırken hata:", error);
         displayElement.textContent = 'Hata!';
     }
@@ -639,7 +619,7 @@ function jumpToProducer() {
             currentProducerIndex = parseInt(this.value);
             displayCurrentProducer();
         }
-// LÜTFEN MEVCUT renderHistory FONKSİYONUNU BU NİHAİ VERSİYONLA TAMAMEN DEĞİŞTİRİN.
+
 function renderHistory(dataToRender) {
     if (!historySection || !historyList || !sessionSummary) return;
 
@@ -673,15 +653,10 @@ function renderHistory(dataToRender) {
 
             sessionTotalMilk += miktar;
             sessionTotalAmount += kayitTutari;
-
-            // --- İSTEKLERİNİZE GÖRE SON DEĞİŞİKLİKLER ---
             const zamanLabel = isSabah ? 'S' : 'A'; // "Sabah" -> "S", "Akşam" -> "A"
             const editTitle = (isSabah ? 'Sabah' : 'Akşam') + ' Düzenle';
-
             const listItem = document.createElement('li');
             listItem.className = 'history-item';
-            
-            // --- OKUNABİLİRLİĞİ MAKSİMUMA ÇIKARAN YENİ YAPI ---
             listItem.innerHTML = `
                 <div class="history-item-main">
                     <span class="producer-name">${item.cariAdi}</span>
@@ -710,7 +685,6 @@ function renderHistory(dataToRender) {
 }
 
 
-// Lütfen mevcut deleteHistoryItem fonksiyonunu bununla değiştirin.
 async function deleteHistoryItem(sutAlimId, zaman) {
     if (!zaman) {
         alert("Silme işleminde hata: Zaman dilimi belirtilmedi.");
@@ -771,13 +745,7 @@ async function deleteHistoryItem(sutAlimId, zaman) {
 
 
 
-function handleSave() {
-            if (editingSutAlimIdInput.value) {
-                handleUpdate();
-            } else {
-                handleSaveAndNext();
-            }
-        }
+function handleSave() {if (editingSutAlimIdInput.value) {handleUpdate();} else {handleSaveAndNext();}}
 
 function setEditMode(entry, zamanDilimi) {
     producerPanel.style.display = 'block';
@@ -820,7 +788,6 @@ function cancelEditMode() {
             }
         }
 
-// Lütfen mevcut handleUpdate fonksiyonunu bununla değiştirin.
 async function handleUpdate() {
     const yeniMiktar = parseFloat(String(quantityInput.value).replace(',', '.')) || 0;
     if (isNaN(yeniMiktar) || yeniMiktar < 0) { alert('Lütfen geçerli bir miktar girin.'); return; }
@@ -836,29 +803,21 @@ async function handleUpdate() {
     const sutAlimRef = db.collection('sut_alimlari').doc(sutAlimId);
 
     try {
-        // *** GÜNCELLEME MANTIĞI TAMAMEN YENİLENDİ ***
         const mevcutVeri = editingEntry;
         const guncelleme = {
              fiyat: yeniBirimFiyat,
              not: notesInput.value
         };
 
-        // Değeri doğru zaman dilimine ata
         guncelleme[zamanDilimi] = yeniMiktar;
-
-        // Toplamı, girilen yeni değer ve diğer zaman diliminin mevcut değerine göre hesapla
         const sabahDegeri = zamanDilimi === 'sabah' ? yeniMiktar : (mevcutVeri.sabah || 0);
         const aksamDegeri = zamanDilimi === 'aksam' ? yeniMiktar : (mevcutVeri.aksam || 0);
-        
         guncelleme.toplam = sabahDegeri + aksamDegeri;
         guncelleme.toplamTutar = guncelleme.toplam * yeniBirimFiyat;
-        
         await sutAlimRef.update(guncelleme);
-
         alert("Kayıt başarıyla güncellendi.");
         await fetchAndRenderHistory(alimTarihi);
         await showDailyGrandTotal();
-
         cancelEditMode(); 
         if (categorySelect.value) { await startRoute(); }
 
@@ -870,18 +829,11 @@ async function handleUpdate() {
     }
 }
 
-/**
- * Belirtilen üretici, tarih ve zaman dilimi için bir önceki günün süt miktarını
- * veritabanından getiren fonksiyon.
- */
 async function getPreviousDayQuantity(producerId, currentDateStr, timeSlot) {
     try {
         const currentDate = new Date(currentDateStr);
-        // Tarihten bir gün çıkararak önceki günü bul
         currentDate.setDate(currentDate.getDate() - 1);
         const previousDateStr = currentDate.toISOString().split('T')[0];
-
-        // Veritabanında önceki güne ait kaydı sorgula
         const query = db.collection('sut_alimlari')
             .where('sahipId', '==', sahipId)
             .where('cariId', '==', producerId)
@@ -894,7 +846,6 @@ async function getPreviousDayQuantity(producerId, currentDateStr, timeSlot) {
         }
 
         const data = snapshot.docs[0].data();
-        // İlgili zaman dilimindeki (sabah/aksam) miktarı döndür
         return data[timeSlot] !== undefined ? data[timeSlot] : null;
 
     } catch (error) {
@@ -902,7 +853,7 @@ async function getPreviousDayQuantity(producerId, currentDateStr, timeSlot) {
         return null; // Hata durumunda null döndür
     }
 }
-// Miktar farkı uyarısını %35'e çıkaran güncel fonksiyon
+
 async function checkPreviousDayDifference() {
     const currentQuantity = parseFloat(String(quantityInput.value).replace(',', '.')) || 0;
     if (currentQuantity <= 0) return;
@@ -923,7 +874,6 @@ async function checkPreviousDayDifference() {
     const difference = Math.abs(currentQuantity - previousQuantity);
     const percentageChange = (difference / previousQuantity) * 100;
 
-    // *** DEĞİŞİKLİK BURADA: Uyarı oranı %20'den %35'e çıkarıldı ***
     if (percentageChange > 35) {
         const message = `DİKKAT!\n\nGirilen miktar (${currentQuantity.toFixed(1)} Lt), dünkü miktara (${previousQuantity.toFixed(1)} Lt) göre %${percentageChange.toFixed(0)} oranında farklı.\n\nYine de bu şekilde kaydetmek istiyor musunuz?`;
         
@@ -938,26 +888,16 @@ async function checkPreviousDayDifference() {
 
 
 function advanceToNextProducer() {
-    // Mevcut (işlemi tamamlanan) üreticiyi rotanın kalanlar listesinden çıkar.
     routeProducers.splice(currentProducerIndex, 1);
-
-    // Üretici atlama dropdown listesini, kalan üreticilerle yeniden doldur.
     populateProducerSelect();
-    
-    // Eğer mevcut index, kalan üretici sayısından büyük veya eşitse,
-    // bu durum genellikle son üretici işlendiğinde olur. Başa dön.
     if (currentProducerIndex >= routeProducers.length) {
         currentProducerIndex = 0;
     }
 
-    // Bir sonraki üreticiyi ekranda göster.
-    // Diziden bir eleman sildiğimiz için indeksi artırmamıza gerek yok,
-    // bir sonraki eleman zaten mevcut indekse kaymış olur.
     displayCurrentProducer();
 }
+
 function scrollToActivePanel() {
-    // Tarayıcının ve klavyenin yerleşmesi için çok kısa bir gecikme eklemek
-    // işlemin daha stabil çalışmasını sağlar.
     setTimeout(() => {
         const producerPanel = document.getElementById('producer-panel');
         if (producerPanel) {
@@ -1042,11 +982,7 @@ editItem.innerHTML = `
         originalItem.style.display = '';
     };
 }
-
-
-
-
-        
+       
 
 </script>
 </body>
