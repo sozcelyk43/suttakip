@@ -4336,8 +4336,6 @@ function updateGenelToplam() {
 
 
 
-// 1. GÜNCELLENECEK FONKSİYON: renderYemSatisListesi
-// "Düzenle" butonu geri eklendi.
 async function renderYemSatisListesi() {
     const listBody = document.getElementById('yemSatisListesiBody');
     const currentUser = auth.currentUser;
@@ -4361,9 +4359,7 @@ async function renderYemSatisListesi() {
     try {
         const snapshot = await db.collection('yem_satislari')
             .where('sahipId', '==', sahipId)
-            .orderBy('tarih', 'desc')
-            .limit(100)
-            .get();
+            .get(); // sıralamayı burada değil, aşağıda yapacağız
 
         if (snapshot.empty) {
             listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Yem satış hareketi bulunmuyor.</td></tr>';
@@ -4373,25 +4369,35 @@ async function renderYemSatisListesi() {
         const tumKayitlar = snapshot.docs;
 
         tumKayitlar.sort((a, b) => {
-            const dataA = a.data();
-            const dataB = b.data();
-            const dateA = dataA.kayitZamani ? dataA.kayitZamani.toDate() : new Date(dataA.tarih);
-            const dateB = dataB.kayitZamani ? dataB.kayitZamani.toDate() : new Date(dataB.tarih);
-            return dateB - dateA;
+            const toDate = (data) => {
+                if (data.kayitZamani?.toDate) return data.kayitZamani.toDate();
+                if (data.date?.toDate) return data.date.toDate();
+                if (data.tarih && typeof data.tarih === 'string') return new Date(data.tarih);
+                return new Date(0);
+            };
+            return toDate(b.data()) - toDate(a.data());
         });
 
         let rows = '';
-        tumKayitlar.slice(0, 20).forEach(doc => {
+        tumKayitlar.slice(0, 100).forEach(doc => {
             const satis = doc.data();
             const yemAdi = window.yemDataMap.get(satis.yemId)?.ad || 'Bilinmiyor';
             const cariAdi = window.cariDataMap.get(satis.cariId)?.adiSoyadi || 'Bilinmiyor';
-            const tarihSaat = satis.kayitZamani ? formatDateTime(satis.kayitZamani) : formatDate(satis.tarih);
+
+            let tarihSaat = '-';
+            if (satis.kayitZamani?.toDate) {
+                tarihSaat = formatDateTime(satis.kayitZamani);
+            } else if (satis.date?.toDate) {
+                tarihSaat = formatDateTime(satis.date);
+            } else if (satis.tarih) {
+                tarihSaat = formatDate(satis.tarih);
+            }
 
             rows += `<tr>
                 <td>${tarihSaat}</td>
                 <td>${cariAdi}</td>
                 <td>${yemAdi}</td>
-                <td>${satis.miktar}</td>
+                <td>${satis.miktar ?? '-'}</td>
                 <td>${formatCurrency(satis.satisFiyati)}</td>
                 <td>${formatCurrency(satis.toplamTutar)}</td>
                 <td class="dont-print">
@@ -4400,6 +4406,7 @@ async function renderYemSatisListesi() {
                 </td>
             </tr>`;
         });
+
         listBody.innerHTML = rows;
 
     } catch (e) {
@@ -4407,6 +4414,7 @@ async function renderYemSatisListesi() {
         listBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Liste yüklenirken bir hata oluştu.</td></tr>';
     }
 }
+
 
 
 // 2. GÜNCELLENECEK FONKSİYON: editYemSatisi
@@ -4427,16 +4435,11 @@ async function editYemSatisi(id) {
 
         editingYemSatisId = id; // Düzenleme modunda olduğumuzu belirtmek için global ID'yi ayarla
 
-        // Ana tarih ve cari bilgilerini doldur
         document.getElementById('topluSatisTarih').value = data.tarih;
         document.getElementById('topluSatisCari').value = data.cariId;
-
-        // Düzenleme sırasında cari ve tarih değiştirilemesin
-        document.getElementById('topluSatisCari').disabled = true;
-        document.getElementById('topluSatisTarih').disabled = true;
-        document.getElementById('yemSatisCariAraInput').disabled = true;
-
-        // Düzenlenecek veriler için tek bir satış satırı ekle
+        document.getElementById('topluSatisCari').disabled = false;
+	document.getElementById('topluSatisTarih').disabled = false;
+	document.getElementById('yemSatisCariAraInput').disabled = false;
         addYemSatisRow();
         const yeniSatir = satirContainer.querySelector('.yem-satis-satiri');
         
@@ -4445,7 +4448,7 @@ async function editYemSatisi(id) {
         yemSelect.value = data.yemId;
         yeniSatir.querySelector('.yem-miktari').value = data.miktar;
         yeniSatir.querySelector('.yem-fiyati').value = data.satisFiyati;
-        yemSelect.disabled = true; // Yem türü de değiştirilemesin
+        yemSelect.disabled = false; // Yem türü de değiştirilemesin
 
         // Fiyat ve ara toplamı güncelle
         updateSatisSatiri(yemSelect);
