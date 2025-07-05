@@ -33,7 +33,8 @@
         .time-selection input:checked + label { color: white; font-weight: 700; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); border: 2px solid rgba(0,0,0,0.1); }
         .time-selection input[id="aksam"]:checked + label { background-color: #ff8c00; }
         .time-selection input[id="sabah"]:checked + label { background-color: #28a745; }
-        #producer-panel, #history-section { background-color: var(--white-color); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px 	rgba(0,0,0,0.05); margin-top: 25px; }
+        #producer-panel, #history-section { background-color: var(--white-color); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); 
+		box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-top: 25px; }
         #current-producer-name { font-size: 1.5em; font-weight: 700; color: var(--primary-color); margin-bottom: 15px; text-align: center; }
         .action-buttons { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; }
         .btn { padding: 15px; font-size: 1.1em; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; }
@@ -45,82 +46,24 @@
         #history-list { list-style: none; padding: 0; margin: 0; }
         .history-item:nth-child(odd) { background-color: #f1f1f1; }
         .history-item:nth-child(even) { background-color: #ffffff; }
-
-/* Geçmiş Listesi Satır Düzeni - NİHAİ VERSİYON */
-.history-item {
-    display: flex;
-    align-items: center;
-    gap: 10px; /* Öğeler arasındaki yatay boşluk */
-    padding: 10px 8px;
-    border-bottom: 1px solid #444; /* Koyu tema için daha uygun bir renk */
-}
-
-/* Üretici adını içeren sol bölüm */
-.history-item-main {
-    flex-grow: 1; /* Mümkün olan tüm boşluğu kapla */
-    min-width: 0; /* Esnekliğe izin ver */
-}
-
-/* Üretici adının stili */
-.history-item-main .producer-name {
-    font-weight: 600;
-    font-size: 1em;
-    display: block; /* Gerekirse alt satıra geçmesine izin verir */
-}
-
-/* Miktar ve tutar bilgilerinin olduğu sağ bölüm */
-.history-item-details {
-    flex-shrink: 0; /* Bu alanın küçülmesini engelle */
-    text-align: right;
-    font-size: 0.9em;
-    line-height: 1.4;
-}
-
-/* Butonların olduğu en sağ bölüm */
-.history-item-actions {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-}
-
-
-
-
-
-        .btn-icon {background: none; border: none; font-size: 1.3em; margin: 0 4px; cursor: pointer;padding: 4px; border-radius: 6px; transition: background-color 0.2s; vertical-align: 	middle; }
+	.history-item {display: flex;align-items: center;gap: 10px;padding: 10px 8px;border-bottom: 1px solid #444; }
+	.history-item-main {flex-grow: 1;min-width: 0; }
+	.history-item-main .producer-name {font-weight: 600;font-size: 1em;display: block; }
+	.history-item-details {flex-shrink: 0;text-align: right;font-size: 0.9em;line-height: 1.4;}
+	.history-item-actions {    flex-shrink: 0;    display: flex;    align-items: center;}
+	.inline-edit-form {    display: flex;    align-items: center;    gap: 8px;    margin-top: 6px;}
+	.btn-inline-save, .btn-inline-cancel {    padding: 4px 8px;    font-size: 1em;    cursor: pointer;}
+        .btn-icon {background: none; border: none; font-size: 1.3em; margin: 0 4px; cursor: pointer;padding: 4px; border-radius: 6px; transition: 
+		background-color 0.2s; vertical-align: 	middle; }
         .btn-icon:hover { background-color: #e2e6ea; }
         .btn-delete { color: var(--danger-color); }
         #cancel-edit-btn { display: none; margin-top: 10px; width: 100%; background-color: var(--danger-color); color: var(--white-color); }
         .toast-message { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #28a745; color: white; padding: 12px 20px; border-radius: 8px; 
-	box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 1000; font-size: 1.1em; font-weight: 500; display: none; opacity: 0; transition: opacity 0.5s ease; }
+		box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 1000; font-size: 1.1em; font-weight: 500; display: none; opacity: 0; transition: opacity 0.5s ease; }
         .toast-message.show { display: block; opacity: 1; }
-.history-producer-name {
-    flex-shrink: 1; /* Esneyerek küçülmesine izin ver */
-    white-space: nowrap; /* Alt satıra inmesini engelle */
-    overflow: hidden; /* Taşanı gizle */
-    text-overflow: ellipsis; /* Gizlenen kısmın yerine '...' koy */
-    display: inline-block; /* Düzgün çalışması için */
-    max-width: 150px; /* Çok uzun isimler için bir sınır koyalım */
-    vertical-align: middle; /* Dikeyde ortala */
-}
-.action-buttons {
-    position: -webkit-sticky; /* Safari gibi eski tarayıcılar için uyumluluk */
-    position: sticky;
-    bottom: 0;
-    z-index: 10;
-    
-    /* Butonların arkasındaki içeriğin görünmemesi için arka plan rengi */
-    background-color: var(--light-color); 
-    
-    /* Butonlar ekrana yapıştığında daha iyi görünmesi için üst ve alt boşluk */
-    padding-top: 10px;
-    padding-bottom: 10px;
-    
-    /* Üstündeki içerikten ayırmak için ince bir çizgi */
-    border-top: 1px solid var(--border-color);
-}
-
-
+	.history-producer-name {flex-shrink: 1;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;display: inline-block;max-width: 150px;vertical-align: middle; }
+	.action-buttons {position: -webkit-sticky;position: sticky;bottom: 0;z-index: 10;background-color: var(--light-color);padding-top: 10px;padding-bottom: 10px;
+        	border-top: 1px solid var(--border-color);}
 
 </style>
 </head>
@@ -908,14 +851,71 @@ function scrollToActivePanel() {
     }, 100);
 }
 function editHistoryItem(sutAlimId, zaman) {
-            const entry = fullHistoryForDate.find(item => item.sutAlimId === sutAlimId);
-            if (entry) {
-            const dayDifference = getDayDifference(entry.tarih);
-            if (currentUserRole !== 'admin' && dayDifference > 2) {
-            alert('Bu kaydı düzenleme yetkiniz yok. Sadece son 2 güne ait kayıtlar düzenlenebilir.');return;}
-                setEditMode(entry, zaman);
-            } else {alert("Düzenlenecek kayıt bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin.");}
+    const entry = fullHistoryForDate.find(item => item.sutAlimId === sutAlimId);
+    if (!entry) return;
+
+    const listItems = document.querySelectorAll('.history-item');
+    let targetItem = null;
+    listItems.forEach(item => {
+        if (item.innerHTML.includes(`editHistoryItem('${sutAlimId}'`)) {
+            targetItem = item;
         }
+    });
+
+    if (!targetItem) return;
+
+    const existingForm = targetItem.querySelector('.inline-edit-form');
+    if (existingForm) {
+        existingForm.remove();
+        return;
+    }
+
+    const miktar = zaman === 'sabah' ? (entry.sabah || 0) : (entry.aksam || 0);
+    const formDiv = document.createElement('div');
+    formDiv.className = 'inline-edit-form';
+    formDiv.style.marginTop = '10px';
+    formDiv.style.display = 'flex';
+    formDiv.style.gap = '8px';
+    formDiv.innerHTML = `
+        <input type="number" step="0.1" value="${miktar}" class="edit-inline-input" style="width: 80px; padding:5px;">
+        <button class="btn-inline-save">✔</button>
+        <button class="btn-inline-cancel">✖</button>
+    `;
+
+    targetItem.appendChild(formDiv);
+
+    const input = formDiv.querySelector('.edit-inline-input');
+    const saveBtn = formDiv.querySelector('.btn-inline-save');
+    const cancelBtn = formDiv.querySelector('.btn-inline-cancel');
+
+    saveBtn.onclick = async () => {
+        const yeniMiktar = parseFloat(String(input.value).replace(',', '.')) || 0;
+        if (isNaN(yeniMiktar) || yeniMiktar < 0) return;
+
+        const sutAlimRef = db.collection('sut_alimlari').doc(sutAlimId);
+        const birimFiyat = parseFloat(entry.fiyat || 0);
+        const guncelleme = { fiyat: birimFiyat };
+        guncelleme[zaman] = yeniMiktar;
+
+        const sabah = zaman === 'sabah' ? yeniMiktar : (entry.sabah || 0);
+        const aksam = zaman === 'aksam' ? yeniMiktar : (entry.aksam || 0);
+
+        guncelleme.toplam = sabah + aksam;
+        guncelleme.toplamTutar = guncelleme.toplam * birimFiyat;
+
+        await sutAlimRef.update(guncelleme);
+        await fetchAndRenderHistory(entry.tarih);
+        await showDailyGrandTotal();
+    };
+
+    cancelBtn.onclick = () => {
+        formDiv.remove();
+    };
+}
+
+
+
+        
 
 </script>
 </body>
