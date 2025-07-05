@@ -56,6 +56,15 @@
         .toast-message { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #28a745; color: white; padding: 12px 20px; border-radius: 8px; 
 	box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 1000; font-size: 1.1em; font-weight: 500; display: none; opacity: 0; transition: opacity 0.5s ease; }
         .toast-message.show { display: block; opacity: 1; }
+.history-producer-name {
+    flex-shrink: 1; /* Esneyerek küçülmesine izin ver */
+    white-space: nowrap; /* Alt satıra inmesini engelle */
+    overflow: hidden; /* Taşanı gizle */
+    text-overflow: ellipsis; /* Gizlenen kısmın yerine '...' koy */
+    display: inline-block; /* Düzgün çalışması için */
+    max-width: 150px; /* Çok uzun isimler için bir sınır koyalım */
+    vertical-align: middle; /* Dikeyde ortala */
+}
 .action-buttons {
     position: -webkit-sticky; /* Safari gibi eski tarayıcılar için uyumluluk */
     position: sticky;
@@ -228,7 +237,9 @@ async function initializeApp() {
     });
 
 
-        quantityInput.addEventListener('change', checkPreviousDayDifference);
+    quantityInput.addEventListener('focus', scrollToActivePanel);
+    notesInput.addEventListener('focus', scrollToActivePanel);
+    quantityInput.addEventListener('change', checkPreviousDayDifference);
     categorySelect.addEventListener('change', startRoute);
     producerSelect.addEventListener('change', jumpToProducer);
     saveBtn.addEventListener('click', handleSave);
@@ -370,13 +381,17 @@ async function startRoute() {
 }
 
 
-// LÜTFEN MEVCUT saveMilkEntry FONKSİYONUNUZU BU YENİ VERSİYONLA TAMAMEN DEĞİŞTİRİN.
+// LÜTFEN BU FONKSİYONU YAZIM HATASI DÜZELTİLMİŞ HALİYLE DEĞİŞTİRİN
 async function saveMilkEntry(quantity, notes) {
     const unitPrice = parseFloat(String(unitPriceInput.value).replace(',', '.')) || 0;
     const alimTarihi = collectionDateInput.value;
     const zamanDilimi = document.querySelector('input[name="time"]:checked').value;
     const currentProducer = routeProducers[currentProducerIndex];
 
+    if (!currentProducer) {
+        alert("Hata: İşlem yapılacak geçerli bir üretici bulunamadı.");
+        return;
+    }
     if (isNaN(unitPrice) || !alimTarihi) {
         alert('Lütfen Fiyat ve Tarih seçimlerini doğru yapın.');
         return;
@@ -390,7 +405,6 @@ async function saveMilkEntry(quantity, notes) {
         const batch = db.batch();
 
         if (existingSutAlimSnapshot.empty) {
-            // YENİ KAYIT OLUŞTURMA (Bu kısım doğruydu, aynı kalıyor)
             const sutAlimRef = db.collection('sut_alimlari').doc();
             let newData = {
                 tarih: alimTarihi, cariId: currentProducer.id, cariAdi: currentProducer.adiSoyadi,
@@ -401,25 +415,18 @@ async function saveMilkEntry(quantity, notes) {
             newData.toplamTutar = quantity * unitPrice;
             batch.set(sutAlimRef, newData);
         } else {
-            // *** MEVCUT KAYDI GÜNCELLEME (HATALI MANTIK TAMAMEN YENİLENDİ) ***
             const sutAlimRef = existingSutAlimSnapshot.docs[0].ref;
             const existingData = existingSutAlimSnapshot.docs[0].data() || {};
-            
             const updatePayload = {
                 fiyat: unitPrice,
                 aciklama: `Hızlı giriş ile güncellendi. Not: ${notes || ''}`
             };
-
-            // Girilen değeri doğru zaman dilimine ata
             updatePayload[zamanDilimi] = quantity;
-            
-            // Toplamı, girilen yeni değer ve diğer zaman diliminin mevcut değerine göre hesapla
+            // *** YAZIM HATASI DÜZELTİLDİ: "sahah" -> "sabah" ***
             const sabahMiktari = (zamanDilimi === 'sabah') ? quantity : (existingData.sabah || 0);
             const aksamMiktari = (zamanDilimi === 'aksam') ? quantity : (existingData.aksam || 0);
-
             updatePayload.toplam = sabahMiktari + aksamMiktari;
             updatePayload.toplamTutar = updatePayload.toplam * unitPrice;
-
             batch.update(sutAlimRef, updatePayload);
         }
         
@@ -432,10 +439,7 @@ async function saveMilkEntry(quantity, notes) {
         toast.classList.add('show');
         setTimeout(() => { toast.classList.remove('show'); }, 3000);
         
-        // Rotayı yeniden başlatıp doğru üreticiyi göstermesi için
-        if (categorySelect.value) {
-            await startRoute();
-        }
+        advanceToNextProducer();
         
     } catch (error) {
         console.error("Kayıt Hatası:", error);
@@ -446,9 +450,12 @@ async function saveMilkEntry(quantity, notes) {
     }
 }
 
-
 async function fetchAndRenderHistory(date) {
     if (!date) return;
+    
+    // --- YENİ EKLENEN SATIR: Her yeni çekimde geçmiş dizisini tamamen sıfırla ---
+    fullHistoryForDate = []; 
+    
     historySection.style.display = 'none';
     historyList.innerHTML = '';
 
@@ -457,16 +464,17 @@ async function fetchAndRenderHistory(date) {
             .where('sahipId', '==', sahipId)
             .where('tarih', '==', date)
             .get();
+            
         fullHistoryForDate = existingEntriesSnapshot.docs.map(doc => {
-            const data = doc.data();
-            if (data.cariAdi && data.cariAdi.includes("Yıldırım")) {
-            }
-            return { ...data, sutAlimId: doc.id };
+            return { ...doc.data(), sutAlimId: doc.id };
         });
+        
         filterAndRenderHistory();
     } catch (error) {
+        console.error("Geçmiş verileri alınırken bir hata oluştu:", error);
     }
 }
+
 
 function displayCurrentProducer() {
             if (currentProducerIndex >= routeProducers.length) {
@@ -483,32 +491,40 @@ function displayCurrentProducer() {
         }
 
 async function showDailyGrandTotal() {
-            const displayElement = document.getElementById('gunlukGenelToplamGosterge');
-            const date = collectionDateInput.value;
-            if (!date) {
-                displayElement.textContent = 'Lütfen bir tarih seçin.';
-                return;
-            }
-            displayElement.textContent = 'Toplam yükleniyor...';
+    const displayElement = document.getElementById('gunlukGenelToplamGosterge');
+    const date = collectionDateInput.value;
+    if (!date) {
+        displayElement.textContent = '';
+        return;
+    }
+    displayElement.textContent = 'Hesaplanıyor...';
 
-            try {
-                const snapshot = await db.collection('sut_alimlari').where('sahipId', '==', sahipId).where('tarih', '==', date).get();
-                if (snapshot.empty) {
-                    displayElement.textContent = `Mevcut: 0.0 Lt`;
-                } else {
-                    let genelToplam = 0;
-                    const toNumber = (val) => parseFloat(String(val || 0).replace(',', '.')) || 0;
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        genelToplam += toNumber(data.toplam);
-                    });
-                    displayElement.textContent = `Mevcut: ${genelToplam.toFixed(1)} Lt`;
-                }
-            } catch (error) {
-                console.error("Günlük genel toplam alınırken hata:", error);
-                displayElement.textContent = 'Toplam alınamadı';
-            }
+    try {
+        const snapshot = await db.collection('sut_alimlari')
+            .where('sahipId', '==', sahipId)
+            .where('tarih', '==', date)
+            .get();
+
+        let genelToplam = 0;
+        const toNumber = (val) => parseFloat(String(val || 0).replace(',', '.')) || 0;
+
+        if (!snapshot.empty) {
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const sabahMiktari = toNumber(data.sabah);
+                const aksamMiktari = toNumber(data.aksam);
+                genelToplam += sabahMiktari + aksamMiktari;
+            });
         }
+        
+        displayElement.textContent = `Mevcut: ${genelToplam.toFixed(1)} Lt`;
+
+    } catch (error) {
+        // Bu konsol kaydı, sadece bir hata olursa çalışacağı için kalmasında fayda var.
+        console.error("Günlük genel toplam alınırken hata:", error);
+        displayElement.textContent = 'Hata!';
+    }
+}
        
 function populateProducerSelect() {
             producerSelect.innerHTML = '';
@@ -525,7 +541,7 @@ function jumpToProducer() {
             displayCurrentProducer();
         }
 
-// Lütfen mevcut renderHistory fonksiyonunu bu yeni versiyonla tamamen değiştirin.
+// LÜTFEN MEVCUT renderHistory FONKSİYONUNU BU YENİ VERSİYONLA TAMAMEN DEĞİŞTİRİN.
 function renderHistory(dataToRender) {
     if (!historySection || !historyList || !sessionSummary) return;
 
@@ -553,9 +569,9 @@ function renderHistory(dataToRender) {
         const isSabah = zaman === 'sabah';
         const miktar = isSabah ? (item.sabah === undefined || item.sabah === null ? -1 : item.sabah) : (item.aksam === undefined || item.aksam === null ? -1 : item.aksam);
 
-        if (miktar >= 0) { // Sadece o zaman dilimine ait giriş varsa listeye ekle
+        if (miktar >= 0) {
             const birimFiyat = item.fiyat || 0;
-            const kayitTutari = miktar * birimFiyat; // Her bir kayıt için tutar hesaplandı
+            const kayitTutari = miktar * birimFiyat;
 
             sessionTotalMilk += miktar;
             sessionTotalAmount += kayitTutari;
@@ -567,14 +583,14 @@ function renderHistory(dataToRender) {
             const listItem = document.createElement('li');
             listItem.className = 'history-item';
             
-            // --- İSTEĞİNİZE GÖRE DÜZENLENEN SATIR YAPISI ---
+            // --- SATIR TAŞMASINI ENGELLEMEK İÇİN YAPI GÜNCELLENDİ ---
             listItem.innerHTML = `
-                <div class="history-info" style="flex-grow: 1; display: flex; justify-content: space-between; align-items: center; margin-right: 10px;">
-                    <span style="min-width: 120px; flex-shrink: 0;">${item.cariAdi}</span>
-                    <strong style="margin: 0 10px;">${zamanLabel}: ${miktar.toFixed(1)} Lt</strong>
-                    <span style="color: var(--success-color); font-weight: 500; min-width: 70px; text-align: right;">${kayitTutari.toFixed(2)} ₺</span>
+                <div class="history-info" style="flex-grow: 1; display: flex; justify-content: space-between; align-items: center; min-width: 0;">
+                    <span class="history-producer-name" title="${item.cariAdi}">${item.cariAdi}</span>
+                    <strong style="margin: 0 8px; white-space: nowrap;">${zamanLabel}: ${miktar.toFixed(1)} Lt</strong>
+                    <span style="color: var(--success-color); font-weight: 500; text-align: right; white-space: nowrap;">${kayitTutari.toFixed(2)} ₺</span>
                 </div>
-                <div class="history-actions">
+                <div class="history-actions" style="flex-shrink: 0; padding-left: 8px;">
                     <button class="btn-icon" onclick="editHistoryItem('${item.sutAlimId}', '${zaman}')" title="${editTitle}">${editIcon}</button>
                     <button class="btn-icon btn-delete" onclick="deleteHistoryItem('${item.sutAlimId}', '${zaman}')" title="Sil">🗑️</button>
                 </div>
@@ -583,7 +599,6 @@ function renderHistory(dataToRender) {
         }
     });
 
-    // Oturum özeti (Toplamlar) kısmı aynı şekilde kalıyor.
     sessionSummary.innerHTML = `
         <strong>${zaman === 'sabah' ? 'Sabah' : 'Akşam'} Toplam Süt:</strong> ${sessionTotalMilk.toFixed(1)} Lt
         | <strong>Toplam Tutar:</strong> ${sessionTotalAmount.toFixed(2)} ₺
@@ -593,6 +608,7 @@ function renderHistory(dataToRender) {
         historySection.style.display = 'none';
      }
 }
+
 
 // Lütfen mevcut deleteHistoryItem fonksiyonunu bununla değiştirin.
 async function deleteHistoryItem(sutAlimId, zaman) {
@@ -786,29 +802,19 @@ async function getPreviousDayQuantity(producerId, currentDateStr, timeSlot) {
         return null; // Hata durumunda null döndür
     }
 }
-
-
-/**
- * Miktar inputuna veri girildiğinde tetiklenen, önceki gün ile karşılaştırma
- * yapan ve gerekirse uyarı gösteren ana fonksiyon.
- */
+// Miktar farkı uyarısını %35'e çıkaran güncel fonksiyon
 async function checkPreviousDayDifference() {
-    // Miktar alanındaki değeri al
     const currentQuantity = parseFloat(String(quantityInput.value).replace(',', '.')) || 0;
-    // Eğer miktar 0 veya geçersizse fonksiyondan çık
     if (currentQuantity <= 0) return;
 
-    // Mevcut üretici bilgilerini al
     const currentProducer = routeProducers[currentProducerIndex];
     if (!currentProducer) return;
 
     const timeSlot = document.querySelector('input[name="time"]:checked').value;
     const currentDateStr = collectionDateInput.value;
 
-    // Önceki günün miktarını veritabanından getir
     const previousQuantity = await getPreviousDayQuantity(currentProducer.id, currentDateStr, timeSlot);
 
-    // Önceki gün verisi yoksa veya 0 ise karşılaştırma yapma
     if (previousQuantity === null || previousQuantity <= 0) {
         console.log("Karşılaştırma için önceki gün verisi bulunamadı.");
         return;
@@ -817,13 +823,12 @@ async function checkPreviousDayDifference() {
     const difference = Math.abs(currentQuantity - previousQuantity);
     const percentageChange = (difference / previousQuantity) * 100;
 
-    // Fark %20'den fazlaysa uyarı göster
-    if (percentageChange > 20) {
+    // *** DEĞİŞİKLİK BURADA: Uyarı oranı %20'den %35'e çıkarıldı ***
+    if (percentageChange > 35) {
         const message = `DİKKAT!\n\nGirilen miktar (${currentQuantity.toFixed(1)} Lt), dünkü miktara (${previousQuantity.toFixed(1)} Lt) göre %${percentageChange.toFixed(0)} oranında farklı.\n\nYine de bu şekilde kaydetmek istiyor musunuz?`;
         
         const confirmation = confirm(message);
 
-        // Kullanıcı "İptal" derse, girilen miktarı temizle
         if (!confirmation) {
             quantityInput.value = '';
             quantityInput.focus();
@@ -831,6 +836,38 @@ async function checkPreviousDayDifference() {
     }
 }
 
+
+function advanceToNextProducer() {
+    // Mevcut (işlemi tamamlanan) üreticiyi rotanın kalanlar listesinden çıkar.
+    routeProducers.splice(currentProducerIndex, 1);
+
+    // Üretici atlama dropdown listesini, kalan üreticilerle yeniden doldur.
+    populateProducerSelect();
+    
+    // Eğer mevcut index, kalan üretici sayısından büyük veya eşitse,
+    // bu durum genellikle son üretici işlendiğinde olur. Başa dön.
+    if (currentProducerIndex >= routeProducers.length) {
+        currentProducerIndex = 0;
+    }
+
+    // Bir sonraki üreticiyi ekranda göster.
+    // Diziden bir eleman sildiğimiz için indeksi artırmamıza gerek yok,
+    // bir sonraki eleman zaten mevcut indekse kaymış olur.
+    displayCurrentProducer();
+}
+function scrollToActivePanel() {
+    // Tarayıcının ve klavyenin yerleşmesi için çok kısa bir gecikme eklemek
+    // işlemin daha stabil çalışmasını sağlar.
+    setTimeout(() => {
+        const producerPanel = document.getElementById('producer-panel');
+        if (producerPanel) {
+            producerPanel.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    }, 100);
+}
 function editHistoryItem(sutAlimId, zaman) {
             const entry = fullHistoryForDate.find(item => item.sutAlimId === sutAlimId);
             if (entry) {
