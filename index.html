@@ -4411,10 +4411,15 @@ async function handleTopluYemSatisKaydet() {
                 transaction.update(yemRef, { stokMiktari: firebase.firestore.FieldValue.increment(miktarFarki) });
                 
                 const guncelVeri = {
-                    miktar: yeniMiktar,
-                    satisFiyati: yeniFiyat,
-                    toplamTutar: yeniMiktar * yeniFiyat
-                };
+			tarih: document.getElementById('topluSatisTarih').value,
+    			cariId: document.getElementById('topluSatisCari').value,
+    			miktar: yeniMiktar,
+    			satisFiyati: yeniFiyat,
+    			toplamTutar: yeniMiktar * yeniFiyat
+    			kayitZamani: firebase.firestore.Timestamp.now()
+
+				};
+
                 transaction.update(satisRef, guncelVeri);
             });
             alert("Satış başarıyla güncellendi.");
