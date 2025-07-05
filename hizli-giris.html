@@ -64,46 +64,77 @@
 	.history-producer-name {flex-shrink: 1;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;display: inline-block;max-width: 150px;vertical-align: middle; }
 	.action-buttons {position: -webkit-sticky;position: sticky;bottom: 0;z-index: 10;background-color: var(--light-color);padding-top: 10px;padding-bottom: 10px;
         	border-top: 1px solid var(--border-color);}
-.inline-edit-form {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    margin-top: 8px;
-    width: 100%;
-    background-color: #f9f9f9;
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    box-sizing: border-box;
-}
-.inline-edit-form input {
-    width: 100%;
-    padding: 8px;
-    font-size: 1em;
-    box-sizing: border-box;
-}
-.inline-edit-form button {
-    padding: 6px 12px;
-    font-size: 1em;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-}
+
 .btn-inline-save {
     background-color: var(--success-color);
     color: white;
 }
+
 .btn-inline-cancel {
     background-color: var(--danger-color);
     color: white;
-    margin-left: 8px;
 }
-.inline-edit-actions {
+.edit-full-box {
+    width: 100%;
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-sizing: border-box;
+}
+
+.edit-header-icons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    font-size: 1.2em;
+}
+
+.edit-summary {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1em;
+}
+
+.edit-full-input {
+    width: 100%;
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.edit-full-actions {
     display: flex;
     gap: 10px;
     width: 100%;
 }
+
+.edit-full-actions button {
+    flex: 1;
+    padding: 12px;
+    font-size: 1em;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-inline-save {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.btn-inline-cancel {
+    background-color: var(--danger-color);
+    color: white;
+}
+
 
 
 
@@ -898,44 +929,50 @@ function scrollToActivePanel() {
 }
 
 
-
 function editHistoryItem(sutAlimId, zaman) {
     const entry = fullHistoryForDate.find(item => item.sutAlimId === sutAlimId);
     if (!entry) return;
 
-    const listItems = document.querySelectorAll('.history-item');
-    let targetItem = null;
-    listItems.forEach(item => {
-        if (item.innerHTML.includes(`editHistoryItem('${sutAlimId}'`)) {
-            targetItem = item;
-        }
-    });
+    const historyList = document.getElementById('history-list');
+    const existingEditItem = historyList.querySelector('.edit-mode-item');
+    if (existingEditItem) existingEditItem.remove();
 
-    if (!targetItem) return;
+    const originalItem = [...historyList.children].find(li =>
+        li.innerHTML.includes(`editHistoryItem('${sutAlimId}'`)
+    );
+    if (!originalItem) return;
 
-    const existingForm = targetItem.querySelector('.inline-edit-form');
-    if (existingForm) {
-        existingForm.remove();
-        return;
-    }
+    originalItem.style.display = 'none';
 
     const miktar = zaman === 'sabah' ? (entry.sabah || 0) : (entry.aksam || 0);
+    const fiyat = entry.fiyat?.toFixed(2) || '0.00';
 
-    const formDiv = document.createElement('div');
-    formDiv.className = 'inline-edit-form';
-    formDiv.innerHTML = `
-        <input type="number" step="0.1" value="${miktar}" class="edit-inline-input">
-        <div class="inline-edit-actions">
-            <button class="btn-inline-save">✔ Güncelle</button>
-            <button class="btn-inline-cancel">✖ Vazgeç</button>
+    const editItem = document.createElement('li');
+    editItem.className = 'edit-mode-item';
+    editItem.style.listStyle = 'none';
+    editItem.innerHTML = `
+        <div class="edit-full-box">
+            <div class="edit-header-icons">
+                <span>✏️</span>
+                <span class="btn-delete" onclick="deleteHistoryItem('${sutAlimId}', '${zaman}')">🗑️</span>
+            </div>
+            <div class="edit-summary">
+                <div><strong>Mevcut:</strong> ${miktar.toFixed(1)} Lt</div>
+                <div><strong>Fiyat:</strong> ${fiyat} ₺</div>
+            </div>
+            <input type="number" class="edit-full-input" step="0.1" value="${miktar}" />
+            <div class="edit-full-actions">
+                <button class="btn-inline-save">✔ Güncelle</button>
+                <button class="btn-inline-cancel">✖ Vazgeç</button>
+            </div>
         </div>
     `;
 
-    targetItem.appendChild(formDiv);
+    originalItem.insertAdjacentElement('afterend', editItem);
 
-    const input = formDiv.querySelector('.edit-inline-input');
-    const saveBtn = formDiv.querySelector('.btn-inline-save');
-    const cancelBtn = formDiv.querySelector('.btn-inline-cancel');
+    const input = editItem.querySelector('.edit-full-input');
+    const saveBtn = editItem.querySelector('.btn-inline-save');
+    const cancelBtn = editItem.querySelector('.btn-inline-cancel');
 
     saveBtn.onclick = async () => {
         const yeniMiktar = parseFloat(String(input.value).replace(',', '.')) || 0;
@@ -958,7 +995,8 @@ function editHistoryItem(sutAlimId, zaman) {
     };
 
     cancelBtn.onclick = () => {
-        formDiv.remove();
+        editItem.remove();
+        originalItem.style.display = '';
     };
 }
 
