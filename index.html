@@ -4262,7 +4262,7 @@ async function renderYemSatisListesi() {
     const tableHeader = listBody.parentElement.querySelector('thead tr');
     if (tableHeader) {
         tableHeader.innerHTML = `
-            <th>Tarih ve Saat</th>
+            <th>İşlem Tarihi ve Saati</th>
             <th>Alan Cari</th>
             <th>Yem</th>
             <th>Miktar</th>
@@ -4275,9 +4275,13 @@ async function renderYemSatisListesi() {
     listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Yükleniyor...</td></tr>';
 
     try {
+        // 1. Veritabanı sorgusu GÜNCELLENDİ:
+        // Sadece `tarih` alanına göre sıralama yapılıyor. Bu sayede `kayitZamani` olmayan eski kayıtlar da gelir.
         const snapshot = await db.collection('yem_satislari')
             .where('sahipId', '==', sahipId)
-            .get(); // sıralamayı burada değil, aşağıda yapacağız
+            .orderBy('tarih', 'desc')
+            .limit(200) // Daha fazla kayıt çekerek tarayıcıda doğru sıralama için yeterli veri olmasını sağlıyoruz.
+            .get();
 
         if (snapshot.empty) {
             listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Yem satış hareketi bulunmuyor.</td></tr>';
@@ -4286,39 +4290,42 @@ async function renderYemSatisListesi() {
 
         const tumKayitlar = snapshot.docs;
 
+        // 2. Tarayıcıda ikincil sıralama GÜNCELLENDİ:
+        // Gelen tüm kayıtları, aynı güne ait olanları kendi içinde saatine göre sıralamak için yeniden düzenliyoruz.
         tumKayitlar.sort((a, b) => {
-            const toDate = (data) => {
-                if (data.kayitZamani?.toDate) return data.kayitZamani.toDate();
-                if (data.date?.toDate) return data.date.toDate();
-                if (data.tarih && typeof data.tarih === 'string') return new Date(data.tarih);
-                return new Date(0);
-            };
-            return toDate(b.data()) - toDate(a.data());
+            const dataA = a.data();
+            const dataB = b.data();
+
+            // Ana kriter: `tarih` alanını karşılaştır (string olarak da çalışır: '2025-07-06' > '2025-07-05')
+            if (dataA.tarih > dataB.tarih) return -1;
+            if (dataA.tarih < dataB.tarih) return 1;
+
+            // Eğer tarihler aynı ise, `kayitZamani` (saat) olanı öne al
+            const timeA = dataA.kayitZamani?.toDate() || new Date(0); // Saati olmayanları en eski olarak kabul et
+            const timeB = dataB.kayitZamani?.toDate() || new Date(0);
+
+            return timeB - timeA; // Saatleri büyükten küçüğe sırala
         });
 
+
         let rows = '';
+        // Sıralanmış listenin ilk 100 kaydını gösteriyoruz.
         tumKayitlar.slice(0, 100).forEach(doc => {
             const satis = doc.data();
             const yemAdi = window.yemDataMap.get(satis.yemId)?.ad || 'Bilinmiyor';
             const cariAdi = window.cariDataMap.get(satis.cariId)?.adiSoyadi || 'Bilinmiyor';
 
-            // YENİ KOD
-let tarihSaat = '-';
-// Öncelikle her zaman formdaki işlem tarihini (satis.tarih) göster.
-if (satis.tarih) {
-    tarihSaat = formatDate(satis.tarih);
-}
-
-// Eğer kaydın ne zaman yapıldığına dair bir zaman damgası (kayitZamani) varsa,
-// bu bilgideki saati alıp tarihin sonuna ekleyerek daha detaylı bir görünüm sağla.
-if (satis.kayitZamani?.toDate) {
-    const time = satis.kayitZamani.toDate().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-    // Eğer tarih zaten basılmışsa sonuna saati ekle, yoksa tam zamanı bas.
-    tarihSaat = (tarihSaat !== '-') ? `${tarihSaat} ${time}` : formatDateTime(satis.kayitZamani);
-} else if (satis.date?.toDate) { // Eski kayıtlar için geri uyumluluk
-     const time = satis.date.toDate().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-     tarihSaat = (tarihSaat !== '-') ? `${tarihSaat} ${time}` : formatDateTime(satis.date);
-}
+            let tarihSaat = '-';
+            if (satis.tarih) {
+                tarihSaat = formatDate(satis.tarih);
+            }
+            if (satis.kayitZamani?.toDate) {
+                const time = satis.kayitZamani.toDate().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+                tarihSaat = (tarihSaat !== '-') ? `${tarihSaat} ${time}` : formatDateTime(satis.kayitZamani);
+            } else if (satis.date?.toDate) {
+                 const time = satis.date.toDate().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+                 tarihSaat = (tarihSaat !== '-') ? `${tarihSaat} ${time}` : formatDateTime(satis.date);
+            }
 
             rows += `<tr>
                 <td>${tarihSaat}</td>
@@ -4338,7 +4345,7 @@ if (satis.kayitZamani?.toDate) {
 
     } catch (e) {
         console.error("Yem satış hareketleri yüklenirken hata:", e);
-        listBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Liste yüklenirken bir hata oluştu.</td></tr>';
+        listBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Liste yüklenirken bir hata oluştu. Lütfen konsolu kontrol edin.</td></tr>`;
     }
 }
 
