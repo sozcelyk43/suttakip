@@ -296,7 +296,7 @@ auth.onAuthStateChanged(user => {
             if (user) {
                 const logoutButton = document.getElementById('logoutButton');
                 if (logoutButton && user.email) {
-                    logoutButton.innerHTML = `🚪 Çıkış Yap<br><small style="font-weight:normal; font-size:0.8em;">${user.email}</small>`;
+                    logoutButton.innerHTML = `Çıkış<br><small style="font-weight:normal; font-size:0.8em;">${user.email}</small>`;
                 }
                 db.collection('kullanicilar').doc(user.uid).get().then(doc => {
                     if (doc.exists) {
