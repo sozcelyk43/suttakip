@@ -4295,14 +4295,23 @@ async function renderYemSatisListesi() {
             const yemAdi = window.yemDataMap.get(satis.yemId)?.ad || 'Bilinmiyor';
             const cariAdi = window.cariDataMap.get(satis.cariId)?.adiSoyadi || 'Bilinmiyor';
 
-            let tarihSaat = '-';
-            if (satis.kayitZamani?.toDate) {
-                tarihSaat = formatDateTime(satis.kayitZamani);
-            } else if (satis.date?.toDate) {
-                tarihSaat = formatDateTime(satis.date);
-            } else if (satis.tarih) {
-                tarihSaat = formatDate(satis.tarih);
-            }
+            // YENİ KOD
+let tarihSaat = '-';
+// Öncelikle her zaman formdaki işlem tarihini (satis.tarih) göster.
+if (satis.tarih) {
+    tarihSaat = formatDate(satis.tarih);
+}
+
+// Eğer kaydın ne zaman yapıldığına dair bir zaman damgası (kayitZamani) varsa,
+// bu bilgideki saati alıp tarihin sonuna ekleyerek daha detaylı bir görünüm sağla.
+if (satis.kayitZamani?.toDate) {
+    const time = satis.kayitZamani.toDate().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    // Eğer tarih zaten basılmışsa sonuna saati ekle, yoksa tam zamanı bas.
+    tarihSaat = (tarihSaat !== '-') ? `${tarihSaat} ${time}` : formatDateTime(satis.kayitZamani);
+} else if (satis.date?.toDate) { // Eski kayıtlar için geri uyumluluk
+     const time = satis.date.toDate().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+     tarihSaat = (tarihSaat !== '-') ? `${tarihSaat} ${time}` : formatDateTime(satis.date);
+}
 
             rows += `<tr>
                 <td>${tarihSaat}</td>
@@ -4378,76 +4387,54 @@ async function editYemSatisi(id) {
 }
 
 async function handleTopluYemSatisKaydet() {
-   
+    const tarihInput = document.getElementById('topluSatisTarih');
+    const cariInput = document.getElementById('topluSatisCari');
+    const formTarih = tarihInput.value;
+    const formCari = cariInput.value;
+
+    if (!formTarih || !formCari) return alert("Lütfen Satış Tarihi ve Cari seçiniz!");
+
     if (editingYemSatisId) {
         const satisRef = db.collection('yem_satislari').doc(editingYemSatisId);
         const satir = document.querySelector('#yemSatisSatirlari .yem-satis-satiri');
-        if (!satir) {
-            alert("Güncellenecek satır bulunamadı.");
-            return;
-        }
-        
+        if (!satir) return alert("Güncellenecek satır bulunamadı.");
+
         const yeniMiktar = parseInt(satir.querySelector('.yem-miktari').value);
         const yeniFiyat = parseFloat(satir.querySelector('.yem-fiyati').value);
-
-        if (isNaN(yeniMiktar) || yeniMiktar <= 0 || isNaN(yeniFiyat)) {
-            alert("Lütfen miktar ve fiyat alanlarını geçerli bir şekilde doldurun.");
-            return;
-        }
+        if (isNaN(yeniMiktar) || yeniMiktar <= 0 || isNaN(yeniFiyat)) return alert("Miktar/Fiyat geçersiz.");
 
         try {
-            await db.runTransaction(async (transaction) => {
-                const satisDoc = await transaction.get(satisRef);
-                if (!satisDoc.exists) throw new Error("Güncellenecek kayıt veritabanında bulunamadı.");
-                
-                const satisData = satisDoc.data();
-                const eskiMiktar = satisData.miktar;
-                const yemId = satisData.yemId;
+            await db.runTransaction(async (trx) => {
+                const satisDoc = await trx.get(satisRef);
+                if (!satisDoc.exists) throw "Kayıt bulunamadı.";
+                const eskiMiktar = satisDoc.data().miktar;
+                const yemId = satisDoc.data().yemId;
                 const yemRef = db.collection('yemler').doc(yemId);
-                
-                const miktarFarki = eskiMiktar - yeniMiktar; // Stoğa geri eklenecek veya düşülecek miktar
-                
-                transaction.update(yemRef, { stokMiktari: firebase.firestore.FieldValue.increment(miktarFarki) });
-                
-               const guncelVeri = {
-			tarih: document.getElementById('topluSatisTarih').value,
-    			cariId: document.getElementById('topluSatisCari').value,
-    			miktar: yeniMiktar,
-    			satisFiyati: yeniFiyat,
-    			toplamTutar: yeniMiktar * yeniFiyat,
-    			kayitZamani: new Date()
-
-				};
-
-                transaction.update(satisRef, guncelVeri);
+                trx.update(yemRef, { stokMiktari: firebase.firestore.FieldValue.increment(eskiMiktar - yeniMiktar) });
+                trx.update(satisRef, {
+                    tarih: formTarih,
+                    cariId: formCari,
+                    miktar: yeniMiktar,
+                    satisFiyati: yeniFiyat,
+                    toplamTutar: yeniMiktar * yeniFiyat,
+                    kayitZamani: new Date()
+                });
             });
-            alert("Satış başarıyla güncellendi.");
+            alert("Satış güncellendi.");
             resetTopluSatisFormu();
             await renderYemSatisListesi();
             await renderYemStokListesi();
-        } catch(error) {
-            console.error("Yem satışı güncellenirken hata:", error);
-            alert("Hata: " + error.message);
+        } catch (e) {
+            console.error(e);
+            alert("Hata: " + e);
         }
-        return; // Güncelleme sonrası fonksiyondan çık
+        return;
     }
-    
-    const tarihString = document.getElementById('topluSatisTarih').value;
-    const cariId = document.getElementById('topluSatisCari').value;
-    const satirlar = document.querySelectorAll('.yem-satis-satiri');
 
-    if (!tarihString || !cariId) {
-        alert("Lütfen Satış Tarihi ve Cari seçimi yapın!");
-        return;
-    }
-    if (satirlar.length === 0) {
-        alert("Kaydedilecek en az bir yem satırı eklemelisiniz.");
-        return;
-    }
+    const satirlar = document.querySelectorAll('.yem-satis-satiri');
+    if (satirlar.length === 0) return alert("En az bir satır ekleyin.");
 
     const now = new Date();
-    const kayitZamani = new Date(`${tarihString}T${now.toTimeString().split(' ')[0]}`);
-
     const batch = db.batch();
     const satislar = [];
 
@@ -4455,46 +4442,39 @@ async function handleTopluYemSatisKaydet() {
         const yemId = satir.querySelector('.yem-secimi').value;
         const miktar = parseInt(satir.querySelector('.yem-miktari').value);
         const satisFiyati = parseFloat(satir.querySelector('.yem-fiyati').value);
-        if (!yemId || isNaN(miktar) || miktar <= 0 || isNaN(satisFiyati)) {
-            alert("Lütfen tüm satırlardaki yem, miktar ve fiyat bilgilerini eksiksiz doldurun.");
-            return;
-        }
+        if (!yemId || isNaN(miktar) || miktar <= 0 || isNaN(satisFiyati)) return alert("Satır bilgileri eksik.");
         satislar.push({ yemId, miktar, satisFiyati });
     }
 
-    for (const satis of satislar) {
-        const yemRef = db.collection('yemler').doc(satis.yemId);
-        const yemData = window.yemDataMap.get(satis.yemId);
-        if (!yemData || (yemData.stokMiktari || 0) < satis.miktar) {
-             alert(`Yetersiz Stok! "${yemData.ad}" adlı yemin stoğu (${yemData.stokMiktari || 0}) satış için yetersiz. İşlem iptal edildi.`);
-             return;
-        }
+    for (const s of satislar) {
+        const yemRef = db.collection('yemler').doc(s.yemId);
+        const stokVeri = window.yemDataMap.get(s.yemId);
+        if (!stokVeri || (stokVeri.stokMiktari || 0) < s.miktar) return alert(`Yetersiz stok: ${stokVeri?.ad}`);
         const satisRef = db.collection('yem_satislari').doc();
         batch.set(satisRef, {
             sahipId: sahipId,
-            tarih: tarihString,
-            kayitZamani: kayitZamani,
-            cariId: cariId,
-            yemId: satis.yemId,
-            miktar: satis.miktar,
-            satisFiyati: satis.satisFiyati,
-            toplamTutar: satis.miktar * satis.satisFiyati
+            tarih: formTarih,
+            kayitZamani: new Date(`${formTarih}T${now.toTimeString().split(' ')[0]}`),
+            cariId: formCari,
+            yemId: s.yemId,
+            miktar: s.miktar,
+            satisFiyati: s.satisFiyati,
+            toplamTutar: s.miktar * s.satisFiyati
         });
-        batch.update(yemRef, { stokMiktari: firebase.firestore.FieldValue.increment(-satis.miktar) });
+        batch.update(yemRef, { stokMiktari: firebase.firestore.FieldValue.increment(-s.miktar) });
     }
-    
+
     try {
         await batch.commit();
-        alert(`${satislar.length} kalemlik yem satışı başarıyla kaydedildi!`);
+        alert(`${satislar.length} satır kaydedildi.`);
         resetTopluSatisFormu();
         await renderYemSatisListesi();
         await loadAllYemlerToCache();
-    } catch(error) {
-        console.error("Toplu yem satışı kaydedilirken hata:", error);
-        alert("Satışlar kaydedilirken bir hata oluştu: " + error.message);
+    } catch (e) {
+        console.error(e);
+        alert("Kayıt hatası: " + e);
     }
 }
-
 
 function resetTopluSatisFormu() {
     editingYemSatisId = null; // Düzenleme modundan çık
