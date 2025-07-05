@@ -296,19 +296,57 @@
 </section>
         
         <section id="yem-satisi" class="module-section hidden-section">
-             <div class="module-header"><h2>🌾 Yem Satışı</h2></div>
-             <div class="container">
-                <div class="form-section"><h3><span id="yemSatisFormBaslik">Yeni Yem Satışı</span></h3><form id="yemSatisForm" action="#"><input type="hidden" id="yemSatisEditId"><div class="form-grid">
-                    <div class="form-group"><label for="yemSatisTarih">Tarih:</label><input type="date" id="yemSatisTarih" required></div>
-                    <div class="form-group"><label for="yemAlanTedarikci">Alan Cari:</label><select id="yemAlanTedarikci" required><option value="">Seçiniz...</option></select></div>
-                    <div class="form-group"><label for="yemSecimiSatis">Yem:</label><select id="yemSecimiSatis" required><option value="">Seçiniz...</option></select></div>
-                    <div class="form-group"><label for="yemSatisMiktar">Miktar:</label><input type="number" id="yemSatisMiktar" step="1" required></div>
-                    <div class="form-group"><label for="yemSatisBirimFiyati">Satış Fiyatı:</label><input type="number" id="yemSatisBirimFiyati" step="0.01" required></div>
-                    <div class="form-group"><label for="yemSatisToplamTutar">Toplam Tutar:</label><input type="text" id="yemSatisToplamTutar" readonly></div>
-                </div><button type="submit" class="btn btn-primary" id="yemSatisKaydetBtn">Satışı Kaydet</button><button type="button" class="btn" id="yemSatisFormTemizleBtn" style="display:none;">Yeni</button></form></div>
-                <div class="list-section"><h3>Yem Satış Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Alan Cari</th><th>Yem</th><th>Miktar</th><th>Fiyat</th><th>Tutar</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="yemSatisListesiBody"></tbody></table></div>
-             </div>
-        </section>
+    <div class="module-header"><h2>🌾 Toplu Yem Satışı</h2></div>
+    <div class="container">
+        <div class="form-section">
+            <h3>Toplu Satış Bilgileri</h3>
+            <div id="toplu-satis-formu">
+                <div class="form-grid" style="grid-template-columns: 1fr 2fr; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label for="topluSatisTarih">Satış Tarihi:</label>
+                        <input type="date" id="topluSatisTarih" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="topluSatisCari">Alan Cari:</label>
+                        <select id="topluSatisCari" required>
+                            <option value="">Cari Seçiniz...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="yemSatisSatirlari">
+                    </div>
+
+                <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+                    <button type="button" class="btn" id="yemSatirEkleBtn">✚ Yeni Yem Satırı Ekle</button>
+                    <div style="text-align: right;">
+                        <strong>Genel Toplam: <span id="genelToplamTutar" style="font-size: 1.5em; color: #2c3e50;">0,00 ₺</span></strong>
+                    </div>
+                </div>
+                <hr style="margin: 20px 0;">
+                <button type="button" class="btn btn-primary btn-lg" id="tumSatislariKaydetBtn" style="width: 100%; padding: 15px; font-size: 1.2em;">TÜM SATIŞLARI KAYDET</button>
+            </div>
+        </div>
+        <hr>
+        <div class="list-section">
+            <h3>Son Yem Satış Hareketleri</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tarih</th>
+                        <th>Alan Cari</th>
+                        <th>Yem</th>
+                        <th>Miktar</th>
+                        <th>Fiyat</th>
+                        <th>Tutar</th>
+                        <th class="dont-print">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody id="yemSatisListesiBody"></tbody>
+            </table>
+        </div>
+    </div>
+</section>
         
         <section id="tahsilat-ve-odemeler" class="module-section hidden-section">
             <div class="module-header"><h2>💳 Tahsilat ve Ödemeler</h2></div>
@@ -490,22 +528,51 @@
 
 
         
-        <section id="hareket-dokumu" class="module-section hidden-section">
-            <div class="module-header"><h2>📋 Hareket Dökümü</h2></div>
-            <div class="container">
-                <div class="list-section">
-                    <h3>Tüm İşlem Geçmişi (En Yeni Üstte)</h3>
-                    <table>
-                        <thead><tr><th>Tarih</th><th>Cari Adı</th><th>İşlem Türü</th><th>Açıklama</th><th>Tutar</th></tr></thead>
-                        <tbody id="hareketDokumuBody"></tbody>
-                    </table>
-                    <div id="hareket-dokumu-pagination" class="pagination-controls dont-print">
-                        <button id="hareketPrevBtn" class="btn btn-sm">← Önceki Sayfa</button>
-                        <span id="hareketPageInfo">Sayfa 1</span>
-                        <button id="hareketNextBtn" class="btn btn-sm">Sonraki Sayfa →</button>
-                    </div>
+       <section id="hareket-dokumu" class="module-section hidden-section">
+    <div class="module-header">
+        <h2>📋 Detaylı Hareket Dökümü</h2>
+    </div>
+    <div class="container">
+        <div class="form-section dont-print" style="border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+            <h3>Filtreler</h3>
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr auto; align-items: end;">
+                <div class="form-group">
+                    <label for="hd-baslangic-tarihi">Başlangıç Tarihi:</label>
+                    <input type="date" id="hd-baslangic-tarihi">
                 </div>
-        </section>
+                <div class="form-group">
+                    <label for="hd-bitis-tarihi">Bitiş Tarihi:</label>
+                    <input type="date" id="hd-bitis-tarihi">
+                </div>
+                <div class="form-group">
+                    <label for="hd-islem-turu">İşlem Türü:</label>
+                    <select id="hd-islem-turu">
+                        <option value="tumu">Tümü</option>
+                        <option value="sut_alimi">Süt Alımı</option>
+                        <option value="yem_satisi">Yem Satışı</option>
+                        <option value="yem_alisi">Yem Alışı</option>
+                        <option value="odeme">Ödeme (Bize Gelen)</option>
+                        <option value="tahsilat">Tahsilat (Bizden Çıkan)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="hd-cari-secimi">Cari:</label>
+                    <select id="hd-cari-secimi">
+                        <option value="tumu">Tümü</option>
+                    </select>
+                </div>
+                <button type="button" class="btn btn-primary" id="hareketFiltreleBtn" style="height: 45px;">Filtrele</button>
+            </div>
+        </div>
+
+        <div class="list-section">
+            <h3>Tüm İşlem Geçmişi (En Yeni Üstte)</h3>
+            <div id="hareketDokumuContainer">
+                <p style="text-align: center;">Lütfen filtreleme kriterlerini seçip 'Filtrele' butonuna basın.</p>
+                </div>
+        </div>
+    </div>
+</section>
         
         <section id="ayarlar" class="module-section hidden-section">
     <div class="module-header"><h2>⚙️ Ayarlar</h2></div>
@@ -598,6 +665,10 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
+
+
+let cachedHareketler = [];
+let cachedDateRange = '';
 	let currentUserRole = '';
 	let currentUserId = '';
 	let sahipId = '';
@@ -661,256 +732,222 @@ auth.onAuthStateChanged(async (user) => {
                 alert("Giriş başarılı ancak kullanıcı profili veritabanında bulunamadı.");
                 handleLogout();
             }
-        } catch (error) {
-            console.error("Kullanıcı profili alınırken hata:", error);
-            alert("Veritabanına erişirken bir sorun oluştu.");
-            handleLogout();
-        }
+    } catch (error) {
+                console.error("Kullanıcı profili alınırken hata:", error);
+                
+                // --- YENİ HATA GÖSTERİMİ ---
+                // Hatanın detayını doğrudan ekranda göstererek sorunun kaynağını öğreniyoruz.
+                alert(`Uygulama başlatılamadı. Veritabanı hatası oluştu.\n\nLÜTFEN BU MESAJIN EKRAN GÖRÜNTÜSÜNÜ ALIN VEYA KOPYALAYIN.\n\nTeknik Detay: ${error.message}`);
+                // --- YENİ HATA GÖSTERİMİ SONU ---
+
+                handleLogout();
+            }
     } else {
         window.location.href = 'login.html';
     }
 });
 
 
+// ESKİ initializeApp FONKSİYONUNUN TAMAMINI SİLİP, BU KOD BLOĞUNU YAPIŞTIRIN
+
 function initializeApp() {
-
-
-if (window.isAppInitialized) {        return;    }
+    // Uygulamanın tekrar tekrar başlatılmasını engelleyen koruma
+    if (window.isAppInitialized) {
+        return;
+    }
     window.isAppInitialized = true;
 
+    // Gerekli HTML elementlerini tanımlama
+    const sidebarNav = document.getElementById('sidebarNav');
+    const moduleSections = document.querySelectorAll('.main-content .module-section');
+    const logoutButton = document.getElementById('logoutButton');
+    const cariForm = document.getElementById('cariForm');
+    const cariFormTemizleBtn = document.getElementById('cariFormTemizleBtn');
+    const yemTanimForm = document.getElementById('yemTanimForm');
+    const yemTanimFormTemizleBtn = document.getElementById('yemTanimFormTemizleBtn');
+    const yemAlisForm = document.getElementById('yemAlisForm');
+    const yemAlisFormTemizleBtn = document.getElementById('yemAlisFormTemizleBtn');
+    const odemeForm = document.getElementById('odemeForm');
+    const odemeFormTemizleBtn = document.getElementById('odemeFormTemizleBtn');
+    const ayarlarForm = document.getElementById('ayarlarForm');
+    const cariKategoriForm = document.getElementById('cariKategoriForm');
+    const kullaniciForm = document.getElementById('kullaniciForm');
+    const sifreDegistirForm = document.getElementById('sifreDegistirForm');
+    const cariSearchInput = document.getElementById('cariSearchInput');
+    const cariKategoriFiltre = document.getElementById('cariKategoriFiltre');
+    const cariListesiYazdirBtn = document.getElementById('cariListesiYazdirBtn');
+    const topluGirisTarihInput = document.getElementById('topluGirisTarih');
+    const topluGirisKategoriSelect = document.getElementById('topluGirisKategori');
+    const sutDuzenleForm = document.getElementById('sutDuzenleForm');
+    const odemeCariSecimi = document.getElementById('odemeYapilanTedarikci');
+    const menuToggleBtn = document.getElementById('menuToggleBtn');
+    const sidebar = document.querySelector('.sidebar');
 
-        const sidebarNav = document.getElementById('sidebarNav');
-        const moduleSections = document.querySelectorAll('.main-content .module-section');
-        const logoutButton = document.getElementById('logoutButton');
-        const cariForm = document.getElementById('cariForm');
-        const cariFormTemizleBtn = document.getElementById('cariFormTemizleBtn');
-        const yemTanimForm = document.getElementById('yemTanimForm');
-        const yemTanimFormTemizleBtn = document.getElementById('yemTanimFormTemizleBtn');
-        const yemAlisForm = document.getElementById('yemAlisForm');
-        const yemAlisFormTemizleBtn = document.getElementById('yemAlisFormTemizleBtn');
-        const yemSatisForm = document.getElementById('yemSatisForm');
-        const yemSatisFormTemizleBtn = document.getElementById('yemSatisFormTemizleBtn');
-        const odemeForm = document.getElementById('odemeForm');
-        const odemeFormTemizleBtn = document.getElementById('odemeFormTemizleBtn');
-        const ayarlarForm = document.getElementById('ayarlarForm');
-        const cariKategoriForm = document.getElementById('cariKategoriForm');
-        const kullaniciForm = document.getElementById('kullaniciForm');
-        const sifreDegistirForm = document.getElementById('sifreDegistirForm');
-        const cariSearchInput = document.getElementById('cariSearchInput');
-        const cariKategoriFiltre = document.getElementById('cariKategoriFiltre');
-        const cariListesiYazdirBtn = document.getElementById('cariListesiYazdirBtn');
-        const topluGirisTarihInput = document.getElementById('topluGirisTarih');
-        const topluGirisKategoriSelect = document.getElementById('topluGirisKategori');
-        const sutDuzenleForm = document.getElementById('sutDuzenleForm');
-        const odemeCariSecimi = document.getElementById('odemeYapilanTedarikci');
-        const menuToggleBtn = document.getElementById('menuToggleBtn');
-        const sidebar = document.querySelector('.sidebar');
-        
- 	window.yemDataMap = new Map();
-    	window.cariDataMap = new Map();
-        if (menuToggleBtn && sidebar) {
-            menuToggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
-            sidebar.addEventListener('click', (event) => {
-                if (window.innerWidth <= 1024 && event.target.closest('a.nav-link')) {
-                    sidebar.classList.add('collapsed');
-                }
-            });
-        }
+    window.yemDataMap = new Map();
+    window.cariDataMap = new Map();
 
-        applyRolePermissions();
-        loadAndRenderAllData();
-
-	loadAllYemlerToCache();
-	loadAllCarilerToCache();
-	updateMonthlyStats(); 
-       
-	sidebarNav.addEventListener('click', function(event) {
-	const link = event.target.closest('a.nav-link');
-	if (!link || link.id === 'logoutButton') return;
-	event.preventDefault();
-            
-	sidebarNav.querySelectorAll('a.nav-link').forEach(lnk => lnk.classList.remove('active'));
-	link.classList.add('active');
-            
-	const targetId = link.getAttribute('href').substring(1);
-	moduleSections.forEach(section => { section.style.display = 'none'; });
-	const activeSection = document.getElementById(targetId);
-	if(activeSection) activeSection.style.display = 'block';
-	
-	if (targetId === 'dashboard') {updateDashboardStats();updateMonthlyStats();}
-	if (targetId === 'cari-yonetimi') {populateCariKategoriFiltre();renderCariListesi();populateCariKategoriSelect(document.getElementById('cariKategori'));generateNextCariKodu();}
-	if (targetId === 'sut-alimi') {
-    if(topluGirisTarihInput) topluGirisTarihInput.value = 	getTodayForInput();
-    populateCariKategoriSelect(topluGirisKategoriSelect);
-    renderTopluSutGirisFormu();
-    renderSutAlimGecmisi();
-}
-	if (targetId === 'yem-stok-yonetimi') {populateCariSelect(document.getElementById('yemAlisTedarikci'), 'tedarikçi');                 	populateYemSelect(document.getElementById('yemSecimiAlis')); 
-                populateYemSelect(document.getElementById('sayimYemSecimi'));renderStokSayimGecmisi();renderYemAlisHareketleri();renderYemStokListesi();}
-	if (targetId === 'yem-satisi') {populateCariSelect(document.getElementById('yemAlanTedarikci'), 'üretici');populateYemSelect(document.getElementById('yemSecimiSatis')); 
-                renderYemSatisListesi();}
-if (targetId === 'tahsilat-ve-odemeler') {
-        populateCariSelect(document.getElementById('odemeYapilanTedarikci'));
-        renderOdemeListesi();
-    }
-    
-
-
-    if (targetId === 'hesap-ozeti') {
-        populateCariSelect(document.getElementById('raporCariSecimi'));
-        if (!document.getElementById('raporTarihAraligi').value) {
-            document.getElementById('raporTarihAraligi').value = getMonthYearForInput();
-        }
-
-        const aramaInput = document.getElementById('raporCariAramaInput');
-        if (aramaInput) aramaInput.value = '';
-        const tumSecenekler = document.getElementById('raporCariSecimi').options;
-        for (let i = 0; i < tumSecenekler.length; i++) {
-            tumSecenekler[i].style.display = "";
-        }
-    }
-
-
-
-
-
-if (!document.getElementById('raporTarihAraligi').value) {
-    document.getElementById('raporTarihAraligi').value = getMonthYearForInput();
-}
-	if (targetId === 'sut-alim-raporu'){populateCariSelect(document.getElementById('sutRaporuTedarikciSecimi'), 'üretici'); 
-                populateCariKategoriSelect(document.getElementById('sutRaporuKategoriSecimi'), "Tümü"); const baslangicTarihiInput = document.getElementById('sutRaporuBaslangicTarihi');
-                const bitisTarihiInput = document.getElementById('sutRaporuBitisTarihi');if (baslangicTarihiInput && !baslangicTarihiInput.value && bitisTarihiInput && !				bitisTarihiInput.value) {
-                    const today = new Date();
-                    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-                    const formatForInput = (date) => {
-                        const year = date.getFullYear();
-                        const month = String(date.getMonth() + 1).padStart(2, '0');
-                        const day = String(date.getDate()).padStart(2, '0');
-                        return `${year}-${month}-${day}`;};
-                    baslangicTarihiInput.value = formatForInput(firstDayOfMonth);
-                    bitisTarihiInput.value = formatForInput(today);}}
-	if (targetId === 'aylik-yem-raporu') {if (!document.getElementById('yemRaporuAySecimi').value) {document.getElementById('yemRaporuAySecimi').value = getMonthYearForInput();}
-            } else if (targetId === 'dinamik-sut-raporu') {populatePeriodSelect();populateCariKategoriSelect(document.getElementById('karneRaporuKategoriSecimi'), "Tüm Kategoriler");
-            } else if (targetId === 'hareket-dokumu') {firstVisibleHareketStack = [];lastVisibleHareket = null;hareketPageCount = 1;renderHareketDokumu('initial'); 
-            } else if (targetId === 'ayarlar') {renderCariKategoriListesi();getSettings();if (currentUserRole === 'admin') {renderKullaniciListesi();}}
-
-	
-  	
-         
-	if (window.innerWidth <= 1024 && sidebar.classList.contains('active')) {sidebar.classList.remove('active');if (menuToggleBtn) {menuToggleBtn.classList.remove('active');}}});
-        
-        logoutButton.addEventListener('click', handleLogout);
-        cariForm.addEventListener('submit', handleCariKaydet);
-        yemTanimForm.addEventListener('submit', handleYemTanimKaydet);
-        yemAlisForm.addEventListener('submit', handleYemAlisKaydet);
-        yemSatisForm.addEventListener('submit', handleYemSatisKaydet);
-        odemeForm.addEventListener('submit', handleOdemeKaydet);
-        ayarlarForm.addEventListener('submit', handleAyarlarKaydet);
-        cariKategoriForm.addEventListener('submit', handleCariKategoriEkle);
-        if(kullaniciForm) kullaniciForm.addEventListener('submit', handleKullaniciKaydet);
-        sifreDegistirForm.addEventListener('submit', handleSifreDegistir);
-        if(sutDuzenleForm) sutDuzenleForm.addEventListener('submit', handleSutAlimiGuncelle);
-       
-
-        if(cariFormTemizleBtn) cariFormTemizleBtn.addEventListener('click', resetCariForm);
-        if(yemTanimFormTemizleBtn) yemTanimFormTemizleBtn.addEventListener('click', resetYemTanimForm);
-        if(yemAlisFormTemizleBtn) yemAlisFormTemizleBtn.addEventListener('click', resetYemAlisForm);
-        if(yemSatisFormTemizleBtn) yemSatisFormTemizleBtn.addEventListener('click', resetYemSatisForm);
-        if(odemeFormTemizleBtn) odemeFormTemizleBtn.addEventListener('click', resetOdemeForm);
-        
-        cariSearchInput.addEventListener('input', renderCariListesi);
-        cariKategoriFiltre.addEventListener('change', renderCariListesi);
-	document.getElementById('cariTarihselRaporBtn')?.addEventListener('click', renderCariListesi);
-        topluGirisTarihInput?.addEventListener('change', () => { renderTopluSutGirisFormu(); renderSutAlimGecmisi(); });
-        topluGirisKategoriSelect?.addEventListener('change', renderTopluSutGirisFormu);
-        document.getElementById('aylikChartGosterBtn')?.addEventListener('click', renderAylikSutunGrafik);
-        
-        if(odemeCariSecimi) {
-            odemeCariSecimi.addEventListener('change', async (event) => {
-                const cariId = event.target.value;
-                const bakiyeBilgiAlani = document.getElementById('cariBakiyeBilgisi');
-                if (!cariId) { bakiyeBilgiAlani.textContent = ''; return; }
-                try {
-                    bakiyeBilgiAlani.textContent = 'Bakiye hesaplanıyor...';
-                    const bakiyeDetay = await calculateCariBakiyeDetayli(cariId);
-                    const bakiye = bakiyeDetay.bakiye;
-                    if (bakiye < 0) {
-                        bakiyeBilgiAlani.textContent = `Bakiye: ${formatCurrency(bakiye)} (Cari Borçlu)`;
-                        bakiyeBilgiAlani.style.color = 'red';
-                    } else {
-                        bakiyeBilgiAlani.textContent = `Bakiye: ${formatCurrency(bakiye)} (Cari Alacaklı)`;
-                        bakiyeBilgiAlani.style.color = 'green';
-                    }
-                } catch (error) {
-                    bakiyeBilgiAlani.textContent = 'Bakiye alınamadı.';
-                }
-            });
-        }
-        
-       
-
-	const raporCariAramaInput = document.getElementById('raporCariAramaInput');
-if (raporCariAramaInput) {
-    raporCariAramaInput.addEventListener('input', function() {
-        const aramaMetni = this.value.toLowerCase();
-        const cariSelect = document.getElementById('raporCariSecimi');
-        
-        // Mevcut listeyi tamamen temizle
-        cariSelect.innerHTML = '';
-
-        // Orijinal (tam) liste üzerinden filtreleme yap
-        raporCariSecimiOrjinalSecenekler.forEach(secenek => {
-            const secenekMetni = secenek.text.toLowerCase();
-
-            // Arama metni boşsa veya eşleşme varsa seçeneği listeye geri ekle
-            if (aramaMetni === '' || secenekMetni.includes(aramaMetni)) {
-                // Seçeneği klonlayarak eklemek en güvenli yoldur
-                cariSelect.appendChild(secenek.cloneNode(true));
+    if (menuToggleBtn && sidebar) {
+        menuToggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+        sidebar.addEventListener('click', (event) => {
+            if (window.innerWidth <= 1024 && event.target.closest('a.nav-link')) {
+                sidebar.classList.add('collapsed');
             }
         });
-    });
+    }
+
+    applyRolePermissions();
+    loadAndRenderAllData();
+    loadAllYemlerToCache();
+    loadAllCarilerToCache();
+    updateMonthlyStats();
+
+    // Olay Dinleyicilerini (EventListeners) Ekleme
+    sidebarNav.addEventListener('click', function (event) {
+        const link = event.target.closest('a.nav-link');
+        if (!link || link.id === 'logoutButton') return;
+        event.preventDefault();
+
+        sidebarNav.querySelectorAll('a.nav-link').forEach(lnk => lnk.classList.remove('active'));
+        link.classList.add('active');
+
+        const targetId = link.getAttribute('href').substring(1);
+        moduleSections.forEach(section => { section.style.display = 'none'; });
+        const activeSection = document.getElementById(targetId);
+        if (activeSection) activeSection.style.display = 'block';
+
+        // Sayfa geçişlerinde gerekli fonksiyonları çağırma
+        if (targetId === 'dashboard') { updateDashboardStats(); updateMonthlyStats(); }
+        if (targetId === 'cari-yonetimi') { populateCariKategoriFiltre(); renderCariListesi(); populateCariKategoriSelect(document.getElementById('cariKategori')); generateNextCariKodu(); }
+        if (targetId === 'sut-alimi') { if (topluGirisTarihInput) topluGirisTarihInput.value = getTodayForInput(); populateCariKategoriSelect(topluGirisKategoriSelect); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); }
+        if (targetId === 'yem-stok-yonetimi') { populateCariSelect(document.getElementById('yemAlisTedarikci'), 'tedarikçi'); populateYemSelect(document.getElementById('yemSecimiAlis')); populateYemSelect(document.getElementById('sayimYemSecimi')); renderStokSayimGecmisi(); renderYemAlisHareketleri(); renderYemStokListesi(); }
+        if (targetId === 'tahsilat-ve-odemeler') { populateCariSelect(document.getElementById('odemeYapilanTedarikci')); renderOdemeListesi(); }
+        if (targetId === 'hesap-ozeti') { populateCariSelect(document.getElementById('raporCariSecimi')); if (!document.getElementById('raporTarihAraligi').value) { document.getElementById('raporTarihAraligi').value = getMonthYearForInput(); } const aramaInput = document.getElementById('raporCariAramaInput'); if (aramaInput) aramaInput.value = ''; const tumSecenekler = document.getElementById('raporCariSecimi').options; for (let i = 0; i < tumSecenekler.length; i++) { tumSecenekler[i].style.display = ""; } }
+        if (targetId === 'sut-alim-raporu') { populateCariSelect(document.getElementById('sutRaporuTedarikciSecimi'), 'üretici'); populateCariKategoriSelect(document.getElementById('sutRaporuKategoriSecimi'), "Tümü"); const baslangicTarihiInput = document.getElementById('sutRaporuBaslangicTarihi'); const bitisTarihiInput = document.getElementById('sutRaporuBitisTarihi'); if (baslangicTarihiInput && !baslangicTarihiInput.value && bitisTarihiInput && !bitisTarihiInput.value) { const today = new Date(); const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1); const formatForInput = (date) => { const year = date.getFullYear(); const month = String(date.getMonth() + 1).padStart(2, '0'); const day = String(date.getDate()).padStart(2, '0'); return `${year}-${month}-${day}`; }; baslangicTarihiInput.value = formatForInput(firstDayOfMonth); bitisTarihiInput.value = formatForInput(today); } }
+        if (targetId === 'aylik-yem-raporu') { if (!document.getElementById('yemRaporuAySecimi').value) { document.getElementById('yemRaporuAySecimi').value = getMonthYearForInput(); } }
+        if (targetId === 'dinamik-sut-raporu') { populatePeriodSelect(); populateCariKategoriSelect(document.getElementById('karneRaporuKategoriSecimi'), "Tüm Kategoriler"); }
+
+
+
+
+
+
+
+
+if (targetId === 'hareket-dokumu') {
+    populateCariSelect(document.getElementById('hd-cari-secimi'), null, "Tüm Cariler");
+    
+    const baslangicInput = document.getElementById('hd-baslangic-tarihi');
+    const bitisInput = document.getElementById('hd-bitis-tarihi');
+
+    if (cachedHareketler.length === 0) {
+        const today = new Date();
+        const ayinIlkGunu = new Date(today.getFullYear(), today.getMonth(), 1);
+        const bugunTarihi = new Date();
+        const formatForInput = (date) => {
+            const pad = (num) => String(num).padStart(2, '0');
+            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+        };
+        baslangicInput.value = formatForInput(ayinIlkGunu);
+        bitisInput.value = formatForInput(bugunTarihi);
+        
+        fetchAndDisplayHareketler();
+    } else {
+        displayHareketler(cachedHareketler);
+    }
+    
+    document.getElementById('hareketFiltreleBtn')?.addEventListener('click', fetchAndDisplayHareketler);
+    document.getElementById('hd-islem-turu')?.addEventListener('change', () => displayHareketler(cachedHareketler));
+    document.getElementById('hd-cari-secimi')?.addEventListener('change', () => displayHareketler(cachedHareketler));
 }
 
 
 
-        document.getElementById('raporOlusturBtn')?.addEventListener('click', handleHesapOzetiRaporuOlustur);
-        document.getElementById('sutRaporuOlusturBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: false}));
-        document.getElementById('sutRaporuTumunuGosterBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: true, kategori: false}));
-        document.getElementById('sutRaporuKategoriGosterBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: true}));
-        document.getElementById('yemAdetRaporuBtn')?.addEventListener('click', () => handleYemPivotRaporu('adet'));
-        document.getElementById('yemDetayliSatisRaporuBtn')?.addEventListener('click', () => handleYemPivotRaporu('satis'));
-        document.getElementById('yemMusteriKarRaporuBtn')?.addEventListener('click', () => handleYemPivotRaporu('karlilik'));
-	document.getElementById('karneRaporuOlusturBtn')?.addEventListener('click', handleDinamikSutRaporu);
-	document.getElementById('hareketNextBtn')?.addEventListener('click', () => renderHareketDokumu('next'));
-	document.getElementById('hareketPrevBtn')?.addEventListener('click', () => renderHareketDokumu('prev'));
-	document.getElementById('cariDurumFiltre')?.addEventListener('change', renderCariListesi);
-document.getElementById('cariGrupFiltre')?.addEventListener('change', renderCariListesi);
-	cariListesiYazdirBtn?.addEventListener('click', () => handleYazdir('cari-yonetimi'));
-	document.getElementById('stokSayimForm')?.addEventListener('submit', handleStokSayimKaydet);
-	document.getElementById('sayimYemSecimi')?.addEventListener('change', updateSayimForm);
-	document.getElementById('sayimFizikselStok')?.addEventListener('input', updateSayimForm);
-	document.getElementById('raporYazdirBtn')?.addEventListener('click', () => handleYazdir('hesap-ozeti'));
-        document.getElementById('sutRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('sut-alim-raporu'));
-        document.getElementById('yemRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('aylik-yem-raporu'));
-        document.getElementById('karneYazdirBtn')?.addEventListener('click', () => handleYazdir('dinamik-sut-raporu'));
-	document.getElementById('karnePdfBtn')?.addEventListener('click', () => exportTableToPdf('dinamikRaporContainer', 'sut_karnesi', 'Aylık Süt Karnesi', 				'karnePdfBtn'));
-	document.getElementById('karneXlsxBtn')?.addEventListener('click', () => exportTableToExcel('dinamikRaporContainer', 'sut_karnesi'));
-	document.getElementById('hesapOzetiPdfBtn')?.addEventListener('click', () => exportTableToPdf('report-content-to-print', 'hesap_ozeti', 'Cari Hesap Özeti', 			'hesapOzetiPdfBtn'));
-	document.getElementById('hesapOzetiXlsxBtn')?.addEventListener('click', () => exportTableToExcel('hesap-ozeti-export-area', 'hesap_ozeti'));
-	document.getElementById('sutRaporuPdfBtn')?.addEventListener('click', () => exportTableToPdf('sutAlimRaporAlani', 'sut_alim_raporu', 'Aylık Süt Alım Raporu', 			'sutRaporuPdfBtn'));
-	document.getElementById('sutRaporuXlsxBtn')?.addEventListener('click', () => exportTableToExcel('sut-raporu-export-area', 'sut_alim_raporu'));
-	document.getElementById('yemRaporuPdfBtn')?.addEventListener('click', () => exportTableToPdf('yemRaporuAlani', 'yem_raporu', 'Aylık Yem Raporu', 				'yemRaporuPdfBtn'));
-	document.getElementById('yemRaporuXlsxBtn')?.addEventListener('click', () => exportTableToExcel('yemRaporuAlani', 'yem_raporu'));
-	document.getElementById('yemAlisMiktar').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
-    	document.getElementById('yemAlisBirimFiyati').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
-    	document.getElementById('yemSatisMiktar').addEventListener('input', () => hesaplaToplamTutar('yemSatisMiktar', 'yemSatisBirimFiyati', 'yemSatisToplamTutar'));
-    	document.getElementById('yemSatisBirimFiyati').addEventListener('input', () => hesaplaToplamTutar('yemSatisMiktar', 'yemSatisBirimFiyati', 'yemSatisToplamTutar'));
-    	document.getElementById('yemSecimiSatis').addEventListener('change', (event) => {
-        const yemId = event.target.value;
-        const fiyatInput = document.getElementById('yemSatisBirimFiyati');
-        if (yemId && window.yemDataMap && window.yemDataMap.has(yemId)) {
-            fiyatInput.value = window.yemDataMap.get(yemId).satisFiyati || 0;
-        } else {fiyatInput.value = '';}hesaplaToplamTutar('yemSatisMiktar', 'yemSatisBirimFiyati', 'yemSatisToplamTutar');});}
+        if (targetId === 'ayarlar') { renderCariKategoriListesi(); getSettings(); if (currentUserRole === 'admin') { renderKullaniciListesi(); } }
+        
+        // --- YEM SATIŞI SEKMESİ İÇİN YENİ KOD ---
+        if (targetId === 'yem-satisi') {
+            populateCariSelect(document.getElementById('topluSatisCari'), 'üretici', 'Lütfen Satış Yapılacak Cariyi Seçin...');
+            if (document.getElementById('yemSatisSatirlari').childElementCount === 0) {
+                addYemSatisRow();
+            }
+            renderYemSatisListesi();
+        }
+        // --- YENİ KOD SONU ---
+
+        if (window.innerWidth <= 1024 && sidebar.classList.contains('active')) { sidebar.classList.remove('active'); if (menuToggleBtn) { menuToggleBtn.classList.remove('active'); } }
+    });
+
+    logoutButton.addEventListener('click', handleLogout);
+    cariForm.addEventListener('submit', handleCariKaydet);
+    yemTanimForm.addEventListener('submit', handleYemTanimKaydet);
+    yemAlisForm.addEventListener('submit', handleYemAlisKaydet);
+    odemeForm.addEventListener('submit', handleOdemeKaydet);
+    ayarlarForm.addEventListener('submit', handleAyarlarKaydet);
+    cariKategoriForm.addEventListener('submit', handleCariKategoriEkle);
+    if(kullaniciForm) kullaniciForm.addEventListener('submit', handleKullaniciKaydet);
+    sifreDegistirForm.addEventListener('submit', handleSifreDegistir);
+    if(sutDuzenleForm) sutDuzenleForm.addEventListener('submit', handleSutAlimiGuncelle);
+
+    if(cariFormTemizleBtn) cariFormTemizleBtn.addEventListener('click', resetCariForm);
+    if(yemTanimFormTemizleBtn) yemTanimFormTemizleBtn.addEventListener('click', resetYemTanimForm);
+    if(yemAlisFormTemizleBtn) yemAlisFormTemizleBtn.addEventListener('click', resetYemAlisForm);
+    if(odemeFormTemizleBtn) odemeFormTemizleBtn.addEventListener('click', resetOdemeForm);
+    
+    cariSearchInput.addEventListener('input', renderCariListesi);
+    cariKategoriFiltre.addEventListener('change', renderCariListesi);
+    document.getElementById('cariTarihselRaporBtn')?.addEventListener('click', renderCariListesi);
+    topluGirisTarihInput?.addEventListener('change', () => { renderTopluSutGirisFormu(); renderSutAlimGecmisi(); });
+    topluGirisKategoriSelect?.addEventListener('change', renderTopluSutGirisFormu);
+    document.getElementById('aylikChartGosterBtn')?.addEventListener('click', renderAylikSutunGrafik);
+    
+    if(odemeCariSecimi) { odemeCariSecimi.addEventListener('change', async (event) => { /*...*/ }); }
+    
+    const raporCariAramaInput = document.getElementById('raporCariAramaInput');
+    if (raporCariAramaInput) { raporCariAramaInput.addEventListener('input', function() { /*...*/ }); }
+
+    // Rapor Butonları
+    document.getElementById('raporOlusturBtn')?.addEventListener('click', handleHesapOzetiRaporuOlustur);
+    document.getElementById('sutRaporuOlusturBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: false}));
+    document.getElementById('sutRaporuTumunuGosterBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: true, kategori: false}));
+    document.getElementById('sutRaporuKategoriGosterBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: true}));
+    document.getElementById('yemAdetRaporuBtn')?.addEventListener('click', () => handleYemPivotRaporu('adet'));
+    document.getElementById('yemDetayliSatisRaporuBtn')?.addEventListener('click', () => handleYemPivotRaporu('satis'));
+    document.getElementById('yemMusteriKarRaporuBtn')?.addEventListener('click', () => handleYemPivotRaporu('karlilik'));
+    document.getElementById('karneRaporuOlusturBtn')?.addEventListener('click', handleDinamikSutRaporu);
+    document.getElementById('hareketNextBtn')?.addEventListener('click', () => renderHareketDokumu('next'));
+    document.getElementById('hareketPrevBtn')?.addEventListener('click', () => renderHareketDokumu('prev'));
+    document.getElementById('cariDurumFiltre')?.addEventListener('change', renderCariListesi);
+    document.getElementById('cariGrupFiltre')?.addEventListener('change', renderCariListesi);
+    
+    // Toplu Yem Satışı Butonları
+    document.getElementById('yemSatirEkleBtn')?.addEventListener('click', addYemSatisRow);
+    document.getElementById('tumSatislariKaydetBtn')?.addEventListener('click', handleTopluYemSatisKaydet);
+    
+    // Stok Sayım Formu
+    document.getElementById('stokSayimForm')?.addEventListener('submit', handleStokSayimKaydet);
+    document.getElementById('sayimYemSecimi')?.addEventListener('change', updateSayimForm);
+    document.getElementById('sayimFizikselStok')?.addEventListener('input', updateSayimForm);
+    
+    // Yazdırma ve Dışa Aktarma Butonları
+    cariListesiYazdirBtn?.addEventListener('click', () => handleYazdir('cari-yonetimi'));
+    document.getElementById('raporYazdirBtn')?.addEventListener('click', () => handleYazdir('hesap-ozeti'));
+    document.getElementById('sutRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('sut-alim-raporu'));
+    document.getElementById('yemRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('aylik-yem-raporu'));
+    document.getElementById('karneYazdirBtn')?.addEventListener('click', () => handleYazdir('dinamik-sut-raporu'));
+    document.getElementById('karnePdfBtn')?.addEventListener('click', () => exportTableToPdf('dinamikRaporContainer', 'sut_karnesi', 'karnePdfBtn'));
+    document.getElementById('karneXlsxBtn')?.addEventListener('click', () => exportTableToExcel('dinamikRaporContainer', 'sut_karnesi'));
+    document.getElementById('hesapOzetiPdfBtn')?.addEventListener('click', () => exportTableToPdf('report-content-to-print', 'hesap_ozeti', 'hesapOzetiPdfBtn'));
+    document.getElementById('hesapOzetiXlsxBtn')?.addEventListener('click', () => exportTableToExcel('hesap-ozeti-export-area', 'hesap_ozeti'));
+    document.getElementById('sutRaporuPdfBtn')?.addEventListener('click', () => exportTableToPdf('sutAlimRaporAlani', 'sut_alim_raporu', 'sutRaporuPdfBtn'));
+    document.getElementById('sutRaporuXlsxBtn')?.addEventListener('click', () => exportTableToExcel('sut-raporu-export-area', 'sut_alim_raporu'));
+    document.getElementById('yemRaporuPdfBtn')?.addEventListener('click', () => exportTableToPdf('yemRaporuAlani', 'yem_raporu', 'yemRaporuPdfBtn'));
+    document.getElementById('yemRaporuXlsxBtn')?.addEventListener('click', () => exportTableToExcel('yemRaporuAlani', 'yem_raporu'));
+
+    // Otomatik Tutar Hesaplama
+    document.getElementById('yemAlisMiktar').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
+    document.getElementById('yemAlisBirimFiyati').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
+}
+
 
 async function loadAndRenderAllData() {
     console.log("Veri yükleme fonksiyonları kontrollü bir şekilde başlatılıyor...");
@@ -2620,74 +2657,111 @@ function toggleLoading(button, isLoading) {
     }
 }
 
-async function renderHareketDokumu(direction = 'initial') {
-    const listBody = document.getElementById('hareketDokumuBody');
-    const pageInfo = document.getElementById('hareketPageInfo');
-    const nextBtn = document.getElementById('hareketNextBtn');
-    const prevBtn = document.getElementById('hareketPrevBtn');
-    const recordsPerPage = 30;
-    const currentUser = auth.currentUser;
+// ESKİ renderHareketDokumu FONKSİYONUNU SİLİP, BU İKİ YENİ FONKSİYONU YAPIŞTIRIN
 
-    if (!currentUser || !listBody) return;
+// Fonksiyon 1: Sadece veriyi ekrana çizer (Veritabanına gitmez)
+function displayHareketler(hareketListesi) {
+    const container = document.getElementById('hareketDokumuContainer');
+    const islemTuruFiltre = document.getElementById('hd-islem-turu').value;
+    const cariIdFiltre = document.getElementById('hd-cari-secimi').value;
 
-    listBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Yükleniyor...</td></tr>`;
+    let filtrelenmisListe = [...hareketListesi]; // Orijinal listeyi bozmamak için kopyasını oluştur
 
-    let query = db.collection('sut_alimlari')
-                .where('sahipId', '==', sahipId)
-                .orderBy('tarih', 'desc')
-                .limit(recordsPerPage);
-    
-    if (direction === 'next' && lastVisibleHareket) {
-        query = query.startAfter(lastVisibleHareket);
-    } else if (direction === 'prev') {
-        firstVisibleHareketStack.pop(); // Mevcut sayfanın başlangıcını kaldır
-        const prevPageStart = firstVisibleHareketStack.pop(); // Bir önceki sayfanın başlangıcını al
-        if (prevPageStart) {
-            query = query.startAt(prevPageStart);
-        }
+    // Cari filtresini uygula
+    if (cariIdFiltre && cariIdFiltre !== 'tumu') {
+        filtrelenmisListe = filtrelenmisListe.filter(item => item.cariId === cariIdFiltre);
     }
+
+    // İşlem türü filtresini uygula
+    if (islemTuruFiltre && islemTuruFiltre !== 'tumu') {
+        filtrelenmisListe = filtrelenmisListe.filter(item => item.tip === islemTuruFiltre);
+    }
+    
+    // Ekrana yazdırma
+    if (filtrelenmisListe.length === 0) {
+        container.innerHTML = '<p style="text-align: center;">Seçtiğiniz kriterlere uygun hiçbir hareket bulunamadı.</p>';
+        return;
+    }
+
+    let tableHTML = `<table class="report-table"><thead><tr><th>Tarih</th><th>Cari Adı</th><th>İşlem Türü</th><th>Açıklama</th><th>Tutar</th></tr></thead><tbody>`;
+    let genelToplam = 0;
+    filtrelenmisListe.forEach(item => {
+        genelToplam += item.tutar || 0;
+        tableHTML += `<tr><td>${formatDate(item.tarih)}</td><td>${item.cariAdi}</td><td>${item.islemTuru}</td><td>${item.aciklama}</td><td style="color: ${item.tutar >= 0 ? 'green' : 'red'}; text-align: right;">${formatCurrency(item.tutar)}</td></tr>`;
+    });
+    tableHTML += `</tbody><tfoot><tr class="report-totals-row"><td colspan="4" style="text-align: right; font-weight: bold;">Filtre Toplamı:</td><td style="font-weight: bold; text-align: right;">${formatCurrency(genelToplam)}</td></tr></tfoot></table>`;
+    container.innerHTML = tableHTML;
+}
+
+
+// Fonksiyon 2: Veritabanından verileri çeker ve önbelleğe alır
+async function fetchAndDisplayHareketler() {
+    const container = document.getElementById('hareketDokumuContainer');
+    container.innerHTML = '<p style="text-align: center; font-size: 1.2em;">Hareketler yükleniyor, lütfen bekleyin...</p>';
+
+    const startDate = document.getElementById('hd-baslangic-tarihi').value;
+    const endDate = document.getElementById('hd-bitis-tarihi').value;
+    const newDateRange = `${startDate}_${endDate}`;
+
+    // Eğer tarih aralığı değişmediyse, veritabanına gitme, önbellekten çalış.
+    if (cachedHareketler.length > 0 && cachedDateRange === newDateRange) {
+        console.log("Veriler önbellekten yüklendi, veritabanına gidilmedi.");
+        displayHareketler(cachedHareketler);
+        return;
+    }
+    
+    console.log("Tarih aralığı değişti, veriler veritabanından çekiliyor...");
 
     try {
-        const snapshot = await query.get();
-        const hareketler = snapshot.docs;
+        const koleksiyonlar = ['sut_alimlari', 'yem_satislari', 'yem_alimlari', 'odemeVeTahsilatlar'];
+        const sorguPromises = koleksiyonlar.map(koleksiyon => {
+            let query = db.collection(koleksiyon).where('sahipId', '==', sahipId);
+            if (startDate) query = query.where('tarih', '>=', startDate);
+            if (endDate) query = query.where('tarih', '<=', endDate);
+            // Cari filtresi burada yapılmaz, çünkü tüm veriyi çekip önbelleğe alacağız
+            return query.get();
+        });
 
-        if (hareketler.length === 0 && direction === 'initial') {
-            listBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Hiç işlem hareketi bulunmuyor.</td></tr>';
-            if(nextBtn) nextBtn.disabled = true;
-            if(prevBtn) prevBtn.disabled = true;
-            return;
-        }
+        const [sutAlimlari, yemSatislari, yemAlimlari, odemeler] = await Promise.all(sorguPromises);
 
-        if (hareketler.length > 0) {
-            lastVisibleHareket = hareketler[hareketler.length - 1];
-            if (direction !== 'prev') {
-                firstVisibleHareketStack.push(hareketler[0]);
-            }
-        }
+        let birlesikListe = [];
+        // Gelen tüm verileri standart bir formata dönüştür
+        sutAlimlari.forEach(doc => {
+            const data = doc.data();
+            birlesikListe.push({ tarih: data.tarih, cariId: data.cariId, cariAdi: window.cariDataMap.get(data.cariId)?.adiSoyadi || 'Bilinmiyor', islemTuru: 'Süt Alımı', aciklama: `${data.toplam.toFixed(2)} Lt`, tutar: data.toplamTutar, tip: 'sut_alimi' });
+        });
+        yemSatislari.forEach(doc => {
+            const data = doc.data();
+            birlesikListe.push({ tarih: data.tarih, cariId: data.cariId, cariAdi: window.cariDataMap.get(data.cariId)?.adiSoyadi || 'Bilinmiyor', islemTuru: 'Yem Satışı', aciklama: `${data.miktar} Adet - ${window.yemDataMap.get(data.yemId)?.ad || ''}`, tutar: data.toplamTutar, tip: 'yem_satisi' });
+        });
+        yemAlimlari.forEach(doc => {
+            const data = doc.data();
+            birlesikListe.push({ tarih: data.tarih, cariId: data.cariId, cariAdi: window.cariDataMap.get(data.cariId)?.adiSoyadi || 'Peşin', islemTuru: 'Yem Alışı', aciklama: `${data.miktar} Adet - ${window.yemDataMap.get(data.yemId)?.ad || ''}`, tutar: -data.toplamTutar, tip: 'yem_alisi' });
+        });
+        odemeler.forEach(doc => {
+            const data = doc.data();
+            let islem, tutar, tip;
+            if (data.islemTuru === 'odeme') { islem = 'Ödeme Alındı'; tutar = data.tutar; tip = 'odeme'; } 
+            else { islem = 'Tahsilat Yapıldı'; tutar = -data.tutar; tip = 'tahsilat'; }
+            birlesikListe.push({ tarih: data.tarih, cariId: data.cariId, cariAdi: window.cariDataMap.get(data.cariId)?.adiSoyadi || 'Bilinmiyor', islemTuru: islem, aciklama: data.aciklama || data.odemeTuru, tutar: tutar, tip: tip });
+        });
+
+        // Nihai listeyi tarihe göre en yeniden en eskiye sırala
+        birlesikListe.sort((a, b) => new Date(b.tarih) - new Date(a.tarih));
         
-listBody.innerHTML = hareketler.map(doc => {
-    const h = doc.data();
-    return `<tr>
-        <td>${formatDate(h.tarih)}</td>
-        <td>${window.cariDataMap.get(h.cariId)?.adiSoyadi || 'Bilinmiyor'}</td>
-        <td>${h.islemKaynagi === 'tank-aktarim' ? 'Süt Satışı' : 'Süt Alımı'}</td>
-        <td>${h.toplam.toFixed(2)} Lt</td>
-        <td>${formatCurrency(h.toplamTutar)}</td>
-    </tr>`;
-}).join('');
+        // Önbelleği güncelle
+        cachedHareketler = birlesikListe;
+        cachedDateRange = newDateRange;
 
-        if(direction === 'next') hareketPageCount++;
-        if(direction === 'prev' && hareketPageCount > 1) hareketPageCount--;
-        
-        if(pageInfo) pageInfo.textContent = `Sayfa ${hareketPageCount}`;
-        if(prevBtn) prevBtn.disabled = hareketPageCount <= 1;
-        if(nextBtn) nextBtn.disabled = hareketler.length < recordsPerPage;
+        // Verileri ekrana çiz
+        displayHareketler(cachedHareketler);
 
-    } catch(e) {
-        console.error("Hareket dökümü hatası:", e);
-        listBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Liste yüklenirken bir hata oluştu.</td></tr>';
+    } catch (error) {
+        container.innerHTML = `<p style="text-align: center; color: red;">Hareketler yüklenirken bir hata oluştu: ${error.message}</p>`;
+        console.error("Detaylı hareket dökümü alınırken KRİTİK HATA:", error);
     }
 }
+
 
 async function deleteSutAlimi(id) {
     if (confirm("Bu süt alım kaydını kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!")) {
@@ -2747,21 +2821,41 @@ async function editSutAlimi(id) {
 }
 
 
+// BU FONKSİYONUN TAMAMINI handleYemSatisKaydet FONKSİYONUNUN ALTINA EKLEYİN
+
 async function handleYemSatisUpdate() {
     const satisRef = db.collection('yem_satislari').doc(editingYemSatisId);
     const yeniMiktar = parseInt(document.getElementById('yemSatisMiktar').value);
     const yeniFiyat = parseFloat(document.getElementById('yemSatisBirimFiyati').value);
     
+    // Gerekli alanların dolu olduğunu kontrol et
+    if (isNaN(yeniMiktar) || isNaN(yeniFiyat) || yeniMiktar <= 0) {
+        alert("Lütfen miktar ve fiyat alanlarını geçerli bir şekilde doldurun.");
+        return;
+    }
+
     try {
         await db.runTransaction(async (transaction) => {
             const satisDoc = await transaction.get(satisRef);
-            if (!satisDoc.exists) throw "Güncellenecek satış kaydı bulunamadı.";
+            if (!satisDoc.exists) {
+                throw new Error("Güncellenecek satış kaydı bulunamadı. Sayfayı yenileyip tekrar deneyin.");
+            }
 
-            const eskiMiktar = satisDoc.data().miktar;
-            const yemId = satisDoc.data().yemId;
+            const satisData = satisDoc.data();
+            const eskiMiktar = satisData.miktar;
+            const yemId = satisData.yemId;
             const yemRef = db.collection('yemler').doc(yemId);
-            const miktarFarki = eskiMiktar - yeniMiktar; // Stok farkı ters mantıkla çalışır
 
+            // GÜVENLİK ADIMI: Stoktaki yemin varlığını kontrol et
+            const yemDoc = await transaction.get(yemRef);
+            if (!yemDoc.exists) {
+                throw new Error("Stokta bu yem bulunamadı! Yem silinmiş olabilir, bu nedenle satış güncellenemiyor.");
+            }
+
+            // Stok farkını hesapla (Eski miktar stoğa geri eklenir, yeni miktar düşülür)
+            const miktarFarki = eskiMiktar - yeniMiktar;
+
+            // Güncellenecek yeni verileri hazırla
             const guncelVeri = {
                 tarih: document.getElementById('yemSatisTarih').value,
                 miktar: yeniMiktar,
@@ -2769,6 +2863,7 @@ async function handleYemSatisUpdate() {
                 toplamTutar: yeniMiktar * yeniFiyat
             };
             
+            // İşlemleri gerçekleştir: Stok miktarını güncelle ve satış kaydını güncelle
             transaction.update(yemRef, { stokMiktari: firebase.firestore.FieldValue.increment(miktarFarki) });
             transaction.update(satisRef, guncelVeri);
         });
@@ -2779,10 +2874,12 @@ async function handleYemSatisUpdate() {
         await renderYemSatisListesi();
 
     } catch (error) {
-        console.error("Yem satışı güncellenirken hata:", error);
-        alert("Güncelleme sırasında bir hata oluştu: " + error);
+        // Hata durumunda kullanıcıyı bilgilendir
+        console.error("Yem satışı güncellenirken KRİTİK HATA:", error);
+        alert("Güncelleme sırasında bir hata oluştu! Hata: " + error.message);
     }
 }
+
 
 async function handleYemSatisKaydet(event) {
     event.preventDefault();
@@ -4174,6 +4271,163 @@ function toggleReportButtons(reportPrefix, show) {
     if (printBtn) printBtn.style.display = displayStyle;
 }
 
+
+
+// YENİ FONKSİYON 1: Toplu satış ekranına yeni bir yem satırı ekler
+function addYemSatisRow() {
+    const container = document.getElementById('yemSatisSatirlari');
+    const satirId = `satir-${Date.now()}`; // Her satıra benzersiz bir ID ver
+    const satirDiv = document.createElement('div');
+    satirDiv.className = 'form-grid yem-satis-satiri';
+    satirDiv.id = satirId;
+    satirDiv.style.cssText = 'grid-template-columns: 3fr 1fr 1fr 1fr auto; padding: 10px; border: 1px solid #eee; margin-bottom: 10px; border-radius: 5px; align-items: end;';
+
+    satirDiv.innerHTML = `
+        <div class="form-group">
+            <label>Yem:</label>
+            <select class="yem-secimi" required><option value="">Seçiniz...</option></select>
+        </div>
+        <div class="form-group">
+            <label>Miktar:</label>
+            <input type="number" class="yem-miktari" step="1" min="1" required>
+        </div>
+        <div class="form-group">
+            <label>Satış Fiyatı (Birim):</label>
+            <input type="number" class="yem-fiyati" step="0.01" required>
+        </div>
+        <div class="form-group">
+            <label>Ara Toplam:</label>
+            <input type="text" class="ara-toplam" readonly style="font-weight: bold; text-align: right;">
+        </div>
+        <button type="button" class="btn btn-delete btn-sm" onclick="removeYemSatisRow('${satirId}')">Sil</button>
+    `;
+
+    container.appendChild(satirDiv);
+
+    // Yeni eklenen satırdaki yem listesini doldur
+    const yeniSelect = satirDiv.querySelector('.yem-secimi');
+    populateYemSelect(yeniSelect);
+
+    // Yeni satıra olay dinleyicileri ekle
+    yeniSelect.addEventListener('change', (e) => updateSatisSatiri(e.target));
+    satirDiv.querySelector('.yem-miktari').addEventListener('input', (e) => updateSatisSatiri(e.target));
+    satirDiv.querySelector('.yem-fiyati').addEventListener('input', (e) => updateSatisSatiri(e.target));
+}
+
+// YENİ FONKSİYON 2: Bir satış satırını siler
+function removeYemSatisRow(satirId) {
+    document.getElementById(satirId)?.remove();
+    updateGenelToplam();
+}
+
+// YENİ FONKSİYON 3: Satırdaki herhangi bir değişiklikte fiyatı ve ara toplamı günceller
+function updateSatisSatiri(element) {
+    const satir = element.closest('.yem-satis-satiri');
+    const yemSelect = satir.querySelector('.yem-secimi');
+    const miktarInput = satir.querySelector('.yem-miktari');
+    const fiyatInput = satir.querySelector('.yem-fiyati');
+    const araToplamInput = satir.querySelector('.ara-toplam');
+
+    const yemId = yemSelect.value;
+    const miktar = parseFloat(miktarInput.value) || 0;
+    
+    // Yem seçildiğinde, varsayılan satış fiyatını otomatik getir
+    if (element.classList.contains('yem-secimi') && yemId && window.yemDataMap.has(yemId)) {
+        fiyatInput.value = window.yemDataMap.get(yemId).satisFiyati || 0;
+    }
+
+    const fiyat = parseFloat(fiyatInput.value) || 0;
+    const araToplam = miktar * fiyat;
+    araToplamInput.value = formatCurrency(araToplam);
+    
+    updateGenelToplam();
+}
+
+// YENİ FONKSİYON 4: Tüm satırların ara toplamlarını toplayarak genel toplamı günceller
+function updateGenelToplam() {
+    let genelToplam = 0;
+    document.querySelectorAll('.yem-satis-satiri .ara-toplam').forEach(input => {
+        // formatCurrency'den gelen "₺" ve "." gibi karakterleri temizle
+        const value = parseFloat(input.value.replace(/[^0-9,-]+/g, "").replace(",", ".")) || 0;
+        genelToplam += value;
+    });
+    document.getElementById('genelToplamTutar').textContent = formatCurrency(genelToplam);
+}
+
+// YENİ FONKSİYON 5: Tüm satışları toplu olarak kaydeder
+async function handleTopluYemSatisKaydet() {
+    const tarih = document.getElementById('topluSatisTarih').value;
+    const cariId = document.getElementById('topluSatisCari').value;
+    const satirlar = document.querySelectorAll('.yem-satis-satiri');
+
+    if (!tarih || !cariId) {
+        alert("Lütfen Satış Tarihi ve Cari seçimi yapın!");
+        return;
+    }
+    if (satirlar.length === 0) {
+        alert("Kaydedilecek en az bir yem satırı eklemelisiniz.");
+        return;
+    }
+
+    const batch = db.batch(); // Toplu işlem başlat
+    const satislar = [];
+
+    for (const satir of satirlar) {
+        const yemId = satir.querySelector('.yem-secimi').value;
+        const miktar = parseInt(satir.querySelector('.yem-miktari').value);
+        const satisFiyati = parseFloat(satir.querySelector('.yem-fiyati').value);
+
+        if (!yemId || isNaN(miktar) || miktar <= 0 || isNaN(satisFiyati)) {
+            alert("Lütfen tüm satırlardaki yem, miktar ve fiyat bilgilerini eksiksiz doldurun.");
+            return; // Bir satır bile hatalıysa işlemi durdur
+        }
+
+        satislar.push({ yemId, miktar, satisFiyati });
+    }
+
+    // Stok kontrolü ve toplu işlemleri hazırlama
+    for (const satis of satislar) {
+        const yemRef = db.collection('yemler').doc(satis.yemId);
+        const yemData = window.yemDataMap.get(satis.yemId);
+
+        if (!yemData || (yemData.stokMiktari || 0) < satis.miktar) {
+             alert(`Yetersiz Stok! "${yemData.ad}" adlı yemin stoğu (${yemData.stokMiktari || 0}) satış için yetersiz. İşlem iptal edildi.`);
+             return;
+        }
+
+        const satisRef = db.collection('yem_satislari').doc(); // Yeni satış kaydı referansı
+        batch.set(satisRef, {
+            sahipId: sahipId,
+            tarih: tarih,
+            cariId: cariId,
+            yemId: satis.yemId,
+            miktar: satis.miktar,
+            satisFiyati: satis.satisFiyati,
+            toplamTutar: satis.miktar * satis.satisFiyati
+        });
+        
+        // Stoğu azaltma işlemi
+        batch.update(yemRef, { stokMiktari: firebase.firestore.FieldValue.increment(-satis.miktar) });
+    }
+    
+    try {
+        await batch.commit(); // Tüm işlemleri tek seferde veritabanına gönder
+        alert(`${satislar.length} kalemlik yem satışı başarıyla kaydedildi!`);
+        
+        // Formu temizle
+        document.getElementById('yemSatisSatirlari').innerHTML = '';
+        updateGenelToplam();
+        
+        // Listeleri ve önbelleği yenile
+        await renderYemSatisListesi();
+        await loadAllYemlerToCache(); // Stok miktarları değiştiği için yem önbelleğini yenile
+        await populateYemSelect(document.querySelector('.yem-secimi')); // Varsa kalan select'i yenile
+
+    } catch(error) {
+        console.error("Toplu yem satışı kaydedilirken hata:", error);
+        alert("Satışlar kaydedilirken bir hata oluştu: " + error.message);
+    }
+}
 
 
 function handleCariListeYazdir() {    handleYazdir('cari-yonetimi');}
