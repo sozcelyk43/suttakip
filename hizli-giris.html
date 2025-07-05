@@ -56,6 +56,25 @@
         .toast-message { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #28a745; color: white; padding: 12px 20px; border-radius: 8px; 
 	box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 1000; font-size: 1.1em; font-weight: 500; display: none; opacity: 0; transition: opacity 0.5s ease; }
         .toast-message.show { display: block; opacity: 1; }
+.action-buttons {
+    position: -webkit-sticky; /* Safari gibi eski tarayıcılar için uyumluluk */
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    
+    /* Butonların arkasındaki içeriğin görünmemesi için arka plan rengi */
+    background-color: var(--light-color); 
+    
+    /* Butonlar ekrana yapıştığında daha iyi görünmesi için üst ve alt boşluk */
+    padding-top: 10px;
+    padding-bottom: 10px;
+    
+    /* Üstündeki içerikten ayırmak için ince bir çizgi */
+    border-top: 1px solid var(--border-color);
+}
+
+
+
 </style>
 </head>
 <body>
@@ -208,6 +227,8 @@ async function initializeApp() {
         }
     });
 
+
+        quantityInput.addEventListener('change', checkPreviousDayDifference);
     categorySelect.addEventListener('change', startRoute);
     producerSelect.addEventListener('change', jumpToProducer);
     saveBtn.addEventListener('click', handleSave);
@@ -733,6 +754,82 @@ async function handleUpdate() {
     }
 }
 
+/**
+ * Belirtilen üretici, tarih ve zaman dilimi için bir önceki günün süt miktarını
+ * veritabanından getiren fonksiyon.
+ */
+async function getPreviousDayQuantity(producerId, currentDateStr, timeSlot) {
+    try {
+        const currentDate = new Date(currentDateStr);
+        // Tarihten bir gün çıkararak önceki günü bul
+        currentDate.setDate(currentDate.getDate() - 1);
+        const previousDateStr = currentDate.toISOString().split('T')[0];
+
+        // Veritabanında önceki güne ait kaydı sorgula
+        const query = db.collection('sut_alimlari')
+            .where('sahipId', '==', sahipId)
+            .where('cariId', '==', producerId)
+            .where('tarih', '==', previousDateStr);
+
+        const snapshot = await query.get();
+
+        if (snapshot.empty) {
+            return null; // Önceki güne ait kayıt yoksa null döndür
+        }
+
+        const data = snapshot.docs[0].data();
+        // İlgili zaman dilimindeki (sabah/aksam) miktarı döndür
+        return data[timeSlot] !== undefined ? data[timeSlot] : null;
+
+    } catch (error) {
+        console.error("Önceki gün verisi alınırken hata:", error);
+        return null; // Hata durumunda null döndür
+    }
+}
+
+
+/**
+ * Miktar inputuna veri girildiğinde tetiklenen, önceki gün ile karşılaştırma
+ * yapan ve gerekirse uyarı gösteren ana fonksiyon.
+ */
+async function checkPreviousDayDifference() {
+    // Miktar alanındaki değeri al
+    const currentQuantity = parseFloat(String(quantityInput.value).replace(',', '.')) || 0;
+    // Eğer miktar 0 veya geçersizse fonksiyondan çık
+    if (currentQuantity <= 0) return;
+
+    // Mevcut üretici bilgilerini al
+    const currentProducer = routeProducers[currentProducerIndex];
+    if (!currentProducer) return;
+
+    const timeSlot = document.querySelector('input[name="time"]:checked').value;
+    const currentDateStr = collectionDateInput.value;
+
+    // Önceki günün miktarını veritabanından getir
+    const previousQuantity = await getPreviousDayQuantity(currentProducer.id, currentDateStr, timeSlot);
+
+    // Önceki gün verisi yoksa veya 0 ise karşılaştırma yapma
+    if (previousQuantity === null || previousQuantity <= 0) {
+        console.log("Karşılaştırma için önceki gün verisi bulunamadı.");
+        return;
+    }
+
+    const difference = Math.abs(currentQuantity - previousQuantity);
+    const percentageChange = (difference / previousQuantity) * 100;
+
+    // Fark %20'den fazlaysa uyarı göster
+    if (percentageChange > 20) {
+        const message = `DİKKAT!\n\nGirilen miktar (${currentQuantity.toFixed(1)} Lt), dünkü miktara (${previousQuantity.toFixed(1)} Lt) göre %${percentageChange.toFixed(0)} oranında farklı.\n\nYine de bu şekilde kaydetmek istiyor musunuz?`;
+        
+        const confirmation = confirm(message);
+
+        // Kullanıcı "İptal" derse, girilen miktarı temizle
+        if (!confirmation) {
+            quantityInput.value = '';
+            quantityInput.focus();
+        }
+    }
+}
 
 function editHistoryItem(sutAlimId, zaman) {
             const entry = fullHistoryForDate.find(item => item.sutAlimId === sutAlimId);
