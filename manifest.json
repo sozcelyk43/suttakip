@@ -1,12 +1,12 @@
 {
   "name": "Süt Takip Programı",
   "short_name": "Süt Takip",
-  "start_url": "/index.html",
+  "start_url": "/suttakip/index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2c3e50",
   "icons": [
-    { "src": "/icon-192x192.png", "type": "image/png", "sizes": "192x192" },
-    { "src": "/icon-512x512.png", "type": "image/png", "sizes": "512x512" }
+    { "src": "/suttakip/icon-192x192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/suttakip/icon-512x512.png", "type": "image/png", "sizes": "512x512" }
   ]
 }
