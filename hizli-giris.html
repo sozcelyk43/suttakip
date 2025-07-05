@@ -504,7 +504,7 @@ function jumpToProducer() {
             displayCurrentProducer();
         }
 
-// Lütfen mevcut renderHistory fonksiyonunu bununla değiştirin.
+// Lütfen mevcut renderHistory fonksiyonunu bu yeni versiyonla tamamen değiştirin.
 function renderHistory(dataToRender) {
     if (!historySection || !historyList || !sessionSummary) return;
 
@@ -533,40 +533,45 @@ function renderHistory(dataToRender) {
         const miktar = isSabah ? (item.sabah === undefined || item.sabah === null ? -1 : item.sabah) : (item.aksam === undefined || item.aksam === null ? -1 : item.aksam);
 
         if (miktar >= 0) { // Sadece o zaman dilimine ait giriş varsa listeye ekle
-            const toplamMiktar = item.toplam || 0;
             const birimFiyat = item.fiyat || 0;
+            const kayitTutari = miktar * birimFiyat; // Her bir kayıt için tutar hesaplandı
 
             sessionTotalMilk += miktar;
-            sessionTotalAmount += miktar * birimFiyat;
+            sessionTotalAmount += kayitTutari;
 
-            const zamanLabel = isSabah ? 'Sbh' : 'Akş';
+            const zamanLabel = isSabah ? 'Sabah' : 'Akşam';
             const editIcon = isSabah ? '☀️✏️' : '🌙✏️';
+            const editTitle = `${zamanLabel} Düzenle`;
 
             const listItem = document.createElement('li');
             listItem.className = 'history-item';
+            
+            // --- İSTEĞİNİZE GÖRE DÜZENLENEN SATIR YAPISI ---
             listItem.innerHTML = `
-                <span class="history-info">
-                    ${item.cariAdi} <strong>${toplamMiktar.toFixed(1)} Lt</strong> (${zamanLabel}: ${miktar.toFixed(1)} lt)
-                </span>
-                <span class="history-actions">
-                    <button class="btn-icon" onclick="editHistoryItem('${item.sutAlimId}', '${zaman}')" title="${isSabah ? 'Sabah' : 'Akşam'} Düzenle">${editIcon}</button>
+                <div class="history-info" style="flex-grow: 1; display: flex; justify-content: space-between; align-items: center; margin-right: 10px;">
+                    <span style="min-width: 120px; flex-shrink: 0;">${item.cariAdi}</span>
+                    <strong style="margin: 0 10px;">${zamanLabel}: ${miktar.toFixed(1)} Lt</strong>
+                    <span style="color: var(--success-color); font-weight: 500; min-width: 70px; text-align: right;">${kayitTutari.toFixed(2)} ₺</span>
+                </div>
+                <div class="history-actions">
+                    <button class="btn-icon" onclick="editHistoryItem('${item.sutAlimId}', '${zaman}')" title="${editTitle}">${editIcon}</button>
                     <button class="btn-icon btn-delete" onclick="deleteHistoryItem('${item.sutAlimId}', '${zaman}')" title="Sil">🗑️</button>
-                </span>
+                </div>
             `;
             historyList.appendChild(listItem);
         }
     });
 
+    // Oturum özeti (Toplamlar) kısmı aynı şekilde kalıyor.
     sessionSummary.innerHTML = `
-        <p><strong>${zaman === 'sabah' ? 'Sabah' : 'Akşam'} Toplam Süt:</strong> ${sessionTotalMilk.toFixed(1)} Lt</p>
-        <p><strong>Toplam Tutar:</strong> ${sessionTotalAmount.toFixed(2)} ₺</p>
+        <strong>${zaman === 'sabah' ? 'Sabah' : 'Akşam'} Toplam Süt:</strong> ${sessionTotalMilk.toFixed(1)} Lt
+        | <strong>Toplam Tutar:</strong> ${sessionTotalAmount.toFixed(2)} ₺
     `;
     
      if (historyList.children.length === 0) {
         historySection.style.display = 'none';
      }
 }
-
 
 // Lütfen mevcut deleteHistoryItem fonksiyonunu bununla değiştirin.
 async function deleteHistoryItem(sutAlimId, zaman) {
