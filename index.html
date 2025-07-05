@@ -624,8 +624,6 @@
 
     Chart.register(ChartDataLabels);
 
-// auth.onAuthStateChanged fonksiyonunu bu doğru versiyonla değiştirin:
-
 auth.onAuthStateChanged(async (user) => {
     if (user) {
         document.getElementById('logoutUserEmail').textContent = user.email;
@@ -675,6 +673,12 @@ auth.onAuthStateChanged(async (user) => {
 
 
 function initializeApp() {
+
+
+if (window.isAppInitialized) {        return;    }
+    window.isAppInitialized = true;
+
+
         const sidebarNav = document.getElementById('sidebarNav');
         const moduleSections = document.querySelectorAll('.main-content .module-section');
         const logoutButton = document.getElementById('logoutButton');
@@ -1696,6 +1700,116 @@ function generateRandomColors(count) {
     return colors;
 }
 
+
+async function renderGunlukSutGrafik() {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+
+    const ctx = document.getElementById('gunlukSutGrafik').getContext('2d');
+    if(gunlukSutunChartInstance) {
+        gunlukSutunChartInstance.destroy();
+    }
+
+    try {
+        const tarihStr = getTodayForInput();
+        const alimlarSnapshot = await db.collection('sut_alimlari').where('sahipId', '==', sahipId).where('tarih', '==', tarihStr).get();
+        
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+        if (alimlarSnapshot.empty) {
+            ctx.font = "16px Segoe UI";
+            ctx.fillStyle = "#666";
+            ctx.textAlign = "center";
+            ctx.fillText("Bugün için süt alım verisi bulunmuyor.", ctx.canvas.width / 2, ctx.canvas.height / 2);
+            return;
+        }
+
+        const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', sahipId).where('cariGrup', 'array-contains', 'üretici').get();
+        const kategoriMap = new Map();
+        carilerSnapshot.forEach(doc => {
+            kategoriMap.set(doc.id, doc.data().kategori || 'Belirtilmemiş');
+        });
+
+      const dataByKategori = {};
+        alimlarSnapshot.forEach(doc => {
+            const alim = doc.data();
+            // islemKaynagi 'tank-aktarim' ise bu kaydı atla
+            if (alim.islemKaynagi === 'tank-aktarim') {
+                return;
+            }
+
+            const kategori = kategoriMap.get(alim.cariId) || 'Tanımsız/Diğer';
+            
+            if (!dataByKategori[kategori]) {
+                dataByKategori[kategori] = 0;
+            }
+            
+            // --- DEĞİŞİKLİK BURADA ---
+            // 'alim.toplam' değerinin sayı olduğundan emin olarak toplama yapılıyor.
+            dataByKategori[kategori] += parseFloat(alim.toplam || 0);
+        });
+
+
+
+        const labels = Object.keys(dataByKategori);
+        const data = Object.values(dataByKategori);
+
+        // YENİ: Dinamik Renk Oluşturma Mantığı
+        let backgroundColors = [];
+        if (data.length > 0) {
+            const maxValue = Math.max(...data);
+            const minValue = Math.min(...data.filter(val => val > 0)); // 0'dan büyük en küçük değeri bul
+
+            backgroundColors = data.map(value => {
+                if (value === maxValue) {
+                    return 'rgba(40, 167, 69, 0.7)'; // Yeşil
+                } else if (value === minValue) {
+                    return 'rgba(220, 53, 69, 0.7)'; // Kırmızı
+                } else {
+                    return 'rgba(255, 193, 7, 0.7)'; // Sarı
+                }
+            });
+        }
+        
+        const maxValueForScale = data.length > 0 ? Math.max(...data) : 0;
+        const chartMax = maxValueForScale > 0 ? maxValueForScale * 1.15 : 100;
+
+        gunlukSutunChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Toplam Süt (Lt)',
+                    data: data,
+                    // GÜNCELLEME: Tek renk yerine dinamik renk dizisi kullanılıyor
+                    backgroundColor: backgroundColors,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'end',
+                        formatter: (value) => value.toFixed(1) + ' Lt',
+                        color: '#333',
+                        font: { weight: 'bold' }
+                    }
+                },
+                scales: { y: { beginAtZero: true, max: chartMax } }
+            }
+        });
+    } catch(error) {
+        console.error("Günlük süt grafiği oluşturulurken hata:", error);
+    }
+}
+
+
+
 async function renderAylikSutunGrafik() {
     const ayYil = document.getElementById('aylikChartAySecimi').value;
     const ctx = document.getElementById('aylikSutGrafik').getContext('2d');
@@ -1724,8 +1838,13 @@ async function renderAylikSutunGrafik() {
 
     try {
         const [year, month] = ayYil.split('-');
-        const startDateStr = new Date(year, month - 1, 1).toISOString().split('T')[0];
-        const endDateStr = new Date(year, month, 0).toISOString().split('T')[0];
+
+        // Saat dilimi (timezone) hatasını gideren doğru tarih formatlaması
+        const startDate = new Date(year, month - 1, 1);
+        const endDate = new Date(year, month, 0);
+        const pad = (num) => String(num).padStart(2, '0');
+        const startDateStr = `${startDate.getFullYear()}-${pad(startDate.getMonth() + 1)}-${pad(startDate.getDate())}`;
+        const endDateStr = `${endDate.getFullYear()}-${pad(endDate.getMonth() + 1)}-${pad(endDate.getDate())}`;
 
         const alimlarSnapshot = await db.collection('sut_alimlari')
             .where('sahipId', '==', sahipId)
@@ -1748,48 +1867,49 @@ async function renderAylikSutunGrafik() {
         const dataByKategori = {};
         alimlarSnapshot.forEach(doc => {
             const alim = doc.data();
-            if (kategoriMap.has(alim.cariId)) {
-                const kategori = kategoriMap.get(alim.cariId);
-                if (!dataByKategori[kategori]) {
-                    dataByKategori[kategori] = 0;
-                }
-                if (alim.islemKaynagi !== 'tank-aktarim') {
-                    dataByKategori[kategori] += alim.toplam;
-                }
+            if (alim.islemKaynagi === 'tank-aktarim') return;
+            
+            const kategori = kategoriMap.get(alim.cariId) || 'Tanımsız/Diğer';
+            if (!dataByKategori[kategori]) {
+                dataByKategori[kategori] = 0;
             }
+            dataByKategori[kategori] += parseFloat(alim.toplam || 0);
         });
 
-        const labels = Object.keys(dataByKategori);
-        const data = Object.values(dataByKategori);
+        // --- YENİ EKLENEN SIRALAMA KODU ---
+        // 1. Kategorileri ve toplamlarını bir diziye dönüştür. Örn: [['Kınık', 7823], ['Boğazköy', 5025]]
+        const sortedDataArray = Object.entries(dataByKategori);
 
-        // YENİ: Dinamik Renk Oluşturma Mantığı
+        // 2. Diziyi, süt miktarına göre (ikinci eleman) büyükten küçüğe doğru sırala.
+        sortedDataArray.sort((a, b) => b[1] - a[1]);
+
+        // 3. Sıralanmış diziden yeni 'labels' (etiketler) ve 'data' (veriler) dizilerini oluştur.
+        const labels = sortedDataArray.map(item => item[0]);
+        const data = sortedDataArray.map(item => item[1]);
+        // --- SIRALAMA KODU SONU ---
+        
         let backgroundColors = [];
         if (data.length > 0) {
-            const maxValue = Math.max(...data);
-            const minValue = Math.min(...data.filter(val => val > 0)); // 0'dan büyük en küçük değeri bul
-
+            // Renk mantığı artık sıralanmış veriye göre çalışacak. En soldaki bar her zaman en yüksek değerdir.
+            const maxValue = data[0]; // Dizinin ilk elemanı her zaman en büyüktür.
+            const minValue = data[data.length - 1]; // Son eleman en küçüktür.
             backgroundColors = data.map(value => {
-                if (value === maxValue) {
-                    return 'rgba(40, 167, 69, 0.7)'; // Yeşil
-                } else if (value === minValue) {
-                    return 'rgba(220, 53, 69, 0.7)'; // Kırmızı
-                } else {
-                    return 'rgba(255, 193, 7, 0.7)'; // Sarı
-                }
+                if (value === maxValue) { return 'rgba(40, 167, 69, 0.7)'; } // En yüksek yeşil
+                else if (value === minValue) { return 'rgba(220, 53, 69, 0.7)'; } // En düşük kırmızı
+                else { return 'rgba(255, 193, 7, 0.7)'; } // Aradakiler sarı
             });
         }
         
-        const maxValueForScale = data.length > 0 ? Math.max(...data) : 0;
+        const maxValueForScale = data.length > 0 ? data[0] : 0; // En yüksek değer
         const chartMax = maxValueForScale > 0 ? maxValueForScale * 1.15 : 100;
         
         aylikSutunChartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: labels,
+                labels: labels, // Sıralanmış etiketler
                 datasets: [{
                     label: 'Toplam Süt (Lt)',
-                    data: data,
-                    // GÜNCELLEME: Tek renk yerine dinamik renk dizisi kullanılıyor
+                    data: data, // Sıralanmış veriler
                     backgroundColor: backgroundColors,
                     borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 1
@@ -2088,106 +2208,6 @@ async function populateYemSelect(selectElement, defaultText = "Yem Seçiniz...")
     }
 }
 
-
-async function renderGunlukSutGrafik() {
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
-
-    const ctx = document.getElementById('gunlukSutGrafik').getContext('2d');
-    if(gunlukSutunChartInstance) {
-        gunlukSutunChartInstance.destroy();
-    }
-
-    try {
-        const tarihStr = getTodayForInput();
-        const alimlarSnapshot = await db.collection('sut_alimlari').where('sahipId', '==', sahipId).where('tarih', '==', tarihStr).get();
-        
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-        if (alimlarSnapshot.empty) {
-            ctx.font = "16px Segoe UI";
-            ctx.fillStyle = "#666";
-            ctx.textAlign = "center";
-            ctx.fillText("Bugün için süt alım verisi bulunmuyor.", ctx.canvas.width / 2, ctx.canvas.height / 2);
-            return;
-        }
-
-        const carilerSnapshot = await db.collection('cariler').where('sahipId', '==', sahipId).where('cariGrup', 'array-contains', 'üretici').get();
-        const kategoriMap = new Map();
-        carilerSnapshot.forEach(doc => {
-            kategoriMap.set(doc.id, doc.data().kategori || 'Belirtilmemiş');
-        });
-
-        const dataByKategori = {};
-        alimlarSnapshot.forEach(doc => {
-            const alim = doc.data();
-            if (kategoriMap.has(alim.cariId)) {
-                const kategori = kategoriMap.get(alim.cariId);
-                if (!dataByKategori[kategori]) {
-                    dataByKategori[kategori] = 0;
-                }
-                if (alim.islemKaynagi !== 'tank-aktarim') {
-                    dataByKategori[kategori] += alim.toplam;
-                }
-            }
-        });
-
-        const labels = Object.keys(dataByKategori);
-        const data = Object.values(dataByKategori);
-
-        // YENİ: Dinamik Renk Oluşturma Mantığı
-        let backgroundColors = [];
-        if (data.length > 0) {
-            const maxValue = Math.max(...data);
-            const minValue = Math.min(...data.filter(val => val > 0)); // 0'dan büyük en küçük değeri bul
-
-            backgroundColors = data.map(value => {
-                if (value === maxValue) {
-                    return 'rgba(40, 167, 69, 0.7)'; // Yeşil
-                } else if (value === minValue) {
-                    return 'rgba(220, 53, 69, 0.7)'; // Kırmızı
-                } else {
-                    return 'rgba(255, 193, 7, 0.7)'; // Sarı
-                }
-            });
-        }
-        
-        const maxValueForScale = data.length > 0 ? Math.max(...data) : 0;
-        const chartMax = maxValueForScale > 0 ? maxValueForScale * 1.15 : 100;
-
-        gunlukSutunChartInstance = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Toplam Süt (Lt)',
-                    data: data,
-                    // GÜNCELLEME: Tek renk yerine dinamik renk dizisi kullanılıyor
-                    backgroundColor: backgroundColors,
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    datalabels: {
-                        anchor: 'end',
-                        align: 'end',
-                        formatter: (value) => value.toFixed(1) + ' Lt',
-                        color: '#333',
-                        font: { weight: 'bold' }
-                    }
-                },
-                scales: { y: { beginAtZero: true, max: chartMax } }
-            }
-        });
-    } catch(error) {
-        console.error("Günlük süt grafiği oluşturulurken hata:", error);
-    }
-}
 
 
 async function handleKullaniciKaydet(event) {
