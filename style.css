@@ -146,69 +146,42 @@
 	.autocomplete-box div {    padding: 10px;    cursor: pointer;    border-bottom: 1px solid #eee;}
 	.autocomplete-box div:last-child {    border-bottom: none;}
 	.autocomplete-box div:hover {    background-color: #f2f2f2;}
+/* Aylık Yem Raporu Tablosu için İyileştirmeler */
+#yemRaporuAlani .report-table {
+    font-size: 13px; /* Yazı tipini biraz büyütelim, okunması kolay olsun */
+    white-space: nowrap; /* Satırların aşağı kaymasını engelle, düzgün yatay kaydırma için */
+    border-spacing: 0;
+}
 
-/* ----- Cari Hesap Özeti Filtreleri için Mobil Uyum Düzenlemesi ----- */
+#yemRaporuAlani .report-table th,
+#yemRaporuAlani .report-table td {
+    padding: 8px 10px; /* Hücre içi boşlukları ayarla */
+}
+/* ----- Aylık Yem Raporu Filtreleri için Eşit Genişlik Düzenlemesi ----- */
 
-/* Masaüstü (Geniş Ekran) Görünümü */
-.rapor-filtre-grid {
+.yem-raporu-filtre-kapsayici {
     display: grid;
-    /* Cari Ara, Ay ve Buton için 3 sütunlu bir yapı */
-    grid-template-columns: 2fr 1fr auto; 
-    align-items: end;
-    gap: 15px; /* Elemanlar arası boşluk */
-    border: 1px solid #eee;
-    padding: 15px;
-    border-radius: 8px;
+    /* 5 eleman için 5 eşit genişlikte sütun oluşturur */
+    grid-template-columns: repeat(5, 1fr);
+    align-items: end; /* Elemanları alt çizgide hizalar */
+    gap: 10px; /* Elemanlar arası boşluk */
     margin-bottom: 20px;
 }
 
-/* Mobil (Dar Ekran) Görünümü */
-@media (max-width: 768px) {
-    .rapor-filtre-grid {
-        /* Tüm elemanları tek bir sütunda alt alta göster */
-        grid-template-columns: 1fr; 
-        align-items: stretch; /* Elemanların genişliğini eşitle */
-    }
-
-    .rapor-filtre-grid .btn {
-        width: 100%; /* Butonun tam genişlik kaplamasını sağla */
-        padding: 12px;
-        margin-top: 10px;
-    }
+/* Kapsayıcı içindeki butonların tam genişlikte olmasını sağlar */
+.yem-raporu-filtre-kapsayici .btn {
+    width: 100%;
+    margin-top: 0; /* Butonların üstündeki varsayılan boşluğu kaldırır */
+    padding: 10px 5px; /* Buton iç boşluğunu ayarlar */
+    height: 45px;
 }
 
-/* ----- Aylık Süt Raporu Filtreleri için Mobil Uyum Düzenlemesi ----- */
-
-/* Masaüstü (Geniş Ekran) Görünümü */
-.sut-raporu-filtre-grid {
-    display: grid;
-    /* Masaüstü için sütun düzeni */
-    grid-template-columns: 1.5fr 2fr 1fr auto; 
-    align-items: end;
-    gap: 15px; /* Elemanlar arası boşluk */
-    margin-bottom: 20px;
-}
-
-/* Mobil (Dar Ekran) Görünümü */
-@media (max-width: 768px) {
-    .sut-raporu-filtre-grid {
-        /* Tüm elemanları tek bir sütunda alt alta göster */
+/* Dar Ekran (Mobil/Tablet) Görünümü */
+@media (max-width: 992px) {
+    .yem-raporu-filtre-kapsayici {
+        /* Tüm elemanları tek bir sütunda alt alta gösterir */
         grid-template-columns: 1fr; 
     }
 }
 
-.tahsilat-filtre-grid {
-    display: grid;
-    /* Masaüstü için sütun düzeni */
-    grid-template-columns: 1fr 1fr 2fr 1fr 1fr; 
-    align-items: end;
-    gap: 15px;
-}
 
-/* Mobil (Dar Ekran) Görünümü */
-@media (max-width: 768px) {
-    .tahsilat-filtre-grid {
-        /* Tüm elemanları tek bir sütunda alt alta göster */
-        grid-template-columns: 1fr; 
-    }
-}

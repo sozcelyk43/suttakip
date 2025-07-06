@@ -45,12 +45,12 @@
                     <div class="stat-card"><h4>📈 Bugünkü Toplam Süt</h4><p><span id="dashToplamSut">0.00</span> Lt</p>
 				<small id="toplamSutTarihAraligi" style="display: block; font-weight: bold;"></small><small id="dunKarsilastirma">(Düne göre...)</small></div>
                     <div class="stat-card"><h4>👥 Aktif Müşteri Sayısı</h4><p><span id="dashAktifMusteri">0</span></p></div>
-	            <div class="stat-card" id="bakiyeDurumKarti"><h4>💰 Toplam Bakiye</h4><p><span id="dashToplamBakiye">0,00</span></p>
+	            <div class="stat-card" id="bakiyeDurumKarti"><h4>💰 Toplam Bakiye</h4><p><span id="dashToplamBakiye">0,00</span> ₺</p>
 				<small id="bakiyeDurumUyarisi" style="font-weight: bold;"></small></div>
                    <div class="stat-card" style="border-left: 5px solid #3498db; grid-column: span 1;"><h4>Bu Ayki Süt Üretimi</h4><p style="font-size: 2.2em; color: #2980b9;">
 				<span id="dashBuAykiToplamSut">0</span> Lt</p><small>(<span id="aylikGunOrtalamasi">0</span> Lt/Gün Ort.)</small></div>
                    <div class="stat-card" style="border-left: 5px solid #1abc9c; grid-column: span 1;"><h4>Üretimin Parasal Değeri</h4><p style="font-size: 2.2em; color: #16a085;">
-				<span id="dashBuAykiSutDegeri">0,00</span></p><small>(Potansiyel Gelir)</small></div>
+				<span id="dashBuAykiSutDegeri">0,00</span> ₺</p><small>(Potansiyel Gelir)</small></div>
                    <div class="stat-card" style="border-left: 5px solid #f39c12;"><h4>📦 Tanımlı Yem Sayısı</h4><p style="font-size: 2.2em; color: #d35400;">
 				<span id="dashYemSayisi">0</span></p><small>(Toplam Çeşit)</small></div>                </div>
 
@@ -382,11 +382,25 @@
             <div class="module-header"><h2>💳 Tahsilat ve Ödemeler</h2></div>
             <div class="container">
                  <div class="form-section"><h3><span id="odemeFormBaslik">Yeni Hareket Girişi</span></h3>
-<form id="odemeForm" action="#">
-    <input type="hidden" id="odemeEditId">
-    <div class="form-grid tahsilat-filtre-grid">
 
-        <div class="form-group"><label for="islemTuru">İşlem Türü:</label><select id="islemTuru" required><option value="odeme">Tahsilat</option><option value="tahsilat">Ödeme</option></select></div>
+		<form id="odemeForm" action="#">
+    <input type="hidden" id="odemeEditId">
+    <div class="form-grid">
+        <div class="form-group">
+
+
+<label for="islemTuru">İşlem Türü:</label>
+
+
+<select id="islemTuru" required>
+    <option value="odeme">Tahsilat</option>
+    <option value="tahsilat">Ödeme</option>
+</select>
+
+
+</div>
+
+
         <div class="form-group"><label for="odemeTarih">Tarih:</label><input type="date" id="odemeTarih" required></div>
      <div class="form-group" style="position: relative;">
     <label for="odemeCariAramaInput">Cari:</label>
@@ -428,8 +442,7 @@
         <div class="report-section">
             <h3 class="dont-print">Cari Hesap Özeti</h3>
             
-       <div class="form-grid dont-print rapor-filtre-grid">
-
+          <div class="form-grid dont-print" style="grid-template-columns: 2fr 2fr 1fr auto; align-items: end; gap: 10px;">
 <div class="form-group" style="position: relative;">
     <label for="raporCariAramaInput">Cari Ara:</label>
     <input type="text" id="raporCariAramaInput" placeholder="Aramak için yazın..." autocomplete="off">
@@ -467,8 +480,7 @@
     <div class="container">
         <div class="report-section">
             <h3>Detaylı Süt Alım Raporu</h3>
-            <div class="form-grid dont-print sut-raporu-filtre-grid">
-
+            <div class="form-grid dont-print" style="grid-template-columns: 1fr 2fr 1fr auto; align-items: end; gap: 10px;">
     <div class="form-group" style="position: relative;">
     <label for="sutRaporuCariAramaInput">Cari Seçin:</label>
     <input type="text" id="sutRaporuCariAramaInput" class="form-control" placeholder="Üretici adı yazarak arayın..." autocomplete="off">
@@ -516,10 +528,16 @@
     <div class="container">
         <div class="report-section">
            <h3>Yem Satış Analizi</h3>
-           <div class="form-grid dont-print" style="grid-template-columns: 1fr auto auto auto; align-items: end; gap: 10px;">
-    <div class="form-group">
+<div class="form-grid dont-print yem-raporu-filtre-kapsayici">    <div class="form-group">
         <label for="yemRaporuAySecimi">Ay Seçin:</label>
         <input type="month" id="yemRaporuAySecimi">
+    </div>
+    
+    <div class="form-group">
+        <label for="yemRaporuKoySecimi">Köy Filtrele:</label>
+        <select id="yemRaporuKoySecimi">
+            <option value="">Tüm Köyler</option>
+        </select>
     </div>
     <button type="button" class="btn btn-info" id="yemAdetRaporuBtn" style="height:45px;">Adet Bazlı Rapor</button>
     <button type="button" class="btn btn-primary" id="yemDetayliSatisRaporuBtn" style="height:45px;">Satış Raporu (Tutar)</button>
@@ -882,9 +900,12 @@ if (cariAraInput) {cariAraInput.addEventListener('input', function () {const ara
     window.cariDataMap = new Map();
 
     if (menuToggleBtn && sidebar) {
-        menuToggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'))
-
-
+        menuToggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+        sidebar.addEventListener('click', (event) => {
+            if (window.innerWidth <= 1024 && event.target.closest('a.nav-link')) {
+                sidebar.classList.add('collapsed');
+            }
+        });
     }
 
     applyRolePermissions();
@@ -906,11 +927,6 @@ if (cariAraInput) {cariAraInput.addEventListener('input', function () {const ara
         const activeSection = document.getElementById(targetId);
         if (activeSection) activeSection.style.display = 'block';
 	if (activeSection) activeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-if (window.innerWidth <= 1024) {
-            sidebar.classList.add('collapsed');
-        }
-
         if (targetId === 'dashboard') { updateDashboardStats(); updateMonthlyStats(); }
         if (targetId === 'cari-yonetimi') { populateCariKategoriFiltre(); renderCariListesi(); populateCariKategoriSelect(document.getElementById('cariKategori')); generateNextCariKodu(); }
         if (targetId === 'sut-alimi') { if (topluGirisTarihInput) topluGirisTarihInput.value = getTodayForInput(); populateCariKategoriSelect(topluGirisKategoriSelect); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); }
@@ -918,7 +934,35 @@ if (window.innerWidth <= 1024) {
         if (targetId === 'tahsilat-ve-odemeler') { populateCariSelect(document.getElementById('odemeYapilanTedarikci')); renderOdemeListesi(); }
         if (targetId === 'hesap-ozeti') { populateCariSelect(document.getElementById('raporCariSecimi')); if (!document.getElementById('raporTarihAraligi').value) { document.getElementById('raporTarihAraligi').value = getMonthYearForInput(); } const aramaInput = document.getElementById('raporCariAramaInput'); if (aramaInput) aramaInput.value = ''; const tumSecenekler = document.getElementById('raporCariSecimi').options; for (let i = 0; i < tumSecenekler.length; i++) { tumSecenekler[i].style.display = ""; } }
         if (targetId === 'sut-alim-raporu') { populateCariSelect(document.getElementById('sutRaporuTedarikciSecimi'), 'üretici'); populateCariKategoriSelect(document.getElementById('sutRaporuKategoriSecimi'), "Tümü"); const baslangicTarihiInput = document.getElementById('sutRaporuBaslangicTarihi'); const bitisTarihiInput = document.getElementById('sutRaporuBitisTarihi'); if (baslangicTarihiInput && !baslangicTarihiInput.value && bitisTarihiInput && !bitisTarihiInput.value) { const today = new Date(); const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1); const formatForInput = (date) => { const year = date.getFullYear(); const month = String(date.getMonth() + 1).padStart(2, '0'); const day = String(date.getDate()).padStart(2, '0'); return `${year}-${month}-${day}`; }; baslangicTarihiInput.value = formatForInput(firstDayOfMonth); bitisTarihiInput.value = formatForInput(today); } }
-        if (targetId === 'aylik-yem-raporu') { if (!document.getElementById('yemRaporuAySecimi').value) { document.getElementById('yemRaporuAySecimi').value = getMonthYearForInput(); } }
+
+if (targetId === 'aylik-yem-raporu') {
+    // Ay seçimi için varsayılan değeri ayarla
+    if (!document.getElementById('yemRaporuAySecimi').value) {
+        document.getElementById('yemRaporuAySecimi').value = getMonthYearForInput();
+    }
+
+    // YENİ EKLENEN KÖY FİLTRESİNİ DOLDURMA KODU
+    const koySelect = document.getElementById('yemRaporuKoySecimi');
+    // Eğer liste daha önce doldurulmamışsa (sadece 1 seçenek varsa)
+    if (koySelect.options.length <= 1) {
+        db.collection('cari_kategorileri').where("sahipId", "==", sahipId).orderBy('ad').get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    const kategori = doc.data();
+                    const option = document.createElement('option');
+                    option.value = kategori.ad;
+                    option.textContent = kategori.ad;
+                    koySelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error("Köy/Kategori filtresi yüklenirken hata:", error);
+            });
+    }
+}
+
+
+
         if (targetId === 'dinamik-sut-raporu') { populatePeriodSelect(); populateCariKategoriSelect(document.getElementById('karneRaporuKategoriSecimi'), "Tüm Kategoriler"); }
 	if (targetId === 'hareket-dokumu') {
     populateCariSelect(document.getElementById('hd-cari-secimi'), null, "Tüm Cariler");
@@ -1116,7 +1160,7 @@ if (sutRaporuCariAramaInput) {
     cariListesiYazdirBtn?.addEventListener('click', () => handleYazdir('cari-list-printable-area'));
     document.getElementById('raporYazdirBtn')?.addEventListener('click', () => handleYazdir('report-content-to-print'));
     document.getElementById('sutRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('sut-alim-raporu'));
-    document.getElementById('yemRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('aylik-yem-raporu'));
+    document.getElementById('yemRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('yemRaporuAlani', 'landscape'));
 document.getElementById('karneYazdirBtn')?.addEventListener('click', () => handleYazdir('dinamikRaporContainer', 'landscape'));
     document.getElementById('karnePdfBtn')?.addEventListener('click', () => exportTableToPdf('dinamikRaporContainer', 'sut_karnesi', 'karnePdfBtn'));
     document.getElementById('karneXlsxBtn')?.addEventListener('click', () => exportTableToExcel('dinamikRaporContainer', 'sut_karnesi'));
@@ -2190,6 +2234,7 @@ async function deleteCariKategori(id) {
 
 async function populateCariKategoriFiltre() { 
     const selectElement = document.getElementById('cariKategoriFiltre');
+    const yemRaporuKoySecimi = document.getElementById('yemRaporuKoySecimi');
     const currentUser = auth.currentUser;
     if (!currentUser) return;
     try {
@@ -2967,8 +3012,8 @@ async function renderOdemeListesi() {
             const cariAdi = window.cariDataMap.get(islem.cariId)?.adiSoyadi || 'Bilinmiyor';
             
             let islemTuruText = islem.islemTuru;
-            if(islem.islemTuru === 'odeme') islemTuruText = 'Ödeme';
-            if(islem.islemTuru === 'tahsilat') islemTuruText = 'Tahsilat';
+           if(islem.islemTuru === 'odeme') islemTuruText = 'Tahsilat'; 
+if(islem.islemTuru === 'tahsilat') islemTuruText = 'Ödeme';   
             if(islem.islemTuru === 'borc') islemTuruText = 'Açılış Borcu';
             if(islem.islemTuru === 'alacak') islemTuruText = 'Açılış Alacağı';
 
@@ -3767,6 +3812,7 @@ async function handleYemPivotRaporu(reportType) {
 
         if (satisSnapshot.empty) {
             raporAlani.innerHTML = '<h4>Bu ay için yem satışı bulunmuyor.</h4>';
+            toggleReportButtons('yemRaporu', true);
             return;
         }
 
@@ -3787,16 +3833,23 @@ async function handleYemPivotRaporu(reportType) {
                 if (value.toplamMiktar > 0) ortalamaMaliyetMap.set(key, value.toplamTutar / value.toplamMiktar);
             });
         }
+const secilenKoy = document.getElementById('yemRaporuKoySecimi').value; // Seçilen köyün değerini al
 
         const reportData = new Map();
         const yemlerInReport = new Set();
         satisSnapshot.forEach(doc => {
             const satis = doc.data();
+            const cariInfo = cariMap.get(satis.cariId);
+            if (!cariInfo) return; // Cari bulunamazsa bu satışı atla
+  if (secilenKoy && cariInfo.kategori !== secilenKoy) {
+        return;
+    }
             yemlerInReport.add(satis.yemId);
 
             if (!reportData.has(satis.cariId)) {
                 reportData.set(satis.cariId, {
-                    cariAdi: cariMap.get(satis.cariId)?.adiSoyadi || 'Bilinmeyen Cari',
+                    cariAdi: cariInfo.adiSoyadi || 'Bilinmeyen Cari',
+                    kategori: cariInfo.kategori || '-', // YENİ: Kategori (Köy) bilgisi eklendi
                     yemler: new Map(),
                     musteriToplamSatis: 0,
                     musteriToplamKar: 0,
@@ -3833,7 +3886,10 @@ async function handleYemPivotRaporu(reportType) {
         let tableHTML = `<h3 class="print-only print-title" style="text-align:center;">${reportTitle} - ${formatMonthYear(ayYil)}</h3>`;
         tableHTML += `<table class="report-table"><thead>`;
         
-        let headerRow1 = `<tr><th rowspan="${reportType === 'adet' ? '1' : '2'}" style="vertical-align: middle;">Müşteri Adı</th>`;
+        const rowSpan = reportType === 'adet' ? '1' : '2';
+        // YENİ: Köy sütunu için başlık eklendi
+        let headerRow1 = `<tr><th rowspan="${rowSpan}" style="vertical-align: middle;">Müşteri Adı</th><th rowspan="${rowSpan}" style="vertical-align: middle;">Köy</th>`;
+        
         sortedYemList.forEach(yemId => {
             const yemAdi = yemMap.get(yemId)?.ad || 'Bilinmeyen';
             let colSpan = (reportType === 'adet') ? 1 : (reportType === 'satis' ? 3 : 5);
@@ -3841,7 +3897,7 @@ async function handleYemPivotRaporu(reportType) {
         });
         
         let lastColTitle = (reportType === 'adet') ? 'Üretici Toplam (Adet)' : (reportType === 'satis' ? 'Müşteri Toplamı' : 'Müşteri Toplam Kârı');
-        headerRow1 += `<th rowspan="${reportType === 'adet' ? '1' : '2'}" style="vertical-align: middle;">${lastColTitle}</th></tr>`;
+        headerRow1 += `<th rowspan="${rowSpan}" style="vertical-align: middle;">${lastColTitle}</th></tr>`;
         
         let headerRow2 = '<tr>';
         if(reportType !== 'adet') {
@@ -3860,17 +3916,18 @@ async function handleYemPivotRaporu(reportType) {
         const sortedCariler = Array.from(reportData.values()).sort((a,b) => a.cariAdi.localeCompare(b.cariAdi));
 
         sortedCariler.forEach(cariData => {
-            tableHTML += `<tr><td>${cariData.cariAdi}</td>`;
+            // YENİ: Köy hücresi satıra eklendi
+            tableHTML += `<tr><td>${cariData.cariAdi}</td><td>${cariData.kategori}</td>`;
             sortedYemList.forEach(yemId => {
                 const yemSatis = cariData.yemler.get(yemId);
                 if (yemSatis) {
-                    const ortSatisFiyati = yemSatis.toplamSatis / yemSatis.adet;
+                    const ortSatisFiyati = yemSatis.adet > 0 ? yemSatis.toplamSatis / yemSatis.adet : 0;
                     const alisFiyati = ortalamaMaliyetMap.get(yemId) || 0;
                     const birimKar = ortSatisFiyati - alisFiyati;
 
                     if (reportType === 'adet') tableHTML += `<td>${yemSatis.adet}</td>`;
                     else if (reportType === 'satis') tableHTML += `<td>${yemSatis.adet}</td><td>${formatCurrency(ortSatisFiyati)}</td><td>${formatCurrency(yemSatis.toplamSatis)}</td>`;
-                    else tableHTML += `<td>${yemSatis.adet}</td><td>${formatCurrency(ortSatisFiyati)}</td><td>${formatCurrency(alisFiyati)}</td><td 							style="color:green;">${formatCurrency(birimKar)}</td><td style="color:green; font-weight:bold;">${formatCurrency(yemSatis.toplamKar)}</td>`;
+                    else tableHTML += `<td>${yemSatis.adet}</td><td>${formatCurrency(ortSatisFiyati)}</td><td>${formatCurrency(alisFiyati)}</td><td style="color:green;">${formatCurrency(birimKar)}</td><td style="color:green; font-weight:bold;">${formatCurrency(yemSatis.toplamKar)}</td>`;
 
                     if (!genelToplamlar.has(yemId)) genelToplamlar.set(yemId, { adet: 0, toplamSatis: 0, toplamKar: 0 });
                     const toplam = genelToplamlar.get(yemId);
@@ -3879,7 +3936,7 @@ async function handleYemPivotRaporu(reportType) {
                     toplam.toplamKar += yemSatis.toplamKar;
                 } else {
                     let colSpan = (reportType === 'adet') ? 1 : (reportType === 'satis' ? 3 : 5);
-                    for (let i = 0; i < colSpan; i++) tableHTML += `<td>-</td>`;
+                    for(let i = 0; i < colSpan; i++) tableHTML += `<td>-</td>`;
                 }
             });
             let musteriToplam = cariData.musteriToplamAdet;
@@ -3888,7 +3945,8 @@ async function handleYemPivotRaporu(reportType) {
             tableHTML += `<td style="font-weight:bold;">${musteriToplam}</td></tr>`;
         });
         
-        tableHTML += `</tbody><tfoot><tr class="report-totals-row"><td><strong>Genel Toplam</strong></td>`;
+        // YENİ: Köy sütunu eklendiği için colspan 2 oldu
+        tableHTML += `</tbody><tfoot><tr class="report-totals-row"><td colspan="2"><strong>Genel Toplam</strong></td>`;
         let sonGenelToplam = 0;
         sortedYemList.forEach(yemId => {
             const toplam = genelToplamlar.get(yemId);
@@ -3898,7 +3956,7 @@ async function handleYemPivotRaporu(reportType) {
                 else { tableHTML += `<td><strong>${toplam.adet}</strong></td><td></td><td></td><td></td><td><strong style="color:green;">${formatCurrency(toplam.toplamKar)}</strong></td>`; sonGenelToplam += toplam.toplamKar; }
             } else {
                 let colSpan = (reportType === 'adet') ? 1 : (reportType === 'satis' ? 3 : 5);
-                for (let i = 0; i < colSpan; i++) tableHTML += `<td></td>`;
+                for(let i = 0; i < colSpan; i++) tableHTML += `<td></td>`;
             }
         });
         tableHTML += `<td><strong>${(reportType === 'adet') ? sonGenelToplam : formatCurrency(sonGenelToplam)}</strong></td></tr>`;
@@ -4396,36 +4454,40 @@ function handleYazdir(elementId, orientation = 'portrait') {
     if (!printElement) {        console.error("Yazdırılacak alan bulunamadı:", elementId);        return;    }
     const contentToPrint = printElement.cloneNode(true);
     contentToPrint.querySelectorAll('.dont-print, .list-header-with-filter').forEach(el => el.remove());
-    const printStyles = `
-        @page {size: A4 ${orientation};margin: 1.5cm;}
-        body {font-family: Arial, Helvetica, sans-serif;font-size: 12px;line-height: 1.3;margin: 0;}
-        h1 {
-    font-size: 10pt; /* Ana başlığı küçülttük */
-    font-weight: normal;
-    color: #666;
-    margin-bottom: 2px;
-    text-align: center;
-}
-h4 {
-    font-size: 14pt; /* Müşteri adının olduğu başlığı büyüttük */
-    font-weight: bold;
-    color: #000;
-    margin-bottom: 15px;
-    text-align: center;
-}
-h5 {
-    text-align: left;
-    margin: 15px 0 8px 0;
-    border-bottom: 1px solid #ccc;
-    padding-bottom: 4px;
-}
-        table {width: 100%;border-collapse: collapse;margin-top: 10px;}
-        th, td {border: 1px solid #ccc;padding: 5px;text-align: left;}
-        th {font-weight: bold;background-color: #f2f2f2;}
-        hr {border: 0;border-top: 1px dashed #ccc;margin: 5px 0;}
-        .final-summary p {display: flex;margin: 2px 0;padding: 2px 4px;}
-        .final-summary p > span:last-child,.final-summary p > strong:last-child {margin-left: auto;padding-left: 20px;}
-    `;
+    
+const printStyles = `
+    @page {
+        size: A4 ${orientation};
+        margin: 1cm; /* Kenar boşluklarını daralttık */
+    }
+    body { 
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 8pt; /* Yazı tipini küçülterek daha fazla veri sığmasını sağladık */
+        line-height: 1.2;
+        -webkit-print-color-adjust: exact; /* Arka plan renklerinin de yazdırılmasını sağlar */
+    }
+    h3 {
+        font-size: 12pt;
+    }
+    table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        margin-top: 5px;
+    }
+    th, td { 
+        border: 1px solid #666; 
+        padding: 3px 4px; /* Hücre içi boşlukları azalttık */
+        text-align: left;
+    }
+    th { 
+        font-weight: bold;
+        background-color: #f2f2f2;
+    }
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+`;
+
     const iframe = document.createElement('iframe');
     iframe.id = 'print-iframe';
     iframe.style.display = 'none';
