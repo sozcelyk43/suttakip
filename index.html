@@ -471,10 +471,14 @@
         <div class="report-section">
             <h3>Detaylı Süt Alım Raporu</h3>
             <div class="form-grid dont-print" style="grid-template-columns: 1fr 2fr 1fr auto; align-items: end; gap: 10px;">
-    <div class="form-group">
-        <label for="sutRaporuTedarikciSecimi">Cari Seçin:</label>
-        <select id="sutRaporuTedarikciSecimi"><option value="">Seçiniz...</option></select>
-    </div>
+    <div class="form-group" style="position: relative;">
+    <label for="sutRaporuCariAramaInput">Cari Seçin:</label>
+    <input type="text" id="sutRaporuCariAramaInput" class="form-control" placeholder="Üretici adı yazarak arayın..." autocomplete="off">
+    <div id="sutRaporuCariSuggestions" class="autocomplete-box"></div>
+</div>
+<div class="form-group" style="display: none;">
+    <select id="sutRaporuTedarikciSecimi"><option value="">Seçiniz...</option></select>
+</div>
     <div class="form-group">
         <label>Tarih Aralığı Seçin:</label>
         <div style="display: flex; gap: 10px;">
@@ -731,7 +735,6 @@
 auth.onAuthStateChanged(async (user) => {
     if (user) {
         document.getElementById('logoutUserEmail').textContent = user.email;
-
         currentUserId = user.uid;
         try {
             const userDoc = await db.collection('kullanicilar').doc(currentUserId).get();
@@ -739,39 +742,20 @@ auth.onAuthStateChanged(async (user) => {
                 const userData = userDoc.data();
                 currentUserRole = userData.rol;
                 sahipId = userData.sahipId;
-
-                if (currentUserRole === 'admin' && !sahipId) {
-                    sahipId = currentUserId;
-                }
-                if (!sahipId) {
-                    alert('Kullanıcı profilinizde "sahipId" alanı bulunamadı. Lütfen yöneticinizle iletişime geçin.');
-                    handleLogout();
-                    return;
-                }
+                if (currentUserRole === 'admin' && !sahipId) {sahipId = currentUserId;}
+                if (!sahipId) {alert('Kullanıcı profilinizde "sahipId" alanı bulunamadı. Lütfen yöneticinizle iletişime geçin.');handleLogout();return;}
 			isAppInitialized = true;
-                 if (currentUserRole === 'calisan') {
-                    window.location.href = 'hizli-giris.html';
-                    return; 
-                }
-
+                 if (currentUserRole === 'calisan') {window.location.href = 'hizli-giris.html';return;}
                 initializeApp();
-            } else {
-                alert("Giriş başarılı ancak kullanıcı profili veritabanında bulunamadı.");
-                handleLogout();
-            }
-    } catch (error) {
-                console.error("Kullanıcı profili alınırken hata:", error);
+            } else {alert("Giriş başarılı ancak kullanıcı profili veritabanında bulunamadı.");handleLogout();}
+    } catch (error) {console.error("Kullanıcı profili alınırken hata:", error);
                 alert(`Uygulama başlatılamadı. Veritabanı hatası oluştu.\n\nLÜTFEN BU MESAJIN EKRAN GÖRÜNTÜSÜNÜ ALIN VEYA KOPYALAYIN.\n\nTeknik Detay: ${error.message}`);
-                handleLogout();
-            }
-    } else {
-        window.location.href = 'login.html';
-    }
+                handleLogout();}
+    } else {window.location.href = 'login.html';}
 });
 
 function initializeApp() {
-    if (window.isAppInitialized) {return;}
-    window.isAppInitialized = true;
+    if (window.isAppInitialized) {return;}window.isAppInitialized = true;
 
     const sidebarNav = document.getElementById('sidebarNav');
     const moduleSections = document.querySelectorAll('.main-content .module-section');
@@ -836,21 +820,11 @@ if (odemeCariAramaInput) {
         const query = this.value.toLowerCase();
         suggestionsBox.innerHTML = '';
         suggestionsBox.style.display = 'none';
-
-        if (query.length < 2) { 
-            cariSelect.value = "";
-            cariSelect.dispatchEvent(new Event('change'));
-            return;
-        }
-
+        if (query.length < 2) {cariSelect.value = "";cariSelect.dispatchEvent(new Event('change'));return;}
         debounceTimer = setTimeout(async () => {
             const matches = [];
             window.cariDataMap.forEach((cari, id) => {
-                if (cari.adiSoyadi && cari.adiSoyadi.toLowerCase().includes(query)) {
-                    matches.push({ id: id, adi: cari.adiSoyadi });
-                }
-            });
-
+                if (cari.adiSoyadi && cari.adiSoyadi.toLowerCase().includes(query)) {matches.push({ id: id, adi: cari.adiSoyadi });}});
             if (matches.length > 0) {
                 const bakiyePromises = matches.map(match => calculateCariBakiyeDetayli(match.id));
                 const bakiyeler = await Promise.all(bakiyePromises);
@@ -878,27 +852,13 @@ matches.slice(0, 10).forEach((match, index) => {
             }
         }, 400); 
     });
-    odemeCariAramaInput.addEventListener('blur', function() {
-        setTimeout(() => {
-            suggestionsBox.style.display = 'none';
-        }, 200);
-    });
-}
-
-
+    odemeCariAramaInput.addEventListener('blur', function() {setTimeout(() => {suggestionsBox.style.display = 'none';}, 200);});}
 const cariAraInput = document.getElementById('yemSatisCariAraInput');
 const cariIdHidden = document.getElementById('topluSatisCari');
 const oneriKutusu = document.getElementById('cariOneriListesi');
 
-if (cariAraInput) {
-    cariAraInput.addEventListener('input', function () {
-        const arama = this.value.toLowerCase();
-        const eslesenler = [];
-
-        window.cariDataMap.forEach((cari, id) => {
-            if (cari.adiSoyadi?.toLowerCase().includes(arama)) {
-                eslesenler.push({ id, ad: cari.adiSoyadi });
-            }
+if (cariAraInput) {cariAraInput.addEventListener('input', function () {const arama = this.value.toLowerCase();const eslesenler = [];window.cariDataMap.forEach((cari, id) => {
+            if (cari.adiSoyadi?.toLowerCase().includes(arama)) {eslesenler.push({ id, ad: cari.adiSoyadi });}
         });
 
         oneriKutusu.innerHTML = "";
@@ -1084,6 +1044,57 @@ if (yemSatisCariAraInput) {
         });
     });
 }
+
+
+// YENİ EKLENECEK KOD BLOĞU: Aylık Süt Raporu için Cari Arama
+const sutRaporuCariAramaInput = document.getElementById('sutRaporuCariAramaInput');
+if (sutRaporuCariAramaInput) {
+    const suggestionsBox = document.getElementById('sutRaporuCariSuggestions');
+    const cariSelect = document.getElementById('sutRaporuTedarikciSecimi');
+
+    sutRaporuCariAramaInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        suggestionsBox.innerHTML = '';
+        suggestionsBox.style.display = 'none';
+
+        if (query.length < 2) { // En az 2 karakter girilince ara
+            cariSelect.value = ""; // Arama kutusu boşsa seçimi de temizle
+            return;
+        }
+
+        const matches = [];
+        window.cariDataMap.forEach((cari, id) => {
+            if (cari.adiSoyadi && cari.cariGrup && cari.cariGrup.includes('üretici') && cari.adiSoyadi.toLowerCase().includes(query)) {
+                matches.push({ id: id, adi: cari.adiSoyadi });
+            }
+        });
+
+        if (matches.length > 0) {
+            suggestionsBox.style.display = 'block';
+            matches.slice(0, 10).forEach(match => {
+                const div = document.createElement('div');
+                div.textContent = match.adi;
+                
+                div.addEventListener('click', () => {
+                    sutRaporuCariAramaInput.value = match.adi; 
+                    cariSelect.value = match.id; 
+                    
+                    suggestionsBox.innerHTML = '';
+                    suggestionsBox.style.display = 'none';
+                });
+                suggestionsBox.appendChild(div);
+            });
+        }
+    });
+
+    sutRaporuCariAramaInput.addEventListener('blur', function() {
+        setTimeout(() => {
+            suggestionsBox.style.display = 'none';
+        }, 200);
+    });
+}
+
+
 
     document.getElementById('raporOlusturBtn')?.addEventListener('click', handleHesapOzetiRaporuOlustur);
     document.getElementById('sutRaporuOlusturBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: false}));
