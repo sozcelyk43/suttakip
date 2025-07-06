@@ -196,3 +196,19 @@
         grid-template-columns: 1fr; 
     }
 }
+
+.tahsilat-filtre-grid {
+    display: grid;
+    /* Masaüstü için sütun düzeni */
+    grid-template-columns: 1fr 1fr 2fr 1fr 1fr; 
+    align-items: end;
+    gap: 15px;
+}
+
+/* Mobil (Dar Ekran) Görünümü */
+@media (max-width: 768px) {
+    .tahsilat-filtre-grid {
+        /* Tüm elemanları tek bir sütunda alt alta göster */
+        grid-template-columns: 1fr; 
+    }
+}
