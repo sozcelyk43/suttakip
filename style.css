@@ -6,7 +6,6 @@
 	.module-header{background-color:#fff;color:#2c3e50;padding:15px 20px;margin-bottom:20px;border-radius:8px;display:flex;justify-content:space-between;
 		align-items:center;border:1px solid #dfe4e8}
 	.module-header h2{margin:0;font-size:1.6em}
-       #history-section h2 {    text-align: center;}
 	h3{color:#2980b9;margin-top:0;margin-bottom:20px;border-bottom:1px solid #ecf0f1;padding-bottom:15px}
 	h4{color:#34495e;margin-top:15px;margin-bottom:10px}
 	.sidebar-logo{display:block;max-width:220px;margin:15px auto 20px}
@@ -138,4 +137,40 @@
 	.autocomplete-box {position: relative;background: white;border: 1px solid #ccc;z-index: 1000;max-height: 150px;overflow-y: auto;border-radius: 4px;box-shadow: 0 2px 6px 	rgba(0,0,0,0.1);font-size: 0.9em;}
 	.autocomplete-box div {padding: 8px;cursor: pointer;}
 	.autocomplete-box div:hover {background-color: #f0f0f0;}
+.cari-yonetimi .tarihsel-bakiye-alani {
+   display: flex; /* Elementleri yan yana hizalamak için flexbox kullan */
+   align-items: center; /* Dikeyde ortalamak için */
+   margin-bottom: 15px; /* Alt boşluk ekleyerek diğer alanlardan ayır */
+}
+
+.cari-yonetimi .tarihsel-bakiye-alani input {
+   padding: 8px; /* Inputun iç boşluğunu artır */
+   margin-right: 10px; /* Butondan sağ boşluk bırak */
+   border: 1px solid #ccc;
+   border-radius: 4px;
+   flex-grow: 1; /* Inputun kullanılabilir alanı doldurmasını sağla */
+   max-width: 200px; /* Input için maksimum genişlik belirle */
+}
+
+.cari-yonetimi .tarihsel-bakiye-alani button {
+   padding: 10px 15px; /* Butonun iç boşluğunu ayarla */
+   border: none;
+   border-radius: 4px;
+   background-color: #28a745; /* Yeşil renk (örnek) */
+   color: white;
+   cursor: pointer;
+   font-weight: bold;
+}
+
+.cari-yonetimi .tarihsel-bakiye-alani button:hover {
+   background-color: #1e7e34; /* Hover efekti için koyu yeşil */
+}
+
+.cari-yonetimi .tarihsel-bakiye-aciklama {
+   font-size: 0.9em;
+   color: #6c757d;
+   display: block; /* Açıklamayı alt satıra al */
+   margin-top: 5px;
+   margin-bottom: 10px;
+}
 

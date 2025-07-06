@@ -128,14 +128,24 @@
 </form></div>
         <div id="cari-list-printable-area" class="printable-content format-a4">
             <h1 class="print-only print-title" style="text-align: center; display: none;">Cari Listesi</h1>
-            <div class="list-section"><div class="form-grid dont-print" style="grid-template-columns: 1fr auto; align-items: end; gap: 10px; padding: 10px; border: 1px solid #ddd; 
-			margin-bottom: 15px; border-radius: 5px;"><div class="form-group">
-                        <label for="cariTarihFiltresi"><strong>Tarihsel Bakiye Raporu:</strong></label>
-                        <input type="date" id="cariTarihFiltresi">
-                        <small>Belirli bir tarih itibarıyla bakiye durumunu görmek için bir tarih seçip 'Raporla' butonuna basın. Boş bırakırsanız güncel durumu gösterir.</small>
-                    </div>
-                    <button type="button" class="btn btn-primary" id="cariTarihselRaporBtn" style="height:45px;">Raporla</button>
-                </div>
+            
+<div class="list-section">
+    <div class="dont-print" style="padding: 15px; border: 1px solid #ddd; margin-bottom: 20px; border-radius: 8px; background-color: #f9f9f9;">
+        <label for="cariTarihFiltresi" style="font-weight: bold; display: block; margin-bottom: 8px;">Tarihsel Bakiye Raporu:</label>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="date" id="cariTarihFiltresi" style="flex-grow: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; height: 38px;">
+            <button type="button" class="btn btn-primary" id="cariTarihselRaporBtn" style="height: 38px; padding: 0 20px;">Raporla</button>
+        </div>
+        <small style="display: block; margin-top: 8px; color: #666; font-size: 12px;">
+            Belirli bir tarih itibarıyla bakiye durumunu görmek için bir tarih seçip 'Raporla' butonuna basın. Boş bırakırsanız güncel durumu gösterir.
+        </small>
+    </div>
+
+
+
+
+
+
 
                 <div id="cariRotaSirasiUyari" style="display: none;"></div>
 
@@ -888,8 +898,7 @@ if (cariAraInput) {
         moduleSections.forEach(section => { section.style.display = 'none'; });
         const activeSection = document.getElementById(targetId);
         if (activeSection) activeSection.style.display = 'block';
-        if (activeSection) activeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
+	if (activeSection) activeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         if (targetId === 'dashboard') { updateDashboardStats(); updateMonthlyStats(); }
         if (targetId === 'cari-yonetimi') { populateCariKategoriFiltre(); renderCariListesi(); populateCariKategoriSelect(document.getElementById('cariKategori')); generateNextCariKodu(); }
         if (targetId === 'sut-alimi') { if (topluGirisTarihInput) topluGirisTarihInput.value = getTodayForInput(); populateCariKategoriSelect(topluGirisKategoriSelect); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); }
