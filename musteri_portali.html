@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Müşteri Süt Hareketleri</title>
+    <link rel="stylesheet" href="style.css">
+    <meta name="theme-color" content="#2c3e50">
+    <style>
+        /* Bu sayfaya özel ek stiller */
+        .summary-box { border-top: 2px solid #3498db; margin-top: 25px; padding-top: 15px; }
+        .summary-box p { font-size: 1.1em; display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .summary-box strong { color: #2c3e50; }
+        .filter-buttons { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .welcome-header { display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+    <div class="main-content" style="margin-left: 0;"> <div class="module-header">
+            <div class="welcome-header">
+                 <h2>Müşteri Süt Hareketleri</h2>
+                 <h3 style="margin:0; padding:0; border:none;">Hoş Geldiniz, <span id="musteriAdi">...</span></h3>
+            </div>
+        </div>
+        <div class="container">
+            <div class="filter-buttons">
+                <select id="aySecimi" class="form-control">
+                    </select>
+                <a href="sifre_degistir.html" class="btn btn-secondary">Şifre Değiştir</a>
+                <button type="button" id="logoutButton" class="btn btn-danger">Çıkış Yap</button>
+            </div>
+
+            <div class="list-section">
+                <table id="sutHareketleriTablosu">
+                    <thead>
+                        <tr>
+                            <th>TARİH</th>
+                            <th>AKŞAM (LT)</th>
+                            <th>SABAH (LT)</th>
+                            <th>TOPLAM (LT)</th>
+                            <th>BİRİM FİYAT (TL)</th>
+                            <th>TOPLAM FİYAT (TL)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sutListesiBody">
+                        <tr><td colspan="6" style="text-align:center;">Lütfen bir ay seçin.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="summary-box">
+                <p>Seçili Dönem Toplam Litre: <strong id="donemToplamLitre">0.00 LT</strong></p>
+                <p>Seçili Dönem Toplam Hasılat: <strong id="donemToplamHasılat">0.00 TL</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCWG4nFwpXRffr_3MO8-Us9mWK6Wsfn0mY",
+            authDomain: "sut-takip-projem.firebaseapp.com",
+            projectId: "sut-takip-projem",
+            storageBucket: "sut-takip-projem.appspot.com",
+            messagingSenderId: "512756958486",
+            appId: "1:512756958486:web:13cceb6835e2c575e9fc37",
+            measurementId: "G-LYLT9WFVNK"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let userCariId = null;
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // Kullanıcının cari kimliğini bul
+                db.collection('cariler').where('authUID', '==', user.uid).limit(1).get()
+                    .then(snapshot => {
+                        if (!snapshot.empty) {
+                            const cariDoc = snapshot.docs[0];
+                            userCariId = cariDoc.id;
+                            document.getElementById('musteriAdi').textContent = cariDoc.data().adiSoyadi;
+                            populateAyFiltresi();
+                        } else {
+                            alert("Bu hesaba bağlı bir müşteri kartı bulunamadı.");
+                            handleLogout();
+                        }
+                    });
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function populateAyFiltresi() {
+            const aySelect = document.getElementById('aySecimi');
+            aySelect.innerHTML = '<option value="">Ay Seçin...</option>';
+            const now = new Date();
+            const ayIsimleri = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+
+            for (let i = 0; i < 12; i++) {
+                let date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                let year = date.getFullYear();
+                let month = date.getMonth();
+                let ayYil = `${year}-${String(month + 1).padStart(2, '0')}`;
+                let optionText = `${ayIsimleri[month]} ${year}`;
+                aySelect.add(new Option(optionText, ayYil));
+            }
+        }
+
+        document.getElementById('aySecimi').addEventListener('change', (event) => {
+            const ayYil = event.target.value;
+            if (ayYil && userCariId) {
+                fetchSutHareketleri(ayYil);
+            }
+        });
+        
+        async function fetchSutHareketleri(ayYil) {
+            const [year, month] = ayYil.split('-');
+            const startDate = `${year}-${month}-01`;
+            const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+            
+            const listBody = document.getElementById('sutListesiBody');
+            listBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Veriler yükleniyor...</td></tr>`;
+
+            try {
+                const snapshot = await db.collection('sut_alimlari')
+                    .where('cariId', '==', userCariId)
+                    .where('tarih', '>=', startDate)
+                    .where('tarih', '<=', endDate)
+                    .orderBy('tarih', 'desc')
+                    .get();
+
+                if (snapshot.empty) {
+                    listBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Bu dönem için süt kaydı bulunmuyor.</td></tr>`;
+                    document.getElementById('donemToplamLitre').textContent = '0.00 LT';
+                    document.getElementById('donemToplamHasılat').textContent = '0.00 TL';
+                    return;
+                }
+
+                let rows = '';
+                let donemLitre = 0;
+                let donemHasılat = 0;
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    donemLitre += data.toplam || 0;
+                    donemHasılat += data.toplamTutar || 0;
+                    rows += `
+                        <tr>
+                            <td>${new Date(data.tarih + 'T00:00:00').toLocaleDateString('tr-TR')}</td>
+                            <td>${(data.aksam || 0).toFixed(2)}</td>
+                            <td>${(data.sabah || 0).toFixed(2)}</td>
+                            <td><strong>${(data.toplam || 0).toFixed(2)}</strong></td>
+                            <td>${(data.fiyat || 0).toFixed(2)}</td>
+                            <td><strong>${(data.toplamTutar || 0).toFixed(2)}</strong></td>
+                        </tr>
+                    `;
+                });
+                
+                listBody.innerHTML = rows;
+                document.getElementById('donemToplamLitre').textContent = `${donemLitre.toFixed(2)} LT`;
+                document.getElementById('donemToplamHasılat').textContent = `${donemHasılat.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}`;
+
+            } catch (error) {
+                console.error("Süt hareketleri alınırken hata: ", error);
+                listBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Veriler yüklenemedi.</td></tr>`;
+            }
+        }
+
+        const logoutButton = document.getElementById('logoutButton');
+        logoutButton.addEventListener('click', handleLogout);
+
+        function handleLogout() {
+            auth.signOut().then(() => {
+                window.location.href = 'login.html';
+            }).catch(error => console.error("Logout error", error));
+        }
+    </script>
+</body>
+</html>

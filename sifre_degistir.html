@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-g">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Şifre Değiştir</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main-content" style="margin-left: 0; max-width: 600px; margin: 50px auto;">
+         <div class="module-header"><h2>Şifrenizi Güncelleyin</h2></div>
+         <div class="container">
+             <form id="sifreDegistirForm">
+                <div class="form-group">
+                    <label for="eskiSifre">Eski Şifreniz:</label>
+                    <input type="password" id="eskiSifre" required>
+                </div>
+                <div class="form-group">
+                    <label for="yeniSifre">Yeni Şifre:</label>
+                    <input type="password" id="yeniSifre" required>
+                </div>
+                <div class="form-group">
+                    <label for="yeniSifreTekrar">Yeni Şifre (Tekrar):</label>
+                    <input type="password" id="yeniSifreTekrar" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Güncelle</button>
+                <a href="musteri_portali.html" class="btn btn-secondary">Geri Dön</a>
+             </form>
+         </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCWG4nFwpXRffr_3MO8-Us9mWK6Wsfn0mY",
+            authDomain: "sut-takip-projem.firebaseapp.com",
+            projectId: "sut-takip-projem",
+            storageBucket: "sut-takip-projem.appspot.com",
+            messagingSenderId: "512756958486",
+            appId: "1:512756958486:web:13cceb6835e2c575e9fc37",
+            measurementId: "G-LYLT9WFVNK"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        
+        auth.onAuthStateChanged(user => {
+            if (!user) {
+                window.location.href = 'login.html';
+            }
+        });
+
+        const sifreDegistirForm = document.getElementById('sifreDegistirForm');
+        sifreDegistirForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const eskiSifre = document.getElementById('eskiSifre').value;
+            const yeniSifre = document.getElementById('yeniSifre').value;
+            const yeniSifreTekrar = document.getElementById('yeniSifreTekrar').value;
+
+            if (yeniSifre.length < 6) {
+                alert("Yeni şifre en az 6 karakter olmalıdır!");
+                return;
+            }
+            if (yeniSifre !== yeniSifreTekrar) {
+                alert("Yeni şifreler uyuşmuyor!");
+                return;
+            }
+
+            const user = auth.currentUser;
+            if (!user) {
+                alert("Önce giriş yapmalısınız.");
+                return;
+            }
+
+            const credential = firebase.auth.EmailAuthProvider.credential(user.email, eskiSifre);
+
+            try {
+                await user.reauthenticateWithCredential(credential);
+                await user.updatePassword(yeniSifre);
+                alert("Şifreniz başarıyla güncellendi! Lütfen yeni şifrenizle tekrar giriş yapın.");
+                auth.signOut().then(() => {
+                    window.location.href = 'login.html';
+                });
+            } catch (error) {
+                console.error("Şifre güncelleme hatası:", error);
+                if (error.code === 'auth/wrong-password') {
+                    alert("Eski şifreniz hatalı!");
+                } else {
+                    alert("Bir hata oluştu. Lütfen tekrar deneyin.");
+                }
+            }
+        });
+    </script>
+</body>
+</html>

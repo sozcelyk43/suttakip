@@ -758,16 +758,40 @@ auth.onAuthStateChanged(async (user) => {
                 const userData = userDoc.data();
                 currentUserRole = userData.rol;
                 sahipId = userData.sahipId;
-                if (currentUserRole === 'admin' && !sahipId) {sahipId = currentUserId;}
-                if (!sahipId) {alert('Kullanıcı profilinizde "sahipId" alanı bulunamadı. Lütfen yöneticinizle iletişime geçin.');handleLogout();return;}
-			isAppInitialized = true;
-                 if (currentUserRole === 'calisan') {window.location.href = 'hizli-giris.html';return;}
+
+                // YENİ YÖNLENDİRME MANTIĞI
+                if (currentUserRole === 'calisan') {
+                    window.location.href = 'hizli-giris.html';
+                    return; 
+                } else if (currentUserRole === 'uretici') {
+                    window.location.href = 'musteri_portali.html';
+                    return;
+                }
+                // Admin bu blokların dışında kalır ve initializeApp() fonksiyonunu çalıştırır.
+
+                if (currentUserRole === 'admin' && !sahipId) {
+                    sahipId = currentUserId;
+                }
+                if (!sahipId) {
+                    alert('Kullanıcı profilinizde "sahipId" alanı bulunamadı. Lütfen yöneticinizle iletişime geçin.');
+                    handleLogout();
+                    return;
+                }
+                isAppInitialized = true;
                 initializeApp();
-            } else {alert("Giriş başarılı ancak kullanıcı profili veritabanında bulunamadı.");handleLogout();}
-    } catch (error) {console.error("Kullanıcı profili alınırken hata:", error);
-                alert(`Uygulama başlatılamadı. Veritabanı hatası oluştu.\n\nLÜTFEN BU MESAJIN EKRAN GÖRÜNTÜSÜNÜ ALIN VEYA KOPYALAYIN.\n\nTeknik Detay: ${error.message}`);
-                handleLogout();}
-    } else {window.location.href = 'login.html';}
+
+            } else {
+                alert("Giriş başarılı ancak kullanıcı profili veritabanında bulunamadı.");
+                handleLogout();
+            }
+        } catch (error) {
+            console.error("Kullanıcı profili alınırken hata:", error);
+            alert(`Uygulama başlatılamadı. Veritabanı hatası oluştu.\n\nLÜTFEN BU MESAJIN EKRAN GÖRÜNTÜSÜNÜ ALIN VEYA KOPYALAYIN.\n\nTeknik Detay: ${error.message}`);
+            handleLogout();
+        }
+    } else {
+        window.location.href = 'login.html';
+    }
 });
 
 function initializeApp() {
