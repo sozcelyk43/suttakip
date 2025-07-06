@@ -882,12 +882,9 @@ if (cariAraInput) {cariAraInput.addEventListener('input', function () {const ara
     window.cariDataMap = new Map();
 
     if (menuToggleBtn && sidebar) {
-        menuToggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
-        sidebar.addEventListener('click', (event) => {
-            if (window.innerWidth <= 1024 && event.target.closest('a.nav-link')) {
-                sidebar.classList.add('collapsed');
-            }
-        });
+        menuToggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'))
+
+
     }
 
     applyRolePermissions();
@@ -909,6 +906,11 @@ if (cariAraInput) {cariAraInput.addEventListener('input', function () {const ara
         const activeSection = document.getElementById(targetId);
         if (activeSection) activeSection.style.display = 'block';
 	if (activeSection) activeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+if (window.innerWidth <= 1024) {
+            sidebar.classList.add('collapsed');
+        }
+
         if (targetId === 'dashboard') { updateDashboardStats(); updateMonthlyStats(); }
         if (targetId === 'cari-yonetimi') { populateCariKategoriFiltre(); renderCariListesi(); populateCariKategoriSelect(document.getElementById('cariKategori')); generateNextCariKodu(); }
         if (targetId === 'sut-alimi') { if (topluGirisTarihInput) topluGirisTarihInput.value = getTodayForInput(); populateCariKategoriSelect(topluGirisKategoriSelect); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); }
