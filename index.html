@@ -392,11 +392,15 @@
     <div class="form-grid">
         <div class="form-group"><label for="islemTuru">İşlem Türü:</label><select id="islemTuru" required><option value="odeme">Tahsilat</option><option value="tahsilat">Ödeme</option></select></div>
         <div class="form-group"><label for="odemeTarih">Tarih:</label><input type="date" id="odemeTarih" required></div>
-        <div class="form-group">
-            <label for="odemeYapilanTedarikci">Cari:</label>
-            <select id="odemeYapilanTedarikci" required><option value="">Seçiniz...</option></select>
-            <small id="cariBakiyeBilgisi" style="display: block; margin-top: 5px; font-weight: bold;"></small>
-        </div>
+     <div class="form-group" style="position: relative;">
+    <label for="odemeCariAramaInput">Cari:</label>
+    <input type="text" id="odemeCariAramaInput" class="form-control" placeholder="Aramak için yazın..." autocomplete="off">
+    <div id="odemeCariSuggestions" class="autocomplete-box"></div>
+    <small id="cariBakiyeBilgisi" style="display: block; margin-top: 5px; font-weight: bold;"></small>
+</div>
+<div class="form-group" style="display: none;">
+    <select id="odemeYapilanTedarikci" required><option value="">Seçiniz...</option></select>
+</div>
         
         <div class="form-group">
             <label for="odemeTuru">Ödeme Türü:</label>
@@ -822,6 +826,65 @@ cariSearchInput?.addEventListener('blur', () => {
     setTimeout(() => cariSuggestionBox.innerHTML = "", 200); // Tıklamaya izin ver
 });
 
+const odemeCariAramaInput = document.getElementById('odemeCariAramaInput');
+if (odemeCariAramaInput) {
+    const suggestionsBox = document.getElementById('odemeCariSuggestions');
+    const cariSelect = document.getElementById('odemeYapilanTedarikci');
+    let debounceTimer; // Debounce için zamanlayıcı değişkeni
+    odemeCariAramaInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer); 
+        const query = this.value.toLowerCase();
+        suggestionsBox.innerHTML = '';
+        suggestionsBox.style.display = 'none';
+
+        if (query.length < 2) { 
+            cariSelect.value = "";
+            cariSelect.dispatchEvent(new Event('change'));
+            return;
+        }
+
+        debounceTimer = setTimeout(async () => {
+            const matches = [];
+            window.cariDataMap.forEach((cari, id) => {
+                if (cari.adiSoyadi && cari.adiSoyadi.toLowerCase().includes(query)) {
+                    matches.push({ id: id, adi: cari.adiSoyadi });
+                }
+            });
+
+            if (matches.length > 0) {
+                const bakiyePromises = matches.map(match => calculateCariBakiyeDetayli(match.id));
+                const bakiyeler = await Promise.all(bakiyePromises);
+                suggestionsBox.innerHTML = ''; 
+                suggestionsBox.style.display = 'block';
+
+matches.slice(0, 10).forEach((match, index) => {
+    const bakiyeDetay = bakiyeler[index];
+    const bakiye = bakiyeDetay.bakiye;
+    const bakiyeMiktar = new Intl.NumberFormat('tr-TR').format(Math.abs(bakiye));
+    const bakiyeDurum = bakiye >= 0 ? 'Alacaklı' : 'Borçlu';
+    const bakiyeRenk = bakiye >= 0 ? 'green' : 'red';
+    const etiketText = `(${bakiyeMiktar} tl ${bakiyeDurum})`;
+    const div = document.createElement('div');
+    div.innerHTML = `${match.adi} <span style="color: ${bakiyeRenk}; font-weight: bold; float: right;">${etiketText}</span>`;
+    div.addEventListener('click', () => {
+        odemeCariAramaInput.value = match.adi;
+        cariSelect.value = match.id;
+        cariSelect.dispatchEvent(new Event('change')); 
+        suggestionsBox.style.display = 'none';
+    });
+    suggestionsBox.appendChild(div);
+});
+
+            }
+        }, 400); 
+    });
+    odemeCariAramaInput.addEventListener('blur', function() {
+        setTimeout(() => {
+            suggestionsBox.style.display = 'none';
+        }, 200);
+    });
+}
+
 
 const cariAraInput = document.getElementById('yemSatisCariAraInput');
 const cariIdHidden = document.getElementById('topluSatisCari');
@@ -1043,7 +1106,7 @@ if (yemSatisCariAraInput) {
     document.getElementById('raporYazdirBtn')?.addEventListener('click', () => handleYazdir('report-content-to-print'));
     document.getElementById('sutRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('sut-alim-raporu'));
     document.getElementById('yemRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('aylik-yem-raporu'));
-    document.getElementById('karneYazdirBtn')?.addEventListener('click', () => handleYazdir('dinamik-sut-raporu'));
+document.getElementById('karneYazdirBtn')?.addEventListener('click', () => handleYazdir('dinamikRaporContainer', 'landscape'));
     document.getElementById('karnePdfBtn')?.addEventListener('click', () => exportTableToPdf('dinamikRaporContainer', 'sut_karnesi', 'karnePdfBtn'));
     document.getElementById('karneXlsxBtn')?.addEventListener('click', () => exportTableToExcel('dinamikRaporContainer', 'sut_karnesi'));
     document.getElementById('hesapOzetiPdfBtn')?.addEventListener('click', () => exportTableToPdf('report-content-to-print', 'hesap_ozeti', 'hesapOzetiPdfBtn'));
@@ -3977,8 +4040,8 @@ async function handleHesapOzetiRaporuOlustur() {
             <div class="report-block"><h5>Cari Ay Yapılan Ödemeler (Müşteriye Giden)</h5>${tahsilatDetayHTML || '<p>Bu ay ödeme yapılmamış.</p>'}</div>
             <div class="report-block final-summary">
                 <h5>DÖNEM SONU HESAPLAMASI</h5>
-                <p><span>Önceki Aydan Devir:</span> <span>${formatCurrency(devredenBakiye)}</span></p>
-                <hr style="border-style: dashed; margin: 10px 0;">
+		<p><span>Önceki Aydan Devir:</span> <span>${formatCurrency(devredenBakiye)} (${devredenBakiye >= 0 ? 'Cari Alacaklı' : 'Cari Borçlu'})</span></p>                
+		<hr style="border-style: dashed; margin: 10px 0;">
                 
                 <p><span>+ Cari Ay Süt Alımları:</span> <span style="color:green;">+ ${formatCurrency(toplamSutDegeri)}</span></p>
                 <p><span>+ Cari Ay Yapılan Tahsilatlar:</span> <span style="color:green;">+ ${formatCurrency(toplamOdemeTutari)}</span></p>
@@ -4315,7 +4378,7 @@ function resetTopluSatisFormu() {
     if (iptalBtn) iptalBtn.style.display = 'none';
 }
 
-function handleYazdir(elementId) {
+function handleYazdir(elementId, orientation = 'portrait') { 
     const oldIframe = document.getElementById('print-iframe');
     if (oldIframe) {        oldIframe.remove();    }
     const printElement = document.getElementById(elementId);
@@ -4323,7 +4386,7 @@ function handleYazdir(elementId) {
     const contentToPrint = printElement.cloneNode(true);
     contentToPrint.querySelectorAll('.dont-print, .list-header-with-filter').forEach(el => el.remove());
     const printStyles = `
-        @page {size: A4;margin: 1.5cm;}
+        @page {size: A4 ${orientation};margin: 1.5cm;}
         body {font-family: Arial, Helvetica, sans-serif;font-size: 12px;line-height: 1.3;margin: 0;}
         h1, h2, h3, h4, h5 {text-align: center;margin: 10px 0;}
         table {width: 100%;border-collapse: collapse;margin-top: 10px;}

@@ -137,40 +137,13 @@
 	.autocomplete-box {position: relative;background: white;border: 1px solid #ccc;z-index: 1000;max-height: 150px;overflow-y: auto;border-radius: 4px;box-shadow: 0 2px 6px 	rgba(0,0,0,0.1);font-size: 0.9em;}
 	.autocomplete-box div {padding: 8px;cursor: pointer;}
 	.autocomplete-box div:hover {background-color: #f0f0f0;}
-.cari-yonetimi .tarihsel-bakiye-alani {
-   display: flex; /* Elementleri yan yana hizalamak için flexbox kullan */
-   align-items: center; /* Dikeyde ortalamak için */
-   margin-bottom: 15px; /* Alt boşluk ekleyerek diğer alanlardan ayır */
-}
-
-.cari-yonetimi .tarihsel-bakiye-alani input {
-   padding: 8px; /* Inputun iç boşluğunu artır */
-   margin-right: 10px; /* Butondan sağ boşluk bırak */
-   border: 1px solid #ccc;
-   border-radius: 4px;
-   flex-grow: 1; /* Inputun kullanılabilir alanı doldurmasını sağla */
-   max-width: 200px; /* Input için maksimum genişlik belirle */
-}
-
-.cari-yonetimi .tarihsel-bakiye-alani button {
-   padding: 10px 15px; /* Butonun iç boşluğunu ayarla */
-   border: none;
-   border-radius: 4px;
-   background-color: #28a745; /* Yeşil renk (örnek) */
-   color: white;
-   cursor: pointer;
-   font-weight: bold;
-}
-
-.cari-yonetimi .tarihsel-bakiye-alani button:hover {
-   background-color: #1e7e34; /* Hover efekti için koyu yeşil */
-}
-
-.cari-yonetimi .tarihsel-bakiye-aciklama {
-   font-size: 0.9em;
-   color: #6c757d;
-   display: block; /* Açıklamayı alt satıra al */
-   margin-top: 5px;
-   margin-bottom: 10px;
-}
+	.cari-yonetimi .tarihsel-bakiye-alani {   display: flex; align-items: center; 	   margin-bottom: 15px; }
+	.cari-yonetimi .tarihsel-bakiye-alani input {padding: 8px;    margin-right: 10px;   border: 1px solid #ccc;  border-radius: 4px;   flex-grow: 1;   max-width: 200px;}
+	.cari-yonetimi .tarihsel-bakiye-alani button {   padding: 10px 15px;    border: none;   border-radius: 4px;   background-color: #28a745;   color: white;   cursor: pointer;   font-weight: bold;}
+	.cari-yonetimi .tarihsel-bakiye-alani button:hover {   background-color: #1e7e34;}
+	.cari-yonetimi .tarihsel-bakiye-aciklama {font-size: 0.9em;color: #6c757d;display: block;margin-top: 5px;margin-bottom: 10px;}
+	.autocomplete-box {position: absolute;border: 1px solid #ccc;border-top: none;z-index: 99;top: 100%;left: 0;right: 0;background-color: white;max-height: 200px;overflow-y: auto;box-shadow: 0 4px 6px rgba(0,0,0,0.1);}
+	.autocomplete-box div {    padding: 10px;    cursor: pointer;    border-bottom: 1px solid #eee;}
+	.autocomplete-box div:last-child {    border-bottom: none;}
+	.autocomplete-box div:hover {    background-color: #f2f2f2;}
 
