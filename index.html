@@ -4590,61 +4590,30 @@ function resetTopluSatisFormu() {
 }
 
 function handleYazdir(elementId) {
-    // Önceki yazdırma işleminden kalmış olabilecek eski çerçeveyi temizle
     const oldIframe = document.getElementById('print-iframe');
-    if (oldIframe) {
-        oldIframe.remove();
-    }
+    if (oldIframe) {        oldIframe.remove();    }
 
     const printElement = document.getElementById(elementId);
-    if (!printElement) {
-        console.error("Yazdırılacak alan bulunamadı:", elementId);
-        return;
-    }
+    if (!printElement) {        console.error("Yazdırılacak alan bulunamadı:", elementId);        return;    }
 
-    // --- YENİ ve ÖNEMLİ BÖLÜM: İçeriği Klonla ve Temizle ---
-    // Orijinal sayfayı bozmamak için yazdırılacak alanı klonluyoruz.
     const contentToPrint = printElement.cloneNode(true);
-
-    // Klonlanan içerikten istenmeyen tüm filtre ve buton alanlarını kaldırıyoruz.
-    // .dont-print sınıfına sahip olanlar VE .list-header-with-filter sınıfına sahip olanlar silinecek.
     contentToPrint.querySelectorAll('.dont-print, .list-header-with-filter').forEach(el => el.remove());
-    // --- TEMİZLEME BÖLÜMÜ SONU ---
 
-
-    // Yazdırma için temel CSS stilleri (Biraz daha sıkıştırıldı)
     const printStyles = `
         @page {
             size: A4;
             margin: 1.5cm;
         }
-        body { 
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 12px;
-            line-height: 1.3;
-            margin: 0;
-        }
-        h1, h2, h3, h4, h5 { 
-            text-align: center; 
-            margin: 10px 0;
-        }
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin-top: 10px;
-        }
-        th, td { 
-            border: 1px solid #ccc; 
-            padding: 5px; 
-            text-align: left;
-        }
-        th { 
-            font-weight: bold;
-            background-color: #f2f2f2;
-        }
+        body {             font-family: Arial, Helvetica, sans-serif;            font-size: 12px;            line-height: 1.3;            margin: 0;        }
+        h1, h2, h3, h4, h5 {             text-align: center;             margin: 10px 0;        }
+        table {             width: 100%;             border-collapse: collapse;             margin-top: 10px;        }
+        th, td {             border: 1px solid #ccc;             padding: 5px;             text-align: left;        }
+        th {             font-weight: bold;            background-color: #f2f2f2;        }
+        hr {            border: 0;            border-top: 1px dashed #ccc;            margin: 5px 0;        }
+        .final-summary p {            display: flex;            margin: 2px 0;            padding: 2px 4px;        }
+        .final-summary p > span:last-child,.final-summary p > strong:last-child {margin-left: auto;padding-left: 20px;}
     `;
 
-    // Görünmez bir iframe oluşturarak yazdırma
     const iframe = document.createElement('iframe');
     iframe.id = 'print-iframe';
     iframe.style.display = 'none';
@@ -4652,10 +4621,9 @@ function handleYazdir(elementId) {
 
     const iframeDoc = iframe.contentWindow.document;
     iframeDoc.open();
-    iframeDoc.write('<!DOCTYPE html><html><head><title>Cari Listesi</title>');
+    iframeDoc.write('<!DOCTYPE html><html><head><title>Yazdır</title>');
     iframeDoc.write('<style>' + printStyles + '</style>');
     iframeDoc.write('</head><body>');
-    // iframe'e orijinal içeriği değil, TEMİZLENMİŞ içeriği yazdırıyoruz.
     iframeDoc.write(contentToPrint.innerHTML);
     iframeDoc.write('</body></html>');
     iframeDoc.close();
