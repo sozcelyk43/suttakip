@@ -8,12 +8,12 @@
 	.module-header h2{margin:0;font-size:1.6em}
 	h3{color:#2980b9;margin-top:0;margin-bottom:20px;border-bottom:1px solid #ecf0f1;padding-bottom:15px}
 	h4{color:#34495e;margin-top:15px;margin-bottom:10px}
-	.sidebar-logo{display:block;max-width:220px;margin:15px auto 20px}
+	.sidebar-logo{display:block;max-width:200px;margin:9px auto 15px}
 	.sidebar h1{font-size:1.5em;text-align:center;margin:0 0 25px;color:#1abc9c;border-bottom:1px solid #34495e;padding-bottom:15px}
 	.sidebar nav ul{list-style:none;padding:0;margin:0}
-	.sidebar nav li a{display:block;padding:12px 15px;text-decoration:none;color:#bdc3c7;border-radius:6px;margin-bottom:8px;transition:background-color .2s ease,color .2s ease}
+	.sidebar nav li a{display:block;padding:4px 15px;text-decoration:none;color:#bdc3c7;border-radius:6px;margin-bottom:4px;transition:background-color .2s ease,color .2s ease}
 	.sidebar nav li a:hover,.sidebar nav li a.active{background-color:#3498db;color:#fff}
-	.sidebar nav li.logout-link{margin-top:25px;padding-top:15px;border-top:1px solid #34495e}
+	.sidebar nav li.logout-link{margin-top:10px;padding-top:8px;border-top:1px solid #34495e}
 	.sidebar nav li.logout-link a{background-color:#c0392b;color:#fff;text-align:center;font-weight:500}
 	.sidebar nav li.logout-link a:hover{background-color:#e74c3c}
 	.menu-toggle-btn{position:fixed;top:15px;left:15px;z-index:1000;background-color:#34495e;color:#fff;border:none;border-radius:5px;padding:8px 12px; 			
