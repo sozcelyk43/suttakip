@@ -149,43 +149,40 @@
 
                 <div id="cariRotaSirasiUyari" style="display: none;"></div>
 
-<div class="list-header-with-filter">
-    <h3>Cari Listesi (<span id="raporTarihEtiketi">Güncel Durum</span>)</h3>
+<h3>Cari Listesi (<span id="raporTarihEtiketi">Güncel Durum</span>)</h3>
 
-    <div class="form-grid" style="grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; align-items: end; margin-top: 10px;">
-        <!-- Cari Ara -->
-        <div class="form-group" style="position: relative;">
-            <label for="cariSearchInput">Cari Ara:</label>
-            <input type="text" id="cariSearchInput" placeholder="Ad, firma, kod..." autocomplete="off">
-            <div id="cariSearchSuggestions" class="autocomplete-box"></div>
-        </div>
+<div class="form-grid" style="grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; align-items: end; margin-bottom: 20px; border: 1px solid #eee; padding: 15px; border-radius: 8px;">
+    
+    <div class="form-group" style="position: relative;">
+        <label for="cariSearchInput">Cari Ara:</label>
+        <input type="text" id="cariSearchInput" placeholder="Ad, firma, kod..." autocomplete="off">
+        <div id="cariSearchSuggestions" class="autocomplete-box"></div>
+    </div>
 
-        <!-- Kategori -->
-        <div class="form-group">
-            <label for="cariKategoriFiltre">Kategori:</label>
-            <select id="cariKategoriFiltre">
-                <option value="">Tüm Kategoriler</option>
-            </select>
-        </div>
+    <div class="form-group">
+        <label for="cariKategoriFiltre">Kategori:</label>
+        <select id="cariKategoriFiltre">
+            <option value="">Tüm Kategoriler</option>
+        </select>
+    </div>
 
-        <!-- Grup -->
-        <div class="form-group">
-            <label for="cariGrupFiltre">Grup:</label>
-            <select id="cariGrupFiltre">
-                <option value="">Tüm Gruplar</option>
-                <option value="üretici">Üretici</option>
-                <option value="tedarikçi">Tedarikçi</option>
-                <option value="süt alıcı">Süt Alıcı</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="cariDurumFiltre">Durum:</label>
-            <select id="cariDurumFiltre">
-                <option value="">Tüm Durumlar</option>
-                <option value="aktif">Aktif</option>
-                <option value="pasif">Pasif</option>
-            </select>
-        </div>
+    <div class="form-group">
+        <label for="cariGrupFiltre">Grup:</label>
+        <select id="cariGrupFiltre">
+            <option value="">Tüm Gruplar</option>
+            <option value="üretici">Üretici</option>
+            <option value="tedarikçi">Tedarikçi</option>
+            <option value="süt alıcı">Süt Alıcı</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="cariDurumFiltre">Durum:</label>
+        <select id="cariDurumFiltre">
+            <option value="">Tüm Durumlar</option>
+            <option value="aktif">Aktif</option>
+            <option value="pasif">Pasif</option>
+        </select>
     </div>
 </div>
 
@@ -334,12 +331,11 @@
                         <input type="date" id="topluSatisTarih" required>
                     </div>
 
-                    <div class="form-group">
-                        <label for="yemSatisCariAraInput">Cari Ara:</label>
-                        <input type="text" id="yemSatisCariAraInput" placeholder="Ad veya firma adı yazın..." required>
-                        <input type="hidden" id="topluSatisCari"> <!-- Seçilen cariId -->
-                        <div id="cariOneriListesi" class="autocomplete-box"></div>
-                    </div>
+<div class="form-group" style="position: relative;">
+    <label for="yemSatisCariAraInput">Cari Ara:</label>
+    <input type="text" id="yemSatisCariAraInput" placeholder="Ad veya firma adı yazın..." required>
+    <input type="hidden" id="topluSatisCari"> <div id="cariOneriListesi" class="autocomplete-box"></div>
+</div>
                 </div>
 
                 <div id="yemSatisSatirlari"></div>
