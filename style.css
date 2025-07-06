@@ -147,3 +147,33 @@
 	.autocomplete-box div:last-child {    border-bottom: none;}
 	.autocomplete-box div:hover {    background-color: #f2f2f2;}
 
+/* ----- Cari Hesap Özeti Filtreleri için Mobil Uyum Düzenlemesi ----- */
+
+/* Masaüstü (Geniş Ekran) Görünümü */
+.rapor-filtre-grid {
+    display: grid;
+    /* Cari Ara, Ay ve Buton için 3 sütunlu bir yapı */
+    grid-template-columns: 2fr 1fr auto; 
+    align-items: end;
+    gap: 15px; /* Elemanlar arası boşluk */
+    border: 1px solid #eee;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+/* Mobil (Dar Ekran) Görünümü */
+@media (max-width: 768px) {
+    .rapor-filtre-grid {
+        /* Tüm elemanları tek bir sütunda alt alta göster */
+        grid-template-columns: 1fr; 
+        align-items: stretch; /* Elemanların genişliğini eşitle */
+    }
+
+    .rapor-filtre-grid .btn {
+        width: 100%; /* Butonun tam genişlik kaplamasını sağla */
+        padding: 12px;
+        margin-top: 10px;
+    }
+}
+
