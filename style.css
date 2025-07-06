@@ -177,3 +177,18 @@
     }
 }
 
+/* ----- Aylık Süt Raporu - Cari Seçin Mobil Görünüm İyileştirmesi ----- */
+
+@media (max-width: 768px) {
+    #sut-alim-raporu .form-group label {
+        display: block; /* Etiketi blok seviyesinde göster, alta insin */
+        width: 100%; /* Tam genişlik kaplasın */
+        margin-bottom: 5px; /* Alt boşluk ekleyerek seçme kutusundan ayır */
+    }
+
+    #sut-alim-raporu .form-group select#sutRaporuTedarikciSecimi {
+        width: 100%; /* Seçme kutusunun da tam genişlik kaplamasını sağla */
+        padding: 10px; /* Daha rahat tıklanabilir olması için iç boşluk ekle */
+        box-sizing: border-box; /* Genişliğin padding ve border'ı da içermesini sağla */
+    }
+}
