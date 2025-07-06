@@ -4395,7 +4395,26 @@ function handleYazdir(elementId, orientation = 'portrait') {
     const printStyles = `
         @page {size: A4 ${orientation};margin: 1.5cm;}
         body {font-family: Arial, Helvetica, sans-serif;font-size: 12px;line-height: 1.3;margin: 0;}
-        h1, h2, h3, h4, h5 {text-align: center;margin: 10px 0;}
+        h1 {
+    font-size: 10pt; /* Ana başlığı küçülttük */
+    font-weight: normal;
+    color: #666;
+    margin-bottom: 2px;
+    text-align: center;
+}
+h4 {
+    font-size: 14pt; /* Müşteri adının olduğu başlığı büyüttük */
+    font-weight: bold;
+    color: #000;
+    margin-bottom: 15px;
+    text-align: center;
+}
+h5 {
+    text-align: left;
+    margin: 15px 0 8px 0;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 4px;
+}
         table {width: 100%;border-collapse: collapse;margin-top: 10px;}
         th, td {border: 1px solid #ccc;padding: 5px;text-align: left;}
         th {font-weight: bold;background-color: #f2f2f2;}
