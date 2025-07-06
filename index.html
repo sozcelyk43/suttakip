@@ -888,6 +888,7 @@ if (cariAraInput) {
         moduleSections.forEach(section => { section.style.display = 'none'; });
         const activeSection = document.getElementById(targetId);
         if (activeSection) activeSection.style.display = 'block';
+        if (activeSection) activeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
         if (targetId === 'dashboard') { updateDashboardStats(); updateMonthlyStats(); }
         if (targetId === 'cari-yonetimi') { populateCariKategoriFiltre(); renderCariListesi(); populateCariKategoriSelect(document.getElementById('cariKategori')); generateNextCariKodu(); }
