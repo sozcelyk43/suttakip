@@ -16,12 +16,10 @@
     </style>
 </head>
 <body id="musteri_portali"> <div class="main-content">
-        <div class="module-header">
-            <div class="welcome-header">
-                 <h2>Müşteri Süt Hareketleri</h2>
-                 <h3 style="margin:0; padding:0; border:none;">Hoş Geldiniz, <span id="musteriAdi">...</span></h3>
-            </div>
-        </div>
+<div class="module-header">
+    <h2>Müşteri Süt Hareketleri</h2>
+    <h3 style="margin:0; padding:0; border:none; font-weight: normal; font-size: 1.1em;">Hoş Geldiniz, <span id="musteriAdi">...</span></h3>
+</div>
         <div class="container">
             <div class="filter-buttons">
                 <select id="aySecimi" class="form-control" style="height: 45px;">
@@ -46,14 +44,12 @@
                         <tbody id="sutListesiBody">
                             <tr><td colspan="6" style="text-align:center;">Lütfen bir ay seçin.</td></tr>
                         </tbody>
+ 			<tfoot id="sutListesiFooter"></tfoot>
                     </table>
                 </div>
             </div>
 
-            <div class="summary-box">
-                <p>Seçili Dönem Toplam Litre: <strong id="donemToplamLitre">0.00 LT</strong></p>
-                <p>Seçili Dönem Toplam Hasılat: <strong id="donemToplamHasılat">0.00 TL</strong></p>
-            </div>
+        
         </div>
     </div>
 
@@ -122,67 +118,82 @@
             }
         });
         
-        async function fetchSutHareketleri(ayYil) {
-            const [year, month] = ayYil.split('-');
-            const startDate = `${year}-${month}-01`;
-            const endDate = new Date(year, month, 0).toISOString().split('T')[0];
-            
-            const listBody = document.getElementById('sutListesiBody');
-            listBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Veriler yükleniyor...</td></tr>`;
+       async function fetchSutHareketleri(ayYil) {
+    const [year, month] = ayYil.split('-');
+    const startDate = `${year}-${month}-01`;
+    const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+    
+    const listBody = document.getElementById('sutListesiBody');
+    const listFooter = document.getElementById('sutListesiFooter'); // Yeni footer elemanını seç
+    listBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Veriler yükleniyor...</td></tr>`;
+    listFooter.innerHTML = ''; // Footer'ı temizle
 
-            try {
-                const snapshot = await db.collection('sut_alimlari')
-                    .where('cariId', '==', userCariId)
-                    .where('tarih', '>=', startDate)
-                    .where('tarih', '<=', endDate)
-                    .orderBy('tarih', 'desc')
-                    .get();
+    try {
+        const snapshot = await db.collection('sut_alimlari')
+            .where('cariId', '==', userCariId)
+            .where('tarih', '>=', startDate)
+            .where('tarih', '<=', endDate)
+            .orderBy('tarih', 'desc')
+            .get();
 
-                if (snapshot.empty) {
-                    listBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Bu dönem için süt kaydı bulunmuyor.</td></tr>`;
-                    document.getElementById('donemToplamLitre').textContent = '0.00 LT';
-                    document.getElementById('donemToplamHasılat').textContent = '0.00 TL';
-                    return;
-                }
-
-                let rows = '';
-                let donemLitre = 0;
-                let donemHasılat = 0;
-
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    donemLitre += data.toplam || 0;
-                    donemHasılat += data.toplamTutar || 0;
-                    rows += `
-                        <tr>
-                            <td>${new Date(data.tarih + 'T00:00:00').toLocaleDateString('tr-TR')}</td>
-                            <td>${(data.aksam || 0).toFixed(2)}</td>
-                            <td>${(data.sabah || 0).toFixed(2)}</td>
-                            <td><strong>${(data.toplam || 0).toFixed(2)}</strong></td>
-                            <td>${(data.fiyat || 0).toFixed(2)}</td>
-                            <td><strong>${(data.toplamTutar || 0).toFixed(2)}</strong></td>
-                        </tr>
-                    `;
-                });
-                
-                listBody.innerHTML = rows;
-                document.getElementById('donemToplamLitre').textContent = `${donemLitre.toFixed(2)} LT`;
-                document.getElementById('donemToplamHasılat').textContent = `${donemHasılat.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}`;
-
-            } catch (error) {
-                console.error("Süt hareketleri alınırken hata: ", error);
-                listBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Veriler yüklenemedi.</td></tr>`;
-            }
+        if (snapshot.empty) {
+            listBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Bu dönem için süt kaydı bulunmuyor.</td></tr>`;
+            return;
         }
 
-        const logoutButton = document.getElementById('logoutButton');
-        logoutButton.addEventListener('click', handleLogout);
+        let rows = '';
+        // YENİ: Tüm toplamlar için değişkenler tanımla
+        let donemToplamAksam = 0;
+        let donemToplamSabah = 0;
+        let donemToplamLitre = 0;
+        let donemToplamHasiat = 0;
 
-        function handleLogout() {
-            auth.signOut().then(() => {
-                window.location.href = 'login.html';
-            }).catch(error => console.error("Logout error", error));
-        }
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            // YENİ: Her bir değeri ilgili toplama ekle
+            donemToplamAksam += data.aksam || 0;
+            donemToplamSabah += data.sabah || 0;
+            donemToplamLitre += data.toplam || 0;
+            donemToplamHasiat += data.toplamTutar || 0;
+
+            rows += `
+                <tr>
+                    <td>${new Date(data.tarih + 'T00:00:00').toLocaleDateString('tr-TR')}</td>
+                    <td>${(data.aksam || 0).toFixed(2)}</td>
+                    <td>${(data.sabah || 0).toFixed(2)}</td>
+                    <td><strong>${(data.toplam || 0).toFixed(2)}</strong></td>
+                    <td>${(data.fiyat || 0).toFixed(2)}</td>
+                    <td><strong>${(data.toplamTutar || 0).toFixed(2)}</strong></td>
+                </tr>
+            `;
+        });
+        
+        listBody.innerHTML = rows;
+
+        // YENİ: Ortalama birim fiyatı hesapla
+        const ortalamaBirimFiyat = donemToplamLitre > 0 ? (donemToplamHasiat / donemToplamLitre) : 0;
+
+        // YENİ: Tablonun en altına eklenecek toplam satırını oluştur
+        const footerRow = `
+            <tr class="report-totals-row">
+                <td><strong>DÖNEM TOPLAMI</strong></td>
+                <td><strong>${donemToplamAksam.toFixed(2)}</strong></td>
+                <td><strong>${donemToplamSabah.toFixed(2)}</strong></td>
+                <td><strong>${donemToplamLitre.toFixed(2)}</strong></td>
+                <td><strong>${ortalamaBirimFiyat.toFixed(2)}</strong></td>
+                <td><strong>${donemToplamHasiat.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}</strong></td>
+            </tr>
+        `;
+        listFooter.innerHTML = footerRow;
+
+    } catch (error) {
+        console.error("Süt hareketleri alınırken hata: ", error);
+        listBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Veriler yüklenemedi.</td></tr>`;
+    }
+}
+
+
+
     </script>
 </body>
 </html>

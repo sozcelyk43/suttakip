@@ -4510,6 +4510,26 @@ const printStyles = `
     tr:nth-child(even) {
         background-color: #f9f9f9;
     }
+.final-summary p {
+    display: flex; /* Satırı esnek bir kutu yapar */
+    margin: 4px 0;
+    padding: 3px 0;
+    border-bottom: 1px dotted #999;
+}
+.final-summary p:last-of-type {
+    border-bottom: none;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+.final-summary span:last-child, 
+.final-summary strong:last-child {
+    margin-left: auto; /* Bu kural rakamları en sağa iter */
+    padding-left: 20px; /* Yazı ile rakam arasına boşluk koyar */
+}
+
+
+
+
 `;
 
     const iframe = document.createElement('iframe');
