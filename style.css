@@ -184,4 +184,49 @@
     }
 }
 
+/* ----- Müşteri Portalı Mobil Görünüm Düzeltmeleri ----- */
 
+/* Portal sayfasının başlığını tema rengi yap */
+#musteri_portali .module-header {
+    background-color: #2c3e50;
+    color: white;
+    border-radius: 0;
+}
+#musteri_portali .module-header h2,
+#musteri_portali .module-header h3 {
+    color: white;
+}
+
+/* Filtre ve Butonları yan yana, eşit genişlikte hizala */
+#musteri_portali .filter-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 eşit sütun oluştur */
+    gap: 10px; /* Aralarında boşluk bırak */
+    align-items: center;
+    margin-bottom: 25px;
+}
+#musteri_portali .filter-buttons .btn {
+    width: 100%;
+    margin-top: 0;
+    padding: 12px 5px; /* Buton iç boşluğu */
+    height: 45px;
+}
+
+/* Geniş tabloların mobil ekranda sağa doğru kaydırılabilmesini sağla */
+.table-responsive-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* iOS'ta daha akıcı kaydırma için */
+}
+
+/* Mobil cihazlarda sayfanın kenar boşluklarını sıfırla */
+@media (max-width: 768px) {
+    #musteri_portali .main-content {
+        padding: 0;
+    }
+    #musteri_portali .container {
+        padding: 15px;
+        border-radius: 0;
+        box-shadow: none;
+    }
+}
