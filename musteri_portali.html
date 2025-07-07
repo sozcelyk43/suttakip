@@ -21,15 +21,19 @@
     <h3 style="margin:0; padding:0; border:none; font-weight: normal; font-size: 1.1em;">Hoş Geldiniz, <span id="musteriAdi">...</span></h3>
 </div>
         <div class="container">
-            <div class="filter-buttons">
-                <select id="aySecimi" class="form-control" style="height: 45px;">
-                    </select>
-                <a href="sifre_degistir.html" class="btn btn-secondary">Şifre Değiştir</a>
-                <a href="#" id="logoutButton" class="btn btn-danger" style="display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2; padding-top: 5px; padding-bottom: 5px;">
-    <div>Çıkış Yap</div>
-    <div id="logoutUserEmail" style="font-size: 0.7em; font-weight: normal; text-transform: none;"></div>
-</a>
-            </div>
+
+
+<div class="filter-buttons">
+    <select id="ayFiltresi" class="form-control" style="height: 45px;"></select>
+    <select id="yilFiltresi" class="form-control" style="height: 45px;"></select>
+    <button type="button" id="raporGosterBtn" class="btn btn-primary" style="height: 45px;">Göster</button>
+
+    <a href="sifre_degistir.html" class="btn btn-secondary">Şifre Değiştir</a>
+    <a href="#" id="logoutButton" class="btn btn-danger" style="display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2; padding-top: 5px; padding-bottom: 5px;">
+        <div>Çıkış Yap</div>
+        <div id="logoutUserEmail" style="font-size: 0.7em; font-weight: normal; text-transform: none;"></div>
+    </a>
+</div>
 
             <div class="list-section">
                 <div class="table-responsive-wrapper">
@@ -81,62 +85,78 @@
         auth.onAuthStateChanged(user => {
             if (user) {
                 const userEmailDiv = document.getElementById('logoutUserEmail');
-        if (userEmailDiv) {
-            userEmailDiv.textContent = user.email;
-        }
+                if (userEmailDiv) {
+                    userEmailDiv.textContent = user.email;
+                }
 
                 db.collection('cariler').where('authUID', '==', user.uid).limit(1).get()
-                    .then(snapshot => {
-                        if (!snapshot.empty) {
-                            const cariDoc = snapshot.docs[0];
-                            userCariId = cariDoc.id;
-                            document.getElementById('musteriAdi').textContent = cariDoc.data().adiSoyadi;
-                            populateAyFiltresi();
-                        } else {
-                            alert("Bu hesaba bağlı bir müşteri kartı bulunamadı.");
-                            handleLogout();
+                .then(snapshot => {
+                    if (!snapshot.empty) {
+                        const cariDoc = snapshot.docs[0];
+                        userCariId = cariDoc.id;
+                        document.getElementById('musteriAdi').textContent = cariDoc.data().adiSoyadi;
+                        
+                        // --- YENİ KOD BLOĞU BAŞLANGICI ---
+                        const aySelect = document.getElementById('ayFiltresi');
+                        const yilSelect = document.getElementById('yilFiltresi');
+                        const gosterBtn = document.getElementById('raporGosterBtn');
+                        const now = new Date();
+
+                        const ayIsimleri = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+                        ayIsimleri.forEach((ay, index) => {
+                            const option = document.createElement('option');
+                            option.value = String(index + 1).padStart(2, '0');
+                            option.textContent = ay;
+                            aySelect.appendChild(option);
+                        });
+                        aySelect.value = String(now.getMonth() + 1).padStart(2, '0');
+
+                        for (let yil = 2050; yil >= 2000; yil--) {
+                            const option = document.createElement('option');
+                            option.value = yil;
+                            option.textContent = yil;
+                            yilSelect.appendChild(option);
                         }
-                    });
+                        yilSelect.value = now.getFullYear();
+
+                        gosterBtn.addEventListener('click', () => {
+                            const secilenAy = aySelect.value;
+                            const secilenYil = yilSelect.value;
+                            if (secilenAy && secilenYil && userCariId) {
+                                const ayYil = `${secilenYil}-${secilenAy}`;
+                                fetchSutHareketleri(ayYil);
+                            }
+                        });
+
+                        gosterBtn.click();
+                        // --- YENİ KOD BLOĞU SONU ---
+                    } else {
+                        alert("Bu hesaba bağlı bir müşteri kartı bulunamadı.");
+                        handleLogout();
+                    }
+                })
+                .catch(error => { // Hata yönetimi için .catch eklemek iyi bir pratiktir.
+                    console.error("Müşteri bilgileri alınırken hata oluştu:", error);
+                    alert("Müşteri bilgileri alınırken bir hata oluştu. Lütfen daha sonra tekrar deneyin.");
+                    handleLogout();
+                });
+
             } else {
-                window.location.href = 'login.html';
+                // Kullanıcı giriş yapmamışsa login sayfasına yönlendirilebilir.
+                // Bu kısım zaten handleLogout ile dolaylı olarak yapılıyor.
+                // handleLogout(); // Bu satır, giriş yapmamış kullanıcıyı login'e atar.
             }
-        });
+        }); // <-- EKSİK OLAN KAPATMA PARANTEZİ
 
+        const logoutButton = document.getElementById('logoutButton');
 
-
-
-
-const logoutButton = document.getElementById('logoutButton');
-logoutButton.addEventListener('click', handleLogout);
 function handleLogout() {
     auth.signOut().then(() => {
         window.location.href = 'login.html';
     }).catch(error => console.error("Çıkış hatası:", error));
 }
-        function populateAyFiltresi() {
-            const aySelect = document.getElementById('aySecimi');
-            aySelect.innerHTML = '<option value="">Ay Seçin...</option>';
-            const now = new Date();
-            const ayIsimleri = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 
-            for (let i = 0; i < 12; i++) {
-                let date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                let year = date.getFullYear();
-                let month = date.getMonth();
-                let ayYil = `${year}-${String(month + 1).padStart(2, '0')}`;
-                let optionText = `${ayIsimleri[month]} ${year}`;
-                aySelect.add(new Option(optionText, ayYil));
-            }
-        }
-
-        document.getElementById('aySecimi').addEventListener('change', (event) => {
-            const ayYil = event.target.value;
-            if (ayYil && userCariId) {
-                fetchSutHareketleri(ayYil);
-            }
-        });
-        
-       async function fetchSutHareketleri(ayYil) {
+async function fetchSutHareketleri(ayYil) {
     const [year, month] = ayYil.split('-');
     const startDate = `${year}-${month}-01`;
     const endDate = new Date(year, month, 0).toISOString().split('T')[0];
