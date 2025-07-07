@@ -237,9 +237,6 @@
     }
 }
 
-
-/* --- GENEL MOBİL FİLTRE ALANI DÜZENLEMESİ --- */
-/* Ekran 768px'den darsa, bu kuralları uygula */
 @media (max-width: 768px) {
     
     /* Filtreleri ve butonları içeren tüm grid yapılarını tek sütuna düşür */
@@ -263,19 +260,18 @@
     }
 }
 
-
 /* ----- Tahsilat ve Ödemeler Formu Mobil Uyum Düzenlemesi ----- */
 
 /* Masaüstü (Geniş Ekran) Görünümü */
 .tahsilat-form-grid {
     display: grid;
-    /* Masaüstü için 3 sütunlu bir yapı (Açıklama alanı hariç) */
+    /* Masaüstü için 3 sütunlu bir yapı */
     grid-template-columns: repeat(3, 1fr);
     align-items: end;
     gap: 20px;
 }
 
-/* Bu formdaki Açıklama alanının masaüstünde 3 sütunu da kaplamasını sağla */
+/* Bu formdaki "Açıklama" alanının masaüstünde 3 sütunu da kaplamasını sağla */
 .tahsilat-form-grid .form-group[style*="span 3"] {
      grid-column: 1 / -1;
 }
@@ -287,7 +283,7 @@
         grid-template-columns: 1fr;
     }
 
-    /* Mobilde açıklama alanının genişlemesini sıfırla */
+    /* Mobilde "Açıklama" alanının genişlemesini sıfırla */
     .tahsilat-form-grid .form-group[style*="span 3"] {
         grid-column: auto;
     }
