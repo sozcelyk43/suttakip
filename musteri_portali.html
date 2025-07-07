@@ -148,7 +148,12 @@
             }
         }); // <-- EKSİK OLAN KAPATMA PARANTEZİ
 
-        const logoutButton = document.getElementById('logoutButton');
+
+const logoutButton = document.getElementById('logoutButton');
+logoutButton.addEventListener('click', (event) => {
+    event.preventDefault(); // Tarayıcının linke gitme varsayılan davranışını engelle
+    handleLogout();
+});
 
 function handleLogout() {
     auth.signOut().then(() => {
