@@ -400,8 +400,8 @@
         <div class="form-group">
             <label for="islemTuru">İşlem Türü:</label>
             <select id="islemTuru" required>
-                <option value="tahsilat">Tahsilat</option>
-                <option value="odeme">Ödeme</option>
+                <option value="odeme">Tahsilat</option>
+                <option value="tahsilat">Ödeme</option>
             </select>
         </div>
 
@@ -3040,11 +3040,11 @@ async function renderOdemeListesi() {
             const islem = doc.data();
             const cariAdi = window.cariDataMap.get(islem.cariId)?.adiSoyadi || 'Bilinmiyor';
             
-            let islemTuruText = islem.islemTuru;
-           if(islem.islemTuru === 'odeme') islemTuruText = 'Tahsilat'; 
-if(islem.islemTuru === 'tahsilat') islemTuruText = 'Ödeme';   
-            if(islem.islemTuru === 'borc') islemTuruText = 'Açılış Borcu';
-            if(islem.islemTuru === 'alacak') islemTuruText = 'Açılış Alacağı';
+          	let islemTuruText = islem.islemTuru;
+if(islem.islemTuru === 'odeme') islemTuruText = 'Ödeme';
+if(islem.islemTuru === 'tahsilat') islemTuruText = 'Tahsilat'; 
+            	if(islem.islemTuru === 'borc') islemTuruText = 'Açılış Borcu';
+            	if(islem.islemTuru === 'alacak') islemTuruText = 'Açılış Alacağı';
 
             rows += `<tr>
                 <td>${formatDate(islem.tarih)}</td>
