@@ -260,19 +260,18 @@
     }
 }
 
-/* ----- Tahsilat ve Ödemeler Formu Mobil Uyum Düzenlemesi ----- */
+/* ----- Tahsilat ve Ödemeler Formu Düzenlemesi (Mobil Uyumlu) ----- */
 
 /* Masaüstü (Geniş Ekran) Görünümü */
 .tahsilat-form-grid {
     display: grid;
-    /* Masaüstü için 3 sütunlu bir yapı */
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr 1fr; /* Masaüstünde 2 sütunlu bir yapı */
     align-items: end;
     gap: 20px;
 }
 
-/* Bu formdaki "Açıklama" alanının masaüstünde 3 sütunu da kaplamasını sağla */
-.tahsilat-form-grid .form-group[style*="span 3"] {
+/* Cari ve Açıklama alanlarının masaüstünde 2 sütunu da kaplamasını sağla */
+.tahsilat-form-grid .form-group[style*="grid-column"] {
      grid-column: 1 / -1;
 }
 
@@ -283,8 +282,8 @@
         grid-template-columns: 1fr;
     }
 
-    /* Mobilde "Açıklama" alanının genişlemesini sıfırla */
-    .tahsilat-form-grid .form-group[style*="span 3"] {
+    /* Mobilde tam genişlik kuralını sıfırla ki alt alta düzgün dursunlar */
+    .tahsilat-form-grid .form-group[style*="grid-column"] {
         grid-column: auto;
     }
 }
