@@ -3,28 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Süt Takip Programı - Giriş</title>
-    <link rel="stylesheet" href="login.css">
+    <title>Sisteme Giriş</title>
     <meta name="theme-color" content="#2c3e50">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192x192.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+        body {
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5; /* Açık gri arkaplan */
+        }
+
+        .login-container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); /* Daha belirgin gölge */
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #1c1c1e; /* Koyu renk başlık */
+            font-weight: 600;
+        }
+
+        .subtitle {
+            margin-bottom: 30px;
+            color: #6a6a6e; /* Gri tonlu alt başlık */
+            font-size: 0.95em;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #3c3c3e;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #dcdce0;
+            border-radius: 8px;
+            box-sizing: border-box; /* Padding ve border'ı genişliğe dahil et */
+            font-size: 1em;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #007bff; /* Mavi çerçeve */
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2); /* Mavi odaklanma gölgesi */
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff; /* Ana Mavi Buton */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.05em;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #0056b3; /* Koyu mavi */
+        }
+
+        .error-message {
+            color: #dc3545; /* Kırmızı hata rengi */
+            margin-top: 15px;
+            height: 20px;
+            font-size: 0.9em;
+        }
+    </style>
 </head>
 <body>
     <div class="login-container">
         <form id="loginForm">
-            <h2>Sisteme Giriş</h2>
-            <p class="subtitle">Süt Takip Programı Yönetim Paneli</p>
-            <div class="input-group">
-                <label for="username">E-posta</label>
-                <input type="email" id="username" name="username" required>
-            </div>
-            <div class="input-group">
-                <label for="password">Şifre</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <button type="submit">Giriş Yap</button>
-            <p id="errorMessage" class="error-message"></p>
-        </form>
+    <h2>Sisteme Giriş</h2>
+    <p class="subtitle">Kurumsal Erişim Portalı</p>
+    <div class="input-group">
+        <label for="username">E-posta</label>
+        <input type="email" id="username" name="username" required>
+    </div>
+    <div class="input-group">
+        <label for="password">Şifre</label>
+        <input type="password" id="password" name="password" required>
+    </div>
+    <button type="submit">Giriş Yap</button>
+    <p id="errorMessage" class="error-message"></p>
+    <p style="margin-top: 15px; font-size: 0.85em; color: #6a6a6e;">
+        Şifrenizi unuttuysanız lütfen yönetici ile iletişime geçin.
+    </p>
+</form>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -47,7 +137,7 @@
         const errorMessage = document.getElementById('errorMessage');
 
         loginForm.addEventListener('submit', function(event) {
-            event.preventDefault();
+            event.preventDefault(); // Formun varsayılan gönderimini engelle
             const email = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
@@ -57,7 +147,7 @@
                 })
                 .catch((error) => {
                     errorMessage.textContent = 'E-posta veya şifre hatalı!';
-                    console.error("Login Error:", error);
+                    console.error("Giriş Hatası:", error);
                 });
         });
     </script>
