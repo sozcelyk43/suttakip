@@ -4271,7 +4271,7 @@ async function renderYemSatisListesi() {
         const snapshot = await db.collection('yem_satislari')
             .where('sahipId', '==', sahipId)
             .orderBy('tarih', 'desc')
-            .limit(200) 
+            //.limit(200) 
             .get();
 
         if (snapshot.empty) {
