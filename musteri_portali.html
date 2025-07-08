@@ -7,44 +7,58 @@
   <meta name="theme-color" content="#2c3e50" />
 <style>
     body {font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;line-height: 1.6;margin: 0;padding: 0;background-color: #f4f7f9;color: #333;}
-a.btn {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-decoration: none;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+    a.btn {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-decoration: none;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
     .main-content {padding: 20px;background-color: #ecf0f1;}
     .container {background-color: #fff;padding: 25px;border-radius: 8px;box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);    }
     .module-header {background-color: #2c3e50;color: #fff;text-align: center;padding: 25px;border-radius: 8px;margin-bottom: 20px;}
     .module-header h2, .module-header h3 {margin: 0;}
-    .filter-buttons {display: grid;grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));gap: 10px;margin-bottom: 20px;}
+
+    /* Filter/Button Layout Updated */
+    .filter-buttons {display: flex;flex-direction: column;gap: 10px;margin-bottom: 20px;}
+    .filter-row-top, .filter-row-bottom {display: grid; gap: 10px;}
+    .filter-row-top {grid-template-columns: 1fr 1fr 1fr;}
+    .filter-row-bottom {grid-template-columns: 1fr 1fr;}
+
     .btn {display: inline-block;background-color: #3498db;color: #fff;padding: 12px;text-align: center;border: none;border-radius: 6px;
-    	cursor: pointer;font-size: 1em;transition: background-color 0.2s;text-transform: uppercase;}
+    	cursor: pointer;font-size: 1em;transition: background-color 0.2s;text-transform: uppercase; line-height: 1.2;}
     .btn:hover { background-color: #2980b9; }
     .btn-danger { background-color: #e74c3c; }
+    .btn-danger:hover { background-color: #c0392b; }
+    .btn-secondary {  color: #fff;  background-color: #95a5a6;}
+    .btn-secondary:hover { background-color: #7f8c8d; }
 
-.table-responsive-wrapper {  width: 100%;  -webkit-overflow-scrolling: touch;}
-#sutHareketleriTablosu {  min-width: 750px;   table-layout: fixed;}
-.btn-danger:hover { background-color: #c0392b; }
-.btn-secondary {  color: #fff;  background-color: #95a5a6;}
-table th, table td {  text-align: center;  white-space: nowrap;}
-.btn-secondary:hover { background-color: #7f8c8d; }
-  select.form-control {padding: 12px;border-radius: 6px;border: 1px solid #ccc;font-size: 1em;background-color: #fff;}
-    table {      width: 100%;      border-collapse: collapse;      margin-top: 20px;      font-size: 0.95em;    }
-    th, td {      padding: 12px 15px;border: 1px solid #ecf0f1;      text-align: center;}
-    th {      background-color: #f8f9fa;      font-weight: 600;      color: #495057;   }
-tbody tr:nth-child(odd) {  background-color: #ffffff;}
-tbody tr:nth-child(even) {  background-color: #f2f6fa;}
+    /* Table Layout Updated */
+    table {width: 100%;border-collapse: collapse;margin-top: 20px;font-size: 0.95em;}
+    th, td {padding: 12px 15px;border: 1px solid #ecf0f1;text-align: center;word-break: break-word;}
+    th {background-color: #f8f9fa;font-weight: 600;color: #495057;}
+    tbody tr:nth-child(odd) {background-color: #ffffff;}
+    tbody tr:nth-child(even) {background-color: #f2f6fa;}
     tbody tr:hover { background-color: #f0f8ff; }
-    tfoot tr {      background-color: #e9ecef;      font-weight: bold;      color: #2c3e50;    }
-#logoutUserEmail {  font-size: 0.75em;  text-transform: lowercase;  color: #ecf0f1;}
-    @media (max-width: 768px) {      .container {        padding: 15px;        border-radius: 0;      }
-      .main-content {        padding: 0;      }
-      .module-header {        border-radius: 0;      }}
+    tfoot tr {background-color: #e9ecef;font-weight: bold;color: #2c3e50;}
 
-	
+    select.form-control {padding: 12px;border-radius: 6px;border: 1px solid #ccc;font-size: 1em;background-color: #fff;}
+    #logoutUserEmail {font-size: 0.75em;text-transform: lowercase;color: #ecf0f1; margin-top: 2px;}
+
+    @media (max-width: 768px) {
+      .container {padding: 15px;border-radius: 0;}
+      .main-content {padding: 0;}
+      .module-header {border-radius: 0;}
+      /* Responsive Table Adjustments */
+      table {font-size: 0.85em;}
+      th, td {padding: 10px 4px;}
+    }
+     @media (max-width: 480px) {
+        .filter-row-top, .filter-row-bottom {
+            grid-template-columns: 1fr; /* Stack all filter/button items vertically on very small screens */
+        }
+    }
 </style>
 </head>
 <body>
@@ -55,33 +69,35 @@ tbody tr:nth-child(even) {  background-color: #f2f6fa;}
     </div>
     <div class="container">
       <div class="filter-buttons">
-        <select id="ayFiltresi" class="form-control"></select>
-        <select id="yilFiltresi" class="form-control"></select>
-        <button id="raporGosterBtn" class="btn">Göster</button>
-        <a href="sifre_degistir.html" class="btn btn-secondary">Şifre Değiştir</a>
-        <a href="#" id="logoutButton" class="btn btn-danger">
-          <div>Çıkış Yap</div>
-          <div id="logoutUserEmail"></div>
-        </a>
+        <div class="filter-row-top">
+          <select id="ayFiltresi" class="form-control"></select>
+          <select id="yilFiltresi" class="form-control"></select>
+          <button id="raporGosterBtn" class="btn">Göster</button>
+        </div>
+        <div class="filter-row-bottom">
+          <a href="sifre_degistir.html" class="btn btn-secondary">Şifre Değiştir</a>
+          <a href="#" id="logoutButton" class="btn btn-danger">
+            <div>Çıkış Yap</div>
+            <div id="logoutUserEmail"></div>
+          </a>
+        </div>
       </div>
-      <div class="table-responsive-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>TARİH</th>
-              <th>AKŞAM (LT)</th>
-              <th>SABAH (LT)</th>
-              <th>TOPLAM (LT)</th>
-              <th>BİRİM FİYAT (TL)</th>
-              <th>TOPLAM FİYAT (TL)</th>
-            </tr>
-          </thead>
-          <tbody id="sutListesiBody">
-            <tr><td colspan="6">Lütfen bir ay seçin.</td></tr>
-          </tbody>
-          <tfoot id="sutListesiFooter"></tfoot>
-        </table>
-      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>TARİH</th>
+            <th>AKŞAM (LT)</th>
+            <th>SABAH (LT)</th>
+            <th>TOPLAM (LT)</th>
+            <th>BİRİM FİYAT (TL)</th>
+            <th>TOPLAM FİYAT (TL)</th>
+          </tr>
+        </thead>
+        <tbody id="sutListesiBody">
+          <tr><td colspan="6">Lütfen bir ay seçin.</td></tr>
+        </tbody>
+        <tfoot id="sutListesiFooter"></tfoot>
+      </table>
     </div>
   </div>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -154,96 +170,98 @@ tbody tr:nth-child(even) {  background-color: #f2f6fa;}
                         handleLogout();
                     }
                 })
-                .catch(error => { // Hata yönetimi için .catch eklemek iyi bir pratiktir.
+                .catch(error => {
                     console.error("Müşteri bilgileri alınırken hata oluştu:", error);
                     alert("Müşteri bilgileri alınırken bir hata oluştu. Lütfen daha sonra tekrar deneyin.");
                     handleLogout();
                 });
 
             } else {
-               
+               // Kullanıcı giriş yapmamışsa, login sayfasına yönlendirilebilir.
+               // window.location.href = 'login.html';
             }
         });
 
 	const logoutButton = document.getElementById('logoutButton');
 	logoutButton.addEventListener('click', (event) => {
-    	event.preventDefault(); // Tarayıcının linke gitme varsayılan davranışını engelle
+    	event.preventDefault();
     	handleLogout();
-});
+    });
 
-function handleLogout() {
-    auth.signOut().then(() => {
-        window.location.href = 'login.html';
-    }).catch(error => console.error("Çıkış hatası:", error));
-}
+    function handleLogout() {
+        auth.signOut().then(() => {
+            window.location.href = 'login.html';
+        }).catch(error => console.error("Çıkış hatası:", error));
+    }
 
-async function fetchSutHareketleri(ayYil) {
-    const [year, month] = ayYil.split('-');
-    const startDate = `${year}-${month}-01`;
-    const endDate = new Date(year, month, 0).toISOString().split('T')[0];
-    
-    const listBody = document.getElementById('sutListesiBody');
-    const listFooter = document.getElementById('sutListesiFooter'); // Yeni footer elemanını seç
-    listBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Veriler yükleniyor...</td></tr>`;
-    listFooter.innerHTML = ''; // Footer'ı temizle
+    async function fetchSutHareketleri(ayYil) {
+        const [year, month] = ayYil.split('-');
+        const startDate = `${year}-${month}-01`;
+        // Ayın son gününü doğru hesaplamak için bir sonraki ayın 0. gününü kullan
+        const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+        
+        const listBody = document.getElementById('sutListesiBody');
+        const listFooter = document.getElementById('sutListesiFooter');
+        listBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Veriler yükleniyor...</td></tr>`;
+        listFooter.innerHTML = '';
 
-    try {
-        const snapshot = await db.collection('sut_alimlari')
-            .where('cariId', '==', userCariId)
-            .where('tarih', '>=', startDate)
-            .where('tarih', '<=', endDate)
-            .orderBy('tarih', 'desc')
-            .get();
+        try {
+            const snapshot = await db.collection('sut_alimlari')
+                .where('cariId', '==', userCariId)
+                .where('tarih', '>=', startDate)
+                .where('tarih', '<=', endDate)
+                .orderBy('tarih', 'desc')
+                .get();
 
-        if (snapshot.empty) {
-            listBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Bu dönem için süt kaydı bulunmuyor.</td></tr>`;
-            return;
-        }
+            if (snapshot.empty) {
+                listBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Bu dönem için süt kaydı bulunmuyor.</td></tr>`;
+                return;
+            }
 
-        let rows = '';
-	let donemToplamAksam = 0;
-        let donemToplamSabah = 0;
-        let donemToplamLitre = 0;
-        let donemToplamHasiat = 0;
+            let rows = '';
+            let donemToplamAksam = 0;
+            let donemToplamSabah = 0;
+            let donemToplamLitre = 0;
+            let donemToplamHasiat = 0;
 
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            donemToplamAksam += data.aksam || 0;
-            donemToplamSabah += data.sabah || 0;
-            donemToplamLitre += data.toplam || 0;
-            donemToplamHasiat += data.toplamTutar || 0;
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                donemToplamAksam += data.aksam || 0;
+                donemToplamSabah += data.sabah || 0;
+                donemToplamLitre += data.toplam || 0;
+                donemToplamHasiat += data.toplamTutar || 0;
 
-            rows += `
-                <tr>
-                    <td>${new Date(data.tarih + 'T00:00:00').toLocaleDateString('tr-TR')}</td>
-                    <td>${(data.aksam || 0).toFixed(2)}</td>
-                    <td>${(data.sabah || 0).toFixed(2)}</td>
-                    <td><strong>${(data.toplam || 0).toFixed(2)}</strong></td>
-                    <td>${(data.fiyat || 0).toFixed(2)}</td>
-                    <td><strong>${(data.toplamTutar || 0).toFixed(2)}</strong></td>
+                rows += `
+                    <tr>
+                        <td>${new Date(data.tarih + 'T00:00:00').toLocaleDateString('tr-TR')}</td>
+                        <td>${(data.aksam || 0).toFixed(2)}</td>
+                        <td>${(data.sabah || 0).toFixed(2)}</td>
+                        <td><strong>${(data.toplam || 0).toFixed(2)}</strong></td>
+                        <td>${(data.fiyat || 0).toFixed(2)}</td>
+                        <td><strong>${(data.toplamTutar || 0).toFixed(2)}</strong></td>
+                    </tr>
+                `;
+            });
+            
+            listBody.innerHTML = rows;
+            const ortalamaBirimFiyat = donemToplamLitre > 0 ? (donemToplamHasiat / donemToplamLitre) : 0;
+            const footerRow = `
+                <tr class="report-totals-row">
+                    <td><strong>DÖNEM TOPLAMI</strong></td>
+                    <td><strong>${donemToplamAksam.toFixed(2)}</strong></td>
+                    <td><strong>${donemToplamSabah.toFixed(2)}</strong></td>
+                    <td><strong>${donemToplamLitre.toFixed(2)}</strong></td>
+                    <td><strong>${ortalamaBirimFiyat.toFixed(2)}</strong></td>
+                    <td><strong>${donemToplamHasiat.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL</strong></td>
                 </tr>
             `;
-        });
-        
-        listBody.innerHTML = rows;
-        const ortalamaBirimFiyat = donemToplamLitre > 0 ? (donemToplamHasiat / donemToplamLitre) : 0;
-        const footerRow = `
-            <tr class="report-totals-row">
-                <td><strong>DÖNEM TOPLAMI</strong></td>
-                <td><strong>${donemToplamAksam.toFixed(2)}</strong></td>
-                <td><strong>${donemToplamSabah.toFixed(2)}</strong></td>
-                <td><strong>${donemToplamLitre.toFixed(2)}</strong></td>
-                <td><strong>${ortalamaBirimFiyat.toFixed(2)}</strong></td>
-                <td><strong>${donemToplamHasiat.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}</strong></td>
-            </tr>
-        `;
-        listFooter.innerHTML = footerRow;
+            listFooter.innerHTML = footerRow;
 
-    } catch (error) {
-        console.error("Süt hareketleri alınırken hata: ", error);
-        listBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Veriler yüklenemedi.</td></tr>`;
+        } catch (error) {
+            console.error("Süt hareketleri alınırken hata: ", error);
+            listBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Veriler yüklenemedi.</td></tr>`;
+        }
     }
-}
   </script>
 </body>
 </html>
