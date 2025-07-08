@@ -4252,48 +4252,41 @@ async function renderYemSatisListesi() {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
 
-    const tableHeader = listBody.parentElement.querySelector('thead tr');
-    if (tableHeader) {
-        tableHeader.innerHTML = `
-            <th>İşlem Tarihi ve Saati</th>
-            <th>Alan Cari</th>
-            <th>Yem</th>
-            <th>Miktar</th>
-            <th>Fiyat</th>
-            <th>Tutar</th>
-            <th class="dont-print">İşlemler</th>
-        `;
-    }
-
     listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Yükleniyor...</td></tr>';
 
     try {
+        // 1. Veritabanından sadece ana kritere göre sırala (`tarih`).
+        // Bu, `kayitZamani` olmayan eski kayıtların da gelmesini sağlar.
         const snapshot = await db.collection('yem_satislari')
             .where('sahipId', '==', sahipId)
             .orderBy('tarih', 'desc')
-            //.limit(200) 
-            .get();
+            .get(); 
 
         if (snapshot.empty) {
             listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Yem satış hareketi bulunmuyor.</td></tr>';
             return;
         }
-        const tumKayitlar = snapshot.docs;
+
+        const tumKayitlar = snapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+
+        // 2. Tarayıcıda ikincil, daha detaylı sıralama yap.
         tumKayitlar.sort((a, b) => {
-            const dataA = a.data();
-            const dataB = b.data();
-            if (dataA.tarih > dataB.tarih) return -1;
-            if (dataA.tarih < dataB.tarih) return 1;
-            const timeA = dataA.kayitZamani?.toDate() || new Date(0); 
-            const timeB = dataB.kayitZamani?.toDate() || new Date(0);
-            return timeB - timeA; 
+            // Ana kriter: `tarih` alanını karşılaştır.
+            if (a.data.tarih > b.data.tarih) return -1;
+            if (a.data.tarih < b.data.tarih) return 1;
+
+            // Eğer tarihler aynı ise, `kayitZamani` (saat) olanı öne al.
+            const timeA = a.data.kayitZamani?.toDate() || new Date(0); // Saati olmayanı en eski kabul et.
+            const timeB = b.data.kayitZamani?.toDate() || new Date(0);
+            return timeB - timeA; // Saatleri büyükten küçüğe sırala.
         });
+
         let rows = '';
-        tumKayitlar.slice(0, 100).forEach(doc => {
-            const satis = doc.data();
+        tumKayitlar.forEach(kayit => {
+            const satis = kayit.data;
             const yemAdi = window.yemDataMap.get(satis.yemId)?.ad || 'Bilinmiyor';
             const cariAdi = window.cariDataMap.get(satis.cariId)?.adiSoyadi || 'Bilinmiyor';
-
+            
             let tarihSaat = '-';
             if (satis.tarih) {
                 tarihSaat = formatDate(satis.tarih);
@@ -4301,9 +4294,6 @@ async function renderYemSatisListesi() {
             if (satis.kayitZamani?.toDate) {
                 const time = satis.kayitZamani.toDate().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
                 tarihSaat = (tarihSaat !== '-') ? `${tarihSaat} ${time}` : formatDateTime(satis.kayitZamani);
-            } else if (satis.date?.toDate) {
-                 const time = satis.date.toDate().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-                 tarihSaat = (tarihSaat !== '-') ? `${tarihSaat} ${time}` : formatDateTime(satis.date);
             }
 
             rows += `<tr>
@@ -4314,8 +4304,8 @@ async function renderYemSatisListesi() {
                 <td>${formatCurrency(satis.satisFiyati)}</td>
                 <td>${formatCurrency(satis.toplamTutar)}</td>
                 <td class="dont-print">
-                    <button class="btn btn-edit btn-sm" onclick="editYemSatisi('${doc.id}')">Düzenle</button>
-                    <button class="btn btn-delete btn-sm" onclick="deleteYemSatisi('${doc.id}')">Sil</button>
+                    <button class="btn btn-edit btn-sm" onclick="editYemSatisi('${kayit.id}')">Düzenle</button>
+                    <button class="btn btn-delete btn-sm" onclick="deleteYemSatisi('${kayit.id}')">Sil</button>
                 </td>
             </tr>`;
         });
@@ -4324,10 +4314,9 @@ async function renderYemSatisListesi() {
 
     } catch (e) {
         console.error("Yem satış hareketleri yüklenirken hata:", e);
-        listBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Liste yüklenirken bir hata oluştu. Lütfen konsolu kontrol edin.</td></tr>`;
+        listBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Liste yüklenirken bir hata oluştu.</td></tr>`;
     }
 }
-
 async function editYemSatisi(id) {
     try {
         const doc = await db.collection('yem_satislari').doc(id).get();
