@@ -1,12 +1,1 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
-body {font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;display: flex;justify-content: center;align-items: center;min-height: 100vh;margin: 0;background-color: #f0f2f5;}
-.login-container {background-color: #ffffff;padding: 40px;    border-radius: 12px;box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);width: 100%;max-width: 400px;text-align: center;}
-h2 {margin-top: 0;margin-bottom: 10px;color: #1c1c1e;font-weight: 600;}
-.subtitle {margin-bottom: 30px;color: #6a6a6e;font-size: 0.95em;}
-.input-group {margin-bottom: 20px;text-align: left;}
-.input-group label {display: block;margin-bottom: 8px;color: #3c3c3e;font-weight: 500;font-size: 0.9em;}
-.input-group input {width: 100%;padding: 12px 15px;border: 1px solid #dcdce0;border-radius: 8px;box-sizing: border-box;font-size: 1em;transition: border-color 0.2s, box-shadow 0.2s;}
-.input-group input:focus {outline: none;border-color: #007bff;box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);}
-button {width: 100%;padding: 12px;background-color: #007bff;color: white;border: none;border-radius: 8px;cursor: pointer;font-size: 1.05em;font-weight: 500;transition: background-color 0.2s;}
-button:hover {background-color: #0056b3;}
-.error-message {color: #dc3545;margin-top: 15px;height: 20px;font-size: 0.9em;}
+
