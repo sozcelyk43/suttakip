@@ -1,72 +1,100 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Müşteri Süt Hareketleri</title>
-    <link rel="stylesheet" href="style.css">
-    <meta name="theme-color" content="#2c3e50">
-    <style>
-        /* Bu sayfaya özel ek stiller */
-        .summary-box { border-top: 2px solid #3498db; margin-top: 25px; padding-top: 15px; }
-        .summary-box p { font-size: 1.1em; display: flex; justify-content: space-between; margin-bottom: 8px; }
-        .summary-box strong { color: #2c3e50; }
-        .filter-buttons { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .welcome-header { display: flex; justify-content: space-between; align-items: center; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Müşteri Süt Hareketleri</title>
+  <meta name="theme-color" content="#2c3e50" />
+<style>
+    body {font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;line-height: 1.6;margin: 0;padding: 0;background-color: #f4f7f9;color: #333;}
+a.btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+    .main-content {padding: 20px;background-color: #ecf0f1;}
+    .container {background-color: #fff;padding: 25px;border-radius: 8px;box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);    }
+    .module-header {background-color: #2c3e50;color: #fff;text-align: center;padding: 25px;border-radius: 8px;margin-bottom: 20px;}
+    .module-header h2, .module-header h3 {margin: 0;}
+    .filter-buttons {display: grid;grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));gap: 10px;margin-bottom: 20px;}
+    .btn {display: inline-block;background-color: #3498db;color: #fff;padding: 12px;text-align: center;border: none;border-radius: 6px;
+    	cursor: pointer;font-size: 1em;transition: background-color 0.2s;text-transform: uppercase;}
+    .btn:hover { background-color: #2980b9; }
+    .btn-danger { background-color: #e74c3c; }
+    .btn-danger:hover { background-color: #c0392b; }
+.btn-secondary {
+  color: #fff;
+  background-color: #95a5a6;
+}
+    .btn-secondary:hover { background-color: #7f8c8d; }
+    select.form-control {padding: 12px;border-radius: 6px;border: 1px solid #ccc;font-size: 1em;background-color: #fff;}
+    table {      width: 100%;      border-collapse: collapse;      margin-top: 20px;      font-size: 0.95em;    }
+    th, td {      padding: 12px 15px;border: 1px solid #ecf0f1;      text-align: center;}
+    th {      background-color: #f8f9fa;      font-weight: 600;      color: #495057;   }
+tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f2f6fa;
+}
+    tbody tr:hover { background-color: #f0f8ff; }
+    tfoot tr {      background-color: #e9ecef;      font-weight: bold;      color: #2c3e50;    }
+#logoutUserEmail {
+  font-size: 0.75em;
+  text-transform: lowercase;
+  color: #ecf0f1;
+}
+    @media (max-width: 768px) {      .container {        padding: 15px;        border-radius: 0;      }
+      .main-content {        padding: 0;      }
+      .module-header {        border-radius: 0;      }}
+</style>
 </head>
-<body id="musteri_portali"> <div class="main-content">
-<div class="module-header">
-    <h2>Müşteri Süt Hareketleri</h2>
-    <h3 style="margin:0; padding:0; border:none; font-weight: normal; font-size: 1.1em;">Hoş Geldiniz, <span id="musteriAdi">...</span></h3>
-</div>
-        <div class="container">
-
-
-<div class="filter-buttons">
-    <select id="ayFiltresi" class="form-control" style="height: 45px;"></select>
-    <select id="yilFiltresi" class="form-control" style="height: 45px;"></select>
-    <button type="button" id="raporGosterBtn" class="btn btn-primary" style="height: 45px;">Göster</button>
-
-    <a href="sifre_degistir.html" class="btn btn-secondary">Şifre Değiştir</a>
-    <a href="#" id="logoutButton" class="btn btn-danger" style="display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2; padding-top: 5px; padding-bottom: 5px;">
-        <div>Çıkış Yap</div>
-        <div id="logoutUserEmail" style="font-size: 0.7em; font-weight: normal; text-transform: none;"></div>
-    </a>
-</div>
-
-            <div class="list-section">
-                <div class="table-responsive-wrapper">
-                    <table id="sutHareketleriTablosu">
-                        <thead>
-                            <tr>
-                                <th>TARİH</th>
-                                <th>AKŞAM (LT)</th>
-                                <th>SABAH (LT)</th>
-                                <th>TOPLAM (LT)</th>
-                                <th>BİRİM FİYAT (TL)</th>
-                                <th>TOPLAM FİYAT (TL)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="sutListesiBody">
-                            <tr><td colspan="6" style="text-align:center;">Lütfen bir ay seçin.</td></tr>
-                        </tbody>
- 			<tfoot id="sutListesiFooter"></tfoot>
-                    </table>
-                </div>
-            </div>
-
-        
-        </div>
+<body>
+  <div class="main-content">
+    <div class="module-header">
+      <h2>Müşteri Süt Hareketleri</h2>
+      <h3>Hoş Geldiniz, <span id="musteriAdi">...</span></h3>
     </div>
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    
-    
-    <script>
-        const firebaseConfig = {
+    <div class="container">
+      <div class="filter-buttons">
+        <select id="ayFiltresi" class="form-control"></select>
+        <select id="yilFiltresi" class="form-control"></select>
+        <button id="raporGosterBtn" class="btn">Göster</button>
+        <a href="sifre_degistir.html" class="btn btn-secondary">Şifre Değiştir</a>
+        <a href="#" id="logoutButton" class="btn btn-danger">
+          <div>Çıkış Yap</div>
+          <div id="logoutUserEmail"></div>
+        </a>
+      </div>
+      <div class="table-responsive-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>TARİH</th>
+              <th>AKŞAM (LT)</th>
+              <th>SABAH (LT)</th>
+              <th>TOPLAM (LT)</th>
+              <th>BİRİM FİYAT (TL)</th>
+              <th>TOPLAM FİYAT (TL)</th>
+            </tr>
+          </thead>
+          <tbody id="sutListesiBody">
+            <tr><td colspan="6">Lütfen bir ay seçin.</td></tr>
+          </tbody>
+          <tfoot id="sutListesiFooter"></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script>
+	const firebaseConfig = {
             apiKey: "AIzaSyCWG4nFwpXRffr_3MO8-Us9mWK6Wsfn0mY",
             authDomain: "sut-takip-projem.firebaseapp.com",
             projectId: "sut-takip-projem",
@@ -95,8 +123,6 @@
                         const cariDoc = snapshot.docs[0];
                         userCariId = cariDoc.id;
                         document.getElementById('musteriAdi').textContent = cariDoc.data().adiSoyadi;
-                        
-                        // --- YENİ KOD BLOĞU BAŞLANGICI ---
                         const aySelect = document.getElementById('ayFiltresi');
                         const yilSelect = document.getElementById('yilFiltresi');
                         const gosterBtn = document.getElementById('raporGosterBtn');
@@ -129,7 +155,6 @@
                         });
 
                         gosterBtn.click();
-                        // --- YENİ KOD BLOĞU SONU ---
                     } else {
                         alert("Bu hesaba bağlı bir müşteri kartı bulunamadı.");
                         handleLogout();
@@ -142,17 +167,14 @@
                 });
 
             } else {
-                // Kullanıcı giriş yapmamışsa login sayfasına yönlendirilebilir.
-                // Bu kısım zaten handleLogout ile dolaylı olarak yapılıyor.
-                // handleLogout(); // Bu satır, giriş yapmamış kullanıcıyı login'e atar.
+               
             }
-        }); // <-- EKSİK OLAN KAPATMA PARANTEZİ
+        });
 
-
-const logoutButton = document.getElementById('logoutButton');
-logoutButton.addEventListener('click', (event) => {
-    event.preventDefault(); // Tarayıcının linke gitme varsayılan davranışını engelle
-    handleLogout();
+	const logoutButton = document.getElementById('logoutButton');
+	logoutButton.addEventListener('click', (event) => {
+    	event.preventDefault(); // Tarayıcının linke gitme varsayılan davranışını engelle
+    	handleLogout();
 });
 
 function handleLogout() {
@@ -185,15 +207,13 @@ async function fetchSutHareketleri(ayYil) {
         }
 
         let rows = '';
-        // YENİ: Tüm toplamlar için değişkenler tanımla
-        let donemToplamAksam = 0;
+	let donemToplamAksam = 0;
         let donemToplamSabah = 0;
         let donemToplamLitre = 0;
         let donemToplamHasiat = 0;
 
         snapshot.forEach(doc => {
             const data = doc.data();
-            // YENİ: Her bir değeri ilgili toplama ekle
             donemToplamAksam += data.aksam || 0;
             donemToplamSabah += data.sabah || 0;
             donemToplamLitre += data.toplam || 0;
@@ -212,11 +232,7 @@ async function fetchSutHareketleri(ayYil) {
         });
         
         listBody.innerHTML = rows;
-
-        // YENİ: Ortalama birim fiyatı hesapla
         const ortalamaBirimFiyat = donemToplamLitre > 0 ? (donemToplamHasiat / donemToplamLitre) : 0;
-
-        // YENİ: Tablonun en altına eklenecek toplam satırını oluştur
         const footerRow = `
             <tr class="report-totals-row">
                 <td><strong>DÖNEM TOPLAMI</strong></td>
@@ -234,9 +250,6 @@ async function fetchSutHareketleri(ayYil) {
         listBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Veriler yüklenemedi.</td></tr>`;
     }
 }
-
-
-
-    </script>
+  </script>
 </body>
 </html>
