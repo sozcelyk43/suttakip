@@ -2655,20 +2655,33 @@ async function editOdeme(id) {
     try {
         const doc = await db.collection('odemeVeTahsilatlar').doc(id).get();
         if (!doc.exists) {
-            alert("Düzenlenecek kayıt bulunamadı.");
+            alert("Kayıt bulunamadı.");
             return;
         }
         const data = doc.data();
-        
+
         document.getElementById('odemeEditId').value = id;
         document.getElementById('islemTuru').value = data.islemTuru;
         document.getElementById('odemeTarih').value = data.tarih;
         document.getElementById('odemeYapilanTedarikci').value = data.cariId;
-        document.getElementById('odemeTuru').value = data.odemeTuru || 'Kasa'; // YENİ EKLENDİ
+        document.getElementById('odemeTuru').value = data.odemeTuru;
         document.getElementById('odemeTutari').value = data.tutar;
         document.getElementById('odemeAciklama').value = data.aciklama;
-        setEditingMode(document.getElementById('odemeFormBaslik'), document.getElementById('odemeKaydetBtn'), document.getElementById('odemeFormTemizleBtn'), id, 'Hareket Girişi');
-        document.getElementById('odemeForm').scrollIntoView();
+
+        const cariBilgisi = window.cariDataMap.get(data.cariId);
+        if (cariBilgisi) {
+            document.getElementById('odemeCariAramaInput').value = cariBilgisi.adiSoyadi;
+        } else {
+            document.getElementById('odemeCariAramaInput').value = 'Cari Bulunamadı';
+        }
+        
+        document.getElementById('odemeFormBaslik').textContent = 'Hareket Düzenle';
+        document.getElementById('odemeKaydetBtn').textContent = 'Güncelle';
+        document.getElementById('odemeFormTemizleBtn').style.display = 'inline-block';
+        
+        const cariSelect = document.getElementById('odemeYapilanTedarikci');
+        cariSelect.dispatchEvent(new Event('change'));
+
     } catch (error) {
         console.error("Ödeme düzenleme için getirilirken hata:", error);
     }
