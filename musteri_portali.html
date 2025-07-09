@@ -65,33 +65,6 @@
     select.form-control {padding: 12px;border-radius: 6px;border: 1px solid #ccc;font-size: 1em;background-color: #fff;}
     #logoutUserEmail {font-size: 0.75em;text-transform: lowercase;color: #ecf0f1; margin-top: 2px;}
 
-    /* Yeni İstatistik Paneli Stilleri */
-    .summary-stats {
-      margin-top: 30px;
-      padding: 20px;
-      background-color: #f8f9fa;
-      border-radius: 8px;
-      border: 1px solid #e9ecef;
-    }
-    .summary-stats h3 {
-      margin-top: 0;
-      color: #2c3e50;
-      border-bottom: 2px solid #3498db;
-      padding-bottom: 10px;
-      margin-bottom: 15px;
-    }
-    .summary-stats p {
-      font-size: 1.1em;
-      color: #333;
-      margin: 8px 0;
-      display: flex;
-      justify-content: space-between;
-    }
-    .summary-stats p span {
-      font-weight: bold;
-      color: #2980b9;
-    }
-
     @media (max-width: 768px) {
       .container {padding: 15px;border-radius: 0;}
       .main-content {padding: 0;}
@@ -99,7 +72,6 @@
       /* Responsive Table Adjustments */
       table {font-size: 0.82em;}
       th, td {padding: 10px 4px;}
-      .summary-stats p {font-size: 1em;}
     }
      
 </style>
@@ -127,8 +99,6 @@
         </div>
       </div>
 
-
-
       <table>
         <thead>
           <tr>
@@ -136,24 +106,13 @@
             <th>Akşam (lt)</th>
             <th>Sabah (lt)</th>
             <th>Toplam (lt)</th>
-            <th>Birim Fiyat (tl)</th>
-            <th>Toplam Fiyat (tl)</th>
           </tr>
         </thead>
         <tbody id="sutListesiBody">
-          <tr><td colspan="6">Lütfen bir ay seçin.</td></tr>
+          <tr><td colspan="4">Lütfen bir ay seçin.</td></tr>
         </tbody>
         <tfoot id="sutListesiFooter"></tfoot>
       </table>
-
-      <div class="summary-stats">
-        <h3>Genel İstatistikler</h3>
-        <p>Güncel Dönem Toplam Litre: <span id="summaryTotalLitre">0.00</span></p>
-        <p>Güncel Dönem Toplam Hasılat (TL): <span id="summaryTotalRevenue">0.00</span></p>
-        <p>Güncel Dönem Günlük Ortalama (LT): <span id="summaryDailyAverage">0.00</span></p>
-        <p>Toplam Aylık Ortalama (LT): <span id="overallMonthlyAverage">Hesaplanıyor...</span></p>
-        <p>Toplam Yıllık Ortalama (LT): <span id="overallYearlyAverage">Hesaplanıyor...</span></p>
-      </div>
 
     </div>
   </div>
@@ -191,9 +150,6 @@
                         userCariId = cariDoc.id;
                         document.getElementById('musteriAdi').textContent = cariDoc.data().adiSoyadi;
                         
-                        // Genel ortalamaları hesapla
-                        calculateOverallAverages();
-
                         const aySelect = document.getElementById('ayFiltresi');
                         const yilSelect = document.getElementById('yilFiltresi');
                         const gosterBtn = document.getElementById('raporGosterBtn');
@@ -253,7 +209,6 @@ function formatSayi(sayi) {
         if (sayi % 1 === 0) {
             return sayi.toString();
         } else {
-            // 27.678 gibi sayıları 27.7'ye yuvarlar
             return sayi.toFixed(1); 
         }
     }
@@ -271,12 +226,6 @@ function formatPara(sayi) {
         }).catch(error => console.error("Çıkış hatası:", error));
     }
 
-    function resetSummaryStats() {
-        document.getElementById('summaryTotalLitre').textContent = '0.0';
-        document.getElementById('summaryTotalRevenue').textContent = '0.0';
-        document.getElementById('summaryDailyAverage').textContent = '0.0';
-    }
-
     async function fetchSutHareketleri(ayYil) {
         const [year, month] = ayYil.split('-');
         const startDate = `${year}-${month}-01`;
@@ -284,10 +233,9 @@ function formatPara(sayi) {
         
         const listBody = document.getElementById('sutListesiBody');
         const listFooter = document.getElementById('sutListesiFooter');
-        listBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Veriler yükleniyor...</td></tr>`;
+        listBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Veriler yükleniyor...</td></tr>`;
         listFooter.innerHTML = '';
-        resetSummaryStats(); // Rapor gösterilmeden önce istatistikleri sıfırla
-
+        
         try {
             const snapshot = await db.collection('sut_alimlari')
                 .where('cariId', '==', userCariId)
@@ -297,7 +245,7 @@ function formatPara(sayi) {
                 .get();
 
             if (snapshot.empty) {
-                listBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Bu dönem için süt kaydı bulunmuyor.</td></tr>`;
+                listBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Bu dönem için süt kaydı bulunmuyor.</td></tr>`;
                 return;
             }
 
@@ -305,115 +253,41 @@ function formatPara(sayi) {
             let donemToplamAksam = 0;
             let donemToplamSabah = 0;
             let donemToplamLitre = 0;
-            let donemToplamHasiat = 0;
 
-const dateOptions = { year: '2-digit', month: '2-digit', day: '2-digit' };
-
-snapshot.forEach(doc => {
-    const data = doc.data();
-    donemToplamAksam += data.aksam || 0;
-    donemToplamSabah += data.sabah || 0;
-    donemToplamLitre += data.toplam || 0;
-    donemToplamHasiat += data.toplamTutar || 0;
-
-    rows += `
-    <tr>
-        <td>${new Date(data.tarih + 'T00:00:00').toLocaleDateString('tr-TR', dateOptions)}</td>
-        
-        <td>${formatSayi(data.aksam || 0)}</td>
-        <td>${formatSayi(data.sabah || 0)}</td>
-        <td><strong>${formatSayi(data.toplam || 0)}</strong></td>
-        <td>${formatPara(data.fiyat || 0)}</td>
-        <td><strong>${formatPara(data.toplamTutar || 0)}</strong></td>
-    </tr>
-`;
-});
-            
-            listBody.innerHTML = rows;
-            const ortalamaBirimFiyat = donemToplamLitre > 0 ? (donemToplamHasiat / donemToplamLitre) : 0;
-  const footerRow = `
-    <tr class="report-totals-row">
-        <td><strong>DÖNEM TOPLAMI</strong></td>
-        <td><strong>${formatSayi(donemToplamAksam)}</strong></td>
-        <td><strong>${formatSayi(donemToplamSabah)}</strong></td>
-        <td><strong>${formatSayi(donemToplamLitre)}</strong></td>
-        <td><strong>${formatPara(ortalamaBirimFiyat)}</strong></td>
-        <td><strong>${formatPara(donemToplamHasiat)}</strong></td>
-    </tr>
-`;
-            listFooter.innerHTML = footerRow;
-
-            const gunlukOrtalama = snapshot.size > 0 ? (donemToplamLitre / snapshot.size) : 0;
-          
-document.getElementById('summaryTotalLitre').textContent = formatSayi(donemToplamLitre);
-document.getElementById('summaryDailyAverage').textContent = formatSayi(gunlukOrtalama);
-document.getElementById('summaryTotalRevenue').textContent = formatPara(donemToplamHasiat);
-
-
-        } catch (error) {
-            console.error("Süt hareketleri alınırken hata: ", error);
-            listBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Veriler yüklenemedi.</td></tr>`;
-        }
-    }
-
-async function calculateOverallAverages() {
-        const monthlyAvgElem = document.getElementById('overallMonthlyAverage');
-        const yearlyAvgElem = document.getElementById('overallYearlyAverage');
-        
-        try {
-            const snapshot = await db.collection('sut_alimlari')
-                .where('cariId', '==', userCariId)
-                .get();
-
-            if (snapshot.empty) {
-                // GÜNCELLENDİ: Başlangıç değerleri "0" olarak ayarlandı.
-                monthlyAvgElem.textContent = '0';
-                yearlyAvgElem.textContent = '0';
-                return;
-            }
-
-            const monthlyTotals = {};
-            const yearlyTotals = {};
+            const dateOptions = { year: '2-digit', month: '2-digit', day: '2-digit' };
 
             snapshot.forEach(doc => {
                 const data = doc.data();
-                const totalLiters = data.toplam || 0;
-                const date = new Date(data.tarih + 'T00:00:00');
-                
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const yearMonthKey = `${year}-${month}`;
+                donemToplamAksam += data.aksam || 0;
+                donemToplamSabah += data.sabah || 0;
+                donemToplamLitre += data.toplam || 0;
 
-                // Aylık toplamları hesapla
-                monthlyTotals[yearMonthKey] = (monthlyTotals[yearMonthKey] || 0) + totalLiters;
-                // Yıllık toplamları hesapla
-                yearlyTotals[year] = (yearlyTotals[year] || 0) + totalLiters;
+                rows += `
+                <tr>
+                    <td>${new Date(data.tarih + 'T00:00:00').toLocaleDateString('tr-TR', dateOptions)}</td>
+                    <td>${formatSayi(data.aksam || 0)}</td>
+                    <td>${formatSayi(data.sabah || 0)}</td>
+                    <td><strong>${formatSayi(data.toplam || 0)}</strong></td>
+                </tr>
+            `;
             });
             
-            // Aylık Ortalamayı Hesapla
-            const monthlyValues = Object.values(monthlyTotals);
-            const monthlyAverage = monthlyValues.length > 0 
-                ? monthlyValues.reduce((sum, current) => sum + current, 0) / monthlyValues.length 
-                : 0;
-
-            // Yıllık Ortalamayı Hesapla
-            const yearlyValues = Object.values(yearlyTotals);
-            const yearlyAverage = yearlyValues.length > 0 
-                ? yearlyValues.reduce((sum, current) => sum + current, 0) / yearlyValues.length 
-                : 0;
-
-            // GÜNCELLENDİ: .toFixed(1) yerine formatSayi() fonksiyonu kullanıldı.
-            monthlyAvgElem.textContent = formatSayi(monthlyAverage);
-            yearlyAvgElem.textContent = formatSayi(yearlyAverage);
+            listBody.innerHTML = rows;
+            const footerRow = `
+                <tr class="report-totals-row">
+                    <td><strong>DÖNEM TOPLAMI</strong></td>
+                    <td><strong>${formatSayi(donemToplamAksam)}</strong></td>
+                    <td><strong>${formatSayi(donemToplamSabah)}</strong></td>
+                    <td><strong>${formatSayi(donemToplamLitre)}</strong></td>
+                </tr>
+            `;
+            listFooter.innerHTML = footerRow;
 
         } catch (error) {
-            console.error("Genel ortalamalar hesaplanırken hata:", error);
-            monthlyAvgElem.textContent = 'Hata!';
-            yearlyAvgElem.textContent = 'Hata!';
+            console.error("Süt hareketleri alınırken hata: ", error);
+            listBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">Veriler yüklenemedi.</td></tr>`;
         }
     }
-
-
 </script>
 </body>
 </html>
