@@ -3,59 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Müşteri Süt Hareketleri</title>
+  <title>Müşteri Süt ve Yem Hareketleri</title>
   <meta name="theme-color" content="#2c3e50" />
 <style>
-    body {font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;line-height: 1.6;margin: 0;padding: 0;background-color: #f4f7f9;color: #333;}
-    a.btn {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-decoration: none;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+    body {font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;line-height: 1.6;margin: 0;padding: 0;background-color: #f4f7f9;color: #333; font-size: 16px;}
+    a.btn {display: flex;flex-direction: column;justify-content: center;align-items: center;text-decoration: none;font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
     .main-content {padding: 20px;background-color: #ecf0f1;}
     .container {background-color: #fff;padding: 25px;border-radius: 8px;box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);    }
     .module-header {background-color: #2c3e50;color: #fff;text-align: center;padding: 25px;border-radius: 8px;margin-bottom: 20px;}
     .module-header h2, .module-header h3 {margin: 0;}
 
-
-.filter-buttons {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .filter-row {
-      display: grid;
-      gap: 10px;
-    }
-    /* İsteğe göre: 2'li ve 3'lü grup için yan yana dizilim */
+    .filter-buttons {display: grid;grid-template-columns: 1fr;gap: 10px;margin-bottom: 20px;}
+    .filter-row {display: grid;gap: 10px;}
     .filter-row.two-items { grid-template-columns: 1fr 1fr; }
     .filter-row.three-items { grid-template-columns: 1fr 1fr 1fr; }
 
-    .btn {display: inline-block;background-color: #3498db;color: #fff;padding: 12px;text-align: center;border: none;border-radius: 6px;
-    	cursor: pointer;font-size: 1em;transition: background-color 0.2s;text-transform: uppercase; line-height: 1.2;}
+    .btn {display: inline-block;background-color: #3498db;color: #fff;padding: 12px;text-align: center;border: none;border-radius: 6px;cursor: pointer;font-size: 1em;transition: 	background-color 0.2s;text-transform: uppercase; line-height: 1.2;}
     .btn:hover { background-color: #2980b9; }
     .btn-danger { background-color: #e74c3c; }
     .btn-danger:hover { background-color: #c0392b; }
     .btn-secondary {  color: #fff;  background-color: #95a5a6;}
     .btn-secondary:hover { background-color: #7f8c8d; }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      font-size: 0.90em; /* Font boyutu küçültüldü */
-    }
-    th, td {
-      padding: 12px 10px; /* Padding ayarlandı */
-      border: 1px solid #ecf0f1;
-      text-align: center;
-      word-break: break-word;
-    }
+    .report-toggle-container {display: flex; gap: 10px; margin-top: 20px; margin-bottom: 20px;}
+    .btn-toggle {flex: 1; background-color: #bdc3c7; color: #2c3e50; font-weight: normal;}
+    .btn-toggle.active {background-color: #3498db; color: #fff; font-weight: bold;}
 
+
+    table {width: 100%;border-collapse: collapse;margin-top: 10px;font-size: 1em;}
+    th, td {padding: 12px 10px;border: 1px solid #ecf0f1;text-align: center;word-break: break-word;}
     th {background-color: #f8f9fa;font-weight: 600;color: #495057;}
     tbody tr:nth-child(odd) {background-color: #ffffff;}
     tbody tr:nth-child(even) {background-color: #f2f6fa;}
@@ -69,57 +45,59 @@
       .container {padding: 15px;border-radius: 0;}
       .main-content {padding: 0;}
       .module-header {border-radius: 0;}
-      /* Responsive Table Adjustments */
-      table {font-size: 0.82em;}
-      th, td {padding: 10px 4px;}
-    }
-     
+      table {font-size: 0.92em;}
+      th, td {padding: 10px 4px;}}
 </style>
 </head>
 <body>
   <div class="main-content">
     <div class="module-header">
-      <h2>Müşteri Süt Hareketleri</h2>
+      <h2>Müşteri Portalı</h2>
       <h3>Hoş Geldiniz, <span id="musteriAdi">...</span></h3>
     </div>
     <div class="container">
-
-<div class="filter-buttons">
-        <div class="filter-row two-items">
-          <a href="sifre_degistir.html" class="btn btn-secondary">Şifre Değiştir</a>
-          <a href="#" id="logoutButton" class="btn btn-danger">
-            <div>Çıkış Yap</div>
-            <div id="logoutUserEmail"></div>
-          </a>
-        </div>
-        <div class="filter-row three-items">
-          <select id="ayFiltresi" class="form-control"></select>
-          <select id="yilFiltresi" class="form-control"></select>
-          <button id="raporGosterBtn" class="btn">Göster</button>
-        </div>
+      <div class="filter-buttons">
+              <div class="filter-row two-items">
+                <a href="sifre_degistir.html" class="btn btn-secondary">Şifre Değiştir</a>
+                <a href="#" id="logoutButton" class="btn btn-danger">
+                  <div>Çıkış Yap</div>
+                  <div id="logoutUserEmail"></div>
+                </a>
+              </div>
+              <div class="filter-row three-items">
+                <select id="ayFiltresi" class="form-control"></select>
+                <select id="yilFiltresi" class="form-control"></select>
+                <button id="raporGosterBtn" class="btn">Göster</button>
+              </div>
       </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th>Tarih</th>
-            <th>Akşam (lt)</th>
-            <th>Sabah (lt)</th>
-            <th>Toplam (lt)</th>
-          </tr>
-        </thead>
-        <tbody id="sutListesiBody">
-          <tr><td colspan="4">Lütfen bir ay seçin.</td></tr>
-        </tbody>
-        <tfoot id="sutListesiFooter"></tfoot>
-      </table>
-
+      <div id="reportToggleButtons" class="report-toggle-container" style="display: none;">
+          <button id="sutRaporuBtn" class="btn btn-toggle active">Süt Raporu</button>
+          <button id="yemRaporuBtn" class="btn btn-toggle">Yem Raporu</button>
+      </div>
+      <div id="sutRaporuContainer">
+          <table>
+            <thead>
+              <tr>
+                <th>Tarih</th>
+                <th>Akşam (lt)</th>
+                <th>Sabah (lt)</th>
+                <th>Toplam (lt)</th>
+              </tr>
+            </thead>
+            <tbody id="sutListesiBody">
+              <tr><td colspan="4">Lütfen bir dönem seçin ve 'Göster' butonuna basın.</td></tr>
+            </tbody>
+            <tfoot id="sutListesiFooter"></tfoot>
+          </table>
+      </div>
+      <div id="yemRaporuContainer" style="display: none;">
+          </div>
     </div>
   </div>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script>
     const firebaseConfig = {
         apiKey: "AIzaSyCWG4nFwpXRffr_3MO8-Us9mWK6Wsfn0mY",
         authDomain: "sut-takip-projem.firebaseapp.com",
@@ -130,73 +108,33 @@
         measurementId: "G-LYLT9WFVNK"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-    // DÜZELTME: Hem cariId hem de sahipId'yi saklamak için değişkenler eklendi.
-    let userCariId = null;
-    let userSahipId = null;
+let userCariId = null;
+let userSahipId = null;
 
-    auth.onAuthStateChanged(user => {
+auth.onAuthStateChanged(user => {
         if (user) {
-            const userEmailDiv = document.getElementById('logoutUserEmail');
-            if (userEmailDiv) {
-                userEmailDiv.textContent = user.email;
-            }
-
+            document.getElementById('logoutUserEmail').textContent = user.email;
             db.collection('cariler').where('authUID', '==', user.uid).limit(1).get()
             .then(snapshot => {
                 if (!snapshot.empty) {
                     const cariDoc = snapshot.docs[0];
                     const cariData = cariDoc.data();
-
-                    // DÜZELTME: Hem cariId hem de sahipId alınıyor.
                     userCariId = cariDoc.id;
                     userSahipId = cariData.sahipId;
-                    
                     document.getElementById('musteriAdi').textContent = cariData.adiSoyadi;
 
-                    // DÜZELTME: sahipId kontrolü eklendi.
                     if (!userSahipId) {
-                        alert("Müşteri profilinizde bir hata var (sahipId eksik). Lütfen işletme ile iletişime geçin.");
+                        alert("Müşteri profilinizde bir hata var. Lütfen işletme ile iletişime geçin.");
                         handleLogout();
                         return;
                     }
                     
-                    const aySelect = document.getElementById('ayFiltresi');
-                    const yilSelect = document.getElementById('yilFiltresi');
-                    const gosterBtn = document.getElementById('raporGosterBtn');
-                    const now = new Date();
+                    setupFiltersAndButtons();
 
-                    const ayIsimleri = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-                    ayIsimleri.forEach((ay, index) => {
-                        const option = document.createElement('option');
-                        option.value = String(index + 1).padStart(2, '0');
-                        option.textContent = ay;
-                        aySelect.appendChild(option);
-                    });
-                    aySelect.value = String(now.getMonth() + 1).padStart(2, '0');
-
-                    for (let yil = 2050; yil >= 2000; yil--) {
-                        const option = document.createElement('option');
-                        option.value = yil;
-                        option.textContent = yil;
-                        yilSelect.appendChild(option);
-                    }
-                    yilSelect.value = now.getFullYear();
-
-                    gosterBtn.addEventListener('click', () => {
-                        const secilenAy = aySelect.value;
-                        const secilenYil = yilSelect.value;
-                        if (secilenAy && secilenYil && userCariId) {
-                            const ayYil = `${secilenYil}-${secilenAy}`;
-                            fetchSutHareketleri(ayYil);
-                        }
-                    });
-
-                    // Sayfa ilk yüklendiğinde verileri getir
-                    gosterBtn.click();
                 } else {
                     alert("Bu hesaba bağlı bir müşteri kartı bulunamadı.");
                     handleLogout();
@@ -204,137 +142,200 @@
             })
             .catch(error => {
                 console.error("Müşteri bilgileri alınırken hata oluştu:", error);
-                alert("Müşteri bilgileri alınırken bir hata oluştu. Lütfen daha sonra tekrar deneyin.");
                 handleLogout();
             });
-
         } else {
            window.location.href = 'login.html';
         }
-    });
+});
 
-    const logoutButton = document.getElementById('logoutButton');
-    logoutButton.addEventListener('click', (event) => {
+function setupFiltersAndButtons() {
+        const aySelect = document.getElementById('ayFiltresi');
+        const yilSelect = document.getElementById('yilFiltresi');
+        const gosterBtn = document.getElementById('raporGosterBtn');
+        const reportToggleButtons = document.getElementById('reportToggleButtons');
+        const sutRaporuBtn = document.getElementById('sutRaporuBtn');
+        const yemRaporuBtn = document.getElementById('yemRaporuBtn');
+        const sutRaporuContainer = document.getElementById('sutRaporuContainer');
+        const yemRaporuContainer = document.getElementById('yemRaporuContainer');
+        
+        const now = new Date();
+        const ayIsimleri = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+        ayIsimleri.forEach((ay, index) => {
+            const option = document.createElement('option');
+            option.value = String(index + 1).padStart(2, '0');
+            option.textContent = ay;
+            aySelect.appendChild(option);
+        });
+        aySelect.value = String(now.getMonth() + 1).padStart(2, '0');
+
+        for (let yil = 2050; yil >= 2000; yil--) {
+            const option = document.createElement('option');
+            option.value = yil;
+            option.textContent = yil;
+            yilSelect.appendChild(option);
+        }
+        yilSelect.value = now.getFullYear();
+
+        gosterBtn.addEventListener('click', () => {
+            const secilenAy = aySelect.value;
+            const secilenYil = yilSelect.value;
+            if (secilenAy && secilenYil && userCariId) {
+                const ayYil = `${secilenYil}-${secilenAy}`;
+                
+                // Raporları getir ve seçim butonlarını göster
+                fetchSutHareketleri(ayYil);
+                fetchYemHareketleri(ayYil);
+                reportToggleButtons.style.display = 'flex';
+
+                // Varsayılan olarak süt raporunu göster
+                sutRaporuContainer.style.display = 'block';
+                yemRaporuContainer.style.display = 'none';
+                sutRaporuBtn.classList.add('active');
+                yemRaporuBtn.classList.remove('active');
+            }
+        });
+
+        sutRaporuBtn.addEventListener('click', () => {
+            sutRaporuContainer.style.display = 'block';
+            yemRaporuContainer.style.display = 'none';
+            sutRaporuBtn.classList.add('active');
+            yemRaporuBtn.classList.remove('active');
+        });
+
+        yemRaporuBtn.addEventListener('click', () => {
+            sutRaporuContainer.style.display = 'none';
+            yemRaporuContainer.style.display = 'block';
+            yemRaporuBtn.classList.add('active');
+            sutRaporuBtn.classList.remove('active');
+        });
+        gosterBtn.click();
+    }
+
+    document.getElementById('logoutButton').addEventListener('click', (event) => {
         event.preventDefault();
         handleLogout();
-    });
+});
 
+function formatSayi(sayi) {if (typeof sayi !== 'number') sayi = 0;if (sayi % 1 === 0) return sayi.toString();return sayi.toFixed(2).replace('.', ',');}
 
-function formatSayi(sayi) {
-        if (typeof sayi !== 'number') sayi = 0;
-        if (sayi % 1 === 0) {
-            return sayi.toString();
-        } else {
-            return sayi.toFixed(2).replace('.', ','); // Ondalık ayracı virgül yap
-        }
+function handleLogout() {
+        auth.signOut().then(() => window.location.href = 'login.html').catch(error => console.error("Çıkış hatası:", error));
     }
 
-    function handleLogout() {
-        auth.signOut().then(() => {
-            window.location.href = 'login.html';
-        }).catch(error => console.error("Çıkış hatası:", error));
-    }
+    async function fetchSutHareketleri(ayYil) {
+        const [year, month] = ayYil.split('-');
+        const startDate = `${year}-${month}-01`;
+        const endDateObj = new Date(parseInt(year, 10), parseInt(month, 10), 0);
+        const endDate = `${endDateObj.getFullYear()}-${String(endDateObj.getMonth() + 1).padStart(2, '0')}-${String(endDateObj.getDate()).padStart(2, '0')}`;
+        const listBody = document.getElementById('sutListesiBody');
+        const listFooter = document.getElementById('sutListesiFooter');
+        listBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Süt verileri yükleniyor...</td></tr>`;
+        listFooter.innerHTML = '';
+        
+        try {
+            const snapshot = await db.collection('sut_alimlari').where('sahipId', '==', userSahipId).where('cariId', '==', userCariId).where('tarih', '>=', startDate).where('tarih', '<=', endDate).orderBy('tarih', 'asc').get();
 
-function formatPara(sayi) {
-      return sayi.toLocaleString('tr-TR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
-    }
-
-
-async function fetchSutHareketleri(ayYil) {
-    const [year, month] = ayYil.split('-');
-    const startDate = `${year}-${month}-01`;
-
-    // --- DÜZELTİLMİŞ TARİH HESAPLAMA BAŞLANGICI ---
-    // Önceki hatalı satır:
-    // const endDate = new Date(year, month, 0).toISOString().split('T')[0];
-
-    // DÜZELTİLMİŞ, SAAT DİLİMİNDEN ETKİLENMEYEN GÜVENİLİR YÖNTEM:
-    const endDateObj = new Date(parseInt(year, 10), parseInt(month, 10), 0);
-    const endYear = endDateObj.getFullYear();
-    const endMonth = String(endDateObj.getMonth() + 1).padStart(2, '0');
-    const endDay = String(endDateObj.getDate()).padStart(2, '0');
-    const endDate = `${endYear}-${endMonth}-${endDay}`;
-    // --- DÜZELTİLMİŞ TARİH HESAPLAMA SONU ---
-    
-    const listBody = document.getElementById('sutListesiBody');
-    const listFooter = document.getElementById('sutListesiFooter');
-    listBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Veriler yükleniyor...</td></tr>`;
-    listFooter.innerHTML = '';
-    
-    try {
-        const snapshot = await db.collection('sut_alimlari')
-            .where('sahipId', '==', userSahipId) 
-            .where('cariId', '==', userCariId)
-            .where('tarih', '>=', startDate)
-            .where('tarih', '<=', endDate)
-            .orderBy('tarih', 'asc') // Sıralamayı küçükten büyüğe değiştirdik, daha doğal bir görünüm için.
-            .get();
-
-        if (snapshot.empty) {
-            listBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Bu dönem için süt kaydı bulunmuyor.</td></tr>`;
-            return;
-        }
-
-        const gunlukVeri = new Map();
-
-        snapshot.forEach(doc => {
-            const alim = doc.data();
-            const tarih = alim.tarih;
-            
-            if (!gunlukVeri.has(tarih)) {
-                gunlukVeri.set(tarih, { aksam: 0, sabah: 0, toplam: 0 });
+            if (snapshot.empty) {
+                listBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Bu dönem için süt kaydı bulunmuyor.</td></tr>`;
+                return;
             }
 
-            const gun = gunlukVeri.get(tarih);
-            gun.aksam += alim.aksam || 0;
-            gun.sabah += alim.sabah || 0;
-            gun.toplam += alim.toplam || 0;
-        });
+            const gunlukVeri = new Map();
+            snapshot.forEach(doc => {
+                const alim = doc.data();
+                if (!gunlukVeri.has(alim.tarih)) {
+                    gunlukVeri.set(alim.tarih, { aksam: 0, sabah: 0, toplam: 0 });
+                }
+                const gun = gunlukVeri.get(alim.tarih);
+                gun.aksam += alim.aksam || 0;
+                gun.sabah += alim.sabah || 0;
+                gun.toplam += alim.toplam || 0;
+            });
 
-const siraliGunler = Array.from(gunlukVeri.keys()).sort().reverse();
+            const siraliGunler = Array.from(gunlukVeri.keys()).sort();
+            let rows = '';
+            let donemToplamAksam = 0, donemToplamSabah = 0, donemToplamLitre = 0;
+            const dateOptions = { day: 'numeric', month: 'long', year: 'numeric' };
 
-        let rows = '';
-        let donemToplamAksam = 0;
-        let donemToplamSabah = 0;
-        let donemToplamLitre = 0;
-	const dateOptions = {day: 'numeric',month: 'long',year: 'numeric'};
-        siraliGunler.forEach(tarih => {
-            const data = gunlukVeri.get(tarih);
-            donemToplamAksam += data.aksam;
-            donemToplamSabah += data.sabah;
-            donemToplamLitre += data.toplam;
-
-            rows += `
-            <tr>
-                <td>${new Date(tarih + 'T00:00:00').toLocaleDateString('tr-TR', dateOptions)}</td>
-                <td>${formatSayi(data.aksam)}</td>
-                <td>${formatSayi(data.sabah)}</td>
-                <td><strong>${formatSayi(data.toplam)}</strong></td>
-            </tr>
-            `;
-        });
-        
-        listBody.innerHTML = rows;
-        const footerRow = `
-            <tr class="report-totals-row">
-                <td><strong>DÖNEM TOPLAMI</strong></td>
-                <td><strong>${formatSayi(donemToplamAksam)}</strong></td>
-                <td><strong>${formatSayi(donemToplamSabah)}</strong></td>
-                <td><strong>${formatSayi(donemToplamLitre)}</strong></td>
-            </tr>
-        `;
-        listFooter.innerHTML = footerRow;
-
-    } catch (error) {
-        console.error("Süt hareketleri alınırken hata: ", error);
-        listBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">Veriler yüklenemedi.</td></tr>`;
-    }
+            siraliGunler.forEach(tarih => {
+                const data = gunlukVeri.get(tarih);
+                donemToplamAksam += data.aksam;
+                donemToplamSabah += data.sabah;
+                donemToplamLitre += data.toplam;
+                rows += `<tr><td>${new Date(tarih + 'T00:00:00').toLocaleDateString('tr-TR', dateOptions)}</td><td>${formatSayi(data.aksam)}</td><td>${formatSayi(data.sabah)}</td><td><strong>${formatSayi(data.toplam)}</strong></td></tr>`;
+            });
+            
+            listBody.innerHTML = rows;
+            listFooter.innerHTML = `<tr><td><strong>DÖNEM TOPLAMI</strong></td><td><strong>${formatSayi(donemToplamAksam)}</strong></td><td><strong>${formatSayi(donemToplamSabah)}</strong></td><td><strong>${formatSayi(donemToplamLitre)}</strong></td></tr>`;
+        } catch (error) {
+            console.error("Süt hareketleri alınırken hata: ", error);
+            listBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">Veriler yüklenemedi.</td></tr>`;
+        }
 }
 
+async function fetchYemHareketleri(ayYil) {
+        const yemRaporuContainer = document.getElementById('yemRaporuContainer');
+        yemRaporuContainer.innerHTML = `<p style="text-align:center;">Yem verileri yükleniyor...</p>`;
 
+        const [year, month] = ayYil.split('-');
+        const startDate = `${year}-${month}-01`;
+        const endDateObj = new Date(parseInt(year, 10), parseInt(month, 10), 0);
+        const endDate = `${endDateObj.getFullYear()}-${String(endDateObj.getMonth() + 1).padStart(2, '0')}-${String(endDateObj.getDate()).padStart(2, '0')}`;
+
+        try {
+            const satisSnapshot = await db.collection('yem_satislari').where('sahipId', '==', userSahipId).where('cariId', '==', userCariId).where('tarih', '>=', startDate).where('tarih', '<=', endDate).get();
+
+            if (satisSnapshot.empty) {
+                yemRaporuContainer.innerHTML = `<p style="text-align:center;">Bu dönem için yem alım kaydı bulunmuyor.</p>`;
+                return;
+            }
+
+            const yemOzet = new Map();
+            satisSnapshot.forEach(doc => {
+                const satis = doc.data();
+                const mevcutMiktar = yemOzet.get(satis.yemId) || 0;
+                yemOzet.set(satis.yemId, mevcutMiktar + satis.miktar);
+            });
+
+            const yemIds = Array.from(yemOzet.keys());
+            if (yemIds.length === 0) {
+                 yemRaporuContainer.innerHTML = `<p style="text-align:center;">Bu dönem için yem alım kaydı bulunmuyor.</p>`;
+                 return;
+            }
+
+            const yemlerSnapshot = await db.collection('yemler').where(firebase.firestore.FieldPath.documentId(), 'in', yemIds).get();
+            const yemIsimleri = new Map();
+            yemlerSnapshot.forEach(doc => {
+                yemIsimleri.set(doc.id, doc.data().ad || 'Bilinmeyen Yem');
+            });
+            
+            let tableHTML = `<table><thead><tr><th>Yem Adı</th><th>Alınan Toplam Miktar</th></tr></thead><tbody>`;
+            let toplamYemMiktari = 0;
+
+		yemOzet.forEach((miktar, yemId) => {
+                toplamYemMiktari += miktar;
+                tableHTML += `<tr>
+                                <td>${yemIsimleri.get(yemId)}</td>
+                                <td><strong>${miktar}</strong></td>
+                              </tr>`;
+            });
+            
+            tableHTML += `</tbody>
+                          <tfoot>
+                            <tr>
+                                <td><strong>TOPLAM</strong></td>
+                                <td><strong>${toplamYemMiktari}</strong></td>
+                            </tr>
+                          </tfoot>
+                        </table>`;
+            
+            yemRaporuContainer.innerHTML = tableHTML;
+        } catch (error) {
+            console.error("Yem hareketleri alınırken hata: ", error);
+            yemRaporuContainer.innerHTML = `<p style="text-align:center; color:red;">Yem verileri yüklenemedi.</p>`;
+        }
+}
 
 </script>
 </body>
