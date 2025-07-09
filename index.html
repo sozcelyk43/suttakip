@@ -141,16 +141,8 @@
         </small>
     </div>
 
-
-
-
-
-
-
-                <div id="cariRotaSirasiUyari" style="display: none;"></div>
-
+<div id="cariRotaSirasiUyari" style="display: none;"></div>
 <h3>Cari Listesi (<span id="raporTarihEtiketi">Güncel Durum</span>)</h3>
-
 <div class="form-grid dont-print" style="grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; align-items: end; margin-bottom: 20px; border: 1px solid #eee; padding: 15px; border-radius: 8px;">
     
     <div class="form-group" style="position: relative;">
@@ -3040,7 +3032,7 @@ async function renderOdemeListesi() {
         const snapshot = await db.collection('odemeVeTahsilatlar')
             .where('sahipId', '==', sahipId)
             .orderBy('tarih', 'desc')
-           // .limit(30)
+            //.limit(30)
             .get();
         
         if(snapshot.empty){
@@ -4479,6 +4471,16 @@ function resetTopluSatisFormu() {
 }
 
 function handleYazdir(elementId, orientation = 'portrait') { 
+
+
+
+
+if (typeof Android !== "undefined" && Android.print) {
+        Android.print();
+    } else {
+
+
+
     const oldIframe = document.getElementById('print-iframe');
     if (oldIframe) {        oldIframe.remove();    }
     const printElement = document.getElementById(elementId);
@@ -4574,7 +4576,7 @@ const printStyles = `
     iframe.contentWindow.focus();
     iframe.contentWindow.print();
 }
-	
+	}
 </script>
 <script src="https://unpkg.com/jspdf-autotable@3.5.23/dist/jspdf.plugin.autotable.js"></script>
 
