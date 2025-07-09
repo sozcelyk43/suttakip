@@ -116,101 +116,123 @@
 
     </div>
   </div>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-  <script>
-	const firebaseConfig = {
-            apiKey: "AIzaSyCWG4nFwpXRffr_3MO8-Us9mWK6Wsfn0mY",
-            authDomain: "sut-takip-projem.firebaseapp.com",
-            projectId: "sut-takip-projem",
-            storageBucket: "sut-takip-projem.appspot.com",
-            messagingSenderId: "512756958486",
-            appId: "1:512756958486:web:13cceb6835e2c575e9fc37",
-            measurementId: "G-LYLT9WFVNK"
-        };
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCWG4nFwpXRffr_3MO8-Us9mWK6Wsfn0mY",
+        authDomain: "sut-takip-projem.firebaseapp.com",
+        projectId: "sut-takip-projem",
+        storageBucket: "sut-takip-projem.appspot.com",
+        messagingSenderId: "512756958486",
+        appId: "1:512756958486:web:13cceb6835e2c575e9fc37",
+        measurementId: "G-LYLT9WFVNK"
+    };
 
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-        let userCariId = null;
+    // DÜZELTME: Hem cariId hem de sahipId'yi saklamak için değişkenler eklendi.
+    let userCariId = null;
+    let userSahipId = null;
 
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                const userEmailDiv = document.getElementById('logoutUserEmail');
-                if (userEmailDiv) {
-                    userEmailDiv.textContent = user.email;
-                }
-
-                db.collection('cariler').where('authUID', '==', user.uid).limit(1).get()
-                .then(snapshot => {
-                    if (!snapshot.empty) {
-                        const cariDoc = snapshot.docs[0];
-                        userCariId = cariDoc.id;
-                        document.getElementById('musteriAdi').textContent = cariDoc.data().adiSoyadi;
-                        
-                        const aySelect = document.getElementById('ayFiltresi');
-                        const yilSelect = document.getElementById('yilFiltresi');
-                        const gosterBtn = document.getElementById('raporGosterBtn');
-                        const now = new Date();
-
-                        const ayIsimleri = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-                        ayIsimleri.forEach((ay, index) => {
-                            const option = document.createElement('option');
-                            option.value = String(index + 1).padStart(2, '0');
-                            option.textContent = ay;
-                            aySelect.appendChild(option);
-                        });
-                        aySelect.value = String(now.getMonth() + 1).padStart(2, '0');
-
-                        for (let yil = 2050; yil >= 2000; yil--) {
-                            const option = document.createElement('option');
-                            option.value = yil;
-                            option.textContent = yil;
-                            yilSelect.appendChild(option);
-                        }
-                        yilSelect.value = now.getFullYear();
-
-                        gosterBtn.addEventListener('click', () => {
-                            const secilenAy = aySelect.value;
-                            const secilenYil = yilSelect.value;
-                            if (secilenAy && secilenYil && userCariId) {
-                                const ayYil = `${secilenYil}-${secilenAy}`;
-                                fetchSutHareketleri(ayYil);
-                            }
-                        });
-
-                        gosterBtn.click();
-                    } else {
-                        alert("Bu hesaba bağlı bir müşteri kartı bulunamadı.");
-                        handleLogout();
-                    }
-                })
-                .catch(error => {
-                    console.error("Müşteri bilgileri alınırken hata oluştu:", error);
-                    alert("Müşteri bilgileri alınırken bir hata oluştu. Lütfen daha sonra tekrar deneyin.");
-                    handleLogout();
-                });
-
-            } else {
-               window.location.href = 'login.html';
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            const userEmailDiv = document.getElementById('logoutUserEmail');
+            if (userEmailDiv) {
+                userEmailDiv.textContent = user.email;
             }
-        });
 
-	const logoutButton = document.getElementById('logoutButton');
-	logoutButton.addEventListener('click', (event) => {
-    	event.preventDefault();
-    	handleLogout();
+            db.collection('cariler').where('authUID', '==', user.uid).limit(1).get()
+            .then(snapshot => {
+                if (!snapshot.empty) {
+                    const cariDoc = snapshot.docs[0];
+                    const cariData = cariDoc.data();
+
+                    // DÜZELTME: Hem cariId hem de sahipId alınıyor.
+                    userCariId = cariDoc.id;
+                    userSahipId = cariData.sahipId;
+                    
+                    document.getElementById('musteriAdi').textContent = cariData.adiSoyadi;
+
+                    // DÜZELTME: sahipId kontrolü eklendi.
+                    if (!userSahipId) {
+                        alert("Müşteri profilinizde bir hata var (sahipId eksik). Lütfen işletme ile iletişime geçin.");
+                        handleLogout();
+                        return;
+                    }
+                    
+                    const aySelect = document.getElementById('ayFiltresi');
+                    const yilSelect = document.getElementById('yilFiltresi');
+                    const gosterBtn = document.getElementById('raporGosterBtn');
+                    const now = new Date();
+
+                    const ayIsimleri = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+                    ayIsimleri.forEach((ay, index) => {
+                        const option = document.createElement('option');
+                        option.value = String(index + 1).padStart(2, '0');
+                        option.textContent = ay;
+                        aySelect.appendChild(option);
+                    });
+                    aySelect.value = String(now.getMonth() + 1).padStart(2, '0');
+
+                    for (let yil = 2050; yil >= 2000; yil--) {
+                        const option = document.createElement('option');
+                        option.value = yil;
+                        option.textContent = yil;
+                        yilSelect.appendChild(option);
+                    }
+                    yilSelect.value = now.getFullYear();
+
+                    gosterBtn.addEventListener('click', () => {
+                        const secilenAy = aySelect.value;
+                        const secilenYil = yilSelect.value;
+                        if (secilenAy && secilenYil && userCariId) {
+                            const ayYil = `${secilenYil}-${secilenAy}`;
+                            fetchSutHareketleri(ayYil);
+                        }
+                    });
+
+                    // Sayfa ilk yüklendiğinde verileri getir
+                    gosterBtn.click();
+                } else {
+                    alert("Bu hesaba bağlı bir müşteri kartı bulunamadı.");
+                    handleLogout();
+                }
+            })
+            .catch(error => {
+                console.error("Müşteri bilgileri alınırken hata oluştu:", error);
+                alert("Müşteri bilgileri alınırken bir hata oluştu. Lütfen daha sonra tekrar deneyin.");
+                handleLogout();
+            });
+
+        } else {
+           window.location.href = 'login.html';
+        }
+    });
+
+    const logoutButton = document.getElementById('logoutButton');
+    logoutButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        handleLogout();
     });
 
 
 function formatSayi(sayi) {
+        if (typeof sayi !== 'number') sayi = 0;
         if (sayi % 1 === 0) {
             return sayi.toString();
         } else {
-            return sayi.toFixed(1); 
+            return sayi.toFixed(2).replace('.', ','); // Ondalık ayracı virgül yap
         }
+    }
+
+    function handleLogout() {
+        auth.signOut().then(() => {
+            window.location.href = 'login.html';
+        }).catch(error => console.error("Çıkış hatası:", error));
     }
 
 function formatPara(sayi) {
@@ -220,74 +242,101 @@ function formatPara(sayi) {
       });
     }
 
-    function handleLogout() {
-        auth.signOut().then(() => {
-            window.location.href = 'login.html';
-        }).catch(error => console.error("Çıkış hatası:", error));
-    }
 
-    async function fetchSutHareketleri(ayYil) {
-        const [year, month] = ayYil.split('-');
-        const startDate = `${year}-${month}-01`;
-        const endDate = new Date(year, month, 0).toISOString().split('T')[0];
-        
-        const listBody = document.getElementById('sutListesiBody');
-        const listFooter = document.getElementById('sutListesiFooter');
-        listBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Veriler yükleniyor...</td></tr>`;
-        listFooter.innerHTML = '';
-        
-        try {
-            const snapshot = await db.collection('sut_alimlari')
-                .where('cariId', '==', userCariId)
-                .where('tarih', '>=', startDate)
-                .where('tarih', '<=', endDate)
-                .orderBy('tarih', 'desc')
-                .get();
+async function fetchSutHareketleri(ayYil) {
+    const [year, month] = ayYil.split('-');
+    const startDate = `${year}-${month}-01`;
 
-            if (snapshot.empty) {
-                listBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Bu dönem için süt kaydı bulunmuyor.</td></tr>`;
-                return;
+    // --- DÜZELTİLMİŞ TARİH HESAPLAMA BAŞLANGICI ---
+    // Önceki hatalı satır:
+    // const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+
+    // DÜZELTİLMİŞ, SAAT DİLİMİNDEN ETKİLENMEYEN GÜVENİLİR YÖNTEM:
+    const endDateObj = new Date(parseInt(year, 10), parseInt(month, 10), 0);
+    const endYear = endDateObj.getFullYear();
+    const endMonth = String(endDateObj.getMonth() + 1).padStart(2, '0');
+    const endDay = String(endDateObj.getDate()).padStart(2, '0');
+    const endDate = `${endYear}-${endMonth}-${endDay}`;
+    // --- DÜZELTİLMİŞ TARİH HESAPLAMA SONU ---
+    
+    const listBody = document.getElementById('sutListesiBody');
+    const listFooter = document.getElementById('sutListesiFooter');
+    listBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Veriler yükleniyor...</td></tr>`;
+    listFooter.innerHTML = '';
+    
+    try {
+        const snapshot = await db.collection('sut_alimlari')
+            .where('sahipId', '==', userSahipId) 
+            .where('cariId', '==', userCariId)
+            .where('tarih', '>=', startDate)
+            .where('tarih', '<=', endDate)
+            .orderBy('tarih', 'asc') // Sıralamayı küçükten büyüğe değiştirdik, daha doğal bir görünüm için.
+            .get();
+
+        if (snapshot.empty) {
+            listBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Bu dönem için süt kaydı bulunmuyor.</td></tr>`;
+            return;
+        }
+
+        const gunlukVeri = new Map();
+
+        snapshot.forEach(doc => {
+            const alim = doc.data();
+            const tarih = alim.tarih;
+            
+            if (!gunlukVeri.has(tarih)) {
+                gunlukVeri.set(tarih, { aksam: 0, sabah: 0, toplam: 0 });
             }
 
-            let rows = '';
-            let donemToplamAksam = 0;
-            let donemToplamSabah = 0;
-            let donemToplamLitre = 0;
+            const gun = gunlukVeri.get(tarih);
+            gun.aksam += alim.aksam || 0;
+            gun.sabah += alim.sabah || 0;
+            gun.toplam += alim.toplam || 0;
+        });
 
-            const dateOptions = { year: '2-digit', month: '2-digit', day: '2-digit' };
+        const siraliGunler = Array.from(gunlukVeri.keys()).sort();
 
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                donemToplamAksam += data.aksam || 0;
-                donemToplamSabah += data.sabah || 0;
-                donemToplamLitre += data.toplam || 0;
+        let rows = '';
+        let donemToplamAksam = 0;
+        let donemToplamSabah = 0;
+        let donemToplamLitre = 0;
+        const dateOptions = { year: '2-digit', month: '2-digit', day: '2-digit' };
 
-                rows += `
-                <tr>
-                    <td>${new Date(data.tarih + 'T00:00:00').toLocaleDateString('tr-TR', dateOptions)}</td>
-                    <td>${formatSayi(data.aksam || 0)}</td>
-                    <td>${formatSayi(data.sabah || 0)}</td>
-                    <td><strong>${formatSayi(data.toplam || 0)}</strong></td>
-                </tr>
+        siraliGunler.forEach(tarih => {
+            const data = gunlukVeri.get(tarih);
+            donemToplamAksam += data.aksam;
+            donemToplamSabah += data.sabah;
+            donemToplamLitre += data.toplam;
+
+            rows += `
+            <tr>
+                <td>${new Date(tarih + 'T00:00:00').toLocaleDateString('tr-TR', dateOptions)}</td>
+                <td>${formatSayi(data.aksam)}</td>
+                <td>${formatSayi(data.sabah)}</td>
+                <td><strong>${formatSayi(data.toplam)}</strong></td>
+            </tr>
             `;
-            });
-            
-            listBody.innerHTML = rows;
-            const footerRow = `
-                <tr class="report-totals-row">
-                    <td><strong>DÖNEM TOPLAMI</strong></td>
-                    <td><strong>${formatSayi(donemToplamAksam)}</strong></td>
-                    <td><strong>${formatSayi(donemToplamSabah)}</strong></td>
-                    <td><strong>${formatSayi(donemToplamLitre)}</strong></td>
-                </tr>
-            `;
-            listFooter.innerHTML = footerRow;
+        });
+        
+        listBody.innerHTML = rows;
+        const footerRow = `
+            <tr class="report-totals-row">
+                <td><strong>DÖNEM TOPLAMI</strong></td>
+                <td><strong>${formatSayi(donemToplamAksam)}</strong></td>
+                <td><strong>${formatSayi(donemToplamSabah)}</strong></td>
+                <td><strong>${formatSayi(donemToplamLitre)}</strong></td>
+            </tr>
+        `;
+        listFooter.innerHTML = footerRow;
 
-        } catch (error) {
-            console.error("Süt hareketleri alınırken hata: ", error);
-            listBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">Veriler yüklenemedi.</td></tr>`;
-        }
+    } catch (error) {
+        console.error("Süt hareketleri alınırken hata: ", error);
+        listBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">Veriler yüklenemedi.</td></tr>`;
     }
+}
+
+
+
 </script>
 </body>
 </html>
