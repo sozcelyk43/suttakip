@@ -132,12 +132,12 @@
       <table>
         <thead>
           <tr>
-            <th>TARİH</th>
-            <th>AKŞAM (LT)</th>
-            <th>SABAH (LT)</th>
-            <th>TOPLAM (LT)</th>
-            <th>BİRİM FİYAT (TL)</th>
-            <th>TOPLAM FİYAT (TL)</th>
+            <th>Tarih</th>
+            <th>Akşam (lt)</th>
+            <th>Sabah (lt)</th>
+            <th>Toplam (lt)</th>
+            <th>Birim Fiyat (tl)</th>
+            <th>Toplam Fiyat (tl)</th>
           </tr>
         </thead>
         <tbody id="sutListesiBody">
@@ -316,11 +316,11 @@ snapshot.forEach(doc => {
             const footerRow = `
                 <tr class="report-totals-row">
                     <td><strong>DÖNEM TOPLAMI</strong></td>
-                    <td><strong>${donemToplamAksam.toFixed(2)}</strong></td>
-                    <td><strong>${donemToplamSabah.toFixed(2)}</strong></td>
+                    <td><strong>${donemToplamAksam.toFixed(1)}</strong></td>
+                    <td><strong>${donemToplamSabah.toFixed(1)}</strong></td>
                      <td><strong>${donemToplamLitre.toFixed(1)}</strong></td>
     <td><strong>${ortalamaBirimFiyat.toFixed(1)}</strong></td>
-    <td><strong>${donemToplamHasiat.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} TL</strong></td>
+    <td><strong>${donemToplamHasiat.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</strong></td>
                 </tr>
             `;
             listFooter.innerHTML = footerRow;
