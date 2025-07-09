@@ -20,12 +20,20 @@
     .module-header {background-color: #2c3e50;color: #fff;text-align: center;padding: 25px;border-radius: 8px;margin-bottom: 20px;}
     .module-header h2, .module-header h3 {margin: 0;}
 
-    /* Filter/Button Layout Updated */
-    .filter-buttons {display: flex;flex-direction: column;gap: 10px;margin-bottom: 20px;}
-    .filter-row-top, .filter-row-bottom {display: grid; gap: 10px;}
-    /* İsteğe göre güncellendi: Üstte 2, altta 3 öğe */
-    .filter-row-top {grid-template-columns: 1fr 1fr;}
-    .filter-row-bottom {grid-template-columns: 1fr 1fr 1fr;}
+
+.filter-buttons {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .filter-row {
+      display: grid;
+      gap: 10px;
+    }
+    /* İsteğe göre: 2'li ve 3'lü grup için yan yana dizilim */
+    .filter-row.two-items { grid-template-columns: 1fr 1fr; }
+    .filter-row.three-items { grid-template-columns: 1fr 1fr 1fr; }
 
     .btn {display: inline-block;background-color: #3498db;color: #fff;padding: 12px;text-align: center;border: none;border-radius: 6px;
     	cursor: pointer;font-size: 1em;transition: background-color 0.2s;text-transform: uppercase; line-height: 1.2;}
@@ -35,9 +43,19 @@
     .btn-secondary {  color: #fff;  background-color: #95a5a6;}
     .btn-secondary:hover { background-color: #7f8c8d; }
 
-    /* Table Layout Updated */
-    table {width: 100%;border-collapse: collapse;margin-top: 20px;font-size: 0.95em;}
-    th, td {padding: 12px 15px;border: 1px solid #ecf0f1;text-align: center;word-break: break-word;}
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 0.90em; /* Font boyutu küçültüldü */
+    }
+    th, td {
+      padding: 12px 10px; /* Padding ayarlandı */
+      border: 1px solid #ecf0f1;
+      text-align: center;
+      word-break: break-word;
+    }
+
     th {background-color: #f8f9fa;font-weight: 600;color: #495057;}
     tbody tr:nth-child(odd) {background-color: #ffffff;}
     tbody tr:nth-child(even) {background-color: #f2f6fa;}
@@ -79,15 +97,11 @@
       .main-content {padding: 0;}
       .module-header {border-radius: 0;}
       /* Responsive Table Adjustments */
-      table {font-size: 0.85em;}
+      table {font-size: 0.82em;}
       th, td {padding: 10px 4px;}
       .summary-stats p {font-size: 1em;}
     }
-     @media (max-width: 480px) {
-        .filter-row-top, .filter-row-bottom {
-            grid-template-columns: 1fr; /* Stack all filter/button items vertically on very small screens */
-        }
-    }
+     
 </style>
 </head>
 <body>
@@ -97,20 +111,24 @@
       <h3>Hoş Geldiniz, <span id="musteriAdi">...</span></h3>
     </div>
     <div class="container">
-      <div class="filter-buttons">
-        <div class="filter-row-top">
+
+<div class="filter-buttons">
+        <div class="filter-row two-items">
           <a href="sifre_degistir.html" class="btn btn-secondary">Şifre Değiştir</a>
           <a href="#" id="logoutButton" class="btn btn-danger">
             <div>Çıkış Yap</div>
             <div id="logoutUserEmail"></div>
           </a>
         </div>
-        <div class="filter-row-bottom">
+        <div class="filter-row three-items">
           <select id="ayFiltresi" class="form-control"></select>
           <select id="yilFiltresi" class="form-control"></select>
           <button id="raporGosterBtn" class="btn">Göster</button>
         </div>
       </div>
+
+
+
       <table>
         <thead>
           <tr>
