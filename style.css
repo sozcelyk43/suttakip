@@ -8,6 +8,7 @@
 	.module-header h2{margin:0;font-size:1.6em}
 	h3{color:#2980b9;margin-top:0;margin-bottom:20px;border-bottom:1px solid #ecf0f1;padding-bottom:15px}
 	h4{color:#34495e;margin-top:15px;margin-bottom:10px}
+	#menuToggleBtn {    top: 20px; }
 	.sidebar-logo{display:block;max-width:200px;margin:9px auto 15px}
 	.sidebar h1{font-size:1.5em;text-align:center;margin:0 0 25px;color:#1abc9c;border-bottom:1px solid #34495e;padding-bottom:15px}
 	.sidebar nav ul{list-style:none;padding:0;margin:0}
