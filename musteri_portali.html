@@ -294,14 +294,13 @@ async function fetchSutHareketleri(ayYil) {
             gun.toplam += alim.toplam || 0;
         });
 
-        const siraliGunler = Array.from(gunlukVeri.keys()).sort();
+const siraliGunler = Array.from(gunlukVeri.keys()).sort().reverse();
 
         let rows = '';
         let donemToplamAksam = 0;
         let donemToplamSabah = 0;
         let donemToplamLitre = 0;
-        const dateOptions = { year: '2-digit', month: '2-digit', day: '2-digit' };
-
+	const dateOptions = {day: 'numeric',month: 'long',year: 'numeric'};
         siraliGunler.forEach(tarih => {
             const data = gunlukVeri.get(tarih);
             donemToplamAksam += data.aksam;
