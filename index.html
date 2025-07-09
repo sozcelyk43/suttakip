@@ -3040,7 +3040,7 @@ async function renderOdemeListesi() {
         const snapshot = await db.collection('odemeVeTahsilatlar')
             .where('sahipId', '==', sahipId)
             .orderBy('tarih', 'desc')
-            .limit(30)
+           // .limit(30)
             .get();
         
         if(snapshot.empty){
