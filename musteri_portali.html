@@ -255,9 +255,9 @@
     }
 
     function resetSummaryStats() {
-        document.getElementById('summaryTotalLitre').textContent = '0.00';
-        document.getElementById('summaryTotalRevenue').textContent = '0.00';
-        document.getElementById('summaryDailyAverage').textContent = '0.00';
+        document.getElementById('summaryTotalLitre').textContent = '0.0';
+        document.getElementById('summaryTotalRevenue').textContent = '0.0';
+        document.getElementById('summaryDailyAverage').textContent = '0.0';
     }
 
     async function fetchSutHareketleri(ayYil) {
@@ -290,24 +290,26 @@
             let donemToplamLitre = 0;
             let donemToplamHasiat = 0;
 
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                donemToplamAksam += data.aksam || 0;
-                donemToplamSabah += data.sabah || 0;
-                donemToplamLitre += data.toplam || 0;
-                donemToplamHasiat += data.toplamTutar || 0;
+const dateOptions = { year: '2-digit', month: '2-digit', day: '2-digit' };
 
-                rows += `
-                    <tr>
-                        <td>${new Date(data.tarih + 'T00:00:00').toLocaleDateString('tr-TR')}</td>
-                        <td>${(data.aksam || 0).toFixed(2)}</td>
-                        <td>${(data.sabah || 0).toFixed(2)}</td>
-                        <td><strong>${(data.toplam || 0).toFixed(2)}</strong></td>
-                        <td>${(data.fiyat || 0).toFixed(2)}</td>
-                        <td><strong>${(data.toplamTutar || 0).toFixed(2)}</strong></td>
-                    </tr>
-                `;
-            });
+snapshot.forEach(doc => {
+    const data = doc.data();
+    donemToplamAksam += data.aksam || 0;
+    donemToplamSabah += data.sabah || 0;
+    donemToplamLitre += data.toplam || 0;
+    donemToplamHasiat += data.toplamTutar || 0;
+
+    rows += `
+        <tr>
+            <td>${new Date(data.tarih + 'T00:00:00').toLocaleDateString('tr-TR', dateOptions)}</td>
+            <td>${(data.aksam || 0).toFixed(1)}</td>
+            <td>${(data.sabah || 0).toFixed(1)}</td>
+            <td><strong>${(data.toplam || 0).toFixed(1)}</strong></td>
+            <td>${(data.fiyat || 0).toFixed(1)}</td>
+            <td><strong>${(data.toplamTutar || 0).toFixed(1)}</strong></td>
+        </tr>
+    `;
+});
             
             listBody.innerHTML = rows;
             const ortalamaBirimFiyat = donemToplamLitre > 0 ? (donemToplamHasiat / donemToplamLitre) : 0;
@@ -316,18 +318,18 @@
                     <td><strong>DÖNEM TOPLAMI</strong></td>
                     <td><strong>${donemToplamAksam.toFixed(2)}</strong></td>
                     <td><strong>${donemToplamSabah.toFixed(2)}</strong></td>
-                    <td><strong>${donemToplamLitre.toFixed(2)}</strong></td>
-                    <td><strong>${ortalamaBirimFiyat.toFixed(2)}</strong></td>
-                    <td><strong>${donemToplamHasiat.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL</strong></td>
+                     <td><strong>${donemToplamLitre.toFixed(1)}</strong></td>
+    <td><strong>${ortalamaBirimFiyat.toFixed(1)}</strong></td>
+    <td><strong>${donemToplamHasiat.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} TL</strong></td>
                 </tr>
             `;
             listFooter.innerHTML = footerRow;
 
             // İstatistik panelini güncelle
             const gunlukOrtalama = snapshot.size > 0 ? (donemToplamLitre / snapshot.size) : 0;
-            document.getElementById('summaryTotalLitre').textContent = donemToplamLitre.toFixed(2);
-            document.getElementById('summaryTotalRevenue').textContent = donemToplamHasiat.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            document.getElementById('summaryDailyAverage').textContent = gunlukOrtalama.toFixed(2);
+            document.getElementById('summaryTotalLitre').textContent = donemToplamLitre.toFixed(1);
+            document.getElementById('summaryTotalRevenue').textContent = donemToplamHasiat.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+            document.getElementById('summaryDailyAverage').textContent = gunlukOrtalama.toFixed(1);
 
 
         } catch (error) {
@@ -382,8 +384,8 @@
                 ? yearlyValues.reduce((sum, current) => sum + current, 0) / yearlyValues.length 
                 : 0;
 
-            monthlyAvgElem.textContent = monthlyAverage.toFixed(2);
-            yearlyAvgElem.textContent = yearlyAverage.toFixed(2);
+            monthlyAvgElem.textContent = monthlyAverage.toFixed(1);
+            yearlyAvgElem.textContent = yearlyAverage.toFixed(1);
 
         } catch (error) {
             console.error("Genel ortalamalar hesaplanırken hata:", error);
