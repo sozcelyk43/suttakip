@@ -694,7 +694,7 @@
 </section>
 </div> 
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -1696,20 +1696,7 @@ async function renderCariListesi() {
     }
 }
 
-function exportTableToExcel(containerId, fileName = 'rapor') {
-    const container = document.getElementById(containerId);
-    if (!container) {
-        alert('Dışa aktarılacak alan bulunamadı.');
-        return;
-    }
-    const table = container.querySelector('table');
-    if (!table) {
-        alert('Dışa aktarılacak tablo bulunamadı.');
-        return;
-    }
-    const wb = XLSX.utils.table_to_book(table, {sheet: "Rapor"});
-    XLSX.writeFile(wb, `${fileName}_${new Date().toLocaleDateString('tr-TR')}.xlsx`);
-}
+
 
 async function updateSayimForm() {
     const yemId = document.getElementById('sayimYemSecimi').value;
@@ -1822,68 +1809,6 @@ async function renderStokSayimGecmisi() {
     }
 }
 
-async function exportTableToPdf(containerId, fileName = 'rapor', buttonId) {
-    const container = document.getElementById(containerId);
-    if (!container || container.innerHTML.trim().length < 20) {
-        alert('PDF oluşturmak için önce bir rapor oluşturun.');
-        return;
-    }
-    const pdfButton = document.getElementById(buttonId);
-    const originalButtonText = pdfButton?.textContent;
-    if (pdfButton) {
-        pdfButton.textContent = "Oluşturuluyor...";
-        pdfButton.disabled = true;
-    }
-    document.body.classList.add('pdf-generating');
-    const sourceSection = container.closest('.module-section');
-    if (sourceSection) {
-        sourceSection.classList.add('pdf-source-section');
-    }
-    try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({
-            orientation: (containerId === 'dinamikRaporContainer' ? 'landscape' : 'portrait'),
-            unit: 'mm',
-            format: 'a4'
-        });
-        const canvas = await html2canvas(container, {
-            scale: 2, 
-            useCORS: true,
-            backgroundColor: '#ffffff'
-        });
-        const imgData = canvas.toDataURL('image/png');
-        const pdfWidth = doc.internal.pageSize.getWidth();
-        const pdfHeight = doc.internal.pageSize.getHeight();
-        const imgWidth = pdfWidth - 20;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let heightLeft = imgHeight;
-        let position = 15; 
-        doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-        heightLeft -= (pdfHeight - 25);
-
-        while (heightLeft > 0) {
-            position = heightLeft - imgHeight;
-            doc.addPage();
-            doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-            heightLeft -= pdfHeight;
-        }
-        
-        doc.save(`${fileName}_${new Date().toLocaleDateString('tr-TR')}.pdf`);
-
-    } catch (error) {
-        console.error("PDF oluşturulurken hata:", error);
-        alert("PDF oluşturulurken bir hata oluştu.");
-    } finally {
-        if (pdfButton) {
-            pdfButton.textContent = originalButtonText;
-            pdfButton.disabled = false;
-        }
-        document.body.classList.remove('pdf-generating');
-        if (sourceSection) {
-            sourceSection.classList.remove('pdf-source-section');
-        }
-    }
-}
 
 function generateRandomColors(count) {
     const colors = [];
@@ -4470,113 +4395,144 @@ function resetTopluSatisFormu() {
     if (iptalBtn) iptalBtn.style.display = 'none';
 }
 
-function handleYazdir(elementId, orientation = 'portrait') { 
+function exportTableToExcel(containerId, fileName = 'rapor') {
+    const container = document.getElementById(containerId);
+    if (!container) return alert('Dışa aktarılacak alan bulunamadı.');
+    const table = container.querySelector('table');
+    if (!table) return alert('Dışa aktarılacak tablo bulunamadı.');
 
+    const wb = XLSX.utils.table_to_book(table, { sheet: "Rapor" });
 
-
-
-if (typeof Android !== "undefined" && Android.print) {
-        Android.print();
+    if (typeof Android !== "undefined" && Android.saveFile) {
+        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+        Android.saveFile(wbout, `${fileName}.xlsx`);
     } else {
+        XLSX.writeFile(wb, `${fileName}_${new Date().toLocaleDateString('tr-TR')}.xlsx`);
+    }
+}
 
+async function exportTableToPdf(containerId, fileName = 'rapor', buttonId) {
+    const container = document.getElementById(containerId);
+    if (!container || container.innerHTML.trim().length < 20) {
+        return alert('PDF oluşturmak için önce bir rapor oluşturun.');
+    }
+    const pdfButton = document.getElementById(buttonId);
+    const originalButtonText = pdfButton?.textContent;
+    if (pdfButton) {
+        pdfButton.textContent = "Oluşturuluyor...";
+        pdfButton.disabled = true;
+    }
+    document.body.classList.add('pdf-generating');
+    const sourceSection = container.closest('.module-section');
+    if (sourceSection) {
+        sourceSection.classList.add('pdf-source-section');
+    }
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+            orientation: (containerId === 'dinamikRaporContainer' ? 'landscape' : 'portrait'),
+            unit: 'mm',
+            format: 'a4'
+        });
+        const canvas = await html2canvas(container, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff'
+        });
+        const imgData = canvas.toDataURL('image/png');
+        const pdfWidth = doc.internal.pageSize.getWidth();
+        const pdfHeight = doc.internal.pageSize.getHeight();
+        const imgWidth = pdfWidth - 20;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 15;
+        doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+        heightLeft -= (pdfHeight - 25);
 
+        while (heightLeft > 0) {
+            position = heightLeft - imgHeight;
+            doc.addPage();
+            doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+            heightLeft -= pdfHeight;
+        }
 
-    const oldIframe = document.getElementById('print-iframe');
-    if (oldIframe) {        oldIframe.remove();    }
+        if (typeof Android !== "undefined" && Android.saveFile) {
+            const base64Data = doc.output('datauristring').split(',')[1];
+            Android.saveFile(base64Data, `${fileName}.pdf`);
+        } else {
+            doc.save(`${fileName}_${new Date().toLocaleDateString('tr-TR')}.pdf`);
+        }
+
+    } catch (error) {
+        console.error("PDF oluşturulurken hata:", error);
+        alert("PDF oluşturulurken bir hata oluştu.");
+    } finally {
+        if (pdfButton) {
+            pdfButton.textContent = originalButtonText;
+            pdfButton.disabled = false;
+        }
+        document.body.classList.remove('pdf-generating');
+        if (sourceSection) {
+            sourceSection.classList.remove('pdf-source-section');
+        }
+    }
+}
+
+function handleYazdir(elementId, orientation = 'portrait') {
     const printElement = document.getElementById(elementId);
-    if (!printElement) {        console.error("Yazdırılacak alan bulunamadı:", elementId);        return;    }
+    if (!printElement) {
+        console.error("Yazdırılacak alan bulunamadı:", elementId);
+        return;
+    }
     const contentToPrint = printElement.cloneNode(true);
     contentToPrint.querySelectorAll('.dont-print, .list-header-with-filter').forEach(el => el.remove());
-    
-const printStyles = `
-    @page {
-        size: A4 ${orientation};
-        margin: 1cm; /* Kenar boşluklarını daralttık */
+
+    const printStyles = `
+        @page {
+            size: A4 ${orientation};
+            margin: 1cm;
+        }
+        body { 
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 8pt;
+            line-height: 1.2;
+            -webkit-print-color-adjust: exact;
+        }
+        h1 { font-size: 10pt; font-weight: normal; color: #666; margin-bottom: 2px; text-align: center; }
+        h4 { font-size: 14pt; font-weight: bold; color: #000; margin-bottom: 15px; text-align: center; }
+        h5 { text-align: left; margin: 15px 0 8px 0; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+        h3 { font-size: 12pt; }
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        th, td { border: 1px solid #666; padding: 3px 4px; text-align: left; }
+        th { font-weight: bold; background-color: #f2f2f2; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .final-summary p { display: flex; margin: 4px 0; padding: 3px 0; border-bottom: 1px dotted #999; }
+        .final-summary p:last-of-type { border-bottom: none; font-size: 1.1em; font-weight: bold; }
+        .final-summary span:last-child, .final-summary strong:last-child { margin-left: auto; padding-left: 20px; }
+    `;
+
+    const finalHtml = `<!DOCTYPE html><html><head><title>Yazdır</title><style>${printStyles}</style></head><body>${contentToPrint.innerHTML}</body></html>`;
+
+    if (typeof Android !== "undefined" && Android.print) {
+        Android.print(finalHtml);
+    } else {
+        const iframe = document.createElement('iframe');
+        iframe.id = 'print-iframe';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+        const iframeDoc = iframe.contentWindow.document;
+        iframeDoc.open();
+        iframeDoc.write(finalHtml);
+        iframeDoc.close();
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+        setTimeout(() => { document.body.removeChild(iframe); }, 1000);
     }
-    body { 
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 8pt; /* Yazı tipini küçülterek daha fazla veri sığmasını sağladık */
-        line-height: 1.2;
-        -webkit-print-color-adjust: exact; /* Arka plan renklerinin de yazdırılmasını sağlar */
-    }
-    h1 {
-        font-size: 10pt; /* Ana başlığı küçülttük */
-        font-weight: normal;
-        color: #666;
-        margin-bottom: 2px;
-        text-align: center;
-    }
-    h4 {
-        font-size: 14pt; /* Müşteri adının olduğu başlığı büyüttük */
-        font-weight: bold;
-        color: #000;
-        margin-bottom: 15px;
-        text-align: center;
-    }
-    h5 {
-        text-align: left;
-        margin: 15px 0 8px 0;
-        border-bottom: 1px solid #ccc;
-        padding-bottom: 4px;
-    }
-    h3 {
-        font-size: 12pt;
-    }
-    table { 
-        width: 100%; 
-        border-collapse: collapse; 
-        margin-top: 5px;
-    }
-    th, td { 
-        border: 1px solid #666; 
-        padding: 3px 4px; /* Hücre içi boşlukları azalttık */
-        text-align: left;
-    }
-    th { 
-        font-weight: bold;
-        background-color: #f2f2f2;
-    }
-    tr:nth-child(even) {
-        background-color: #f9f9f9;
-    }
-.final-summary p {
-    display: flex; /* Satırı esnek bir kutu yapar */
-    margin: 4px 0;
-    padding: 3px 0;
-    border-bottom: 1px dotted #999;
-}
-.final-summary p:last-of-type {
-    border-bottom: none;
-    font-size: 1.1em;
-    font-weight: bold;
-}
-.final-summary span:last-child, 
-.final-summary strong:last-child {
-    margin-left: auto; /* Bu kural rakamları en sağa iter */
-    padding-left: 20px; /* Yazı ile rakam arasına boşluk koyar */
 }
 
 
 
 
-`;
-
-    const iframe = document.createElement('iframe');
-    iframe.id = 'print-iframe';
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-    const iframeDoc = iframe.contentWindow.document;
-    iframeDoc.open();
-    iframeDoc.write('<!DOCTYPE html><html><head><title>Yazdır</title>');
-    iframeDoc.write('<style>' + printStyles + '</style>');
-    iframeDoc.write('</head><body>');
-    iframeDoc.write(contentToPrint.innerHTML);
-    iframeDoc.write('</body></html>');
-    iframeDoc.close();
-    iframe.contentWindow.focus();
-    iframe.contentWindow.print();
-}
-	}
 </script>
 <script src="https://unpkg.com/jspdf-autotable@3.5.23/dist/jspdf.plugin.autotable.js"></script>
 
