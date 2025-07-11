@@ -736,6 +736,8 @@
 	let firstVisibleHareketStack = [];
 	let hareketPageCount = 1;
     	let isAppInitialized = false;
+const globalCache = new Map();
+const CACHE_TTL_SECONDS = 300;
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -1373,6 +1375,17 @@ async function updateMonthlyStats() {
 }
 
 async function updateDashboardStats() {
+    const cacheKey = `dashboard_stats_main`;
+    const now = Date.now();
+
+    if (globalCache.has(cacheKey)) {
+        const cachedItem = globalCache.get(cacheKey);
+        if (now - cachedItem.timestamp < CACHE_TTL_SECONDS * 1000) {
+            // console.log("Dashboard ana istatistikleri önbellekten geldi.");
+            return; // Fonksiyondan çık, çünkü veri taze ve zaten ekranda.
+        }
+    }
+
     const currentUser = auth.currentUser;
     if (!currentUser) return;
     try {
@@ -1484,7 +1497,11 @@ async function updateDashboardStats() {
         }
         if (typeof renderAylikSutunGrafik === 'function') await renderAylikSutunGrafik();
     } catch(e) { console.error("Kontrol paneli grafikleri oluşturulurken hata", e); }
+    
+    // İşlemler bittikten sonra sonucu önbelleğe al.
+    globalCache.set(cacheKey, { data: true, timestamp: now });
 }
+
 
 async function handleCariKaydet(event) {
     event.preventDefault();
@@ -2852,6 +2869,22 @@ function resetYemSatisForm() {
 }
 
 async function calculateCariBakiyeDetayli(cariId, endDate = null) {
+    // 1. Önbellek için benzersiz bir anahtar oluştur.
+    const cacheKey = `bakiye_${cariId}_${endDate || 'guncel'}`;
+    const now = Date.now();
+
+    // 2. Önbelleği kontrol et.
+    if (globalCache.has(cacheKey)) {
+        const cachedItem = globalCache.get(cacheKey);
+        // 3. Veri taze mi diye kontrol et (5 dakikadan yeni mi?).
+        if (now - cachedItem.timestamp < CACHE_TTL_SECONDS * 1000) {
+            // console.log(`Bakiye önbellekten geldi: ${cariId}`);
+            return cachedItem.data; // Taze ise veritabanına gitmeden sonucu döndür.
+        }
+    }
+
+    // 4. Önbellekte yoksa veya eskiyse, veritabanından hesapla (orijinal kod).
+    // console.log(`Bakiye veritabanından hesaplanıyor: ${cariId}`);
     let alacak = 0, borc = 0;
     const currentUser = auth.currentUser;
     if (!currentUser) return { alacak: 0, borc: 0, bakiye: 0 };
@@ -2893,14 +2926,18 @@ async function calculateCariBakiyeDetayli(cariId, endDate = null) {
             else if (data.islemTuru === 'tahsilat' || data.islemTuru === 'borc') borc += data.tutar;
         });
         
-        return { alacak, borc, bakiye: alacak - borc };
+        const result = { alacak, borc, bakiye: alacak - borc };
+        
+        // 5. Yeni sonucu zaman damgasıyla birlikte önbelleğe kaydet.
+        globalCache.set(cacheKey, { data: result, timestamp: now });
+
+        return result;
 
     } catch (error) {
         console.error(`Bakiye hesaplanırken hata (Cari ID: ${cariId}):`, error);
         return { alacak: 0, borc: 0, bakiye: 0 };
     }
-}
-        
+}        
 
 async function handleOdemeKaydet(event) {
     event.preventDefault();
