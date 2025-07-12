@@ -700,9 +700,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://unpkg.com/jspdf-autotable@3.5.23/dist/jspdf.plugin.autotable.js"></script>
+
     
 <script>
     const firebaseConfig = {
@@ -718,58 +720,75 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-// --- YARDIMCI FONKSİYONLAR ---
 
-// 1. BİLGİ/HATA MESAJLARI İÇİN (alert yerine)
 function showToast(message, isError = false) {
-    // Bu fonksiyon zaten 'hizli-giris.html' için oluşturulmuştu,
-    // ana sayfada da kullanmak için buraya ekliyoruz.
-    // Eğer ana sayfanızda benzer bir yapı yoksa, CSS'e de eklenmesi gerekebilir.
-    // Şimdilik sadece JS kısmını ekliyoruz.
-    console.log(`Toast: ${message} (Error: ${isError})`);
-    // Gerçek bir toast mekanizması için HTML/CSS gerekir.
-    // Şimdilik en basit haliyle alert'i değiştiriyoruz.
-    // Gelişmiş bir toast için CSS ve HTML de eklemek gerekir.
-    // Şimdilik temel alert'leri değiştirmek için bu yeterli olacaktır.
-    alert(message); // Geçici olarak alert'e geri döndüm, çünkü ana sayfada toast HTML/CSS'i yok.
-                   // Eğer varsa bu satırı yorumdan çıkarabilirsiniz.
-    /*
-    const toast = document.getElementById('toast-message'); // HTML'de bu ID'li bir element olmalı
-    if(toast) {
-        toast.textContent = message;
-        toast.style.backgroundColor = isError ? '#dc3545' : '#28a745';
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3000);
-    } else {
-        alert(message); // Toast elementi yoksa fallback olarak alert kullan
-    }
-    */
+    const toast = document.getElementById('toast-message');
+    if (!toast) return; // Element yoksa hiçbir şey yapma
+    
+    toast.textContent = message;
+    toast.style.backgroundColor = isError ? 'var(--danger-color)' : 'var(--success-color)';
+    toast.classList.add('show');
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
 }
 
-// 2. EVET/HAYIR ONAY PENCERELERİ İÇİN (confirm yerine)
-function showCustomConfirm(message, onConfirm, onCancel) {
-    // Bu fonksiyon da 'hizli-giris.html' için oluşturulmuştu.
-    // Ana sayfadaki confirm'leri değiştirmek için bu fonksiyonun var olduğunu varsayıyoruz.
-    // Eğer yoksa, 'hizli-giris.html' dosyasından kopyalanmalıdır.
-    if (confirm(message)) {
-        if(onConfirm) onConfirm();
-    } else {
-        if(onCancel) onCancel();
-    }
+function showCustomConfirm(message, onConfirm, title = "İşlem Onayı") {
+    const overlay = document.getElementById('custom-confirm-overlay');
+    const titleEl = document.getElementById('custom-confirm-title');
+    const messageEl = document.getElementById('custom-confirm-message');
+    const yesBtn = document.getElementById('custom-confirm-yes');
+    const cancelBtn = document.getElementById('custom-confirm-cancel');
+    
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+
+    const cleanup = () => {
+        overlay.classList.remove('show');
+        yesBtn.replaceWith(yesBtn.cloneNode(true)); // event listener'ları temizle
+        cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+    };
+
+    document.getElementById('custom-confirm-yes').onclick = () => {
+        onConfirm();
+        cleanup();
+    };
+    
+    document.getElementById('custom-confirm-cancel').onclick = cleanup;
+
+    overlay.classList.add('show');
 }
 
-// 3. KULLANICIDAN GİRİŞ İSTEYEN PENCERELER İÇİN (prompt yerine)
-function showCustomPrompt(message, onConfirm) {
-    // Bu fonksiyon 'prompt'un yerine geçecek.
-    // Güvenlik doğrulaması gibi kritik yerlerde kullanılıyor.
-    const userInput = prompt(message);
-    if (userInput !== null) { // Kullanıcı "İptal" demediyse
-        onConfirm(userInput);
-    }
-    // "İptal" denirse bir şey yapma.
+function showCustomPrompt(message, onConfirm, title = "Onay Gerekiyor") {
+    const overlay = document.getElementById('custom-prompt-overlay');
+    const titleEl = document.getElementById('custom-prompt-title');
+    const messageEl = document.getElementById('custom-prompt-message');
+    const inputEl = document.getElementById('custom-prompt-input');
+    const okBtn = document.getElementById('custom-prompt-ok');
+    const cancelBtn = document.getElementById('custom-prompt-cancel');
+    
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+    inputEl.value = '';
+
+    const cleanup = () => {
+        overlay.classList.remove('show');
+        okBtn.replaceWith(okBtn.cloneNode(true));
+        cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+    };
+
+    document.getElementById('custom-prompt-ok').onclick = () => {
+        onConfirm(inputEl.value);
+        cleanup();
+    };
+    
+    document.getElementById('custom-prompt-cancel').onclick = cleanup;
+
+    overlay.classList.add('show');
 }
 
-// --- YARDIMCI FONKSİYONLAR BİTİŞ ---
+
 
 
 
@@ -1564,7 +1583,7 @@ async function updateDashboardStats() {
 async function handleCariKaydet(event) {
     event.preventDefault();
     const currentUser = auth.currentUser;
-    if (!currentUser) {        alert("Lütfen giriş yapın.");        return;    }
+    if (!currentUser) {        showToast("Lütfen giriş yapın.", true);        return;    }
     const editingId = document.getElementById('cariEditId').value;
     const secilenGruplar = [];
     if (document.getElementById('grupUretici').checked) secilenGruplar.push('üretici');
@@ -1802,7 +1821,7 @@ async function handleStokSayimKaydet(event) {
     const not = document.getElementById('sayimNotu').value;
 
     if (!tarih || !yemId || isNaN(fizikselStok) || fizikselStok < 0) {
-        alert("Lütfen tarih, yem ve geçerli bir sayım miktarı girin.");
+        showToast("Lütfen tarih, yem ve geçerli bir sayım miktarı girin.", true);
         return;
     }
 
@@ -1832,7 +1851,7 @@ async function handleStokSayimKaydet(event) {
             });
         });
 
-        alert("Stok sayımı başarıyla kaydedildi ve yem stoğu güncellendi!");
+        showToast("Stok sayımı başarıyla kaydedildi ve yem stoğu güncellendi!");
         document.getElementById('stokSayimForm').reset();
         await Promise.all([
             renderYemStokListesi(), 
@@ -1842,7 +1861,7 @@ async function handleStokSayimKaydet(event) {
 
     } catch (error) {
         console.error("Stok sayımı kaydedilirken hata:", error);
-        alert("Hata: " + error.message);
+	showToast("Hata: " + error.message, true);
     }
 }
 
@@ -2161,33 +2180,27 @@ async function deleteCari(id) {
         const cariAdi = cariData.adiSoyadi;
         const cariKodu = cariData.kodu || '';
         
-        const ilkOnayMesaji = `⚠️ DİKKAT!\n\n'${cariAdi}' isimli cariyi ve bu cariye ait TÜM SÜT, YEM, ÖDEME ve TAHSİLAT kayıtlarını kalıcı olarak silmek üzeresiniz. Bu işlem geri alınamaz!\n\nDevam etmek istediğinizden emin misiniz?`;
+        const ilkOnayMesaji = `'${cariAdi}' isimli cariyi ve bu cariye ait TÜM kayıtları kalıcı olarak silmek üzeresiniz. Bu işlem geri alınamaz! Devam etmek istediğinizden emin misiniz?`;
         
         showCustomConfirm(ilkOnayMesaji, () => {
-            const ikinciOnayMesaji = `🛑 SON UYARI!\n\nSilme işlemini onaylamak için lütfen carinin kodunu (${cariKodu}) aşağıdaki kutucuğa tam olarak yazın.`;
+            const ikinciOnayMesaji = `SON UYARI! Silme işlemini onaylamak için lütfen carinin kodunu (${cariKodu}) aşağıdaki kutucuğa tam olarak yazın.`;
             
             showCustomPrompt(ikinciOnayMesaji, async (kullaniciGirdisi) => {
                 if (kullaniciGirdisi.trim() !== cariKodu) {
                     showToast("Girilen cari kodu yanlış! Silme işlemi iptal edildi.", true);
                     return;
                 }
-
-                // --- Silme işleminin devamı ---
                 const silinenRotaSirasi = cariData.rotaSirasi;
                 const hareketler = ['sut_alimlari', 'yem_alimlari', 'yem_satislari', 'odemeVeTahsilatlar'];
                 const hareketSnapshots = [];
                 for (const koleksiyon of hareketler) {
                     const q = db.collection(koleksiyon).where('cariId', '==', id).where('sahipId', '==', sahipId);
-                    const snapshot = await q.get();
-                    hareketSnapshots.push(snapshot);
+                    hareketSnapshots.push(await q.get());
                 }
-
                 let carilerToUpdateSnapshot = null;
                 if (silinenRotaSirasi) {
-                    const carilerToUpdateQuery = db.collection('cariler').where('sahipId', '==', sahipId).where('rotaSirasi', '>', silinenRotaSirasi);
-                    carilerToUpdateSnapshot = await carilerToUpdateQuery.get();
+                    carilerToUpdateSnapshot = await db.collection('cariler').where('sahipId', '==', sahipId).where('rotaSirasi', '>', silinenRotaSirasi).get();
                 }
-
                 await db.runTransaction(async (transaction) => {
                     hareketSnapshots.forEach(snapshot => snapshot.forEach(doc => transaction.delete(doc.ref)));
                     if (carilerToUpdateSnapshot) {
@@ -2195,18 +2208,16 @@ async function deleteCari(id) {
                     }
                     transaction.delete(cariRef);
                 });
-
                 await renderCariListesi();
                 showToast(`'${cariAdi}' isimli cari ve tüm hareketleri başarıyla silindi.`);
-                // --- Silme işlemi sonu ---
-            });
-        });
-
+            }, "🛑 SON UYARI!");
+        }, "⚠️ DİKKAT!");
     } catch (error) {
         console.error("Cari silinirken hata:", error);
         showToast("Cari silinirken bir hata oluştu: " + error, true);
     }
 }
+
 
 
 function resetCariForm(){ 
@@ -2222,8 +2233,8 @@ async function handleCariKategoriEkle(event) {
     const yeniCariKategoriAdiInput = document.getElementById('yeniCariKategoriAdi');
     const yeniAd = yeniCariKategoriAdiInput.value.trim();
     const currentUser = auth.currentUser;
-    if (!currentUser) { alert("Lütfen giriş yapın."); return; }
-    if (yeniAd === '') { alert('Kategori/Köy adı boş olamaz.'); return; }
+    	if (!currentUser) { showToast("Lütfen giriş yapın.", true); return; }
+	if (yeniAd === '') { showToast('Kategori/Köy adı boş olamaz.', true); return; }
     try {
         await db.collection('cari_kategorileri').add({ ad: yeniAd, sahipId: sahipId });
         await Promise.all([
@@ -2235,7 +2246,7 @@ async function handleCariKategoriEkle(event) {
         yeniCariKategoriAdiInput.value = '';
     } catch (error) {
         console.error("Kategori eklenirken hata: ", error);
-        alert("Kategori eklenemedi. Konsolu kontrol edin.");
+        showToast("Kategori eklenemedi. Konsolu kontrol edin.", true);
     }
 }
 
@@ -2252,14 +2263,58 @@ async function renderCariKategoriListesi() {
     } catch(error) { console.error("Kategoriler listelenirken hata:", error); }
 }
 
-async function deleteCariKategori(id) { 
-    if (confirm('Bu kategoriyi/köyü silmek istediğinizden emin misiniz?')) { 
-        try {
-            await db.collection('cari_kategorileri').doc(id).delete(); 
-            await Promise.all([renderCariKategoriListesi(), populateCariKategoriSelect(document.getElementById('cariKategori')), populateCariKategoriFiltre(), 	populateCariKategoriSelect(document.getElementById('topluGirisKategori'))]);
-        } catch(error) { console.error("Kategori silinirken hata:", error); }
+async function deleteCariKategori(id) {
+    try {
+        // 1. Adım: Kategorinin adını öğren ve kullanılıp kullanılmadığını kontrol et
+        const kategoriRef = db.collection('cari_kategorileri').doc(id);
+        const kategoriDoc = await kategoriRef.get();
+        if (!kategoriDoc.exists) {
+            showToast("Silinecek kategori bulunamadı.", true);
+            return;
+        }
+        const kategoriAdi = kategoriDoc.data().ad;
+
+        const carilerSnapshot = await db.collection('cariler')
+            .where('sahipId', '==', sahipId)
+            .where('kategori', '==', kategoriAdi)
+            .limit(1)
+            .get();
+
+        // 2. Adım: Eğer kategori kullanımdaysa, hata mesajı göster ve işlemi durdur
+        if (!carilerSnapshot.empty) {
+            showToast(`"${kategoriAdi}" kategorisi, bir veya daha fazla cari tarafından kullanıldığı için silinemez.`, true);
+            return;
+        }
+
+        // 3. Adım: Kategori kullanımda değilse, kullanıcıdan onay iste
+        const onayMesaji = `"${kategoriAdi}" kategorisini/köyünü kalıcı olarak silmek istediğinizden emin misiniz?`;
+        
+        showCustomConfirm(onayMesaji, async () => {
+            // 4. Adım: Onaylanırsa silme işlemini yap ve kullanıcıyı bilgilendir
+            try {
+                await db.collection('cari_kategorileri').doc(id).delete();
+                showToast(`"${kategoriAdi}" kategorisi başarıyla silindi.`);
+                
+                // İlgili tüm listeleri ve seçim kutularını yenile
+                await Promise.all([
+                    renderCariKategoriListesi(),
+                    populateCariKategoriSelect(document.getElementById('cariKategori')),
+                    populateCariKategoriFiltre(),
+                    populateCariKategoriSelect(document.getElementById('topluGirisKategori'))
+                ]);
+
+            } catch (error) {
+                console.error("Kategori silinirken hata:", error);
+                showToast("Kategori silinirken bir hata oluştu.", true);
+            }
+        });
+
+    } catch (error) {
+        console.error("Kategori silme ön kontrolü sırasında hata:", error);
+        showToast("İşlem sırasında bir hata oluştu.", true);
     }
 }
+
 
 async function populateCariKategoriFiltre() { 
     const selectElement = document.getElementById('cariKategoriFiltre');
@@ -2349,18 +2404,20 @@ async function populateYemSelect(selectElement, defaultText = "Yem Seçiniz...")
 
 async function handleKullaniciKaydet(event) {
     	event.preventDefault();
-    	alert("Bu özellik güvenlik nedeniyle doğrudan yeni kullanıcı oluşturmaz. Lütfen önce Firebase Authentication panelinden kullanıcıyı e-posta/şifre ile oluşturun, ardından bu 	panelden o 	kullanıcıya ait bir profil (rol ataması) oluşturabilirsiniz.");
+    	showToast("Bu özellik güvenlik nedeniyle doğrudan yeni kullanıcı oluşturmaz. Lütfen önce Firebase Authentication panelinden kullanıcıyı e-posta/şifre ile oluşturun, ardından bu 	panelden o 	kullanıcıya ait bir profil (rol ataması) oluşturabilirsiniz.");
 }
 
 async function deleteKullanici(id) {
-    if(confirm("Kullanıcıyı silmek istiyor musunuz?")) {
+    showCustomConfirm("Kullanıcıyı silmek istiyor musunuz?", async () => {
         try {
             await db.collection('kullanicilar').doc(id).delete();
+            showToast("Kullanıcı başarıyla silindi.");
             await renderKullaniciListesi();
         } catch (error) {
             console.error("Kullanıcı silinirken hata:", error);
+            showToast("Kullanıcı silinirken bir hata oluştu.", true);
         }
-    }
+    });
 }
 
 async function renderKullaniciListesi() {
@@ -2383,7 +2440,7 @@ async function editYemAlisi(id) {
     try {
         const doc = await db.collection('yem_alimlari').doc(id).get();
         if (!doc.exists) {
-            alert("Düzenlenecek kayıt bulunamadı.");
+            showToast("Düzenlenecek kayıt bulunamadı.", true);
             return;
         }
         const data = doc.data();
@@ -2406,7 +2463,7 @@ async function editYemAlisi(id) {
 async function handleYemTanimKaydet(event) {
     event.preventDefault();
     const currentUser = auth.currentUser;
-    if (!currentUser) { alert("Lütfen giriş yapın."); return; }
+if (!currentUser) { showToast("Lütfen giriş yapın.", true); return; }
 
     const formData = {
         kod: document.getElementById('yemKodu').value,
@@ -2421,17 +2478,17 @@ async function handleYemTanimKaydet(event) {
         const editingYemTanimId = document.getElementById('yemTanimEditId').value;
         if (editingYemTanimId) {
             await db.collection('yemler').doc(editingYemTanimId).set(formData, { merge: true });
-            alert("Yem tanımı güncellendi.");
+            showToast("Yem tanımı güncellendi.");
         } else {
             formData.stokMiktari = 0;
             await db.collection('yemler').add(formData);
-            alert("Yem tanımı kaydedildi.");
+            showToast("Yem tanımı kaydedildi.");
         }
         resetYemTanimForm();
         await renderYemStokListesi();
     } catch (error) {
         console.error("Yem tanımı kaydedilirken hata:", error);
-        alert("Yem tanımı kaydedilirken bir hata oluştu.");
+       showToast("Yem tanımı kaydedilirken bir hata oluştu.", true);
     }
 }
 
@@ -2500,14 +2557,17 @@ async function loadAllCarilerToCache() {
 async function handleYemAlisKaydet(event) {
     event.preventDefault();
     const currentUser = auth.currentUser;
-    if (!currentUser) { alert("Lütfen giriş yapın."); return; }
+    if (!currentUser) { 
+        showToast("Lütfen giriş yapın.", true); 
+        return; 
+    }
 
     const miktar = parseInt(document.getElementById('yemAlisMiktar').value);
     const birimFiyat = parseFloat(document.getElementById('yemAlisBirimFiyati').value);
     const yemId = document.getElementById('yemSecimiAlis').value;
-    
+
     if (!yemId || isNaN(miktar) || miktar < 0 || isNaN(birimFiyat)) {
-        alert("Lütfen yem, miktar ve fiyat alanlarını doğru bir şekilde doldurun.");
+        showToast("Lütfen yem, miktar ve fiyat alanlarını doğru bir şekilde doldurun.", true);
         return;
     }
 
@@ -2525,25 +2585,25 @@ async function handleYemAlisKaydet(event) {
 
     if (editingYemAlisId) {
         const alisRef = db.collection('yem_alimlari').doc(editingYemAlisId);
-        
+
         try {
             await db.runTransaction(async (transaction) => {
                 const eskiAlisDoc = await transaction.get(alisRef);
                 if (!eskiAlisDoc.exists) throw "Düzenlenecek kayıt bulunamadı.";
-		const eskiMiktar = eskiAlisDoc.data().miktar;
+        const eskiMiktar = eskiAlisDoc.data().miktar;
                 if (eskiAlisDoc.data().yemId !== yemId) throw "Yem türü düzenleme sırasında değiştirilemez. Lütfen kaydı silip yeniden oluşturun.";
-	        const stokFarki = miktar - eskiMiktar;
+            const stokFarki = miktar - eskiMiktar;
                 transaction.update(yemRef, { stokMiktari: firebase.firestore.FieldValue.increment(stokFarki) });
                 transaction.update(alisRef, formData);
             });
-            
-            alert("Yem alışı başarıyla güncellendi.");
+
+            showToast("Yem alışı başarıyla güncellendi.");
             resetYemAlisForm();
             await Promise.all([renderYemStokListesi(), renderYemAlisHareketleri()]);
 
         } catch (error) {
             console.error("Yem alışı güncellenirken hata:", error);
-            alert("Hata: " + error);
+            showToast("Hata: " + error, true);
         }
     } 
     else {
@@ -2553,39 +2613,49 @@ async function handleYemAlisKaydet(event) {
             batch.set(yemAlimRef, formData);
             batch.update(yemRef, { stokMiktari: firebase.firestore.FieldValue.increment(miktar) });
             await batch.commit();
-            
+
+            showToast("Yem alışı başarıyla kaydedildi."); // Başarı mesajı eklendi
             resetYemAlisForm();
             await Promise.all([renderYemStokListesi(), renderYemAlisHareketleri()]);
         } catch (error) {
             console.error("Yem alışı kaydedilirken hata:", error);
-            alert("Yem alışı kaydedilirken bir hata oluştu.");
+            showToast("Yem alışı kaydedilirken bir hata oluştu.", true);
         }
     }
 }
 
 
 async function deleteYemTanimi(id) {
-    if (!confirm("Bu yem tanımını silmek istediğinizden emin misiniz? Eğer bu yem ile ilgili bir alış veya satış yapıldıysa, silme işlemi engellenecektir.")) return;
-    try {
-        const alisSnapshot = await db.collection('yem_alimlari').where('yemId', '==', id).limit(1).get();
-        const satisSnapshot = await db.collection('yem_satislari').where('yemId', '==', id).limit(1).get();
-        if (!alisSnapshot.empty || !satisSnapshot.empty) {
-            alert("Bu yem ile ilgili alış veya satış hareketleri bulunduğu için silemezsiniz.");
-            return;
+    const message = "Bu yem tanımını silmek istediğinizden emin misiniz? Eğer bu yem ile ilgili bir alış veya satış yapıldıysa, silme işlemi engellenecektir.";
+    showCustomConfirm(message, async () => {
+        try {
+            const alisSnapshot = await db.collection('yem_alimlari').where('yemId', '==', id).limit(1).get();
+            const satisSnapshot = await db.collection('yem_satislari').where('yemId', '==', id).limit(1).get();
+            
+            if (!alisSnapshot.empty || !satisSnapshot.empty) {
+                showToast("Bu yem ile ilgili hareketleri bulunduğu için silemezsiniz.", true);
+                return;
+            }
+            
+            await db.collection('yemler').doc(id).delete();
+            showToast("Yem tanımı silindi.");
+            await renderYemStokListesi();
+            
+        } catch (error) {
+            console.error("Yem tanımı silinirken hata:", error);
+            showToast("Yem tanımı silinirken bir hata oluştu.", true);
         }
-        await db.collection('yemler').doc(id).delete();
-        alert("Yem tanımı silindi.");
-        await renderYemStokListesi();
-    } catch (error) {
-        console.error("Yem tanımı silinirken hata:", error);
-        alert("Yem tanımı silinirken bir hata oluştu.");
-    }
+    }); 
 }
+
 
 async function editYemTanimi(id) {
     try {
         const doc = await db.collection('yemler').doc(id).get();
-        if (!doc.exists) { alert("Düzenlenecek yem bulunamadı."); return; }
+        if (!doc.exists) { 
+            showToast("Düzenlenecek yem bulunamadı.", true); 
+            return; 
+        }
         const yem = doc.data();
         document.getElementById('yemTanimEditId').value = id;
         document.getElementById('yemKodu').value = yem.kod;
@@ -2655,7 +2725,7 @@ async function editOdeme(id) {
     try {
         const doc = await db.collection('odemeVeTahsilatlar').doc(id).get();
         if (!doc.exists) {
-            alert("Kayıt bulunamadı.");
+            showToast("Kayıt bulunamadı.", true);
             return;
         }
         const data = doc.data();
@@ -2688,16 +2758,18 @@ async function editOdeme(id) {
 }
 
 async function deleteOdeme(id) {
-    if (confirm("Bu işlem hareketini silmek istediğinizden emin misiniz?")) {
+    showCustomConfirm("Bu işlem hareketini silmek istediğinizden emin misiniz?", async () => {
         try {
             await db.collection('odemeVeTahsilatlar').doc(id).delete();
+            showToast("İşlem başarıyla silindi."); // Başarı bildirimi eklendi
             await renderOdemeListesi(); // Listeyi yenile
         } catch (error) {
             console.error("Ödeme silinirken hata:", error);
-            alert("İşlem silinirken bir hata oluştu.");
+            showToast("İşlem silinirken bir hata oluştu.", true);
         }
-    }
+    }); // <-- EKSİK OLAN KAPANIŞ PARANTEZİ BURADAYDI
 }
+
 
 function closeSutDuzenleForm() {
     document.getElementById('sutDuzenleFormAlani').style.display = 'none';
@@ -2790,19 +2862,20 @@ async function fetchAndDisplayHareketler() {
 }
 
 async function deleteSutAlimi(id) {
-    if (confirm("Bu süt alım kaydını kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!")) {
+    showCustomConfirm("Bu süt alım kaydını kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!", async () => {
         try {
             await db.collection('sut_alimlari').doc(id).delete();
-            alert("Kayıt başarıyla silindi.");
+            showToast("Kayıt başarıyla silindi.");
             await renderSutAlimGecmisi();
             await renderTopluSutGirisFormu();
             await updateDashboardStats(); 
         } catch (error) {
             console.error("Süt alımı silinirken hata:", error);
-            alert("Silme işlemi sırasında bir hata oluştu: " + error.message);
+            showToast("Silme işlemi sırasında bir hata oluştu: " + error.message, true);
         }
-    }
+    });
 }
+
 
 async function handleSutAlimiGuncelle(event) {
     event.preventDefault();
@@ -2847,10 +2920,9 @@ async function handleYemSatisUpdate() {
     const satisRef = db.collection('yem_satislari').doc(editingYemSatisId);
     const yeniMiktar = parseInt(document.getElementById('yemSatisMiktar').value);
     const yeniFiyat = parseFloat(document.getElementById('yemSatisBirimFiyati').value);
-    if (isNaN(yeniMiktar) || isNaN(yeniFiyat) || yeniMiktar <= 0) {
-        alert("Lütfen miktar ve fiyat alanlarını geçerli bir şekilde doldurun.");
-        return;
-    }
+   if (isNaN(yeniMiktar) || isNaN(yeniFiyat) || yeniMiktar <= 0) {
+    showToast("Lütfen miktar ve fiyat alanlarını geçerli bir şekilde doldurun.", true);
+    return;}
 
     try {
         await db.runTransaction(async (transaction) => {
@@ -2874,14 +2946,14 @@ async function handleYemSatisUpdate() {
             transaction.update(satisRef, guncelVeri);
         });
 
-        alert("Yem satışı başarıyla güncellendi.");
+        showToast("Yem satışı başarıyla güncellendi.");
         resetYemSatisForm();
         await renderYemStokListesi();
         await renderYemSatisListesi();
 
     } catch (error) {
         console.error("Yem satışı güncellenirken KRİTİK HATA:", error);
-        alert("Güncelleme sırasında bir hata oluştu! Hata: " + error.message);
+        showToast("Güncelleme sırasında bir hata oluştu! Hata: " + error.message, true);
     }
 }
 
@@ -2892,14 +2964,12 @@ async function handleYemSatisKaydet(event) {
         await handleYemSatisUpdate();
     } else {
         const currentUser = auth.currentUser;
-        if (!currentUser) { alert("Lütfen giriş yapın."); return; }
+        if (!currentUser) { showToast("Lütfen giriş yapın.", true); return; }
         const miktar = parseInt(document.getElementById('yemSatisMiktar').value);
         const birimFiyat = parseFloat(document.getElementById('yemSatisBirimFiyati').value);
         const yemId = document.getElementById('yemSecimiSatis').value;
         const cariId = document.getElementById('yemAlanTedarikci').value;
-        if (!yemId || !cariId || isNaN(miktar) || miktar <= 0 || isNaN(birimFiyat)) {
-            alert("Lütfen cari, yem, miktar ve fiyat alanlarını doğru bir şekilde doldurun."); return;
-        }
+       if (!yemId || isNaN(miktar) || miktar < 0 || isNaN(birimFiyat)) {    showToast("Lütfen yem, miktar ve fiyat alanlarını doğru bir şekilde doldurun.", true);    return;}
         const yemRef = db.collection('yemler').doc(yemId);
         const yemSatisRef = db.collection('yem_satislari').doc();
         try {
@@ -2920,8 +2990,7 @@ async function handleYemSatisKaydet(event) {
             await renderYemSatisListesi();
         } catch (error) {
             console.error("Yem satışı kaydedilirken hata:", error);
-            alert("Yem satışı kaydedilemedi: " + error);
-        }
+		showToast("Yem satışı kaydedilemedi: " + error, true);        }
     }
 }
 
@@ -3008,14 +3077,16 @@ async function calculateCariBakiyeDetayli(cariId, endDate = null) {
 async function handleOdemeKaydet(event) {
     event.preventDefault();
     const currentUser = auth.currentUser;
-    if (!currentUser) { alert("Lütfen giriş yapın."); return; }
-    const editingId = document.getElementById('odemeEditId').value;
+if (!currentUser) { 
+    showToast("Lütfen giriş yapın.", true); 
+    return; 
+}    const editingId = document.getElementById('odemeEditId').value;
     const tutar = parseFloat(document.getElementById('odemeTutari').value);
     const cariId = document.getElementById('odemeYapilanTedarikci').value;
-    if (!cariId || isNaN(tutar) || tutar <= 0) {
-        alert("Lütfen cari ve tutar alanlarını doğru bir şekilde doldurun.");
-        return;
-    }
+   if (!cariId || isNaN(tutar) || tutar <= 0) {
+    showToast("Lütfen cari ve tutar alanlarını doğru bir şekilde doldurun.", true);
+    return;
+}
     const formData = {
         tarih: document.getElementById('odemeTarih').value,
         cariId: cariId,
@@ -3035,7 +3106,7 @@ async function handleOdemeKaydet(event) {
         await renderOdemeListesi();
     } catch (error) {
         console.error("Ödeme/Tahsilat kaydedilirken hata:", error);
-        alert("İşlem kaydedilirken bir hata oluştu.");
+        showToast("İşlem kaydedilirken bir hata oluştu.");
     }
 }
 
@@ -3125,27 +3196,32 @@ async function generateNextCariKodu() {
 }
 
 async function deleteYemSatisi(id) {
-    if (confirm("Bu yem satışını silmek istediğinizden emin misiniz? Bu işlem, satılan yemi stoğa geri ekleyecektir.")) {
+    showCustomConfirm("Bu yem satışını silmek istediğinizden emin misiniz? Bu işlem, satılan yemi stoğa geri ekleyecektir.", async () => {
         const currentUser = auth.currentUser;
         if (!currentUser) return;
 
         const satisRef = db.collection('yem_satislari').doc(id);
         try {
             const satisDoc = await satisRef.get();
-            if (!satisDoc.exists) {throw "Silinecek satış kaydı bulunamadı.";}
+            if (!satisDoc.exists) { throw "Silinecek satış kaydı bulunamadı."; }
             const satisData = satisDoc.data();
             const yemRef = db.collection('yemler').doc(satisData.yemId);
             const batch = db.batch();
             batch.delete(satisRef);
             batch.update(yemRef, { stokMiktari: firebase.firestore.FieldValue.increment(satisData.miktar) });
             await batch.commit();
-            alert("Yem satışı silindi ve stok güncellendi.");
+            showToast("Yem satışı silindi ve stok güncellendi.");
             await renderYemSatisListesi();
             await renderYemStokListesi();
 
-        } catch (error) {console.error("Yem satışı silinirken hata:", error);alert("Hata: " + error);}
-    }
+        } catch (error) { 
+            console.error("Yem satışı silinirken hata:", error); 
+            showToast("Hata: " + error, true); 
+        }
+    });
 }
+
+
         
 async function renderTopluSutGirisFormu() {
     const tarih = document.getElementById('topluGirisTarih').value;
@@ -3223,14 +3299,42 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
     const sabahMiktar = parseFloat(String(sabahInput.value).replace(',', '.')) || 0;
     const aksamMiktar = parseFloat(String(aksamInput.value).replace(',', '.')) || 0;
     const birimFiyat = parseFloat(String(fiyatInput.value).replace(',', '.')) || globalSettings.defaultMilkPrice || 0;
-    
+
     const bugunkuToplamMiktar = sabahMiktar + aksamMiktar;
-    if (bugunkuToplamMiktar <= 0) {
-        alert("Lütfen en az bir miktar girin.");
+    if (bugunkuToplamMiktar <= 0) { 
+        showToast("Lütfen en az bir miktar girin.", true);
         return;
     }
-    
-    
+
+    const proceedWithSave = async () => {
+        const satir = document.getElementById(`satir-${cariId}`);
+        if(satir) satir.querySelector('button').disabled = true;
+
+        const batch = db.batch();
+        const sutAlimRef = db.collection("sut_alimlari").doc();
+        batch.set(sutAlimRef, {
+            tarih: tarih,
+            cariId: cariId,
+            cariAdi: cariAdi,
+            sabah: sabahMiktar,
+            aksam: aksamMiktar,
+            toplam: bugunkuToplamMiktar,
+            fiyat: birimFiyat,
+            toplamTutar: bugunkuToplamMiktar * birimFiyat,
+            sahipId: sahipId
+        });
+
+        try {
+            await batch.commit();
+            if (satir) satir.style.display = 'none';
+            await renderSutAlimGecmisi();
+        } catch (error) {
+            console.error("Toplu süt alımı kaydedilirken hata:", error);
+            showToast("Kayıt sırasında bir hata oluştu: " + error.message, true);
+            if(satir) satir.querySelector('button').disabled = false;
+        }
+    };
+
     try {
         const today = new Date(tarih);
         const yesterday = new Date(today);
@@ -3245,51 +3349,21 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
 
         if (!dunkuSutSnapshot.empty) {
             const dunkuToplamMiktar = dunkuSutSnapshot.docs[0].data().toplam;
+            const farkYuzdesi = Math.abs((bugunkuToplamMiktar - dunkuToplamMiktar) / dunkuToplamMiktar) * 100;
 
-            const altLimit = dunkuToplamMiktar * 0.80; 
-            const ustLimit = dunkuToplamMiktar * 1.20; 
-
-            if (bugunkuToplamMiktar < altLimit || bugunkuToplamMiktar > ustLimit) {
-                const fark = bugunkuToplamMiktar - dunkuToplamMiktar;
-                const durum = fark > 0 ? 'daha fazla' : 'daha az';
-                
-                const onay = confirm(`⚠️ DİKKAT! \n\nBugün girilen miktar (${bugunkuToplamMiktar.toFixed(1)} Lt), dün girilen miktardan (${dunkuToplamMiktar.toFixed(1)} Lt) %20 oranında ${durum}.\n\nBu miktar doğru mu? Kaydetmek için 'Tamam'a basın.`);
-                if (!onay) {
-                    return; 
-                }
+            if (farkYuzdesi > 20) {
+                const durum = bugunkuToplamMiktar > dunkuToplamMiktar ? 'daha fazla' : 'daha az';
+                const message = `⚠️ DİKKAT! \n\nBugün girilen miktar (${bugunkuToplamMiktar.toFixed(1)} Lt), dün girilen miktardan (${dunkuToplamMiktar.toFixed(1)} Lt) önemli ölçüde ${durum}.\n\nBu miktar doğru mu? Kaydetmek için 'Evet'e basın.`;
+                showCustomConfirm(message, proceedWithSave);
+            } else {
+                await proceedWithSave();
             }
+        } else {
+            await proceedWithSave();
         }
     } catch (error) {
         console.error("Önceki gün kontrolü sırasında hata:", error);
-    }
-    
-    const satir = document.getElementById(`satir-${cariId}`);
-    if(satir) satir.querySelector('button').disabled = true;
-    const calisanId = auth.currentUser.uid;
-    const batch = db.batch();
-
-    const sutAlimRef = db.collection("sut_alimlari").doc();
-    batch.set(sutAlimRef, {
-        tarih: tarih,
-        cariId: cariId,
-        cariAdi: cariAdi,
-        sabah: sabahMiktar,
-        aksam: aksamMiktar,
-        toplam: bugunkuToplamMiktar,
-        fiyat: birimFiyat,
-        toplamTutar: bugunkuToplamMiktar * birimFiyat,
-        sahipId: sahipId
-    });
-
-   
-    try {
-        await batch.commit();
-        if (satir) satir.style.display = 'none';
-        await renderSutAlimGecmisi();
-    } catch (error) {
-        console.error("Toplu süt alımı kaydedilirken hata:", error);
-        alert("Kayıt sırasında bir hata oluştu: " + error.message);
-        if(satir) satir.querySelector('button').disabled = false;
+        await proceedWithSave(); // Kontrol başarısız olursa bile kayda devam et
     }
 }
 
@@ -3441,13 +3515,12 @@ async function renderSutAlimGecmisi() {
 
  
 async function deleteYemAlisi(id) {
-    if (confirm("Bu yem alışını silmek istediğinizden emin misiniz? Bu işlem, alınan yemi stoktan düşecektir.")) {
-        const currentUser = auth.currentUser;
-        if (!currentUser) {
-            alert("Lütfen giriş yapın.");
-            return;
-        }
-
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+        showToast("Lütfen giriş yapın.", true);
+        return;
+    }
+    showCustomConfirm("Bu yem alışını silmek istediğinizden emin misiniz? Bu işlem, alınan yemi stoktan düşecektir.", async () => {
         const alisRef = db.collection('yem_alimlari').doc(id);
         try {
             const alisDoc = await alisRef.get();
@@ -3457,19 +3530,19 @@ async function deleteYemAlisi(id) {
             const alisData = alisDoc.data();
             const yemRef = db.collection('yemler').doc(alisData.yemId);
             const batch = db.batch();
-	    batch.delete(alisRef);
+            batch.delete(alisRef);
             batch.update(yemRef, { stokMiktari: firebase.firestore.FieldValue.increment(-alisData.miktar) });
-	    await batch.commit();
-            alert("Yem alışı silindi ve stok güncellendi.");
+            await batch.commit();
+            showToast("Yem alışı silindi ve stok güncellendi.");
             await renderYemAlisHareketleri();
             await renderYemStokListesi();
-
         } catch (error) {
             console.error("Yem alışı silinirken hata:", error);
-            alert("Hata: " + error);
+            showToast("Hata: " + error, true);
         }
-    }
+    });
 }
+
        
 async function handleSutAlimRaporuOlustur(options) {
     toggleReportButtons('sutRaporu', false);
@@ -3482,14 +3555,13 @@ async function handleSutAlimRaporuOlustur(options) {
     const sutRaporuDetayAlani = document.getElementById('sutRaporuDetayAlani');
 
     if (!startDateStr || !endDateStr) {
-        alert("Rapor oluşturmak için lütfen başlangıç ve bitiş tarihlerini seçin.");
-        return;
-    }
+        showToast("Rapor oluşturmak için lütfen başlangıç ve bitiş tarihlerini seçin.", true);
+        return;}
+
     if (!options.tumu && !options.kategori && !cariId) {
-        alert("Lütfen bir cari seçin veya 'Kategori' ya da 'Toplu' raporu seçin.");
-        return;
-    }
-    
+    showToast("Lütfen bir cari seçin veya 'Kategori' ya da 'Toplu' raporu seçin.", true);
+    return;}
+
     sutRaporuDetayAlani.innerHTML = '<p>Rapor oluşturuluyor, lütfen bekleyin...</p>';
     document.getElementById('sut-raporu-export-area').innerHTML = '';
 
@@ -3640,9 +3712,9 @@ async function exportSutRaporuToExcel() {
     if (document.activeElement.id === 'sutRaporuTumunuGosterBtn') options.tumu = true;
 
 
-    if (!ayYil) {
-        alert("Dışa aktarmadan önce lütfen bir rapor oluşturun.");
-        return;
+	if (!ayYil) {
+    showToast("Dışa aktarmadan önce lütfen bir rapor oluşturun.", true);
+    return;
     }
 
     try {
@@ -3660,11 +3732,11 @@ async function exportSutRaporuToExcel() {
         let sheetTitle = "Aylik Sut Raporu";
 
         if (!options.tumu && !options.kategori) {
-            if (!cariId) { alert("Lütfen bir cari seçin."); return; }
+            if (!cariId) { showToast("Lütfen bir cari seçin.", true); return; }
             const cariAdi = document.getElementById('sutRaporuTedarikciSecimi').options[document.getElementById('sutRaporuTedarikciSecimi').selectedIndex].text;
             sheetTitle = cariAdi;
             const snapshot = await baseQuery.where('cariId', '==', cariId).orderBy('tarih').get();
-            if (snapshot.empty) { alert("Dışa aktarılacak veri bulunamadı."); return; }
+		if (snapshot.empty) { showToast("Dışa aktarılacak veri bulunamadı.", true); return; }
 
             let toplamLitre = 0, toplamTutar = 0;
             dataForExcel = snapshot.docs.map(doc => {
@@ -3684,8 +3756,7 @@ async function exportSutRaporuToExcel() {
             dataForExcel.push({ "Tarih": "AYLIK TOPLAM", "Toplam (Lt)": toplamLitre.toFixed(2), "Tutar (₺)": toplamTutar.toFixed(2) });
 
         } else {
-             alert("Toplu ve Kategori raporları için Excel dışa aktarma henüz tamamlanmadı."); return;
-        }
+             showToast("Toplu ve Kategori raporları için Excel dışa aktarma henüz tamamlanmadı.", true); return;}
 
         const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
         const workbook = XLSX.utils.book_new();
@@ -3694,7 +3765,7 @@ async function exportSutRaporuToExcel() {
 
     } catch (error) {
         console.error("Excel oluşturulurken hata oluştu:", error);
-        alert("Excel dosyası oluşturulurken bir hata oluştu.");
+	showToast("Excel dosyası oluşturulurken bir hata oluştu.", true);
     }
 }
 
@@ -3704,9 +3775,9 @@ async function handleDinamikSutRaporu() {
     const container = document.getElementById('dinamikRaporContainer');
 
     if (!periodValue) {
-        alert("Lütfen bir dönem seçin.");
-        return;
-    }
+    showToast("Lütfen bir dönem seçin.", true);
+    return;
+}
     container.innerHTML = `<p style="text-align:center; font-size:1.2em;">Rapor oluşturuluyor...</p>`;
 
     const [year, month, periodPart] = periodValue.split('-');
@@ -3852,7 +3923,7 @@ async function handleYemPivotRaporu(reportType) {
     const currentUser = auth.currentUser;
 
     if (!currentUser || !ayYil) {
-        alert("Lütfen bir ay seçin.");
+        showToast("Lütfen bir ay seçin.", true);
         raporAlani.innerHTML = '';
         return;
     }
@@ -4042,7 +4113,7 @@ async function handleHesapOzetiRaporuOlustur() {
     const raporDetayAlani = document.getElementById('raporDetayAlani');
     const currentUser = auth.currentUser;
 
-    if (!currentUser || !cariId || !ayYil) {        alert("Lütfen cari ve ay seçimi yapın.");        return;    }
+    if (!currentUser || !cariId || !ayYil) { showToast("Lütfen cari ve ay seçimi yapın.", true);return;}
 
     const cariAdi = document.getElementById('raporCariSecimi').options[document.getElementById('raporCariSecimi').selectedIndex].text;
     const [year, month] = ayYil.split('-');
@@ -4354,7 +4425,7 @@ async function editYemSatisi(id) {
     try {
         const doc = await db.collection('yem_satislari').doc(id).get();
         if (!doc.exists) {
-            alert("Düzenlenecek kayıt bulunamadı.");
+            showToast("Düzenlenecek kayıt bulunamadı.", true);
             return;
         }
         const data = doc.data();
@@ -4395,7 +4466,7 @@ async function editYemSatisi(id) {
         formContainer.scrollIntoView({ behavior: 'smooth' });
     } catch (error) {
         console.error("Yem satışı düzenleme için getirilirken hata:", error);
-        alert("Kayıt düzenleme için yüklenirken bir hata oluştu.");
+        showToast("Kayıt düzenleme için yüklenirken bir hata oluştu.", true);
     }
 }
 
@@ -4404,14 +4475,14 @@ async function handleTopluYemSatisKaydet() {
     const cariInput = document.getElementById('topluSatisCari');
     const formTarih = tarihInput.value;
     const formCari = cariInput.value;
-    if (!formTarih || !formCari) return alert("Lütfen Satış Tarihi ve Cari seçiniz!");
+    if (!formTarih || !formCari) return showToast("Lütfen Satış Tarihi ve Cari seçiniz!", true);
     if (editingYemSatisId) {
         const satisRef = db.collection('yem_satislari').doc(editingYemSatisId);
         const satir = document.querySelector('#yemSatisSatirlari .yem-satis-satiri');
-        if (!satir) return alert("Güncellenecek satır bulunamadı.");
+	if (!satir) return showToast("Güncellenecek satır bulunamadı.", true);
         const yeniMiktar = parseInt(satir.querySelector('.yem-miktari').value);
         const yeniFiyat = parseFloat(satir.querySelector('.yem-fiyati').value);
-        if (isNaN(yeniMiktar) || yeniMiktar <= 0 || isNaN(yeniFiyat)) return alert("Miktar/Fiyat geçersiz.");
+        if (isNaN(yeniMiktar) || yeniMiktar <= 0 || isNaN(yeniFiyat)) return showToast("Miktar/Fiyat geçersiz.", true);
 
         try {
             await db.runTransaction(async (trx) => {
@@ -4430,19 +4501,19 @@ async function handleTopluYemSatisKaydet() {
                     kayitZamani: new Date()
                 });
             });
-            alert("Satış güncellendi.");
+            showToast("Satış güncellendi.");
             resetTopluSatisFormu();
             await renderYemSatisListesi();
             await renderYemStokListesi();
         } catch (e) {
             console.error(e);
-            alert("Hata: " + e);
+            showToast("Kayıt hatası: " + e, true);
         }
         return;
     }
 
     const satirlar = document.querySelectorAll('.yem-satis-satiri');
-    if (satirlar.length === 0) return alert("En az bir satır ekleyin.");
+    if (satirlar.length === 0) return showToast("En az bir satır ekleyin.", true);
     const now = new Date();
     const batch = db.batch();
     const satislar = [];
@@ -4450,13 +4521,14 @@ async function handleTopluYemSatisKaydet() {
         const yemId = satir.querySelector('.yem-secimi').value;
         const miktar = parseInt(satir.querySelector('.yem-miktari').value);
         const satisFiyati = parseFloat(satir.querySelector('.yem-fiyati').value);
-        if (!yemId || isNaN(miktar) || miktar <= 0 || isNaN(satisFiyati)) return alert("Satır bilgileri eksik.");
+        if (!yemId || isNaN(miktar) || miktar <= 0 || isNaN(satisFiyati)) return showToast("Satır bilgileri eksik.", true);
         satislar.push({ yemId, miktar, satisFiyati });
     }
     for (const s of satislar) {
         const yemRef = db.collection('yemler').doc(s.yemId);
         const stokVeri = window.yemDataMap.get(s.yemId);
-        if (!stokVeri || (stokVeri.stokMiktari || 0) < s.miktar) return alert(`Yetersiz stok: ${stokVeri?.ad}`);
+        if (!stokVeri || (stokVeri.stokMiktari || 0) < s.miktar) return showToast(`Yetersiz stok: ${stokVeri?.ad}`, true);
+
         const satisRef = db.collection('yem_satislari').doc();
         batch.set(satisRef, {
             sahipId: sahipId,
@@ -4472,13 +4544,13 @@ async function handleTopluYemSatisKaydet() {
     }
     try {
         await batch.commit();
-        alert(`${satislar.length} satır kaydedildi.`);
+	showToast(`${satislar.length} satır kaydedildi.`);
         resetTopluSatisFormu();
         await renderYemSatisListesi();
         await loadAllYemlerToCache();
     } catch (e) {
         console.error(e);
-        alert("Kayıt hatası: " + e);
+	showToast("Kayıt hatası: " + e, true);
     }
 }
 
@@ -4499,11 +4571,12 @@ function resetTopluSatisFormu() {
 }
 
 function exportTableToExcel(containerId, fileName = 'rapor') {
-    const container = document.getElementById(containerId);
-    if (!container) return alert('Dışa aktarılacak alan bulunamadı.');
-    const table = container.querySelector('table');
-    if (!table) return alert('Dışa aktarılacak tablo bulunamadı.');
 
+    const container = document.getElementById(containerId);
+if (!container) return showToast('Dışa aktarılacak alan bulunamadı.', true); 
+const table = container.querySelector('table');
+
+if (!table) return showToast('Dışa aktarılacak tablo bulunamadı.', true);
     const wb = XLSX.utils.table_to_book(table, { sheet: "Rapor" });
 
     if (typeof Android !== "undefined" && Android.saveFile) {
@@ -4516,9 +4589,8 @@ function exportTableToExcel(containerId, fileName = 'rapor') {
 
 async function exportTableToPdf(containerId, fileName = 'rapor', buttonId) {
     const container = document.getElementById(containerId);
-    if (!container || container.innerHTML.trim().length < 20) {
-        return alert('PDF oluşturmak için önce bir rapor oluşturun.');
-    }
+if (!container || container.innerHTML.trim().length < 20) {
+    return showToast('PDF oluşturmak için önce bir rapor oluşturun.', true);}
     const pdfButton = document.getElementById(buttonId);
     const originalButtonText = pdfButton?.textContent;
     if (pdfButton) {
@@ -4568,7 +4640,7 @@ async function exportTableToPdf(containerId, fileName = 'rapor', buttonId) {
 
     } catch (error) {
         console.error("PDF oluşturulurken hata:", error);
-        alert("PDF oluşturulurken bir hata oluştu.");
+    	showToast("PDF oluşturulurken bir hata oluştu.", true);
     } finally {
         if (pdfButton) {
             pdfButton.textContent = originalButtonText;
@@ -4633,12 +4705,32 @@ function handleYazdir(elementId, orientation = 'portrait') {
     }
 }
 
-
-
-
 </script>
-<script src="https://unpkg.com/jspdf-autotable@3.5.23/dist/jspdf.plugin.autotable.js"></script>
 
-</script>
+<div id="toast-message" class="toast-message"></div>
+
+<div id="custom-confirm-overlay" class="custom-modal-overlay">
+    <div class="custom-modal-box">
+        <h3 id="custom-confirm-title">İşlem Onayı</h3>
+        <p id="custom-confirm-message">Bu işlemi yapmak istediğinizden emin misiniz?</p>
+        <div class="custom-modal-buttons">
+            <button id="custom-confirm-cancel" class="btn">Hayır</button>
+            <button id="custom-confirm-yes" class="btn btn-danger">Evet</button>
+        </div>
+    </div>
+</div>
+
+<div id="custom-prompt-overlay" class="custom-modal-overlay">
+    <div class="custom-modal-box">
+        <h3 id="custom-prompt-title">Onay Gerekiyor</h3>
+        <p id="custom-prompt-message">Lütfen onay metnini girin.</p>
+        <input type="text" id="custom-prompt-input" class="form-control" style="margin-top: 10px;">
+        <div class="custom-modal-buttons">
+            <button id="custom-prompt-cancel" class="btn">İptal</button>
+            <button id="custom-prompt-ok" class="btn btn-primary">Onayla</button>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
