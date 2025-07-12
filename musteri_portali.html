@@ -25,8 +25,10 @@
     .btn-success {background-color: #2ecc71;}
     .btn-success:hover {background-color: #27ae60;}
     .btn-small { padding: 5px 10px; font-size: 0.8em; text-transform: none;}
-    .btn-warning { background-color: #f39c12; }
+.btn-warning { background-color: #f39c12; }
 .btn-warning:hover { background-color: #e67e22; }
+
+
     .report-toggle-container {display: flex; gap: 10px; margin-top: 20px; margin-bottom: 20px;}
     .btn-toggle {flex: 1; background-color: #bdc3c7; color: #2c3e50; font-weight: normal;}
     .btn-toggle.active {background-color: #3498db; color: #fff; font-weight: bold;}
@@ -93,11 +95,11 @@
                     <button id="yemRaporuBtn" class="btn btn-toggle">Yem Raporu</button>
                 </div>
                 <div id="hayvanTakipContainer" style="display: none;">
-                    <table>
-                        <thead><tr><th>Küpe No</th><th>Irk</th><th>Gebelik Durumu</th><th>Kalan Gün</th><th>İşlemler</th></tr></thead>
-                        <tbody id="hayvanListesiBody"></tbody>
-                    </table>
-                </div>
+    <table>
+        <thead><tr><th>Küpe No</th><th>Irk</th><th>Gebelik Durumu</th><th>Tahmini Doğum Tarihi</th><th>Kalan Gün</th><th>İşlemler</th></tr></thead>
+        <tbody id="hayvanListesiBody"></tbody>
+    </table>
+</div>
                 <div id="sutRaporuContainer" style="display:none;">
                     <table>
                         <thead><tr><th>Tarih</th><th>Akşam (lt)</th><th>Sabah (lt)</th><th>Toplam (lt)</th></tr></thead>
@@ -108,53 +110,121 @@
                 <div id="yemRaporuContainer" style="display: none;"></div>
             </div>
 
-            <section id="yeniHayvanSection" class="form-section" style="display: none;">
-                <h2>Yeni Hayvan Kaydı Ekle</h2>
-                <form id="yeniHayvanForm">
-                    <div class="form-group">
-                        <label for="yeni-hayvan-kupe">Küpe Numarası</label>
-                        <input type="text" id="yeni-hayvan-kupe" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="yeni-hayvan-irk">Irk</label>
-                        <input type="text" id="yeni-hayvan-irk" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label for="yeni-hayvan-dogum-tarihi">Doğum Tarihi</label>
-                        <input type="date" id="yeni-hayvan-dogum-tarihi" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="yeni-hayvan-gebelik-durumu">Gebelik Durumu</label>
-                        <select id="yeni-hayvan-gebelik-durumu" class="form-control">
-                            <option value="Boş" selected>Boş</option>
-                            <option value="Gebe">Gebe</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn">Hayvanı Kaydet</button>
-                </form>
-            </section>
+          
+<section id="yeniHayvanSection" class="form-section" style="display: none;">
+    <h2>Yeni Hayvan Kaydı Ekle</h2>
+    <form id="yeniHayvanForm">
+        <div class="form-group">
+            <label for="yeni-hayvan-kupe">Küpe Numarası</label>
+            <input type="text" id="yeni-hayvan-kupe" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="yeni-hayvan-irk">Irk</label>
+            <select id="yeni-hayvan-irk" class="form-control">
+                <option value="Angus">Angus</option>
+                <option value="Charolais (Şarole)">Charolais (Şarole)</option>
+                <option value="Hereford">Hereford</option>
+                <option value="Holstein">Holstein</option>
+                <option value="Jersey">Jersey</option>
+                <option value="Limousin (Limuzin)">Limousin (Limuzin)</option>
+                <option value="Montofon (Esmer)">Montofon (Esmer)</option>
+                <option value="Simental (Fleckvieh)">Simental (Fleckvieh)</option>
+                <option value="Diğer">Diğer</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="yeni-hayvan-cinsiyet">Cinsiyet</label>
+            <select id="yeni-hayvan-cinsiyet" class="form-control">
+                <option value="Dişi">Dişi</option>
+                <option value="Erkek">Erkek</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="yeni-hayvan-dogum-tarihi">Doğum Tarihi</label>
+            <input type="date" id="yeni-hayvan-dogum-tarihi" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="yeni-hayvan-gebelik-durumu">Gebelik Durumu</label>
+            <select id="yeni-hayvan-gebelik-durumu" class="form-control">
+                <option value="Boş" selected>Boş</option>
+                <option value="Gebe">Gebe</option>
+            </select>
+        </div>
+        <button type="submit" class="btn">Hayvanı Kaydet</button>
+    </form>
+</section>
 
-            <section id="yeniTohumlamaSection" class="form-section" style="display: none;">
-                <h2>Yeni Tohumlama Kaydı Ekle</h2>
-                <form id="yeniTohumlamaForm">
-                    <div class="form-group"><label for="tohumlama-hayvan-kupe">Hayvan Küpe Numarası</label><select id="tohumlama-hayvan-kupe" class="form-control" required></select></div>
-                    <div class="form-group"><label for="tohumlama-tarihi">Tohumlama Tarihi</label><input type="date" id="tohumlama-tarihi" class="form-control" required></div>
-                    <div class="form-group"><label for="boga-sperma-kodu">Boğa / Sperma Kodu</label><input type="text" id="boga-sperma-kodu" class="form-control"></div>
-                    <button type="submit" class="btn">Tohumlama Kaydını Oluştur</button>
-                </form>
-            </section>
 
-            <section id="yeniDogumSection" class="form-section" style="display: none;">
-                <h2>Yeni Doğum Kaydı Ekle</h2>
-                <form id="yeniDogumForm">
-                    <div class="form-group"><label for="anne-kupe">Anne Küpe Numarası</label><select id="anne-kupe" class="form-control" required></select></div>
-                    <div class="form-group"><label for="dogum-tarihi">Doğum Tarihi</label><input type="date" id="dogum-tarihi" class="form-control" required></div>
-                    <div class="form-group"><label for="yavru-kupe-1">Yeni Yavru Küpe No:</label><input type="text" id="yavru-kupe-1" class="form-control" required></div>
-                     <div class="form-group"><label for="yavru-irk-1">Yavru Irkı:</label><input type="text" id="yavru-irk-1" class="form-control"></div>
-                    <div class="form-group"><label for="yavru-cinsiyet-1">Cinsiyet:</label><select id="yavru-cinsiyet-1" class="form-control"><option value="Dişi">Dişi</option><option value="Erkek">Erkek</option></select></div>
-                    <button type="submit" class="btn">Doğum Kaydını Tamamla</button>
-                </form>
-            </section>
+
+
+<section id="yeniTohumlamaSection" class="form-section" style="display: none;">
+    <h2>Yeni Tohumlama Kaydı Ekle</h2>
+    <form id="yeniTohumlamaForm">
+        <div class="form-group"><label for="tohumlama-hayvan-kupe">Hayvan Küpe Numarası</label><select id="tohumlama-hayvan-kupe" class="form-control" required></select></div>
+        <div class="form-group"><label for="tohumlama-tarihi">Tohumlama Tarihi</label><input type="date" id="tohumlama-tarihi" class="form-control" required></div>
+        <div class="form-group">
+            <label for="tohumlama-tipi">Tohumlama Tipi</label>
+            <select id="tohumlama-tipi" class="form-control">
+                <option value="Suni Tohumlama">Suni Tohumlama</option>
+                <option value="Doğal Aşım">Doğal Aşım</option>
+            </select>
+        </div>
+        <div class="form-group"><label for="boga-sperma-kodu">Boğa / Sperma Kodu</label><input type="text" id="boga-sperma-kodu" class="form-control"></div>
+        <div class="form-group">
+            <label for="tohumlama-notlari">Tohumlama Notları</label>
+            <textarea id="tohumlama-notlari" class="form-control" rows="3" placeholder="Kısa notlar..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-warning">Tohumlama Kaydını Oluştur</button>
+    </form>
+</section>
+
+
+
+<section id="yeniDogumSection" class="form-section" style="display: none;">
+    <h2>Yeni Doğum Kaydı Ekle</h2>
+    <form id="yeniDogumForm">
+        <div class="form-group">
+            <label for="anne-kupe">Anne Küpe Numarası</label>
+            <select id="anne-kupe" class="form-control" required></select>
+        </div>
+        <div class="form-group">
+            <label for="dogum-tarihi-saati">Doğum Tarihi ve Saati</label>
+            <input type="datetime-local" id="dogum-tarihi-saati" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="yavru-sayisi">Yavru Sayısı</label>
+            <input type="number" id="yavru-sayisi" class="form-control" value="1" min="1">
+        </div>
+        <div class="form-group">
+            <label for="dogum-sekli">Doğum Şekli</label>
+            <select id="dogum-sekli" class="form-control">
+                <option value="Normal">Normal</option>
+                <option value="Zor">Zor</option>
+                <option value="Sezaryen">Sezaryen</option>
+            </select>
+        </div>
+        <div style="border: 1px solid #eee; padding: 15px; border-radius: 5px; margin-bottom:15px;">
+            <strong>Yavru Bilgileri</strong>
+            <div class="form-group" style="margin-top:10px;">
+                <label for="yavru-kupe-1">Yavru Küpe No:</label>
+                <input type="text" id="yavru-kupe-1" class="form-control" placeholder="Örn: TR34055" required>
+            </div>
+            <div class="form-group">
+                <label for="yavru-cinsiyet-1">Cinsiyet:</label>
+                <select id="yavru-cinsiyet-1" class="form-control"><option value="Dişi">Dişi</option><option value="Erkek">Erkek</option></select>
+            </div>
+            <div class="form-group">
+                <label for="yavru-agirlik-1">Doğum Ağırlığı (kg):</label>
+                <input type="text" id="yavru-agirlik-1" class="form-control" placeholder="Örn: 42.5">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="dogum-notlari">Doğum Notları</label>
+            <textarea id="dogum-notlari" class="form-control" rows="3" placeholder="Annenin veya yavrunun sağlık durumu, doğum süreci vb. hakkında notlar..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">Doğum Kaydını Tamamla</button>
+    </form>
+</section>
         </div>
     </div>
     
@@ -168,10 +238,20 @@
                     <label for="edit-hayvan-kupe">Küpe Numarası</label>
                     <input type="text" id="edit-hayvan-kupe" class="form-control" required>
                 </div>
-                <div class="form-group">
-                    <label for="edit-hayvan-irk">Irk</label>
-                    <input type="text" id="edit-hayvan-irk" class="form-control">
-                </div>
+               <div class="form-group">
+    <label for="edit-hayvan-irk">Irk</label>
+    <select id="edit-hayvan-irk" class="form-control">
+        <option value="Angus">Angus</option>
+        <option value="Charolais (Şarole)">Charolais (Şarole)</option>
+        <option value="Hereford">Hereford</option>
+        <option value="Holstein">Holstein</option>
+        <option value="Jersey">Jersey</option>
+        <option value="Limousin (Limuzin)">Limousin (Limuzin)</option>
+        <option value="Montofon (Esmer)">Montofon (Esmer)</option>
+        <option value="Simental (Fleckvieh)">Simental (Fleckvieh)</option>
+        <option value="Diğer">Diğer</option>
+    </select>
+</div>
                 <div class="form-group">
                     <label for="edit-hayvan-dogum-tarihi">Doğum Tarihi</label>
                     <input type="date" id="edit-hayvan-dogum-tarihi" class="form-control" required>
@@ -315,6 +395,8 @@
             await db.collection('hayvanlar').add({
                 kupeNo: kupeNo,
                 irk: document.getElementById('yeni-hayvan-irk').value,
+            cinsiyet: document.getElementById('yeni-hayvan-cinsiyet').value,
+
                 dogumTarihi: dogumTarihi,
                 gebəlikDurumu: document.getElementById('yeni-hayvan-gebelik-durumu').value,
                 sahipId: userSahipId,
@@ -325,8 +407,7 @@
             refreshAllData();
         } catch (error) { showPortalMessage("Hayvan kaydedilirken hata oluştu.", "error");}
     }
-    async function handleTohumlamaSubmit(event) { /* ... unchanged ... */ }
-    async function handleDogumSubmit(event) { /* ... unchanged ... */ }
+
 
     function handleTableActions(event) {
         const target = event.target;
@@ -345,6 +426,8 @@
                     document.getElementById('edit-hayvan-id').value = doc.id;
                     document.getElementById('edit-hayvan-kupe').value = hayvan.kupeNo || '';
                     document.getElementById('edit-hayvan-irk').value = hayvan.irk || '';
+                document.getElementById('edit-hayvan-cinsiyet').value = hayvan.cinsiyet || 'Dişi';
+
                     document.getElementById('edit-hayvan-dogum-tarihi').value = hayvan.dogumTarihi || '';
                     document.getElementById('edit-hayvan-gebelik-durumu').value = hayvan.gebəlikDurumu || 'Boş';
                     document.getElementById('edit-son-tohumlama-tarihi').value = hayvan.sonTohumlamaTarihi || '';
@@ -368,6 +451,8 @@
         const dataToUpdate = {
             kupeNo: document.getElementById('edit-hayvan-kupe').value,
             irk: document.getElementById('edit-hayvan-irk').value,
+        cinsiyet: document.getElementById('edit-hayvan-cinsiyet').value,
+
             dogumTarihi: document.getElementById('edit-hayvan-dogum-tarihi').value,
             gebəlikDurumu: document.getElementById('edit-hayvan-gebelik-durumu').value,
             sonTohumlamaTarihi: tohumlamaTarihi || firebase.firestore.FieldValue.delete(),
@@ -401,38 +486,83 @@
         });
     }
     async function handleTohumlamaSubmit(event) {
-        event.preventDefault();
-        const hayvanId = document.getElementById('tohumlama-hayvan-kupe').value;
-        const tohumlamaTarihi = document.getElementById('tohumlama-tarihi').value;
-        if (!hayvanId || !tohumlamaTarihi) { showPortalMessage("Hayvan ve tohumlama tarihini seçin.", "error"); return; }
-        const tohumlamaDate = new Date(tohumlamaTarihi);
-        const tahminiDogumDate = new Date(tohumlamaDate.setDate(tohumlamaDate.getDate() + 283));
-        const tahminiDogumTarihi = tahminiDogumDate.toISOString().split('T')[0];
-        try {
-            await db.collection('hayvanlar').doc(hayvanId).update({ gebəlikDurumu: 'Gebe', sonTohumlamaTarihi: tohumlamaTarihi, tahminiDogumTarihi: tahminiDogumTarihi });
-            showPortalMessage("Tohumlama başarıyla kaydedildi.", "success");
-            event.target.reset();
-            refreshAllData();
-        } catch (error) { showPortalMessage("Kayıt sırasında bir hata oluştu.", "error"); }
-    }
+    event.preventDefault();
+    const hayvanId = document.getElementById('tohumlama-hayvan-kupe').value;
+    const tohumlamaTarihi = document.getElementById('tohumlama-tarihi').value;
+    if (!hayvanId || !tohumlamaTarihi) { showPortalMessage("Hayvan ve tohumlama tarihini seçin.", "error"); return; }
+    const tohumlamaDate = new Date(tohumlamaTarihi);
+    const tahminiDogumDate = new Date(tohumlamaDate.setDate(tohumlamaDate.getDate() + 283));
+    const tahminiDogumTarihi = tahminiDogumDate.toISOString().split('T')[0];
+    try {
+        await db.collection('hayvanlar').doc(hayvanId).update({ gebəlikDurumu: 'Gebe', sonTohumlamaTarihi: tohumlamaTarihi, tahminiDogumTarihi: tahminiDogumTarihi });
+        
+        // Bu kısım tohumlama kaydını ayrı bir koleksiyona ekler
+        await db.collection('tohumlama_kayitlari').add({
+             sahipId: userSahipId,
+             cariId: userCariId,
+             hayvanId: hayvanId,
+             tarih: tohumlamaTarihi,
+             tip: document.getElementById('tohumlama-tipi').value, 
+             bogaKodu: document.getElementById('boga-sperma-kodu').value,
+             notlar: document.getElementById('tohumlama-notlari').value 
+        });
+        
+        showPortalMessage("Tohumlama başarıyla kaydedildi.", "success");
+        event.target.reset();
+        refreshAllData();
+    } catch (error) { showPortalMessage("Kayıt sırasında bir hata oluştu.", "error"); }
+}
     async function handleDogumSubmit(event) {
-        event.preventDefault();
-        const anneId = document.getElementById('anne-kupe').value;
-        const yavruKupeNo = document.getElementById('yavru-kupe-1').value;
-        const dogumTarihi = document.getElementById('dogum-tarihi').value;
-        if (!anneId || !yavruKupeNo || !dogumTarihi) { showPortalMessage("Anne, yavru küpe no ve doğum tarihini girin.", "error"); return; }
-        try {
-            const anneRef = db.collection('hayvanlar').doc(anneId);
-            await db.runTransaction(async (t) => {
-                await t.update(anneRef, { gebəlikDurumu: 'Boş', sonTohumlamaTarihi: firebase.firestore.FieldValue.delete(), tahminiDogumTarihi: firebase.firestore.FieldValue.delete() });
-                const yeniYavruRef = db.collection('hayvanlar').doc();
-                await t.set(yeniYavruRef, { kupeNo: yavruKupeNo, irk: document.getElementById('yavru-irk-1').value, cinsiyet: document.getElementById('yavru-cinsiyet-1').value, dogumTarihi: dogumTarihi, anneId: anneId, sahipId: userSahipId, cariId: userCariId, gebəlikDurumu: 'Boş'});
-            });
-            showPortalMessage("Doğum kaydı başarıyla oluşturuldu.", "success");
-            event.target.reset();
-            refreshAllData();
-        } catch (error) { showPortalMessage("Kayıt sırasında bir hata oluştu: " + error, "error"); }
+    event.preventDefault();
+    const anneId = document.getElementById('anne-kupe').value;
+    const dogumTarihiSaati = document.getElementById('dogum-tarihi-saati').value;
+    const yavruKupeNo = document.getElementById('yavru-kupe-1').value;
+
+    if (!anneId || !dogumTarihiSaati || !yavruKupeNo) {
+        showPortalMessage("Anne, Doğum Tarihi ve Yavru Küpe No alanları zorunludur.", "error");
+        return;
     }
+    
+    // datetime-local'den sadece tarih kısmını alıyoruz
+    const dogumTarihi = dogumTarihiSaati.split('T')[0];
+
+    try {
+        const anneRef = db.collection('hayvanlar').doc(anneId);
+        await db.runTransaction(async (t) => {
+            // Annenin durumunu güncelle
+            await t.update(anneRef, { gebəlikDurumu: 'Boş', sonTohumlamaTarihi: firebase.firestore.FieldValue.delete(), tahminiDogumTarihi: firebase.firestore.FieldValue.delete() });
+            
+            // Yeni yavruyu kaydet
+            const yeniYavruRef = db.collection('hayvanlar').doc();
+            await t.set(yeniYavruRef, { 
+                kupeNo: yavruKupeNo, 
+                cinsiyet: document.getElementById('yavru-cinsiyet-1').value, 
+                dogumAgirligi: document.getElementById('yavru-agirlik-1').value,
+                dogumTarihi: dogumTarihi, // Sadece tarih
+                anneId: anneId, 
+                sahipId: userSahipId, 
+                cariId: userCariId, 
+                gebəlikDurumu: 'Boş'
+            });
+
+            // Doğum kaydını ayrı bir koleksiyona ekle
+            await db.collection('dogum_kayitlari').add({
+                anneId: anneId,
+                yavruId: yeniYavruRef.id,
+                yavruKupeNo: yavruKupeNo,
+                tarih: dogumTarihiSaati, // Tarih ve saat
+                yavruSayisi: document.getElementById('yavru-sayisi').value,
+                dogumSekli: document.getElementById('dogum-sekli').value,
+                notlar: document.getElementById('dogum-notlari').value,
+                sahipId: userSahipId,
+                cariId: userCariId,
+             });
+        });
+        showPortalMessage("Doğum kaydı başarıyla oluşturuldu.", "success");
+        event.target.reset();
+        refreshAllData();
+    } catch (error) { showPortalMessage("Kayıt sırasında bir hata oluştu: " + error, "error"); }
+}
     async function fetchHayvanTakipVerileri() {
         const listBody = document.getElementById('hayvanListesiBody');
         listBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Hayvan verileri yükleniyor...</td></tr>`;
@@ -443,14 +573,19 @@
             snapshot.forEach(doc => {
                 const hayvan = doc.data();
                 let kalanGun = '-';
-                if (hayvan.gebəlikDurumu === 'Gebe' && hayvan.tahminiDogumTarihi) {
-                    const farkMs = new Date(hayvan.tahminiDogumTarihi) - new Date();
-                    kalanGun = Math.ceil(farkMs / (1000 * 60 * 60 * 24));
-                }
-                rows += `<tr>
-                    <td><strong>${hayvan.kupeNo}</strong></td><td>${hayvan.irk || '-'}</td>
-                    <td>${hayvan.gebəlikDurumu || '-'}</td><td>${kalanGun}</td>
-                    <td><button class="btn btn-secondary btn-small btn-edit" data-id="${doc.id}">Düzenle</button> <button class="btn btn-danger btn-small btn-delete" data-id="${doc.id}">Sil</button></td></tr>`;
+let tahminiDogumTarihiStr = '-'; // Yeni değişken
+if (hayvan.gebəlikDurumu === 'Gebe' && hayvan.tahminiDogumTarihi) {
+    const tahminiDogumTarihi = new Date(hayvan.tahminiDogumTarihi);
+    const farkMs = tahminiDogumTarihi - new Date();
+    kalanGun = Math.ceil(farkMs / (1000 * 60 * 60 * 24));
+    tahminiDogumTarihiStr = tahminiDogumTarihi.toLocaleDateString('tr-TR'); // Tarihi formatla
+}
+rows += `<tr>
+    <td><strong>${hayvan.kupeNo}</strong></td><td>${hayvan.irk || '-'}</td>
+    <td>${hayvan.gebəlikDurumu || '-'}</td>
+    <td>${tahminiDogumTarihiStr}</td>
+    <td>${kalanGun}</td>
+    <td><button class="btn btn-secondary btn-small btn-edit" data-id="${doc.id}">Düzenle</button> <button class="btn btn-danger btn-small btn-delete" data-id="${doc.id}">Sil</button></td></tr>`;
             });
             listBody.innerHTML = rows;
         } catch (error) { listBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Veriler yüklenemedi.</td></tr>`; }
