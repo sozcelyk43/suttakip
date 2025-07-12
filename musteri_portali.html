@@ -56,6 +56,8 @@
       <h3>Hoş Geldiniz, <span id="musteriAdi">...</span></h3>
     </div>
     <div class="container">
+<div id="portal-error-message" style="display: none; color: white; background-color: #c0392b; padding: 15px; border-radius: 6px; margin-bottom: 20px; text-align: center; font-weight: bold;"></div>
+
       <div class="filter-buttons">
               <div class="filter-row two-items">
                 <a href="sifre_degistir.html" class="btn btn-secondary">Şifre Değiştir</a>
@@ -128,26 +130,33 @@ auth.onAuthStateChanged(user => {
                     document.getElementById('musteriAdi').textContent = cariData.adiSoyadi;
 
                     if (!userSahipId) {
-                        alert("Müşteri profilinizde bir hata var. Lütfen işletme ile iletişime geçin.");
-                        handleLogout();
+                        // alert yerine yeni hata gösterme yöntemi
+                        document.getElementById('portal-error-message').textContent = "Müşteri profilinizde bir hata var. Lütfen işletme ile iletişime geçin.";
+                        document.getElementById('portal-error-message').style.display = 'block';
+                        // handleLogout(); // Hata durumunda otomatik çıkış yaptırmayabiliriz, kullanıcı mesajı görebilir.
                         return;
                     }
                     
                     setupFiltersAndButtons();
 
                 } else {
-                    alert("Bu hesaba bağlı bir müşteri kartı bulunamadı.");
-                    handleLogout();
+                    // alert yerine yeni hata gösterme yöntemi
+                    document.getElementById('portal-error-message').textContent = "Bu hesaba bağlı bir müşteri kartı bulunamadı.";
+                    document.getElementById('portal-error-message').style.display = 'block';
+                    // handleLogout();
                 }
             })
             .catch(error => {
                 console.error("Müşteri bilgileri alınırken hata oluştu:", error);
-                handleLogout();
+                document.getElementById('portal-error-message').textContent = "Bilgileriniz yüklenirken bir hata oluştu. Lütfen tekrar deneyin.";
+                document.getElementById('portal-error-message').style.display = 'block';
+                // handleLogout();
             });
         } else {
            window.location.href = 'login.html';
         }
 });
+
 
 function setupFiltersAndButtons() {
         const aySelect = document.getElementById('ayFiltresi');
