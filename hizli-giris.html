@@ -485,17 +485,23 @@ async function handleSaveAndNext() {
 }
 
 function handleSkip() {
-            const producerName = routeProducers[currentProducerIndex]?.adiSoyadi || 'Bu üretici';
-            const confirmation = confirm(`'${producerName}' için işlem seçin:\n\n➡️ SÜT YOK ise -> 'Tamam'a basın (0 Lt olarak kaydedilecektir).\n\n➡️ ULAŞILAMADIYSA veya başka bir sebeple atlamak için -> 'İptal'e basın.`);
-            if (confirmation) {
-                saveMilkEntry(0, "Süt yok");
-            } else {
-                // Sadece sıradakine geçmek yerine hiçbir şey yapma seçeneği de olabilir.
-                // Mevcut kodda iptal basınca sıradakine geçiyordu, biz bunu kaldıralım.
-                // Kullanıcı isterse "Üretici Atlama" dropdown'dan kendisi seçebilir.
-                console.log("Kullanıcı sıradaki üreticiye geçmeyi iptal etti.");
-            }
-        }
+    const producerName = routeProducers[currentProducerIndex]?.adiSoyadi || 'Bu üretici';
+    
+    // Açıklamayı daha net hale getirdim.
+    const confirmation = confirm(
+        `'${producerName}' için işlem seçin:\n\n` +
+        `➡️ "TAMAM" derseniz: 'Süt Yok' olarak (0 Lt) kaydedilir.\n\n` +
+        `➡️ "İPTAL" derseniz: Kayıt yapmadan sıradakine geçilir.`
+    );
+
+    if (confirmation) {
+        // "Tamam"a basılınca: 0 Lt olarak kaydeder ve sıradakine geçer.
+        saveMilkEntry(0, "Süt yok");
+    } else {
+        // "İptal"e basılınca: HİÇBİR ŞEY KAYDETMEDEN sadece sıradakine geçer.
+        advanceToNextProducer();
+    }
+}
 
 function populateCategories() {
             db.collection('cari_kategorileri').where('sahipId', '==', sahipId).orderBy('ad').get()
