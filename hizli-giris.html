@@ -578,6 +578,9 @@ if (resetRouteBtn) {
                     else { filterAndRenderHistory(); }
                 });
             });
+    document.getElementById('logoutButton').addEventListener('click', handleLogout);
+
+
         } 
        
         async function getSettings() {
@@ -651,6 +654,17 @@ function handleSkip() {
                     categorySelect.innerHTML = '<option value="" disabled selected>Hata: Rotalar yüklenemedi</option>';
                 });
         }
+
+// YENİ EKLENDİ - Çıkış işlemini yöneten fonksiyon
+function handleLogout() {
+    auth.signOut().then(() => {
+        window.location.href = 'login.html';
+    }).catch(error => {
+        console.error("Çıkış yaparken hata oluştu:", error);
+        showToast("Çıkış yapılırken bir hata oluştu.", true);
+    });
+}
+
 
 async function startRoute() {
     filterAndRenderHistory();
