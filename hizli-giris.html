@@ -65,7 +65,7 @@
         #producer-panel, #history-section { background-color: var(--white-color); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); 
 		box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-top: 25px; }
         #current-producer-name { font-size: 1.5em; font-weight: 700; color: var(--primary-color); margin-bottom: 15px; text-align: center; }
-        .action-buttons { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; }
+        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; } /* Değişiklik: Skip butonu için ayarlandı */
         .btn { padding: 15px; font-size: 1.1em; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-success { background-color: var(--success-color); color: var(--white-color); }
@@ -172,13 +172,66 @@
     color: white;
 }
 
+/* YENİ EKLENEN STİLLER BAŞLANGIÇ */
+.quantity-wrapper {
+    position: relative;
+    margin-bottom: 15px;
+}
 
+#quantity {
+    background-color: var(--white-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    width: 100%;
+    height: 80px;
+    padding: 10px 120px 10px 20px;
+    font-size: 2.8em;
+    font-weight: bold;
+    text-align: right;
+    color: var(--dark-color);
+    box-sizing: border-box;
+}
 
+.quantity-wrapper::after {
+    content: 'Litre';
+    position: absolute;
+    right: 25px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #aaa;
+    font-size: 1.5em;
+    font-weight: normal;
+}
 
+#keypad-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
 
+.keypad-btn {
+    padding: 20px;
+    font-size: 1.8em;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: #fff;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    user-select: none; /* Butona basarken metin seçilmesini engeller */
+}
 
+.keypad-btn:active {
+    background-color: #e9ecef;
+}
 
-
+.keypad-btn.action {
+    background-color: var(--warning-color);
+    color: var(--dark-color);
+    font-weight: bold;
+}
+/* YENİ EKLENEN STİLLER BİTİŞ */
 </style>
 </head>
 <body>
@@ -221,18 +274,34 @@
                     <label for="producer-select">Rota Dışı Seçim / Üretici Atlama</label>
                     <select id="producer-select" name="producer-select"></select>
                 </div>
-                <div class="form-group">
-                    <label for="quantity">Miktar (Litre)</label>
-                    <input type="number" id="quantity" name="quantity" step="0.1" inputmode="decimal">
+
+                <div class="quantity-wrapper">
+                    <input type="text" id="quantity" name="quantity" readonly>
                 </div>
-                <div class="form-group">
+
+                <div id="keypad-container">
+                    <button type="button" class="keypad-btn">1</button>
+                    <button type="button" class="keypad-btn">2</button>
+                    <button type="button" class="keypad-btn">3</button>
+                    <button type="button" class="keypad-btn">4</button>
+                    <button type="button" class="keypad-btn">5</button>
+                    <button type="button" class="keypad-btn">6</button>
+                    <button type="button" class="keypad-btn">7</button>
+                    <button type="button" class="keypad-btn">8</button>
+                    <button type="button" class="keypad-btn">9</button>
+                    <button type="button" class="keypad-btn action">Sil</button>
+                    <button type="button" class="keypad-btn">0</button>
+                    <button type="button" class="keypad-btn">.</button>
+                </div>
+                <div class="form-group" style="display: none;">
                     <label for="notes">Açıklama</label>
                     <textarea id="notes" name="notes" rows="3"></textarea>
                 </div>
+
                 <div class="action-buttons">
-                    <button type="button" id="skip-btn" class="btn btn-secondary" onclick="skipCurrentProducer()">Pas Geç</button>
-                    <button type="button" id="save-btn" class="btn btn-success">Kaydet ve Sonraki</button>
-                    <button type="button" id="cancel-edit-btn" class="btn btn-danger">İptal</button>
+                    <button type="button" id="skip-btn" class="btn btn-secondary">PAS GEÇ</button>
+                    <button type="button" id="save-btn" class="btn btn-success">KAYDET</button>
+                    <button type="button" id="cancel-edit-btn" class="btn btn-danger" style="grid-column: 1 / -1;">İptal</button>
                 </div>
             </div>
 
@@ -291,6 +360,9 @@
         const cancelEditBtn = document.getElementById('cancel-edit-btn');
         const editingSutAlimIdInput = document.getElementById('editingSutAlimId');
         const gunlukGenelToplamGosterge = document.getElementById('gunlukGenelToplamGosterge');
+        // YENİ EKLENDİ - Tuş takımı referansı
+        const keypadContainer = document.getElementById('keypad-container');
+
 
 auth.onAuthStateChanged(user => {
             if (user) {
@@ -312,6 +384,23 @@ auth.onAuthStateChanged(user => {
             } else { window.location.href = 'login.html'; }
         });
 
+// YENİ EKLENDİ - Tuş takımı dinleyicisi
+keypadContainer.addEventListener('click', (e) => {
+    if (e.target.tagName !== 'BUTTON') return;
+
+    const key = e.target.textContent;
+
+    if (key === 'Sil') {
+        quantityInput.value = quantityInput.value.slice(0, -1);
+    } else if (key === '.') {
+        if (!quantityInput.value.includes('.')) {
+            quantityInput.value += '.';
+        }
+    } else {
+        quantityInput.value += key;
+    }
+});
+
 async function initializeApp() {
     collectionDateInput.value = new Date().toISOString().split('T')[0];
     const settings = await getSettings();
@@ -327,18 +416,14 @@ async function initializeApp() {
         await fetchAndRenderHistory(collectionDateInput.value);
         await showDailyGrandTotal();
         if (categorySelect.value) {
-            startRoute(); // Eğer bir rota seçiliyse, o rota için sırayı da güncelle
+            startRoute(); 
         }
     });
 
-
-    quantityInput.addEventListener('focus', scrollToActivePanel);
-    notesInput.addEventListener('focus', scrollToActivePanel);
-    //quantityInput.addEventListener('change', checkPreviousDayDifference);
     categorySelect.addEventListener('change', startRoute);
     producerSelect.addEventListener('change', jumpToProducer);
     saveBtn.addEventListener('click', handleSave);
-    skipBtn.addEventListener('click', handleSkip);
+    skipBtn.addEventListener('click', handleSkip); // handleSkip, pas geç butonu içindi, skipCurrentProducer değil
     cancelEditBtn.addEventListener('click', cancelEditMode);
     const inputsToTriggerRoute = [...document.querySelectorAll('input[name="time"]')];
     inputsToTriggerRoute.forEach(el => {
@@ -405,8 +490,10 @@ function handleSkip() {
             if (confirmation) {
                 saveMilkEntry(0, "Süt yok");
             } else {
-                currentProducerIndex++;
-                displayCurrentProducer();
+                // Sadece sıradakine geçmek yerine hiçbir şey yapma seçeneği de olabilir.
+                // Mevcut kodda iptal basınca sıradakine geçiyordu, biz bunu kaldıralım.
+                // Kullanıcı isterse "Üretici Atlama" dropdown'dan kendisi seçebilir.
+                console.log("Kullanıcı sıradaki üreticiye geçmeyi iptal etti.");
             }
         }
 
@@ -423,12 +510,13 @@ function populateCategories() {
                 });
         }
 
-function skipCurrentProducer() {
-            if (currentProducerIndex < routeProducers.length) {
-                currentProducerIndex++;
-                displayCurrentProducer();
-            }
-        }
+// Bu fonksiyon artık kullanılmıyor, handleSkip içinden yönetiliyor.
+// function skipCurrentProducer() {
+//             if (currentProducerIndex < routeProducers.length) {
+//                 currentProducerIndex++;
+//                 displayCurrentProducer();
+//             }
+//         }
 
 async function startRoute() {
     filterAndRenderHistory();
@@ -570,11 +658,11 @@ function displayCurrentProducer() {
                 return;
             }
             const producer = routeProducers[currentProducerIndex];
-            currentProducerName.textContent = producer.adiSoyadi;
+            // Üretici adı dropdown'dan değiştirildiği için başlık olarak kullanılıyor.
+            currentProducerName.textContent = producer.adiSoyadi; 
             producerSelect.value = currentProducerIndex;
             quantityInput.value = '';
             notesInput.value = '';
-            quantityInput.focus();
         }
 
 async function showDailyGrandTotal() {
@@ -613,11 +701,13 @@ async function showDailyGrandTotal() {
 }
        
 function populateProducerSelect() {
-            producerSelect.innerHTML = '';
+            // Dropdown yerine artık sadece başlık ve atlama için kullanılıyor.
+            producerSelect.innerHTML = ''; 
             routeProducers.forEach((producer, index) => {
                 const option = document.createElement('option');
                 option.value = index;
-                option.textContent = `${producer.rotaSirasi || (index + 1)}. ${producer.adiSoyadi}`;
+                // Başlık olarak kullandığımız için, dropdown'da sadece isim yeterli.
+                option.textContent = `${producer.adiSoyadi}`; 
                 producerSelect.appendChild(option);
             });
         }
@@ -736,7 +826,7 @@ async function deleteHistoryItem(sutAlimId, zaman) {
         }
         
         await fetchAndRenderHistory(alimTarihi);
-        await showDailyGrandTotal(); // <<-- YENİ EKLENEN SATIR
+        await showDailyGrandTotal();
 
         if (categorySelect.value) {
             await startRoute();
@@ -752,7 +842,13 @@ async function deleteHistoryItem(sutAlimId, zaman) {
 
 
 
-function handleSave() {if (editingSutAlimIdInput.value) {handleUpdate();} else {handleSaveAndNext();}}
+function handleSave() {
+    if (editingSutAlimIdInput.value) {
+        handleUpdate();
+    } else {
+        handleSaveAndNext();
+    }
+}
 
 function setEditMode(entry, zamanDilimi) {
     producerPanel.style.display = 'block';
@@ -767,12 +863,13 @@ function setEditMode(entry, zamanDilimi) {
     notesInput.value = entry.not || '';
     unitPriceInput.value = (entry.fiyat || 0).toFixed(2);
     
-    producerSelect.disabled = true;
+    producerSelect.style.display = 'none'; // Düzenleme modunda atlama dropdown'ını gizle
     categorySelect.disabled = true;
     
-    skipBtn.style.display = 'none';
+    skipBtn.style.display = 'none'; // Pas geç butonunu gizle
     saveBtn.textContent = 'Güncelle';
     saveBtn.className = 'btn btn-warning';
+    saveBtn.style.gridColumn = '1 / -1'; // Güncelle butonunu tam genişlik yap
     cancelEditBtn.style.display = 'block';
     
     producerPanel.scrollIntoView({ behavior: 'smooth' });
@@ -781,11 +878,13 @@ function setEditMode(entry, zamanDilimi) {
 function cancelEditMode() {
             editingEntry = null;
             editingSutAlimIdInput.value = '';
-            producerSelect.disabled = false;
+            producerSelect.style.display = 'block';
             categorySelect.disabled = false;
+            
             skipBtn.style.display = 'block';
-            saveBtn.textContent = 'Kaydet ve Sonraki';
+            saveBtn.textContent = 'KAYDET';
             saveBtn.className = 'btn btn-success';
+            saveBtn.style.gridColumn = ''; // Buton genişliğini normale döndür
             cancelEditBtn.style.display = 'none';
             
             if(routeProducers.length > 0 && currentProducerIndex < routeProducers.length) {
@@ -858,7 +957,7 @@ async function getPreviousDayQuantity(producerId, currentDateStr, timeSlot) {
         const snapshot = await query.get();
 
         if (snapshot.empty) {
-            return null; // Önceki güne ait kayıt yoksa null döndür
+            return null;
         }
 
         const data = snapshot.docs[0].data();
@@ -866,7 +965,7 @@ async function getPreviousDayQuantity(producerId, currentDateStr, timeSlot) {
 
     } catch (error) {
         console.error("Önceki gün verisi alınırken hata:", error);
-        return null; // Hata durumunda null döndür
+        return null; 
     }
 }
 
@@ -874,13 +973,13 @@ async function checkPreviousDayDifference() {
     const currentQuantity = parseFloat(String(quantityInput.value).replace(',', '.')) || 0;
     if (currentQuantity <= 0) return true;
 
-    const currentProducer = routeProducers[currentProducerIndex];
-    if (!currentProducer) return true;
+    const producerToCheck = editingEntry ? { id: editingEntry.cariId } : routeProducers[currentProducerIndex];
+    if (!producerToCheck) return true;
 
     const timeSlot = document.querySelector('input[name="time"]:checked').value;
     const currentDateStr = collectionDateInput.value;
 
-    const previousQuantity = await getPreviousDayQuantity(currentProducer.id, currentDateStr, timeSlot);
+    const previousQuantity = await getPreviousDayQuantity(producerToCheck.id, currentDateStr, timeSlot);
 
     if (previousQuantity === null || previousQuantity <= 0) return true;
 
@@ -923,73 +1022,12 @@ function editHistoryItem(sutAlimId, zaman) {
     const entry = fullHistoryForDate.find(item => item.sutAlimId === sutAlimId);
     if (!entry) return;
 
-    const historyList = document.getElementById('history-list');
-    const existingEditItem = historyList.querySelector('.edit-mode-item');
-    if (existingEditItem) existingEditItem.remove();
-
-    const originalItem = [...historyList.children].find(li =>
-        li.innerHTML.includes(`editHistoryItem('${sutAlimId}'`)
-    );
-    if (!originalItem) return;
-
-    originalItem.style.display = 'none';
-
-    const miktar = zaman === 'sabah' ? (entry.sabah || 0) : (entry.aksam || 0);
-    const fiyat = entry.fiyat?.toFixed(2) || '0.00';
-
-    const editItem = document.createElement('li');
-    editItem.className = 'edit-mode-item';
-    editItem.style.listStyle = 'none';
-editItem.innerHTML = `
-    <div class="edit-full-box">
-        <div class="edit-header-icons">
-            <span class="edit-producer-name"><strong>${entry.cariAdi}</strong></span>
-            <span>✏️</span>
-            <span class="btn-delete" onclick="deleteHistoryItem('${sutAlimId}', '${zaman}')">🗑️</span>
-        </div>
-        <div class="edit-summary">
-            <div><strong>Mevcut:</strong> ${miktar.toFixed(1)} Lt</div>
-            <div><strong>Fiyat:</strong> ${fiyat} ₺</div>
-        </div>
-        <input type="number" class="edit-full-input" step="0.1" value="${miktar}" />
-        <div class="edit-full-actions">
-            <button class="btn-inline-save">✔ Güncelle</button>
-            <button class="btn-inline-cancel">✖ Vazgeç</button>
-        </div>
-    </div>
-`;
-
-
-    originalItem.insertAdjacentElement('afterend', editItem);
-
-    const input = editItem.querySelector('.edit-full-input');
-    const saveBtn = editItem.querySelector('.btn-inline-save');
-    const cancelBtn = editItem.querySelector('.btn-inline-cancel');
-
-    saveBtn.onclick = async () => {
-        const yeniMiktar = parseFloat(String(input.value).replace(',', '.')) || 0;
-        if (isNaN(yeniMiktar) || yeniMiktar < 0) return;
-
-        const sutAlimRef = db.collection('sut_alimlari').doc(sutAlimId);
-        const birimFiyat = parseFloat(entry.fiyat || 0);
-        const guncelleme = { fiyat: birimFiyat };
-        guncelleme[zaman] = yeniMiktar;
-
-        const sabah = zaman === 'sabah' ? yeniMiktar : (entry.sabah || 0);
-        const aksam = zaman === 'aksam' ? yeniMiktar : (entry.aksam || 0);
-
-        guncelleme.toplam = sabah + aksam;
-        guncelleme.toplamTutar = guncelleme.toplam * birimFiyat;
-
-        await sutAlimRef.update(guncelleme);
-        await fetchAndRenderHistory(entry.tarih);
-        await showDailyGrandTotal();
-    };
-
-    cancelBtn.onclick = () => {
-        editItem.remove();
-        originalItem.style.display = '';
-    };
+    // Eğer ana panelde düzenleme modu açıksa, onu iptal et
+    if (editingSutAlimIdInput.value) {
+        cancelEditMode();
+    }
+    
+    setEditMode(entry, zaman);
 }
        
 
