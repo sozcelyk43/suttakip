@@ -509,27 +509,37 @@ color: var(--danger-color);
         const keypadContainer = document.getElementById('keypad-container');
 	 
 
+auth.onAuthStateChanged(user => {
+    if (user) {
+        db.collection('kullanicilar').doc(user.uid).get().then(doc => {
+            if (doc.exists) {
+                const userData = doc.data();
+                currentUserRole = userData.rol;
 
-        auth.onAuthStateChanged(user => {
-            if (user) {
+                // --- YENİ EKLENEN GÜVENLİK KONTROLÜ ---
+                // Eğer kullanıcı bir üretici ise, onu kendi portalına yönlendir.
+                if (currentUserRole === 'uretici') {
+                    window.location.href = 'musteri_portali.html';
+                    return; // Fonksiyonun devamını çalıştırma
+                }
+                // --- KONTROL SONU ---
+
+                sahipId = userData.sahipId || user.uid;
                 const logoutButton = document.getElementById('logoutButton');
                 if (logoutButton && user.email) {
                     logoutButton.innerHTML = `🚪 Çıkış Yap<br><small style="font-weight:normal; font-size:0.8em;">${user.email}</small>`;
                 }
-                db.collection('kullanicilar').doc(user.uid).get().then(doc => {
-                    if (doc.exists) {
-                        const userData = doc.data();
-                        sahipId = userData.sahipId || user.uid;
-                        currentUserRole = userData.rol;
-                        initializeApp();
-                    } else {
-                        showToast("Kullanıcı profili bulunamadı.", true);
-                        auth.signOut();
-                    }
-                });
-            } else { window.location.href = 'login.html'; }
-        });
+                initializeApp();
 
+            } else {
+                showToast("Kullanıcı profili bulunamadı.", true);
+                auth.signOut();
+            }
+        });
+    } else { 
+        window.location.href = 'login.html'; 
+    }
+});
         keypadContainer.addEventListener('click', (e) => {
             if (e.target.tagName !== 'BUTTON') return;
             const key = e.target.textContent;

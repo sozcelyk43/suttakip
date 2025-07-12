@@ -446,32 +446,42 @@
 
 
     function handleTableActions(event) {
-        const target = event.target;
-        const hayvanId = target.dataset.id;
-        if (target.classList.contains('btn-delete')) {
-            if (confirm("Bu hayvanı kalıcı olarak silmek istediğinizden emin misiniz?")) {
-                db.collection('hayvanlar').doc(hayvanId).delete()
-                  .then(() => { showPortalMessage("Hayvan silindi.", "success"); refreshAllData(); })
-                  .catch(e => showPortalMessage("Silme işlemi başarısız.", "error"));
-            }
-        }
-        if (target.classList.contains('btn-edit')) {
-            db.collection('hayvanlar').doc(hayvanId).get().then(doc => {
-                if (doc.exists) {
-                    const hayvan = doc.data();
-                    document.getElementById('edit-hayvan-id').value = doc.id;
-                    document.getElementById('edit-hayvan-kupe').value = hayvan.kupeNo || '';
-                    document.getElementById('edit-hayvan-irk').value = hayvan.irk || '';
-                document.getElementById('edit-hayvan-cinsiyet').value = hayvan.cinsiyet || 'Dişi';
+    const target = event.target;
+    const hayvanId = target.dataset.id;
 
-                    document.getElementById('edit-hayvan-dogum-tarihi').value = hayvan.dogumTarihi || '';
-                    document.getElementById('edit-hayvan-gebelik-durumu').value = hayvan.gebəlikDurumu || 'Boş';
-                    document.getElementById('edit-son-tohumlama-tarihi').value = hayvan.sonTohumlamaTarihi || '';
-                    editModal.style.display = 'block';
-                }
-            });
+    if (target.classList.contains('btn-delete')) {
+        // Düzeltilmiş onay mekanizması
+        const onay = prompt("Bu hayvanı kalıcı olarak silmek için 'SİL' yazın.");
+        if (onay === "SİL") {
+            db.collection('hayvanlar').doc(hayvanId).delete()
+              .then(() => { 
+                  showPortalMessage("Hayvan silindi.", "success"); 
+                  refreshAllData(); 
+              })
+              .catch(e => {
+                  console.error(e);
+                  showPortalMessage("Silme işlemi başarısız.", "error");
+              });
+        } else if (onay !== null) { // Kullanıcı "İptal" demediyse ama yanlış yazdıysa
+            showPortalMessage("Onay metni yanlış olduğu için silme işlemi iptal edildi.", "error");
         }
     }
+
+    if (target.classList.contains('btn-edit')) {
+        db.collection('hayvanlar').doc(hayvanId).get().then(doc => {
+            if (doc.exists) {
+                const hayvan = doc.data();
+                document.getElementById('edit-hayvan-id').value = doc.id;
+                document.getElementById('edit-hayvan-kupe').value = hayvan.kupeNo || '';
+                document.getElementById('edit-hayvan-irk').value = hayvan.irk || '';
+                document.getElementById('edit-hayvan-dogum-tarihi').value = hayvan.dogumTarihi || '';
+                document.getElementById('edit-hayvan-gebelik-durumu').value = hayvan.gebəlikDurumu || 'Boş';
+                document.getElementById('edit-son-tohumlama-tarihi').value = hayvan.sonTohumlamaTarihi || '';
+                editModal.style.display = 'block';
+            }
+        });
+    }
+}
 
     async function handleUpdateHayvan(event) {
         event.preventDefault();
