@@ -222,7 +222,6 @@
     user-select: none;
 }
 
-
 .keypad-btn:active {
     background-color: #e9ecef;
 }
@@ -284,6 +283,52 @@
 .custom-alert-buttons button {
     flex-grow: 1;
 }
+/* YENİ EKLENEN ROTA AKTİF STİLLERİ */
+main.route-active .form-group[data-step="1"] {
+    display: none;
+}
+
+/* Kategori seçimi ve Değiştir butonunu yan yana getirmek için */
+.category-selection-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.category-selection-wrapper select {
+    flex-grow: 1; /* Seçim kutusunun boşluğu doldurmasını sağlar */
+}
+
+/* Değiştir butonunun stili */
+#resetRouteBtn {
+    display: none; /* Başlangıçta gizli */
+    padding: 10px 16px;
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    flex-shrink: 0; /* Küçülmesini engeller */
+    transition: background-color 0.2s;
+}
+
+#resetRouteBtn:hover {
+    background-color: var(--dark-color);
+}
+
+/* Ana gövdede .route-active class'ı varken butonu göster */
+main.route-active #resetRouteBtn {
+    display: inline-block;
+}
+/* Dropdown'daki ismi başlık gibi göstermek için yeni stil */
+#producer-select {
+    font-weight: 700; /* Yazıyı kalın yapar ('bold' ile aynı) */
+    font-size: 1.3em; /* Yazıyı biraz büyütür */
+    text-align: center; /* İsmi ortalar */
+color: var(--danger-color);
+}
+
 
 </style>
 </head>
@@ -295,75 +340,83 @@
             <button id="logoutButton">Çıkış</button>
         </header>
         <main>
-            <form id="setup-form" onsubmit="return false;">
-                <input type="hidden" id="editingSutAlimId">
-                <div class="form-group">
-                    <label for="collection-date">Süt Alım Tarihi</label>
-                    <input type="date" id="collection-date" name="collection-date">
-                </div>
-                <div class="form-group">
-                    <label for="unit-price">Süt Birim Fiyatı (₺)</label>
-                    <input type="number" id="unit-price" name="unit-price" step="0.01">
-                </div>
-                <div class="form-group">
-                    <label>Zaman</label>
-                    <div class="time-selection">
-                        <input type="radio" id="aksam" name="time" value="aksam" checked><label for="aksam">AKŞAM</label>
-                        <input type="radio" id="sabah" name="time" value="sabah"><label for="sabah">SABAH</label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="category">
-                        Kategori/Köy (Rota)
-                        <span id="gunlukGenelToplamGosterge" style="float: right; color: var(--primary-color); font-weight: bold;"></span>
-                    </label>
-                    <select id="category" name="category"></select>
-                </div>
-            </form>
+    <form id="setup-form" onsubmit="return false;">
+        <input type="hidden" id="editingSutAlimId">
+        <div class="form-group" data-step="1">
+            <label for="collection-date">Süt Alım Tarihi</label>
+            <input type="date" id="collection-date" name="collection-date">
+        </div>
+        <div class="form-group" data-step="1">
+            <label for="unit-price">Süt Birim Fiyatı (₺)</label>
+            <input type="number" id="unit-price" name="unit-price" step="0.01">
+        </div>
+        <div class="form-group">
+    <label for="category">
+        Kategori/Köy (Rota)
+    </label>
+    <div class="category-selection-wrapper">
+        <select id="category" name="category"></select>
+        <button type="button" id="resetRouteBtn">Değiştir</button>
+    </div>
+</div>
+        <div class="form-group">
+    <label>Zaman</label>
+    <div class="time-selection">
+        <input type="radio" id="aksam" name="time" value="aksam" checked><label for="aksam">AKŞAM</label>
+        <input type="radio" id="sabah" name="time" value="sabah"><label for="sabah">SABAH</label>
+    </div>
+    
+<div style="text-align: right; margin-top: 10px; padding-right: 5px;">
+    <span id="gunlukGenelToplamGosterge" style="color: var(--primary-color); font-weight: bold; font-size: 1.1em;"></span>
+</div>
 
-            <div id="producer-panel" style="display: none;">
-                <h2 id="current-producer-name">Üretici Adı</h2>
-                <div class="form-group">
-                    <label for="producer-select">Rota Dışı Seçim / Üretici Atlama</label>
-                    <select id="producer-select" name="producer-select"></select>
-                </div>
 
-                <div class="quantity-wrapper">
-                    <input type="text" id="quantity" name="quantity" readonly>
-                </div>
 
-                <div id="keypad-container">
-                    <button type="button" class="keypad-btn">1</button>
-                    <button type="button" class="keypad-btn">2</button>
-                    <button type="button" class="keypad-btn">3</button>
-                    <button type="button" class="keypad-btn">4</button>
-                    <button type="button" class="keypad-btn">5</button>
-                    <button type="button" class="keypad-btn">6</button>
-                    <button type="button" class="keypad-btn">7</button>
-                    <button type="button" class="keypad-btn">8</button>
-                    <button type="button" class="keypad-btn">9</button>
-                    <button type="button" class="keypad-btn action">Sil</button>
-                    <button type="button" class="keypad-btn">0</button>
-                    <button type="button" class="keypad-btn">.</button>
-                </div>
-                <div class="form-group" style="display: none;">
-                    <label for="notes">Açıklama</label>
-                    <textarea id="notes" name="notes" rows="3"></textarea>
-                </div>
+</div>
+    </form>
 
-                <div class="action-buttons">
-                    <button type="button" id="skip-btn" class="btn btn-secondary">PAS GEÇ</button>
-                    <button type="button" id="save-btn" class="btn btn-success">KAYDET</button>
-                    <button type="button" id="cancel-edit-btn" class="btn btn-danger" style="grid-column: 1 / -1;">İptal</button>
-                </div>
-            </div>
+    <div id="producer-panel" style="display: none;">
+    <h2 id="current-producer-name" style="display: none;">Üretici Adı</h2>
+        <div class="form-group">
+    <label for="producer-select" style="text-align: center;">Rota Dışı Seçim / Üretici Atlama</label>
+    <select id="producer-select" name="producer-select"></select>
+</div>
+        <div class="quantity-wrapper">
+            <input type="text" id="quantity" name="quantity" readonly>
+        </div>
+        <div id="keypad-container">
+            <button type="button" class="keypad-btn">1</button>
+            <button type="button" class="keypad-btn">2</button>
+            <button type="button" class="keypad-btn">3</button>
+            <button type="button" class="keypad-btn">4</button>
+            <button type="button" class="keypad-btn">5</button>
+            <button type="button" class="keypad-btn">6</button>
+            <button type="button" class="keypad-btn">7</button>
+            <button type="button" class="keypad-btn">8</button>
+            <button type="button" class="keypad-btn">9</button>
+            <button type="button" class="keypad-btn action">Sil</button>
+            <button type="button" class="keypad-btn">0</button>
+            <button type="button" class="keypad-btn">.</button>
+        </div>
+        <div class="form-group" style="display: none;">
+            <label for="notes">Açıklama</label>
+            <textarea id="notes" name="notes" rows="3"></textarea>
+        </div>
+        <div class="action-buttons">
+            <button type="button" id="skip-btn" class="btn btn-secondary">PAS GEÇ</button>
+            <button type="button" id="save-btn" class="btn btn-success">KAYDET</button>
+            <button type="button" id="cancel-edit-btn" class="btn btn-danger" style="grid-column: 1 / -1;">İptal</button>
+        </div>
+    </div>
 
-            <section id="history-section" style="display: none;">
-                <h2>Süt Alım Geçmişi (Bu Oturum)</h2>
-                <div id="session-summary"></div>
-                <ul id="history-list"></ul>
-            </section>
-        </main>
+    <section id="history-section" style="display: none;">
+        <h2>Süt Alım Geçmişi (Bu Oturum)</h2>
+        <div id="session-summary"></div>
+        <ul id="history-list"></ul>
+    </section>
+</main>
+
+
     </div>
 	
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -454,6 +507,7 @@
         const editingSutAlimIdInput = document.getElementById('editingSutAlimId');
         const gunlukGenelToplamGosterge = document.getElementById('gunlukGenelToplamGosterge');
         const keypadContainer = document.getElementById('keypad-container');
+	 
 
 
         auth.onAuthStateChanged(user => {
@@ -505,6 +559,13 @@
                 if (categorySelect.value) { startRoute(); }
             });
 
+const resetRouteBtn = document.getElementById('resetRouteBtn');
+if (resetRouteBtn) {
+    resetRouteBtn.addEventListener('click', () => {
+        categorySelect.value = ''; // Dropdown'ı sıfırla
+        startRoute(); // Arayüzü başlangıç durumuna getirmek için tetikle
+    });
+}
             categorySelect.addEventListener('change', startRoute);
             producerSelect.addEventListener('change', jumpToProducer);
             saveBtn.addEventListener('click', handleSave);
@@ -583,48 +644,65 @@
                 });
         }
 
-        async function startRoute() {
-            filterAndRenderHistory();
+async function startRoute() {
+    filterAndRenderHistory();
+    const category = categorySelect.value;
+    const mainElement = document.querySelector('main');
+
+    // Sadece bir class ekleyip çıkararak arayüzü yönetiyoruz
+    if (category) {
+        mainElement.classList.add('route-active');
+    } else {
+        mainElement.classList.remove('route-active');
+        producerPanel.style.display = 'none';
+        return;
+    }
+
+    try {
+        const producersSnapshot = await db.collection('cariler')
+            .where('sahipId', '==', sahipId)
+            .where('kategori', '==', category)
+            .where('durum', '==', 'aktif')
+            .where('cariGrup', 'array-contains', 'üretici')
+            .orderBy('rotaSirasi').get();
+
+        // Artık document'ta arama yapıyoruz çünkü butonların yeri hiç değişmiyor
+        const zamanDilimi = document.querySelector('input[name="time"]:checked').value;
+        
+        const savedProducerIds = new Set(
+            fullHistoryForDate
+                .filter(entry => typeof entry[zamanDilimi] !== 'undefined' && entry[zamanDilimi] !== null)
+                .map(entry => entry.cariId)
+        );
+
+        routeProducers = producersSnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter(p => !savedProducerIds.has(p.id));
+
+        currentProducerIndex = 0;
+        populateProducerSelect();
+        
+        if (routeProducers.length > 0) {
+            producerPanel.style.display = 'block';
+            displayCurrentProducer();
+        } else {
             producerPanel.style.display = 'none';
-            const category = categorySelect.value;
-            if (!category) return;
-            
-            try {
-                const producersSnapshot = await db.collection('cariler')
-                    .where('sahipId', '==', sahipId)
-                    .where('kategori', '==', category)
-                    .where('durum', '==', 'aktif')
-                    .where('cariGrup', 'array-contains', 'üretici')
-                    .orderBy('rotaSirasi').get();
-
-                const zamanDilimi = document.querySelector('input[name="time"]:checked').value;
-                const savedProducerIds = new Set(
-                    fullHistoryForDate
-                        .filter(entry => typeof entry[zamanDilimi] !== 'undefined' && entry[zamanDilimi] !== null)
-                        .map(entry => entry.cariId)
-                );
-
-                routeProducers = producersSnapshot.docs
-                    .map(doc => ({ id: doc.id, ...doc.data() }))
-                    .filter(p => !savedProducerIds.has(p.id));
-
-                currentProducerIndex = 0;
-                populateProducerSelect();
-                
-                if (routeProducers.length > 0) {
-                    producerPanel.style.display = 'block';
-                    displayCurrentProducer();
-                } else {
-                    showToast("Bu rota için tüm süt girişleri tamamlandı veya uygun üretici bulunamadı.");
-                }
-
-            } catch (error) { 
-                console.error("Rota başlatılırken hata:", error); 
-                showToast("Rota başlatılamadı. Lütfen konsol kayıtlarını kontrol edin.", true);
-            }
+            showToast("Bu rota için tüm girişler tamamlandı.");
         }
 
-        async function saveMilkEntry(quantity, notes) {
+    } catch (error) { 
+        console.error("Rota başlatılırken hata:", error); 
+        showToast("Rota başlatılamadı!", true);
+    }
+}     
+
+
+
+
+
+
+
+ async function saveMilkEntry(quantity, notes) {
             const unitPrice = parseFloat(String(unitPriceInput.value).replace(',', '.')) || 0;
             const alimTarihi = collectionDateInput.value;
             const zamanDilimi = document.querySelector('input[name="time"]:checked').value;
