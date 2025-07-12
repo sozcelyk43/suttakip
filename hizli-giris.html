@@ -211,16 +211,17 @@
 }
 
 .keypad-btn {
-    padding: 20px;
-    font-size: 1.8em;
+    padding: 15px; /* <--- Yüksekliği azaltmak için değeri düşürdük */
+    font-size: 1.6em; /* <--- Yazı boyutunu da orantılı olarak biraz azalttık */
     font-weight: 600;
     border-radius: 8px;
     border: 1px solid var(--border-color);
     background-color: #fff;
     cursor: pointer;
     transition: background-color 0.2s;
-    user-select: none; /* Butona basarken metin seçilmesini engeller */
+    user-select: none;
 }
+
 
 .keypad-btn:active {
     background-color: #e9ecef;
