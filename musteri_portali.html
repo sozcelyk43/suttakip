@@ -300,24 +300,60 @@
     const yeniDogumSection = document.getElementById('yeniDogumSection');
     const editModal = document.getElementById('editHayvanModal');
 
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            db.collection('cariler').where('authUID', '==', user.uid).limit(1).get().then(snapshot => {
-                if (!snapshot.empty) {
-                    const cariDoc = snapshot.docs[0];
-                    userCariId = cariDoc.id;
-                    userSahipId = cariDoc.data().sahipId;
-                    document.getElementById('musteriAdi').textContent = cariDoc.data().adiSoyadi;
-                    document.getElementById('logoutUserEmail').textContent = user.email;
-                    if (!userSahipId) {
-                        showPortalMessage("Müşteri profili hatası.", "error");
-                        return;
-                    }
-                    setupPage();
-                } else { showPortalMessage("Bu hesaba bağlı müşteri kartı bulunamadı.", "error"); }
-            }).catch(error => showPortalMessage("Bilgiler yüklenirken hata oluştu.", "error"));
-        } else { window.location.href = 'login.html'; }
-    });
+   auth.onAuthStateChanged(async (user) => { // Fonksiyonu daha modern ve okunaklı hale getirdik
+    if (user) {
+        try {
+            // 1. Önce kullanıcının rolünü alıyoruz
+            const userDoc = await db.collection('kullanicilar').doc(user.uid).get();
+            
+            if (!userDoc.exists) {
+                showPortalMessage("Kullanıcı profiliniz bulunamadı. Lütfen yönetici ile iletişime geçin.", "error");
+                auth.signOut();
+                return;
+            }
+            
+            const userRole = userDoc.data().rol;
+
+            // 2. Rol kontrolü yapıp, yetkisi olmayanları yönlendiriyoruz
+            if (userRole === 'admin') {
+                window.location.href = 'index.html';
+                return;
+            } else if (userRole === 'calisan') {
+                window.location.href = 'hizli-giris.html';
+                return;
+            }
+
+            // 3. Eğer rol 'uretici' ise, sayfanın orijinal mantığı çalışmaya devam ediyor
+            const snapshot = await db.collection('cariler').where('authUID', '==', user.uid).limit(1).get();
+
+            if (!snapshot.empty) {
+                const cariDoc = snapshot.docs[0];
+                const cariData = cariDoc.data();
+                userCariId = cariDoc.id;
+                userSahipId = cariData.sahipId;
+                document.getElementById('musteriAdi').textContent = cariData.adiSoyadi;
+                document.getElementById('logoutUserEmail').textContent = user.email;
+
+                if (!userSahipId) {
+                    showPortalMessage("Müşteri profili hatası.", "error");
+                    return;
+                }
+                
+                // 4. Sizin orijinal fonksiyonunuzu çağırıyoruz
+                setupPage();
+
+            } else {
+                showPortalMessage("Bu hesaba bağlı müşteri kartı bulunamadı.", "error");
+            }
+
+        } catch (error) {
+            console.error("Kullanıcı doğrulanırken hata:", error);
+            showPortalMessage("Bilgiler yüklenirken bir hata oluştu.", "error");
+        }
+    } else {
+        window.location.href = 'login.html';
+    }
+});
     
     function showPortalMessage(message, type = 'error') {
         portalMessage.textContent = message;
