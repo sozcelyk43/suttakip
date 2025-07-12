@@ -621,15 +621,23 @@ if (resetRouteBtn) {
             });
         }
 
-        function handleSkip() {
-            const producerName = routeProducers[currentProducerIndex]?.adiSoyadi || 'Bu üretici';
-            const message = `'${producerName}' için işlem seçin:\n\n"TAMAM" derseniz: 'Süt Yok' olarak (0 Lt) kaydedilir.\n\n"İPTAL" derseniz: Kayıt yapmadan sıradakine geçilir.`;
-            showCustomConfirm(message, () => {
-                saveMilkEntry(0, "Süt yok");
-            }, () => {
-                advanceToNextProducer();
-            });
+function handleSkip() {
+    const producerName = routeProducers[currentProducerIndex]?.adiSoyadi || 'Bu üretici';
+    
+    // Uyarı mesajını yeni duruma göre güncelledik
+    const message = `'${producerName}' için işlem seçin:\n\n"TAMAM" derseniz: 'Süt Yok' olarak (0 Lt) kaydedilir.\n\n"İPTAL" derseniz: Kişi listenin sonuna ertelenir.`;
+    
+    showCustomConfirm(message,
+        () => {
+            // "Tamam"a basılınca eskisi gibi 0 Lt kaydeder
+            saveMilkEntry(0, "Süt yok");
+        },
+        () => {
+            // "İptal"e basılınca artık yeni fonksiyonu çağırır
+            skipAndMoveToEnd();
         }
+    );
+}
 
         function populateCategories() {
             db.collection('cari_kategorileri').where('sahipId', '==', sahipId).orderBy('ad').get()
@@ -698,7 +706,31 @@ async function startRoute() {
 
 
 
+// YENİ EKLENDİ - Üreticiyi listenin sonuna taşıyan fonksiyon
+function skipAndMoveToEnd() {
+    // Listede 1 veya daha az kişi varsa bir şey yapma
+    if (routeProducers.length <= 1) return;
 
+    // Mevcut üreticiyi al
+    const skippedProducer = routeProducers[currentProducerIndex];
+    
+    // Mevcut konumundan kaldır
+    routeProducers.splice(currentProducerIndex, 1);
+    
+    // Listenin sonuna ekle
+    routeProducers.push(skippedProducer);
+    
+    // Dropdown listesini yeni sıraya göre güncelle
+    populateProducerSelect();
+    
+    // Eğer listenin sonundaki elemanı atladıysak, indeksi başa al
+    if (currentProducerIndex >= routeProducers.length) {
+        currentProducerIndex = 0;
+    }
+
+    // Bir sonraki (yeni sıradaki) üreticiyi göster
+    displayCurrentProducer();
+}
 
 
 
