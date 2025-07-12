@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gelişmiş Süt Girişi</title>
+    <link rel="icon" href="https://raw.githubusercontent.com/sozcelyk43/suttakip/refs/heads/main/favicon.ico" type="image/x-icon" />
+
 <style>
         :root {
         --primary-color: #007bff; --secondary-color: #6c757d; --success-color: #28a745;
@@ -12,44 +14,15 @@
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding: 0; background-color: var(--light-color); 
 	color: var(--dark-color); }
         .container { max-width: 600px; margin: 0 auto; padding: 15px; }
-	header {
-    background-color: #2c3e50;
-    color: white;
-    padding: 16px 20px;
-    text-align: center;
-    border-bottom-left-radius: 15px;
-    border-bottom-right-radius: 15px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-}	border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+	header {background-color: #2c3e50;color: white;padding: 16px 20px;text-align: center;border-bottom-left-radius: 15px;border-bottom-right-radius: 15px;
+    	box-shadow: 0 4px 6px rgba(0,0,0,0.1);display: flex;justify-content: space-between;align-items: center;flex-wrap: wrap;}	
+	border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 	display: flex; justify-content: space-between; align-items: center;}
-        header h1 {
-    margin: 0;
-    font-size: 1.4em;
-    flex-grow: 1;
-    text-align: left;
-    white-space: nowrap;
-}
+        header h1 {    margin: 0;    font-size: 1.4em;    flex-grow: 1;    text-align: left;    white-space: nowrap;}
         main { padding: 20px 0; }
-#logoutButton {
-    background-color: #dc3545; /* Bootstrap kırmızı tonu */
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.95em;
-    font-weight: 600;
-    transition: background-color 0.2s ease;
-}
-
-#logoutButton:hover {
-    background-color: #b02a37;
-}
-
+	#logoutButton {background-color: #dc3545;color: white;border: none;padding: 8px 14px;border-radius: 8px;cursor: pointer;font-size: 0.95em;font-weight: 600;
+		transition: background-color 0.2s ease;}
+	#logoutButton:hover {    background-color: #b02a37;}
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 1.1em; }
         .form-group select, .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1em; 
@@ -93,244 +66,46 @@
 	.history-producer-name {flex-shrink: 1;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;display: inline-block;max-width: 150px;vertical-align: middle; }
 	.action-buttons {position: -webkit-sticky;position: sticky;bottom: 0;z-index: 10;background-color: var(--light-color);padding-top: 10px;padding-bottom: 10px;
         	border-top: 1px solid var(--border-color);}
-
-.btn-inline-save {
-    background-color: var(--success-color);
-    color: white;
-}
-
-.btn-inline-cancel {
-    background-color: var(--danger-color);
-    color: white;
-}
-.edit-full-box {
-    width: 100%;
-    background: #fff;
-    padding: 16px;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    box-sizing: border-box;
-}
-
-.edit--icons {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 1.1em;
-    gap: 8px;
-}
-
-.edit-producer-name {
-    color: var(--primary-color);
-    font-weight: 700;
-    font-size: 1em;
-    flex-grow: 1;
-}
-
-.edit-summary {
-    display: flex;
-    justify-content: space-between;
-    font-size: 1em;
-}
-
-.edit-full-input {
-    width: 100%;
-    padding: 10px;
-    font-size: 1em;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    box-sizing: border-box;
-}
-
-.edit-full-actions {
-    display: flex;
-    gap: 10px;
-    width: 100%;
-}
-
-.edit-full-actions button {
-    flex: 1;
-    padding: 12px;
-    font-size: 1em;
-    font-weight: 600;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.btn-inline-save {
-    background-color: var(--success-color);
-    color: white;
-}
-
-.btn-inline-cancel {
-    background-color: var(--danger-color);
-    color: white;
-}
-
-/* YENİ EKLENEN STİLLER BAŞLANGIÇ */
-.quantity-wrapper {
-    position: relative;
-    margin-bottom: 15px;
-}
-
-#quantity {
-    background-color: var(--white-color);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    width: 100%;
-    height: 80px;
-    padding: 10px 120px 10px 20px;
-    font-size: 2.8em;
-    font-weight: bold;
-    text-align: right;
-    color: var(--dark-color);
-    box-sizing: border-box;
-}
-
-.quantity-wrapper::after {
-    content: 'Litre';
-    position: absolute;
-    right: 25px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #aaa;
-    font-size: 1.5em;
-    font-weight: normal;
-}
-
-#keypad-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.keypad-btn {
-    padding: 15px; /* <--- Yüksekliği azaltmak için değeri düşürdük */
-    font-size: 1.6em; /* <--- Yazı boyutunu da orantılı olarak biraz azalttık */
-    font-weight: 600;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    background-color: #fff;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    user-select: none;
-}
-
-.keypad-btn:active {
-    background-color: #e9ecef;
-}
-
-.keypad-btn.action {
-    background-color: var(--warning-color);
-    color: var(--dark-color);
-    font-weight: bold;
-}
-
-
-/* YENİ EKLENEN ÖZEL UYARI PENCERESİ STİLLERİ */
-.custom-alert-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    z-index: 1000;
-    display: none; /* Başlangıçta gizli */
-    justify-content: center;
-    align-items: center;
-    padding: 15px;
-    box-sizing: border-box;
-}
-
-.custom-alert-box {
-    background-color: var(--white-color);
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-    transform: scale(0.9);
-    transition: transform 0.2s ease-out;
-}
-
-.custom-alert-overlay.show .custom-alert-box {
-    transform: scale(1);
-}
-
-#custom-alert-message {
-    font-size: 1.2em;
-    color: var(--dark-color);
-    margin-top: 0;
-    margin-bottom: 20px;
-    line-height: 1.5;
-    white-space: pre-wrap; /* \n karakterlerinin çalışması için */
-}
-
-.custom-alert-buttons {
-    display: flex;
-    justify-content: space-around;
-    gap: 15px;
-}
-
-.custom-alert-buttons button {
-    flex-grow: 1;
-}
-/* YENİ EKLENEN ROTA AKTİF STİLLERİ */
-main.route-active .form-group[data-step="1"] {
-    display: none;
-}
-
-/* Kategori seçimi ve Değiştir butonunu yan yana getirmek için */
-.category-selection-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.category-selection-wrapper select {
-    flex-grow: 1; /* Seçim kutusunun boşluğu doldurmasını sağlar */
-}
-
-/* Değiştir butonunun stili */
-#resetRouteBtn {
-    display: none; /* Başlangıçta gizli */
-    padding: 10px 16px;
-    background-color: var(--secondary-color);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    flex-shrink: 0; /* Küçülmesini engeller */
-    transition: background-color 0.2s;
-}
-
-#resetRouteBtn:hover {
-    background-color: var(--dark-color);
-}
-
-/* Ana gövdede .route-active class'ı varken butonu göster */
-main.route-active #resetRouteBtn {
-    display: inline-block;
-}
-/* Dropdown'daki ismi başlık gibi göstermek için yeni stil */
-#producer-select {
-    font-weight: 700; /* Yazıyı kalın yapar ('bold' ile aynı) */
-    font-size: 1.3em; /* Yazıyı biraz büyütür */
-    text-align: center; /* İsmi ortalar */
-color: var(--danger-color);
-}
-
-
+	.btn-inline-save {    background-color: var(--success-color);    color: white;}
+	.btn-inline-cancel {    background-color: var(--danger-color);    color: white;}
+	.edit-full-box {    width: 100%;    background: #fff;    padding: 16px;    border-radius: 12px;    border: 1px solid var(--border-color);    
+		box-shadow: 0 2px 6px rgba(0,0,0,0.05);    display: flex;    flex-direction: column;    gap: 10px;    box-sizing: border-box;}
+	.edit--icons {    display: flex;    justify-content: space-between;    align-items: center;    font-size: 1.1em;    gap: 8px;}
+	.edit-producer-name {    color: var(--primary-color);    font-weight: 700;    font-size: 1em;    flex-grow: 1;}
+	.edit-summary {    display: flex;    justify-content: space-between;    font-size: 1em;}
+	.edit-full-input {    width: 100%;    padding: 10px;    font-size: 1em;    border: 1px solid var(--border-color);    border-radius: 8px;    box-sizing: border-box;}
+	.edit-full-actions {    display: flex;    gap: 10px;    width: 100%;}
+	.edit-full-actions button {    flex: 1;    padding: 12px;    font-size: 1em;    font-weight: 600;    border: none;    border-radius: 8px;    cursor: pointer;}
+	.btn-inline-save {    background-color: var(--success-color);    color: white;}
+	.btn-inline-cancel {    background-color: var(--danger-color);    color: white;}
+	.quantity-wrapper {    position: relative;    margin-bottom: 15px;}
+	#quantity {    background-color: var(--white-color);    border: 1px solid var(--border-color);    border-radius: 8px;    width: 100%;    height: 80px;    
+		padding: 10px 120px 10px 20px;    font-size: 2.8em;    font-weight: bold;    text-align: right;    color: var(--dark-color);    box-sizing: border-box;}
+	.quantity-wrapper::after {content: 'Litre';position: absolute;right: 25px;top: 50%;transform: translateY(-50%);color: #aaa;font-size: 1.5em;font-weight: normal;}
+	#keypad-container {    display: grid;    grid-template-columns: repeat(3, 1fr);    gap: 10px;    margin-bottom: 20px;}
+	.keypad-btn {    padding: 15px;     font-size: 1.6em;    font-weight: 600;    border-radius: 8px;    border: 1px solid var(--border-color);
+    		background-color: #fff;    cursor: pointer;    transition: background-color 0.2s;    user-select: none;}
+	.keypad-btn:active {    background-color: #e9ecef;}
+	.keypad-btn.action {    background-color: var(--warning-color);    color: var(--dark-color);    font-weight: bold;}
+	.custom-alert-overlay {    position: fixed;    top: 0;    left: 0;    width: 100%;    height: 100%;    background-color: rgba(0, 0, 0, 0.6);
+    		z-index: 1000;    display: none;    justify-content: center;    align-items: center;    padding: 15px;    box-sizing: border-box;}
+	.custom-alert-box {    background-color: var(--white-color);    padding: 25px;    border-radius: 12px;    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    		width: 100%;    max-width: 400px;    text-align: center;    transform: scale(0.9);    transition: transform 0.2s ease-out;}
+	.custom-alert-overlay.show .custom-alert-box {    transform: scale(1);}
+	#custom-alert-message {    font-size: 1.2em;    color: var(--dark-color);    margin-top: 0;margin-bottom: 20px;line-height: 1.5;white-space: pre-wrap; }
+	.custom-alert-buttons {    display: flex;    justify-content: space-around;    gap: 15px;}
+	.custom-alert-buttons button {    flex-grow: 1;}
+	main.route-active .form-group[data-step="1"] {    display: none;}
+	.category-selection-wrapper {    display: flex;    align-items: center;    gap: 10px;}
+	.category-selection-wrapper select {    flex-grow: 1;}
+	#resetRouteBtn {    display: none;    padding: 10px 16px;    background-color: var(--secondary-color);    color: white;    border: none;    border-radius: 8px;
+    		cursor: pointer;    font-weight: 600;    flex-shrink: 0;     transition: background-color 0.2s;}
+	#resetRouteBtn:hover {    background-color: var(--dark-color);}
+	main.route-active #resetRouteBtn {    display: inline-block;}
+	#producer-select {    font-weight: 700;     font-size: 1.3em;    text-align: center; color: var(--danger-color);}
 </style>
+
+
 </head>
 <body>
     <div id="toast-message" class="toast-message"></div>
@@ -439,8 +214,7 @@ color: var(--danger-color);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // --- YARDIMCI FONKSİYONLAR ---
-        function showCustomConfirm(message, onConfirm, onCancel) {
+function showCustomConfirm(message, onConfirm, onCancel) {
             const overlay = document.getElementById('custom-alert-overlay');
             const messageP = document.getElementById('custom-alert-message');
             const confirmBtn = document.getElementById('custom-alert-confirm');
@@ -468,9 +242,9 @@ color: var(--danger-color);
                 close();
                 if (onCancel) onCancel();
             }, { once: true });
-        }
+}
 
-        function showToast(message, isError = false) {
+function showToast(message, isError = false) {
             const toast = document.getElementById('toast-message');
             toast.textContent = message;
             toast.style.backgroundColor = isError ? 'var(--danger-color)' : 'var(--success-color)';
@@ -479,8 +253,7 @@ color: var(--danger-color);
             setTimeout(() => {
                 toast.classList.remove('show');
             }, 3000);
-        }
-        // --- YARDIMCI FONKSİYONLAR BİTİŞ ---
+}
 
         let fullHistoryForDate = [];
         let allProducersMap = new Map();
@@ -515,15 +288,10 @@ auth.onAuthStateChanged(user => {
             if (doc.exists) {
                 const userData = doc.data();
                 currentUserRole = userData.rol;
-
-                // --- YENİ EKLENEN GÜVENLİK KONTROLÜ ---
-                // Eğer kullanıcı bir üretici ise, onu kendi portalına yönlendir.
                 if (currentUserRole === 'uretici') {
                     window.location.href = 'musteri_portali.html';
                     return; // Fonksiyonun devamını çalıştırma
                 }
-                // --- KONTROL SONU ---
-
                 sahipId = userData.sahipId || user.uid;
                 const logoutButton = document.getElementById('logoutButton');
                 if (logoutButton && user.email) {
@@ -552,7 +320,7 @@ auth.onAuthStateChanged(user => {
             }
         });
 
-        async function initializeApp() {
+async function initializeApp() {
             collectionDateInput.value = new Date().toISOString().split('T')[0];
             const settings = await getSettings();
             unitPriceInput.value = settings.defaultMilkPrice ? settings.defaultMilkPrice.toFixed(2) : "15.50";
@@ -569,11 +337,11 @@ auth.onAuthStateChanged(user => {
                 if (categorySelect.value) { startRoute(); }
             });
 
-const resetRouteBtn = document.getElementById('resetRouteBtn');
-if (resetRouteBtn) {
-    resetRouteBtn.addEventListener('click', () => {
-        categorySelect.value = ''; // Dropdown'ı sıfırla
-        startRoute(); // Arayüzü başlangıç durumuna getirmek için tetikle
+	const resetRouteBtn = document.getElementById('resetRouteBtn');
+	if (resetRouteBtn) {
+    		resetRouteBtn.addEventListener('click', () => {
+       	 	categorySelect.value = ''; // Dropdown'ı sıfırla
+        	startRoute(); // Arayüzü başlangıç durumuna getirmek için tetikle
     });
 }
             categorySelect.addEventListener('change', startRoute);
@@ -589,19 +357,17 @@ if (resetRouteBtn) {
                 });
             });
     document.getElementById('logoutButton').addEventListener('click', handleLogout);
-
-
-        } 
+} 
        
-        async function getSettings() {
+async function getSettings() {
             if (!sahipId) return {};
             try {
                 const doc = await db.collection('ayarlar').doc(sahipId).get();
                 return doc.exists ? doc.data() : {};
             } catch (e) { console.error("Ayarlar alınamadı:", e); return {}; }
-        }
+}
 
-        function filterAndRenderHistory() {
+function filterAndRenderHistory() {
             const selectedCategory = categorySelect.value;
             let historyToRender = fullHistoryForDate;
 
@@ -612,23 +378,22 @@ if (resetRouteBtn) {
                 });
             }
             renderHistory(historyToRender);
-        }
+}
 
-        function getDayDifference(dateStr) {
+function getDayDifference(dateStr) {
             const today = new Date();
             const entryDate = new Date(dateStr);
             today.setHours(0, 0, 0, 0);
             entryDate.setHours(0, 0, 0, 0);
             return Math.ceil((today - entryDate) / (1000 * 60 * 60 * 24));
-        }
+}
 
-        async function handleSaveAndNext() {
+async function handleSaveAndNext() {
             const quantity = parseFloat(String(quantityInput.value).replace(',', '.')) || 0;
             if (isNaN(quantity) || quantity < 0) {
                 showToast('Lütfen geçerli bir miktar girin.', true);
                 return;
             }
-            // `checkPreviousDayDifference` artık callback ile çalışıyor
             checkPreviousDayDifference(() => {
                 saveMilkEntry(quantity, notesInput.value);
             });
@@ -636,23 +401,18 @@ if (resetRouteBtn) {
 
 function handleSkip() {
     const producerName = routeProducers[currentProducerIndex]?.adiSoyadi || 'Bu üretici';
-    
-    // Uyarı mesajını yeni duruma göre güncelledik
     const message = `'${producerName}' için işlem seçin:\n\n"TAMAM" derseniz: 'Süt Yok' olarak (0 Lt) kaydedilir.\n\n"İPTAL" derseniz: Kişi listenin sonuna ertelenir.`;
-    
     showCustomConfirm(message,
         () => {
-            // "Tamam"a basılınca eskisi gibi 0 Lt kaydeder
             saveMilkEntry(0, "Süt yok");
         },
         () => {
-            // "İptal"e basılınca artık yeni fonksiyonu çağırır
             skipAndMoveToEnd();
         }
     );
 }
 
-        function populateCategories() {
+function populateCategories() {
             db.collection('cari_kategorileri').where('sahipId', '==', sahipId).orderBy('ad').get()
                 .then(snapshot => {
                     categorySelect.innerHTML = '<option value="">Rota Seçiniz...</option>';
@@ -663,9 +423,8 @@ function handleSkip() {
                     console.error("Kategoriler yüklenirken hata:", e);
                     categorySelect.innerHTML = '<option value="" disabled selected>Hata: Rotalar yüklenemedi</option>';
                 });
-        }
+}
 
-// YENİ EKLENDİ - Çıkış işlemini yöneten fonksiyon
 function handleLogout() {
     auth.signOut().then(() => {
         window.location.href = 'login.html';
@@ -680,8 +439,6 @@ async function startRoute() {
     filterAndRenderHistory();
     const category = categorySelect.value;
     const mainElement = document.querySelector('main');
-
-    // Sadece bir class ekleyip çıkararak arayüzü yönetiyoruz
     if (category) {
         mainElement.classList.add('route-active');
     } else {
@@ -698,9 +455,7 @@ async function startRoute() {
             .where('cariGrup', 'array-contains', 'üretici')
             .orderBy('rotaSirasi').get();
 
-        // Artık document'ta arama yapıyoruz çünkü butonların yeri hiç değişmiyor
         const zamanDilimi = document.querySelector('input[name="time"]:checked').value;
-        
         const savedProducerIds = new Set(
             fullHistoryForDate
                 .filter(entry => typeof entry[zamanDilimi] !== 'undefined' && entry[zamanDilimi] !== null)
@@ -730,35 +485,17 @@ async function startRoute() {
 
 
 
-// YENİ EKLENDİ - Üreticiyi listenin sonuna taşıyan fonksiyon
 function skipAndMoveToEnd() {
-    // Listede 1 veya daha az kişi varsa bir şey yapma
     if (routeProducers.length <= 1) return;
-
-    // Mevcut üreticiyi al
     const skippedProducer = routeProducers[currentProducerIndex];
-    
-    // Mevcut konumundan kaldır
     routeProducers.splice(currentProducerIndex, 1);
-    
-    // Listenin sonuna ekle
     routeProducers.push(skippedProducer);
-    
-    // Dropdown listesini yeni sıraya göre güncelle
     populateProducerSelect();
-    
-    // Eğer listenin sonundaki elemanı atladıysak, indeksi başa al
-    if (currentProducerIndex >= routeProducers.length) {
-        currentProducerIndex = 0;
-    }
-
-    // Bir sonraki (yeni sıradaki) üreticiyi göster
+    if (currentProducerIndex >= routeProducers.length) {        currentProducerIndex = 0;    }
     displayCurrentProducer();
 }
 
-
-
- async function saveMilkEntry(quantity, notes) {
+async function saveMilkEntry(quantity, notes) {
             const unitPrice = parseFloat(String(unitPriceInput.value).replace(',', '.')) || 0;
             const alimTarihi = collectionDateInput.value;
             const zamanDilimi = document.querySelector('input[name="time"]:checked').value;
@@ -818,9 +555,9 @@ function skipAndMoveToEnd() {
                 saveBtn.disabled = false;
                 skipBtn.disabled = false;
             }
-        }
+}
 
-        async function fetchAndRenderHistory(date) {
+async function fetchAndRenderHistory(date) {
             if (!date) return;
             fullHistoryForDate = []; 
             historySection.style.display = 'none';
@@ -836,9 +573,10 @@ function skipAndMoveToEnd() {
             } catch (error) {
                 console.error("Geçmiş verileri alınırken bir hata oluştu:", error);
             }
-        }
+}
 
-        function displayCurrentProducer() {
+
+function displayCurrentProducer() {
             if (currentProducerIndex >= routeProducers.length) {
                 producerPanel.style.display = 'none';
                 showToast(`${categorySelect.options[categorySelect.selectedIndex].text} rotası tamamlandı!`);
@@ -849,9 +587,9 @@ function skipAndMoveToEnd() {
             producerSelect.value = currentProducerIndex;
             quantityInput.value = '';
             notesInput.value = '';
-        }
+}
 
-        async function showDailyGrandTotal() {
+async function showDailyGrandTotal() {
             const displayElement = document.getElementById('gunlukGenelToplamGosterge');
             const date = collectionDateInput.value;
             if (!date) {
@@ -880,9 +618,9 @@ function skipAndMoveToEnd() {
                 console.error("Günlük genel toplam alınırken hata:", error);
                 displayElement.textContent = 'Hata!';
             }
-        }
+}
        
-        function populateProducerSelect() {
+function populateProducerSelect() {
             producerSelect.innerHTML = '';
             routeProducers.forEach((producer, index) => {
                 const option = document.createElement('option');
@@ -890,14 +628,14 @@ function skipAndMoveToEnd() {
                 option.textContent = `${producer.adiSoyadi}`;
                 producerSelect.appendChild(option);
             });
-        }
+}
 
-        function jumpToProducer() {
+function jumpToProducer() {
             currentProducerIndex = parseInt(this.value);
             displayCurrentProducer();
-        }
+}
 
-        function renderHistory(dataToRender) {
+function renderHistory(dataToRender) {
             if (!historySection || !historyList || !sessionSummary || !dataToRender || dataToRender.length === 0) {
                 historySection.style.display = 'none';
                 return;
@@ -938,9 +676,9 @@ function skipAndMoveToEnd() {
             });
             sessionSummary.innerHTML = `<strong>${zaman === 'sabah' ? 'Sabah' : 'Akşam'} Toplam Süt:</strong> ${sessionTotalMilk.toFixed(1)} Lt | <strong>Toplam Tutar:</strong> ${sessionTotalAmount.toFixed(2)} ₺`;
             if (historyList.children.length === 0) { historySection.style.display = 'none'; }
-        }
+}
 
-        async function deleteHistoryItem(sutAlimId, zaman) {
+async function deleteHistoryItem(sutAlimId, zaman) {
             if (!zaman) { showToast("Silme işleminde hata: Zaman dilimi belirtilmedi.", true); return; }
             const entryToDelete = fullHistoryForDate.find(item => item.sutAlimId === sutAlimId);
             if (!entryToDelete) { showToast("Silinecek kayıt bulunamadı.", true); return; }
@@ -980,14 +718,14 @@ function skipAndMoveToEnd() {
                     skipBtn.disabled = false;
                 }
             });
-        }
+}
 
-        function handleSave() {
+function handleSave() {
             if (editingSutAlimIdInput.value) { handleUpdate(); } 
             else { handleSaveAndNext(); }
-        }
+}
 
-        function setEditMode(entry, zamanDilimi) {
+function setEditMode(entry, zamanDilimi) {
             producerPanel.style.display = 'block';
             editingEntry = entry;
             editingSutAlimIdInput.value = entry.sutAlimId;
@@ -1004,9 +742,9 @@ function skipAndMoveToEnd() {
             saveBtn.style.gridColumn = '1 / -1';
             cancelEditBtn.style.display = 'block';
             producerPanel.scrollIntoView({ behavior: 'smooth' });
-        }
+}
 
-        function cancelEditMode() {
+function cancelEditMode() {
             editingEntry = null;
             editingSutAlimIdInput.value = '';
             producerSelect.style.display = 'block';
@@ -1021,9 +759,9 @@ function skipAndMoveToEnd() {
             } else {
                  producerPanel.style.display = 'none';
             }
-        }
+}
 
-        async function handleUpdate() {
+async function handleUpdate() {
             if (!editingEntry) return;
             const yeniMiktar = parseFloat(String(quantityInput.value).replace(',', '.')) || 0;
             if (isNaN(yeniMiktar) || yeniMiktar < 0) return;
@@ -1031,9 +769,9 @@ function skipAndMoveToEnd() {
             checkPreviousDayDifference(() => {
                 executeUpdate(yeniMiktar);
             });
-        }
+}
         
-        async function executeUpdate(yeniMiktar) {
+async function executeUpdate(yeniMiktar) {
             saveBtn.disabled = true;
             const yeniBirimFiyat = parseFloat(unitPriceInput.value);
             const zamanDilimi = document.querySelector('input[name="time"]:checked').value;
@@ -1065,9 +803,9 @@ function skipAndMoveToEnd() {
             } finally {
                 saveBtn.disabled = false;
             }
-        }
+}
 
-        async function getPreviousDayQuantity(producerId, currentDateStr, timeSlot) {
+async function getPreviousDayQuantity(producerId, currentDateStr, timeSlot) {
             try {
                 const currentDate = new Date(currentDateStr);
                 currentDate.setDate(currentDate.getDate() - 1);
@@ -1084,9 +822,9 @@ function skipAndMoveToEnd() {
                 console.error("Önceki gün verisi alınırken hata:", error);
                 return null;
             }
-        }
+}
 
-        async function checkPreviousDayDifference(onSuccess) {
+async function checkPreviousDayDifference(onSuccess) {
             const currentQuantity = parseFloat(String(quantityInput.value).replace(',', '.')) || 0;
             if (currentQuantity <= 0) {
                 onSuccess(); // Miktar 0 veya daha azsa kontrol etmeden devam et
@@ -1114,30 +852,32 @@ function skipAndMoveToEnd() {
             } else {
                 onSuccess(); // Fark %35'in altındaysa direkt devam et
             }
-        }
+}
 
-        function advanceToNextProducer() {
+function advanceToNextProducer() {
             routeProducers.splice(currentProducerIndex, 1);
             populateProducerSelect();
             if (currentProducerIndex >= routeProducers.length) {
                 currentProducerIndex = 0;
             }
             displayCurrentProducer();
-        }
+}
 
-        function scrollToActivePanel() {
+function scrollToActivePanel() {
             setTimeout(() => {
                 document.getElementById('producer-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 100);
-        }
+}
 
-        function editHistoryItem(sutAlimId, zaman) {
+function editHistoryItem(sutAlimId, zaman) {
             const entry = fullHistoryForDate.find(item => item.sutAlimId === sutAlimId);
             if (!entry) return;
             if (editingSutAlimIdInput.value) { cancelEditMode(); }
             setEditMode(entry, zaman);
-        }
+}
+
 </script>
+
 
 <div id="custom-alert-overlay" class="custom-alert-overlay">
     <div class="custom-alert-box">
@@ -1148,5 +888,7 @@ function skipAndMoveToEnd() {
         </div>
     </div>
 </div>
+
+
 </body>
 </html>
