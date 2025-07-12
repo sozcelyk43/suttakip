@@ -717,6 +717,62 @@
 
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
+
+// --- YARDIMCI FONKSİYONLAR ---
+
+// 1. BİLGİ/HATA MESAJLARI İÇİN (alert yerine)
+function showToast(message, isError = false) {
+    // Bu fonksiyon zaten 'hizli-giris.html' için oluşturulmuştu,
+    // ana sayfada da kullanmak için buraya ekliyoruz.
+    // Eğer ana sayfanızda benzer bir yapı yoksa, CSS'e de eklenmesi gerekebilir.
+    // Şimdilik sadece JS kısmını ekliyoruz.
+    console.log(`Toast: ${message} (Error: ${isError})`);
+    // Gerçek bir toast mekanizması için HTML/CSS gerekir.
+    // Şimdilik en basit haliyle alert'i değiştiriyoruz.
+    // Gelişmiş bir toast için CSS ve HTML de eklemek gerekir.
+    // Şimdilik temel alert'leri değiştirmek için bu yeterli olacaktır.
+    alert(message); // Geçici olarak alert'e geri döndüm, çünkü ana sayfada toast HTML/CSS'i yok.
+                   // Eğer varsa bu satırı yorumdan çıkarabilirsiniz.
+    /*
+    const toast = document.getElementById('toast-message'); // HTML'de bu ID'li bir element olmalı
+    if(toast) {
+        toast.textContent = message;
+        toast.style.backgroundColor = isError ? '#dc3545' : '#28a745';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    } else {
+        alert(message); // Toast elementi yoksa fallback olarak alert kullan
+    }
+    */
+}
+
+// 2. EVET/HAYIR ONAY PENCERELERİ İÇİN (confirm yerine)
+function showCustomConfirm(message, onConfirm, onCancel) {
+    // Bu fonksiyon da 'hizli-giris.html' için oluşturulmuştu.
+    // Ana sayfadaki confirm'leri değiştirmek için bu fonksiyonun var olduğunu varsayıyoruz.
+    // Eğer yoksa, 'hizli-giris.html' dosyasından kopyalanmalıdır.
+    if (confirm(message)) {
+        if(onConfirm) onConfirm();
+    } else {
+        if(onCancel) onCancel();
+    }
+}
+
+// 3. KULLANICIDAN GİRİŞ İSTEYEN PENCERELER İÇİN (prompt yerine)
+function showCustomPrompt(message, onConfirm) {
+    // Bu fonksiyon 'prompt'un yerine geçecek.
+    // Güvenlik doğrulaması gibi kritik yerlerde kullanılıyor.
+    const userInput = prompt(message);
+    if (userInput !== null) { // Kullanıcı "İptal" demediyse
+        onConfirm(userInput);
+    }
+    // "İptal" denirse bir şey yapma.
+}
+
+// --- YARDIMCI FONKSİYONLAR BİTİŞ ---
+
+
+
     const db = firebase.firestore();
 
 	let cachedHareketler = [];
@@ -758,7 +814,6 @@ auth.onAuthStateChanged(async (user) => {
                 currentUserRole = userData.rol;
                 sahipId = userData.sahipId;
 
-                // YENİ YÖNLENDİRME MANTIĞI
                 if (currentUserRole === 'calisan') {
                     window.location.href = 'hizli-giris.html';
                     return; 
@@ -766,13 +821,12 @@ auth.onAuthStateChanged(async (user) => {
                     window.location.href = 'musteri_portali.html';
                     return;
                 }
-                // Admin bu blokların dışında kalır ve initializeApp() fonksiyonunu çalıştırır.
-
+                
                 if (currentUserRole === 'admin' && !sahipId) {
                     sahipId = currentUserId;
                 }
                 if (!sahipId) {
-                    alert('Kullanıcı profilinizde "sahipId" alanı bulunamadı. Lütfen yöneticinizle iletişime geçin.');
+                    showToast('Kullanıcı profilinizde "sahipId" alanı bulunamadı. Lütfen yöneticinizle iletişime geçin.', true);
                     handleLogout();
                     return;
                 }
@@ -780,18 +834,20 @@ auth.onAuthStateChanged(async (user) => {
                 initializeApp();
 
             } else {
-                alert("Giriş başarılı ancak kullanıcı profili veritabanında bulunamadı.");
+                showToast("Giriş başarılı ancak kullanıcı profili veritabanında bulunamadı.", true);
                 handleLogout();
             }
         } catch (error) {
             console.error("Kullanıcı profili alınırken hata:", error);
-            alert(`Uygulama başlatılamadı. Veritabanı hatası oluştu.\n\nLÜTFEN BU MESAJIN EKRAN GÖRÜNTÜSÜNÜ ALIN VEYA KOPYALAYIN.\n\nTeknik Detay: ${error.message}`);
+            showToast(`Uygulama başlatılamadı. Veritabanı hatası oluştu.\nTeknik Detay: ${error.message}`, true);
             handleLogout();
         }
     } else {
         window.location.href = 'login.html';
     }
 });
+
+
 
 function initializeApp() {
     if (window.isAppInitialized) {return;}window.isAppInitialized = true;
@@ -1292,14 +1348,14 @@ function populatePeriodSelect() {
 async function handleAyarlarKaydet(event) {
     event.preventDefault();
     const currentUser = auth.currentUser;
-    if (!currentUser) { alert("Lütfen giriş yapın."); return; }
+    if (!currentUser) { showToast("Lütfen giriş yapın.", true); return; }
     const varsayilanSutFiyatiInput = document.getElementById('varsayilanSutFiyati');
     const yeniFiyat = parseFloat(varsayilanSutFiyatiInput.value);
     if (!isNaN(yeniFiyat) && yeniFiyat >= 0) {
         try {
             await db.collection('ayarlar').doc(sahipId).set({ defaultMilkPrice: yeniFiyat, sahipId: sahipId }, { merge: true });
             globalSettings.defaultMilkPrice = yeniFiyat;
-            alert('Genel ayarlar kaydedildi.');
+            showToast('Genel ayarlar kaydedildi.');
             const sutAlimiSekmesi = document.getElementById('sut-alimi');
             if (sutAlimiSekmesi && sutAlimiSekmesi.style.display === 'block') {
                 await renderTopluSutGirisFormu();
@@ -1308,33 +1364,35 @@ async function handleAyarlarKaydet(event) {
 
         } catch (error) {
             console.error("Ayarlar kaydedilirken hata:", error);
-            alert("Ayarlar kaydedilemedi.");
+            showToast("Ayarlar kaydedilemedi.", true);
         }
     } else {
-        alert('Lütfen geçerli bir süt fiyatı giriniz.');
+        showToast('Lütfen geçerli bir süt fiyatı giriniz.', true);
     }
 }
+
 
 async function handleSifreDegistir(event) {
     event.preventDefault();
     const eskiSifre = document.getElementById('eskiSifre').value;
     const yeniSifre = document.getElementById('yeniSifre').value;
     const yeniSifreTekrar = document.getElementById('yeniSifreTekrar').value;
-    if(!yeniSifre || yeniSifre.length < 6) { alert("Yeni şifre en az 6 karakter olmalıdır!"); return; }
-    if(yeniSifre !== yeniSifreTekrar) { alert("Yeni şifreler uyuşmuyor!"); return; }
+    if(!yeniSifre || yeniSifre.length < 6) { showToast("Yeni şifre en az 6 karakter olmalıdır!", true); return; }
+    if(yeniSifre !== yeniSifreTekrar) { showToast("Yeni şifreler uyuşmuyor!", true); return; }
     const user = auth.currentUser;
-    if (!user) { alert("Lütfen giriş yapın."); return; }
+    if (!user) { showToast("Lütfen giriş yapın.", true); return; }
     const credential = firebase.auth.EmailAuthProvider.credential(user.email, eskiSifre);
     try {
         await user.reauthenticateWithCredential(credential);
         await user.updatePassword(yeniSifre);
-        alert("Şifreniz başarıyla güncellendi!");
+        showToast("Şifreniz başarıyla güncellendi!");
         document.getElementById('sifreDegistirForm').reset();
     } catch (error) {
         console.error("Şifre güncelleme hatası:", error);
-        alert("Eski şifre hatalı veya bir sorun oluştu.");
+        showToast("Eski şifre hatalı veya bir sorun oluştu.", true);
     }
 }
+
 
 async function updateMonthlyStats() {
     try {
@@ -1617,13 +1675,13 @@ async function handleCariKaydet(event) {
             });
         }
         
-        resetCariForm();
+         resetCariForm();
         await renderCariListesi();
-        alert('Cari başarıyla kaydedildi!');
+        showToast('Cari başarıyla kaydedildi!');
 
-    } catch (error) {
+     } catch (error) {
         console.error("Cari kaydedilirken hata: ", error);
-        alert("Cari kaydedilirken bir hata oluştu: " + error.message);
+        showToast("Cari kaydedilirken bir hata oluştu: " + error.message, true);
     }
 }
 
@@ -2089,59 +2147,67 @@ async function editCari(id) {
 async function deleteCari(id) {
     const currentUser = auth.currentUser;
     if (!currentUser) {
-        alert("Lütfen giriş yapın.");
+        showToast("Lütfen giriş yapın.", true);
         return;
     }
     try {
         const cariRef = db.collection('cariler').doc(id);
         const cariDoc = await cariRef.get();
         if (!cariDoc.exists) {
-            alert("Silinecek cari bulunamadı!");
+            showToast("Silinecek cari bulunamadı!", true);
             return;
         }
-	const cariData = cariDoc.data();
+        const cariData = cariDoc.data();
         const cariAdi = cariData.adiSoyadi;
         const cariKodu = cariData.kodu || '';
-        const ilkOnay = confirm(`⚠️ DİKKAT!\n\n'${cariAdi}' isimli cariyi ve bu cariye ait TÜM SÜT, YEM, ÖDEME ve TAHSİLAT kayıtlarını kalıcı olarak silmek üzeresiniz. Bu işlem geri 	alınamaz!\n\nDevam etmek istediğinizden emin misiniz?`);
-        if (!ilkOnay) return;
-        const ikinciOnayMesaji = `🛑 SON UYARI!\n\nSilme işlemini onaylamak için lütfen carinin kodunu (${cariKodu}) aşağıdaki kutucuğa tam olarak yazın.`;
-        const kullaniciGirdisi = prompt(ikinciOnayMesaji, "");
-        if (kullaniciGirdisi === null) return; 
-        if (kullaniciGirdisi.trim() !== cariKodu) {
-            alert("Girilen cari kodu yanlış! Silme işlemi iptal edildi.");
-            return;
-        }
-        const silinenRotaSirasi = cariData.rotaSirasi;
-        const hareketler = ['sut_alimlari', 'yem_alimlari', 'yem_satislari', 'odemeVeTahsilatlar'];
-        const hareketSnapshots = [];
-        for (const koleksiyon of hareketler) {
-            const q = db.collection(koleksiyon).where('cariId', '==', id).where('sahipId', '==', sahipId);
-            const snapshot = await q.get();
-            hareketSnapshots.push(snapshot);
-        }
+        
+        const ilkOnayMesaji = `⚠️ DİKKAT!\n\n'${cariAdi}' isimli cariyi ve bu cariye ait TÜM SÜT, YEM, ÖDEME ve TAHSİLAT kayıtlarını kalıcı olarak silmek üzeresiniz. Bu işlem geri alınamaz!\n\nDevam etmek istediğinizden emin misiniz?`;
+        
+        showCustomConfirm(ilkOnayMesaji, () => {
+            const ikinciOnayMesaji = `🛑 SON UYARI!\n\nSilme işlemini onaylamak için lütfen carinin kodunu (${cariKodu}) aşağıdaki kutucuğa tam olarak yazın.`;
+            
+            showCustomPrompt(ikinciOnayMesaji, async (kullaniciGirdisi) => {
+                if (kullaniciGirdisi.trim() !== cariKodu) {
+                    showToast("Girilen cari kodu yanlış! Silme işlemi iptal edildi.", true);
+                    return;
+                }
 
-        let carilerToUpdateSnapshot = null;
-        if (silinenRotaSirasi) {
-            const carilerToUpdateQuery = db.collection('cariler').where('sahipId', '==', sahipId).where('rotaSirasi', '>', silinenRotaSirasi);
-            carilerToUpdateSnapshot = await carilerToUpdateQuery.get();
-        }
+                // --- Silme işleminin devamı ---
+                const silinenRotaSirasi = cariData.rotaSirasi;
+                const hareketler = ['sut_alimlari', 'yem_alimlari', 'yem_satislari', 'odemeVeTahsilatlar'];
+                const hareketSnapshots = [];
+                for (const koleksiyon of hareketler) {
+                    const q = db.collection(koleksiyon).where('cariId', '==', id).where('sahipId', '==', sahipId);
+                    const snapshot = await q.get();
+                    hareketSnapshots.push(snapshot);
+                }
 
-        await db.runTransaction(async (transaction) => {
-            hareketSnapshots.forEach(snapshot => snapshot.forEach(doc => transaction.delete(doc.ref)));
-            if (carilerToUpdateSnapshot) {
-                carilerToUpdateSnapshot.forEach(doc => transaction.update(doc.ref, { rotaSirasi: doc.data().rotaSirasi - 1 }));
-            }
-            transaction.delete(cariRef);
+                let carilerToUpdateSnapshot = null;
+                if (silinenRotaSirasi) {
+                    const carilerToUpdateQuery = db.collection('cariler').where('sahipId', '==', sahipId).where('rotaSirasi', '>', silinenRotaSirasi);
+                    carilerToUpdateSnapshot = await carilerToUpdateQuery.get();
+                }
+
+                await db.runTransaction(async (transaction) => {
+                    hareketSnapshots.forEach(snapshot => snapshot.forEach(doc => transaction.delete(doc.ref)));
+                    if (carilerToUpdateSnapshot) {
+                        carilerToUpdateSnapshot.forEach(doc => transaction.update(doc.ref, { rotaSirasi: doc.data().rotaSirasi - 1 }));
+                    }
+                    transaction.delete(cariRef);
+                });
+
+                await renderCariListesi();
+                showToast(`'${cariAdi}' isimli cari ve tüm hareketleri başarıyla silindi.`);
+                // --- Silme işlemi sonu ---
+            });
         });
-
-        await renderCariListesi();
-        alert(`'${cariAdi}' isimli cari ve tüm hareketleri başarıyla silindi.`);
 
     } catch (error) {
         console.error("Cari silinirken hata:", error);
-        alert("Cari silinirken bir hata oluştu: " + error);
+        showToast("Cari silinirken bir hata oluştu: " + error, true);
     }
 }
+
 
 function resetCariForm(){ 
     document.getElementById('cariForm').reset(); 
