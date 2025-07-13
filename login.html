@@ -11,91 +11,17 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
-        body {
-            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f0f2f5; /* Açık gri arkaplan */
-        }
-
-        .login-container {
-            background-color: #ffffff;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); /* Daha belirgin gölge */
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        h2 {
-            margin-top: 0;
-            margin-bottom: 10px;
-            color: #1c1c1e; /* Koyu renk başlık */
-            font-weight: 600;
-        }
-
-        .subtitle {
-            margin-bottom: 30px;
-            color: #6a6a6e; /* Gri tonlu alt başlık */
-            font-size: 0.95em;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #3c3c3e;
-            font-weight: 500;
-            font-size: 0.9em;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #dcdce0;
-            border-radius: 8px;
-            box-sizing: border-box; /* Padding ve border'ı genişliğe dahil et */
-            font-size: 1em;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: #007bff; /* Mavi çerçeve */
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2); /* Mavi odaklanma gölgesi */
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #007bff; /* Ana Mavi Buton */
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.05em;
-            font-weight: 500;
-            transition: background-color 0.2s;
-        }
-
-        button:hover {
-            background-color: #0056b3; /* Koyu mavi */
-        }
-
-        .error-message {
-            color: #dc3545; /* Kırmızı hata rengi */
-            margin-top: 15px;
-            height: 20px;
-            font-size: 0.9em;
-        }
+        body {font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;display: flex;justify-content: center;align-items: center;min-height: 100vh;margin: 0;background-color: #f0f2f5;}
+        .login-container {background-color: #ffffff;padding: 40px;border-radius: 12px;box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);width: 100%;max-width: 400px;text-align: center;}
+        h2 {margin-top: 0;margin-bottom: 10px;color: #1c1c1e;font-weight: 600;}
+        .subtitle {margin-bottom: 30px;color: #6a6a6e;font-size: 0.95em;}
+        .input-group {margin-bottom: 20px;text-align: left;}
+        .input-group label {display: block;margin-bottom: 8px;color: #3c3c3e;font-weight: 500;font-size: 0.9em;}
+        .input-group input {width: 100%;padding: 12px 15px;border: 1px solid #dcdce0;border-radius: 8px;box-sizing: border-box;font-size: 1em;transition: border-color 0.2s, box-shadow 0.2s;}
+        .input-group input:focus {outline: none;border-color: #007bff;box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);}
+        button {width: 100%;padding: 12px;background-color: #007bff;color: white;border: none;border-radius: 8px;cursor: pointer;font-size: 1.05em;font-weight: 500;transition: background-color 0.2s;}
+        button:hover {background-color: #0056b3;}
+        .error-message {color: #dc3545;margin-top: 15px;height: 20px;font-size: 0.9em;}
     </style>
 </head>
 <body>
@@ -123,7 +49,6 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
-    // Firebase konfigürasyon bilgileriniz (değişiklik yok)
     const firebaseConfig = {
         apiKey: "AIzaSyCWG4nFwpXRffr_3MO8-Us9mWK6Wsfn0mY",
         authDomain: "sut-takip-projem.firebaseapp.com",
@@ -134,26 +59,16 @@
         measurementId: "G-LYLT9WFVNK"
     };
 
-    // Firebase'i başlat
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const db = firebase.firestore(); // YENİ: Firestore veritabanını başlat
-
-    // Eğer kullanıcı zaten giriş yapmışsa ve bu sayfaya geri geldiyse diye bir kontrol.
-    // Bu kısım, tarayıcıda ileri/geri yapıldığında oluşabilecek döngüleri engeller.
+    const db = firebase.firestore();
     auth.onAuthStateChanged(function(user) {
-        if (user) {
-            // Kullanıcı zaten giriş yapmışsa, rolünü kontrol et ve yönlendir.
-            // Bu, login sayfasının tekrar gösterilmesini engeller.
-            yonlendir(user.uid);
-        }
+        if (user) {yonlendir(user.uid);}
     });
-
     const loginForm = document.getElementById('loginForm');
     const errorMessage = document.getElementById('errorMessage');
 
-    // Asenkron yönlendirme fonksiyonu
-    async function yonlendir(uid) {
+async function yonlendir(uid) {
         try {
             const userDoc = await db.collection('kullanicilar').doc(uid).get();
             if (userDoc.exists) {
@@ -166,7 +81,6 @@
                 } else if (userRole === 'admin') {
                     window.location.href = 'index.html'; // Admin index'e gitsin
                 } else {
-                    // Tanımsız bir rol varsa güvenlik için çıkış yaptır
                     errorMessage.textContent = 'Kullanıcı rolü geçersiz. Yöneticiye bildirin.';
                     auth.signOut();
                 }
@@ -181,7 +95,6 @@
         }
     }
 
-    // Form gönderildiğinde çalışacak fonksiyon (async olarak güncellendi)
     loginForm.addEventListener('submit', async function(event) {
         event.preventDefault();
         const email = document.getElementById('username').value;
@@ -190,10 +103,8 @@
 
         try {
             const userCredential = await auth.signInWithEmailAndPassword(email, password);
-            // Giriş başarılı, şimdi rol kontrolü ve yönlendirme yap
             await yonlendir(userCredential.user.uid);
         } catch (error) {
-            // Hata olursa mesajı göster
             if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
                  errorMessage.textContent = "E-posta veya şifre hatalı!";
             } else {
