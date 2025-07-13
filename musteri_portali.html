@@ -67,6 +67,21 @@
         				.filter-row.three-items {grid-template-columns: 1fr;}
        					 table {font-size: 0.85em;}
         				 th, td {padding: 8px 3px;}    }
+    @media screen and (max-width: 768px) {    #hayvanTakipContainer table,     #hayvanTakipContainer thead,     #hayvanTakipContainer tbody, 
+    #hayvanTakipContainer th,     #hayvanTakipContainer td,     #hayvanTakipContainer tr {        display: block;    }
+    #hayvanTakipContainer thead tr {        position: absolute;        top: -9999px;        left: -9999px;    }
+    #hayvanTakipContainer tr {        border: 1px solid #ccc;        border-radius: 8px;        margin-bottom: 15px;        background-color: #fff;    }
+    #hayvanTakipContainer td {        border: none;        border-bottom: 1px solid #eee;        position: relative;        padding-left: 50%; 
+        text-align: right;padding-top: 10px;padding-bottom: 10px;display: flex;justify-content: space-between;align-items: center;    }
+    #hayvanTakipContainer td:before {        content: attr(data-label);        position: absolute;        left: 10px;        width: 45%;        padding-right: 10px;
+        white-space: nowrap;        text-align: left;        font-weight: bold;        color: #2c3e50;    }
+    #hayvanTakipContainer td[data-label="İşlemler"] {display: flex;justify-content: center;gap: 10px;padding: 15px 10px;border-bottom: none;}
+    #hayvanTakipContainer td[data-label="İşlemler"]:before {content: "";}}
+
+
+
+
+
 </style>
 </head>
 
@@ -753,23 +768,32 @@
                 listBody.innerHTML = '';
             }
 
-            let rows = '';
-            querySnapshot.forEach(doc => {
-                const hayvan = doc.data();
-                let kalanGun = '-';
-                let tahminiDogumTarihiStr = '-';
-                const sonTohumlamaTarihiStr = hayvan.sonTohumlamaTarihi ? new Date(hayvan.sonTohumlamaTarihi + 'T00:00:00').toLocaleDateString('tr-TR') : '-';
-                if (hayvan.gebəlikDurumu === 'Gebe' && hayvan.tahminiDogumTarihi) {
-                    const tahminiDogumTarihi = new Date(hayvan.tahminiDogumTarihi);
-                    kalanGun = Math.ceil((tahminiDogumTarihi - new Date()) / (1000 * 60 * 60 * 24));
-                    tahminiDogumTarihiStr = tahminiDogumTarihi.toLocaleDateString('tr-TR');
-                }
-                rows += `<tr>
-                    <td><strong>${hayvan.kupeNo}</strong></td><td>${hayvan.irk || '-'}</td><td>${hayvan.gebəlikDurumu || '-'}</td>
-                    <td>${sonTohumlamaTarihiStr}</td><td>${tahminiDogumTarihiStr}</td><td>${kalanGun}</td>
-                    <td><button class="btn btn-secondary btn-small btn-edit" data-id="${doc.id}">Düzenle</button> <button class="btn btn-danger btn-small btn-delete" data-id="${doc.id}">Sil</button></td>
-                </tr>`;
-            });
+	let rows = '';
+	querySnapshot.forEach(doc => {
+    	const hayvan = doc.data();
+    	let kalanGun = '-';
+    	let tahminiDogumTarihiStr = '-';
+    	const sonTohumlamaTarihiStr = hayvan.sonTohumlamaTarihi ? new Date(hayvan.sonTohumlamaTarihi + 'T00:00:00').toLocaleDateString('tr-TR') : '-';
+    	if (hayvan.gebəlikDurumu === 'Gebe' && hayvan.tahminiDogumTarihi) {
+        const tahminiDogumTarihi = new Date(hayvan.tahminiDogumTarihi);
+        kalanGun = Math.ceil((tahminiDogumTarihi - new Date()) / (1000 * 60 * 60 * 24));
+        tahminiDogumTarihiStr = tahminiDogumTarihi.toLocaleDateString('tr-TR');
+    	}
+
+	
+    	rows += `<tr>
+        <td data-label="Küpe No"><strong>${hayvan.kupeNo}</strong></td>
+        <td data-label="Irk">${hayvan.irk || '-'}</td>
+        <td data-label="Gebelik Durumu">${hayvan.gebəlikDurumu || '-'}</td>
+        <td data-label="Son Tohumlama">${sonTohumlamaTarihiStr}</td>
+        <td data-label="Tahmini Doğum">${tahminiDogumTarihiStr}</td>
+        <td data-label="Kalan Gün">${kalanGun}</td>
+        <td data-label="İşlemler">
+            <button class="btn btn-secondary btn-small btn-edit" data-id="${doc.id}">Düzenle</button>
+            <button class="btn btn-danger btn-small btn-delete" data-id="${doc.id}">Sil</button>
+        </td>
+    	</tr>`;
+	});
 
             listBody.innerHTML += rows;
 
