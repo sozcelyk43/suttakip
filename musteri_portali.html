@@ -64,7 +64,8 @@
     @media (max-width: 768px) {         .container {padding: 15px;border-radius: 0;}        
 					.main-content {padding: 0;}
         				.module-header {border-radius: 0;}
-        				.filter-row.three-items {grid-template-columns: 1fr;}
+        				.filter-row.three-items {display: flex;gap: 10px;}
+					.filter-row.three-items {flex: 1;}
        					 table {font-size: 0.85em;}
         				 th, td {padding: 8px 3px;}    }
     @media screen and (max-width: 768px) {    #hayvanTakipContainer table,     #hayvanTakipContainer thead,     #hayvanTakipContainer tbody, 
@@ -93,9 +94,9 @@
 
     <div class="main-content">
         <div class="module-header">
-            <h2>Müşteri Portalı ve Hayvan Takip Sistemi</h2>
-            <h3>Hoş Geldiniz, <span id="musteriAdi">...</span></h3>
-        </div>
+    		<h2>HAYVAN TAKİP SİSTEMİ</h2>
+    		<h3>Hoş Geldiniz, <span id="musteriAdi">...</span></h3>
+	</div>
         <div class="container">
             <div id="portal-message" class="alert-message"></div>
             <div class="filter-buttons">
