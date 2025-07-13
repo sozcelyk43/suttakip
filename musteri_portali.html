@@ -6,10 +6,13 @@
     <title>Müşteri Portalı ve Hayvan Takibi</title>
     <meta name="theme-color" content="#2c3e50" />
     <link rel="icon" href="https://raw.githubusercontent.com/sozcelyk43/suttakip/refs/heads/main/favicon.ico" type="image/x-icon" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
 <style>
     body {font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;line-height: 1.6;margin: 0;padding: 0;background-color: #f4f7f9;color: #333; font-size: 16px;}
-    a.btn {display: flex;flex-direction: column;justify-content: center;align-items: center;text-decoration: none;font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
+    a.btn {display: flex;flex-direction: column;justify-content: center;align-items: center;text-decoration: none;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
     .main-content {padding: 20px;background-color: #ecf0f1;}
     .container {background-color: #fff;padding: 25px;border-radius: 8px;box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);}
     .module-header {background-color: #2c3e50;color: #fff;text-align: center;padding: 25px;border-radius: 8px;margin-bottom: 20px;}
@@ -18,7 +21,8 @@
     .filter-row {display: grid;gap: 10px;}
     .filter-row.two-items {grid-template-columns: 1fr 1fr;}
     .filter-row.three-items {grid-template-columns: 1fr 1fr 1fr;}
-    .btn {display: inline-block;background-color: #3498db;color: #fff;padding: 12px;text-align: center;border: none;border-radius: 6px;cursor: pointer;font-size: 1em;transition: background-color 0.2s;text-transform: uppercase; line-height: 1.2;}
+    .btn {display: inline-block;background-color: #3498db;color: #fff;padding: 12px;text-align: center;border: none;
+	border-radius: 6px;cursor: pointer;font-size: 1em;transition: background-color 0.2s;text-transform: uppercase; line-height: 1.2;}
     .btn:hover {background-color: #2980b9;}
     .btn-danger {background-color: #e74c3c;}
     .btn-danger:hover {background-color: #c0392b;}
@@ -39,7 +43,8 @@
     tbody tr:nth-child(even) {background-color: #f2f6fa;}
     tbody tr:hover {background-color: #f0f8ff;}
     tfoot tr {background-color: #e9ecef;font-weight: bold;color: #2c3e50;}
-    select.form-control, input.form-control, textarea.form-control {width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 1em; 		background-color: #fff;}
+    select.form-control, input.form-control, textarea.form-control {width: 100%; padding: 10px; border: 1px solid #ccc; 
+	border-radius: 4px; box-sizing: border-box; font-size: 1em; 		background-color: #fff;}
     .form-group {margin-bottom: 15px;}
     .form-group label {display: block;margin-bottom: 5px;font-weight: bold; color: #34495e;}
     .form-section {border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin-top: 20px; background-color: #fdfdfd;}
@@ -48,21 +53,26 @@
     .alert-message {display: none; color: white; padding: 15px; border-radius: 6px; margin-bottom: 20px; text-align: center; font-weight: bold;}
     .alert-message.error {background-color: #c0392b;}
     .alert-message.success {background-color: #27ae60;}
-    .modal {display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5);}
+    .modal {display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; 
+	background-color: rgba(0,0,0,0.5);}
+    .sticky-birth-alert { background-color: #c0392b;color: white;padding: 15px; text-align: center; font-weight: bold; font-size: 1.1em;
+    margin-bottom: 10px;border-radius: 0 0 8px 8px;position: sticky;top: 0;z-index: 1001;display: flex;justify-content: space-between;align-items: center;}
+    .alert-close-btn {    color: white;    font-size: 24px;    font-weight: bold;    cursor: pointer;    padding-left: 20px;     line-height: 1;}
+    .alert-close-btn:hover {    opacity: 0.8;}
     .modal-content {background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; border-radius: 8px;}
     .close-button {color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;}
-    @media (max-width: 768px) {
-        .container {padding: 15px;border-radius: 0;}
-        .main-content {padding: 0;}
-        .module-header {border-radius: 0;}
-        .filter-row.three-items {grid-template-columns: 1fr;}
-        table {font-size: 0.85em;}
-        th, td {padding: 8px 3px;}
-    }
+    @media (max-width: 768px) {         .container {padding: 15px;border-radius: 0;}        
+					.main-content {padding: 0;}
+        				.module-header {border-radius: 0;}
+        				.filter-row.three-items {grid-template-columns: 1fr;}
+       					 table {font-size: 0.85em;}
+        				 th, td {padding: 8px 3px;}    }
 </style>
 </head>
 
 <body>
+    <div id="sticky-alert-container"></div>
+
     <div class="main-content">
         <div class="module-header">
             <h2>Müşteri Portalı ve Hayvan Takip Sistemi</h2>
@@ -75,11 +85,11 @@
                     <a href="sifre_degistir.html" class="btn btn-secondary">Şifre Değiştir</a>
                     <a href="#" id="logoutButton" class="btn btn-danger"><div>Çıkış Yap</div><div id="logoutUserEmail"></div></a>
                 </div>
-                 <div class="filter-row three-items">
-    <button id="yeniHayvanBtn" class="btn">Yeni Hayvan Ekle</button>
-    <button id="yeniTohumlamaBtn" class="btn btn-warning">Yeni Tohumlama Ekle</button>
-    <button id="yeniDogumBtn" class="btn btn-success">Yeni Doğum Ekle</button>
-</div>
+                  <div class="filter-row three-items">
+    			<button id="yeniHayvanBtn" class="btn">Yeni Hayvan Ekle</button>
+    			<button id="yeniTohumlamaBtn" class="btn btn-warning">Yeni Tohumlama Ekle</button>
+    			<button id="yeniDogumBtn" class="btn btn-success">Yeni Doğum Ekle</button>
+		  </div>
                 <hr>
                 <div class="filter-row three-items">
                     <select id="ayFiltresi" class="form-control"></select>
@@ -95,8 +105,7 @@
                     <button id="yemRaporuBtn" class="btn btn-toggle">Yem Raporu</button>
                 </div>
                 <div id="hayvanTakipContainer" style="display: none;">
-    <table>
-        <thead><tr><th>Küpe No</th><th>Irk</th><th>Gebelik Durumu</th><th>Tahmini Doğum Tarihi</th><th>Kalan Gün</th><th>İşlemler</th></tr></thead>
+    	<table><thead><tr><th>Küpe No</th><th>Irk</th><th>Gebelik Durumu</th><th>Son Tohumlama Tarihi</th><th>Tahmini Doğum Tarihi</th><th>Kalan Gün</th><th>İşlemler</th></tr></thead>
         <tbody id="hayvanListesiBody"></tbody>
     </table>
 </div>
@@ -154,13 +163,12 @@
     </form>
 </section>
 
-
-
-
 <section id="yeniTohumlamaSection" class="form-section" style="display: none;">
     <h2>Yeni Tohumlama Kaydı Ekle</h2>
     <form id="yeniTohumlamaForm">
-        <div class="form-group"><label for="tohumlama-hayvan-kupe">Hayvan Küpe Numarası</label><select id="tohumlama-hayvan-kupe" class="form-control" required></select></div>
+        <div class="form-group">
+		<label for="tohumlama-hayvan-kupe">Hayvan Küpe Numarası</label>
+		<select id="tohumlama-hayvan-kupe" class="form-control" required></select></div>
         <div class="form-group"><label for="tohumlama-tarihi">Tohumlama Tarihi</label><input type="date" id="tohumlama-tarihi" class="form-control" required></div>
         <div class="form-group">
             <label for="tohumlama-tipi">Tohumlama Tipi</label>
@@ -203,21 +211,8 @@
                 <option value="Sezaryen">Sezaryen</option>
             </select>
         </div>
-        <div style="border: 1px solid #eee; padding: 15px; border-radius: 5px; margin-bottom:15px;">
-            <strong>Yavru Bilgileri</strong>
-            <div class="form-group" style="margin-top:10px;">
-                <label for="yavru-kupe-1">Yavru Küpe No:</label>
-                <input type="text" id="yavru-kupe-1" class="form-control" placeholder="Örn: TR34055" required>
-            </div>
-            <div class="form-group">
-                <label for="yavru-cinsiyet-1">Cinsiyet:</label>
-                <select id="yavru-cinsiyet-1" class="form-control"><option value="Dişi">Dişi</option><option value="Erkek">Erkek</option></select>
-            </div>
-            <div class="form-group">
-                <label for="yavru-agirlik-1">Doğum Ağırlığı (kg):</label>
-                <input type="text" id="yavru-agirlik-1" class="form-control" placeholder="Örn: 42.5">
-            </div>
-        </div>
+<div id="yavruBilgileriContainer">
+    </div>
         <div class="form-group">
             <label for="dogum-notlari">Doğum Notları</label>
             <textarea id="dogum-notlari" class="form-control" rows="3" placeholder="Annenin veya yavrunun sağlık durumu, doğum süreci vb. hakkında notlar..."></textarea>
@@ -238,7 +233,7 @@
                     <label for="edit-hayvan-kupe">Küpe Numarası</label>
                     <input type="text" id="edit-hayvan-kupe" class="form-control" required>
                 </div>
-		    <div class="form-group">
+<div class="form-group">
     <label for="edit-hayvan-cinsiyet">Cinsiyet</label>
     <select id="edit-hayvan-cinsiyet" class="form-control">
         <option value="Erkek">Erkek</option>
@@ -279,19 +274,19 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script>
-    const firebaseConfig = {
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script>
+    
+	const firebaseConfig = {
         apiKey: "AIzaSyCWG4nFwpXRffr_3MO8-Us9mWK6Wsfn0mY",
         authDomain: "sut-takip-projem.firebaseapp.com",
         projectId: "sut-takip-projem",
         storageBucket: "sut-takip-projem.appspot.com",
         messagingSenderId: "512756958486",
         appId: "1:512756958486:web:13cceb6835e2c575e9fc37",
-        measurementId: "G-LYLT9WFVNK"
-    };
+        measurementId: "G-LYLT9WFVNK" };
 
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
@@ -307,61 +302,72 @@
     const yeniDogumSection = document.getElementById('yeniDogumSection');
     const editModal = document.getElementById('editHayvanModal');
 
-   auth.onAuthStateChanged(async (user) => { // Fonksiyonu daha modern ve okunaklı hale getirdik
-    if (user) {
-        try {
-            const userDoc = await db.collection('kullanicilar').doc(user.uid).get();
-		if (!userDoc.exists) {
-                showPortalMessage("Kullanıcı profiliniz bulunamadı. Lütfen yönetici ile iletişime geçin.", "error");
-                auth.signOut();
-                return;
-            }
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            try {
+                const userDoc = await db.collection('kullanicilar').doc(user.uid).get();
+                if (!userDoc.exists) {
+                    showPortalMessage("Kullanıcı profiliniz bulunamadı. Lütfen yönetici ile iletişime geçin.", "error");
+                    auth.signOut();
+                    return;}
             
-            const userRole = userDoc.data().rol;
-            if (userRole === 'admin') {
-                window.location.href = 'index.html';
-                return;
-            } else if (userRole === 'calisan') {
-                window.location.href = 'hizli-giris.html';
-                return;
-            }
-            const snapshot = await db.collection('cariler').where('authUID', '==', user.uid).limit(1).get();
-
-            if (!snapshot.empty) {
-                const cariDoc = snapshot.docs[0];
-                const cariData = cariDoc.data();
-                userCariId = cariDoc.id;
-                userSahipId = cariData.sahipId;
-                document.getElementById('musteriAdi').textContent = cariData.adiSoyadi;
-                document.getElementById('logoutUserEmail').textContent = user.email;
-
-                if (!userSahipId) {
-                    showPortalMessage("Müşteri profili hatası.", "error");
+                const userRole = userDoc.data().rol;
+                if (userRole === 'admin') {
+                    window.location.href = 'index.html';
                     return;
-                }
+                } else if (userRole === 'calisan') {
+                    window.location.href = 'hizli-giris.html';
+                    return;}
+                const snapshot = await db.collection('cariler').where('authUID', '==', user.uid).limit(1).get();
+
+                if (!snapshot.empty) {
+                    const cariDoc = snapshot.docs[0];
+                    const cariData = cariDoc.data();
+                    userCariId = cariDoc.id;
+                    userSahipId = cariData.sahipId;
+                    document.getElementById('musteriAdi').textContent = cariData.adiSoyadi;
+                    document.getElementById('logoutUserEmail').textContent = user.email;
+               if (!userSahipId) {
+                        showPortalMessage("Müşteri profili hatası.", "error");
+                        return;
+                    }
                     setupPage();
 
-            } else {
-                showPortalMessage("Bu hesaba bağlı müşteri kartı bulunamadı.", "error");
-            }
+                } else {
+                    showPortalMessage("Bu hesaba bağlı müşteri kartı bulunamadı.", "error");
+                }
 
-        } catch (error) {
-            console.error("Kullanıcı doğrulanırken hata:", error);
-            showPortalMessage("Bilgiler yüklenirken bir hata oluştu.", "error");
+            } catch (error) {
+                console.error("Kullanıcı doğrulanırken hata:", error);
+                showPortalMessage("Bilgiler yüklenirken bir hata oluştu.", "error");
+            }
+        } else {
+            window.location.href = 'login.html';
         }
-    } else {
-        window.location.href = 'login.html';
-    }
-});
+    });
     
 function showPortalMessage(message, type = 'error') {
-        portalMessage.textContent = message;
-        portalMessage.className = `alert-message ${type}`;
-        portalMessage.style.display = 'block';
-        setTimeout(() => { portalMessage.style.display = 'none'; }, 4000);
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+
+    Toast.fire({
+        icon: type, // 'success' veya 'error'
+        title: message
+    });
 }
 
 function showSection(sectionToShow) {
+        const dynamicAlerts = document.querySelectorAll('[data-alert-id]');
+        dynamicAlerts.forEach(alert => alert.remove());
         raporlarSection.style.display = 'none';
         yeniHayvanSection.style.display = 'none';
         yeniTohumlamaSection.style.display = 'none';
@@ -391,6 +397,36 @@ function setupPage() {
         for (let yil = now.getFullYear() + 1; yil >= 2000; yil--) { yilSelect.add(new Option(yil, yil));}
         yilSelect.value = now.getFullYear();
 
+        document.getElementById('yavru-sayisi').addEventListener('input', (e) => {
+            const yavruSayisi = parseInt(e.target.value) || 0;
+            const container = document.getElementById('yavruBilgileriContainer');
+            container.innerHTML = ''; 
+
+            for (let i = 1; i <= yavruSayisi; i++) {
+                const yavruHtml = `
+                    <div style="border: 1px solid #eee; padding: 15px; border-radius: 5px; margin-bottom:15px;">
+                        <strong>${i}. Yavru Bilgileri</strong>
+                        <div class="form-group" style="margin-top:10px;">
+                            <label for="yavru-kupe-${i}">Yavru Küpe No:</label>
+                            <input type="text" id="yavru-kupe-${i}" class="form-control" placeholder="Örn: TR34055" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="yavru-cinsiyet-${i}">Cinsiyet:</label>
+                            <select id="yavru-cinsiyet-${i}" class="form-control">
+                                <option value="Dişi">Dişi</option>
+                                <option value="Erkek">Erkek</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="yavru-agirlik-${i}">Doğum Ağırlığı (kg):</label>
+                            <input type="text" id="yavru-agirlik-${i}" class="form-control" placeholder="Örn: 42.5">
+                        </div>
+                    </div>`;
+                container.innerHTML += yavruHtml;
+            }
+        });
+        document.getElementById('yavru-sayisi').dispatchEvent(new Event('input'));
+
         const toggleButtons = {
             hayvanTakipBtn: document.getElementById('hayvanTakipContainer'),
             sutRaporuBtn: document.getElementById('sutRaporuContainer'),
@@ -412,9 +448,13 @@ function setupPage() {
         document.getElementById('hayvanListesiBody').addEventListener('click', handleTableActions);
         document.querySelector('.close-button').addEventListener('click', () => editModal.style.display = "none");
         window.addEventListener('click', (event) => { if (event.target == editModal) { editModal.style.display = "none"; }});
-    }
+}
 
-async function refreshAllData(){        await populateHayvanlarSelects();        await fetchHayvanTakipVerileri();    }
+async function refreshAllData(){
+        await populateHayvanlarSelects();
+        await fetchHayvanTakipVerileri();
+        await checkUpcomingBirths(); 
+}
 
 async function handleHayvanKayitSubmit(event) {
         event.preventDefault();
@@ -426,8 +466,7 @@ async function handleHayvanKayitSubmit(event) {
             await db.collection('hayvanlar').add({
                 kupeNo: kupeNo,
                 irk: document.getElementById('yeni-hayvan-irk').value,
-            cinsiyet: document.getElementById('yeni-hayvan-cinsiyet').value,
-
+            	cinsiyet: document.getElementById('yeni-hayvan-cinsiyet').value,
                 dogumTarihi: dogumTarihi,
                 gebəlikDurumu: document.getElementById('yeni-hayvan-gebelik-durumu').value,
                 sahipId: userSahipId,
@@ -437,57 +476,51 @@ async function handleHayvanKayitSubmit(event) {
             event.target.reset();
             refreshAllData();
         } catch (error) { showPortalMessage("Hayvan kaydedilirken hata oluştu.", "error");}
-    }
-
+}
 
 function handleTableActions(event) {
-    const target = event.target;
-    const hayvanId = target.dataset.id;
+        const target = event.target;
+        const hayvanId = target.dataset.id;
 
-    if (target.classList.contains('btn-delete')) {
-        // Yeni onay mekanizması
-        const modal = document.getElementById('deleteAnimalModal');
-        const closeBtn = document.getElementById('closeDeleteAnimalModal');
-        const confirmBtn = document.getElementById('confirmDeleteAnimalBtn');
-        const confirmInput = document.getElementById('deleteConfirmInput');
-        
-        confirmInput.value = ''; // Input'u her seferinde temizle
-        modal.style.display = 'block';
+        if (target.classList.contains('btn-delete')) {
+    Swal.fire({
+        title: 'Emin misiniz?',
+        text: `Bu hayvanı kalıcı olarak silmek üzeresiniz. Bu işlem geri alınamaz!`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Evet, sil!',
+        cancelButtonText: 'İptal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            db.collection('hayvanlar').doc(hayvanId).delete()
+              .then(() => { 
+                  showPortalMessage("Hayvan başarıyla silindi.", "success"); 
+                  refreshAllData(); 
+              })
+              .catch(e => {
+                  console.error(e);
+                  showPortalMessage("Silme işlemi sırasında bir hata oluştu.", "error");
+              });
+        }
+    });
+} else if (target.classList.contains('btn-edit')) {
 
-        const confirmHandler = () => {
-            if (confirmInput.value === "SİL") {
-                db.collection('hayvanlar').doc(hayvanId).delete()
-                  .then(() => { 
-                      showPortalMessage("Hayvan silindi.", "success"); 
-                      refreshAllData(); 
-                  })
-                  .catch(e => {
-                      console.error(e);
-                      showPortalMessage("Silme işlemi başarısız.", "error");
-                  });
-                modal.style.display = 'none';
-            } else {
-                showPortalMessage("Onay metni yanlış olduğu için silme işlemi iptal edildi.", "error");
-            }
-        };
-        
-        confirmBtn.onclick = confirmHandler;
-        closeBtn.onclick = () => modal.style.display = 'none';
-
-    } else if (target.classList.contains('btn-edit')) {
-        db.collection('hayvanlar').doc(hayvanId).get().then(doc => {
-            if (doc.exists) {
-                const hayvan = doc.data();
-                document.getElementById('edit-hayvan-id').value = doc.id;
-                document.getElementById('edit-hayvan-kupe').value = hayvan.kupeNo || '';
-                document.getElementById('edit-hayvan-irk').value = hayvan.irk || '';
-                document.getElementById('edit-hayvan-dogum-tarihi').value = hayvan.dogumTarihi || '';
-                document.getElementById('edit-hayvan-gebelik-durumu').value = hayvan.gebəlikDurumu || 'Boş';
-                document.getElementById('edit-son-tohumlama-tarihi').value = hayvan.sonTohumlamaTarihi || '';
-                editModal.style.display = 'block';
-            }
-        });
-    }
+            db.collection('hayvanlar').doc(hayvanId).get().then(doc => {
+                if (doc.exists) {
+                    const hayvan = doc.data();
+                    document.getElementById('edit-hayvan-id').value = doc.id;
+                    document.getElementById('edit-hayvan-kupe').value = hayvan.kupeNo || '';
+                    document.getElementById('edit-hayvan-irk').value = hayvan.irk || '';
+                    document.getElementById('edit-hayvan-cinsiyet').value = hayvan.cinsiyet || 'Dişi';
+                    document.getElementById('edit-hayvan-dogum-tarihi').value = hayvan.dogumTarihi || '';
+                    document.getElementById('edit-hayvan-gebelik-durumu').value = hayvan.gebəlikDurumu || 'Boş';
+                    document.getElementById('edit-son-tohumlama-tarihi').value = hayvan.sonTohumlamaTarihi || '';
+                    editModal.style.display = 'block';
+                }
+            });
+        }
 }
 
 async function handleUpdateHayvan(event) {
@@ -504,8 +537,7 @@ async function handleUpdateHayvan(event) {
         const dataToUpdate = {
             kupeNo: document.getElementById('edit-hayvan-kupe').value,
             irk: document.getElementById('edit-hayvan-irk').value,
-        cinsiyet: document.getElementById('edit-hayvan-cinsiyet').value,
-
+            cinsiyet: document.getElementById('edit-hayvan-cinsiyet').value,
             dogumTarihi: document.getElementById('edit-hayvan-dogum-tarihi').value,
             gebəlikDurumu: document.getElementById('edit-hayvan-gebelik-durumu').value,
             sonTohumlamaTarihi: tohumlamaTarihi || firebase.firestore.FieldValue.delete(),
@@ -518,12 +550,12 @@ async function handleUpdateHayvan(event) {
             editModal.style.display = "none";
             refreshAllData();
         } catch(error) { showPortalMessage("Güncelleme başarısız.", "error");}
-    }
+}
 
-    document.getElementById('logoutButton').addEventListener('click', (e) => { e.preventDefault(); auth.signOut().then(() => window.location.href = 'login.html'); });
-    function formatSayi(sayi) { if (typeof sayi !== 'number') sayi = 0; return (sayi % 1 === 0) ? sayi.toString() : sayi.toFixed(2).replace('.', ','); }
+document.getElementById('logoutButton').addEventListener('click', (e) => { e.preventDefault(); auth.signOut().then(() => window.location.href = 'login.html'); });
     
-
+function formatSayi(sayi) { if (typeof sayi !== 'number') sayi = 0; return (sayi % 1 === 0) ? sayi.toString() : sayi.toFixed(2).replace('.', ','); }
+    
 async function populateHayvanlarSelects() {
         const tohumlamaSelect = document.getElementById('tohumlama-hayvan-kupe');
         const dogumSelect = document.getElementById('anne-kupe');
@@ -534,111 +566,204 @@ async function populateHayvanlarSelects() {
         snapshot.forEach(doc => {
             const hayvan = doc.data();
             const option = new Option(`${hayvan.kupeNo} (${hayvan.gebəlikDurumu || 'Boş'})`, doc.id);
-            if (hayvan.gebəlikDurumu !== 'Gebe') { tohumlamaSelect.add(option.cloneNode(true)); }
+            if (hayvan.cinsiyet === 'Dişi' && hayvan.gebəlikDurumu !== 'Gebe') { tohumlamaSelect.add(option.cloneNode(true)); }
             if (hayvan.gebəlikDurumu === 'Gebe') { dogumSelect.add(option.cloneNode(true)); }
         });
-    }
+}
 
 async function handleTohumlamaSubmit(event) {
-    event.preventDefault();
-    const hayvanId = document.getElementById('tohumlama-hayvan-kupe').value;
-    const tohumlamaTarihi = document.getElementById('tohumlama-tarihi').value;
-    if (!hayvanId || !tohumlamaTarihi) { showPortalMessage("Hayvan ve tohumlama tarihini seçin.", "error"); return; }
-    const tohumlamaDate = new Date(tohumlamaTarihi);
-    const tahminiDogumDate = new Date(tohumlamaDate.setDate(tohumlamaDate.getDate() + 283));
-    const tahminiDogumTarihi = tahminiDogumDate.toISOString().split('T')[0];
-    try {
-        await db.collection('hayvanlar').doc(hayvanId).update({ gebəlikDurumu: 'Gebe', sonTohumlamaTarihi: tohumlamaTarihi, tahminiDogumTarihi: tahminiDogumTarihi });
-        
-        await db.collection('tohumlama_kayitlari').add({
-             sahipId: userSahipId,
-             cariId: userCariId,
-             hayvanId: hayvanId,
-             tarih: tohumlamaTarihi,
-             tip: document.getElementById('tohumlama-tipi').value, 
-             bogaKodu: document.getElementById('boga-sperma-kodu').value,
-             notlar: document.getElementById('tohumlama-notlari').value 
-        });
-        
-        showPortalMessage("Tohumlama başarıyla kaydedildi.", "success");
-        event.target.reset();
-        refreshAllData();
-    } catch (error) { showPortalMessage("Kayıt sırasında bir hata oluştu.", "error"); }
+        event.preventDefault();
+        const hayvanId = document.getElementById('tohumlama-hayvan-kupe').value;
+        const tohumlamaTarihi = document.getElementById('tohumlama-tarihi').value;
+        if (!hayvanId || !tohumlamaTarihi) { showPortalMessage("Hayvan ve tohumlama tarihini seçin.", "error"); return; }
+        const tohumlamaDate = new Date(tohumlamaTarihi);
+        const tahminiDogumDate = new Date(tohumlamaDate.setDate(tohumlamaDate.getDate() + 283));
+        const tahminiDogumTarihi = tahminiDogumDate.toISOString().split('T')[0];
+        try {
+            await db.collection('hayvanlar').doc(hayvanId).update({ gebəlikDurumu: 'Gebe', sonTohumlamaTarihi: tohumlamaTarihi, tahminiDogumTarihi: tahminiDogumTarihi });
+            
+            await db.collection('tohumlama_kayitlari').add({
+                 sahipId: userSahipId,
+                 cariId: userCariId,
+                 hayvanId: hayvanId,
+                 tarih: tohumlamaTarihi,
+                 tip: document.getElementById('tohumlama-tipi').value, 
+                 bogaKodu: document.getElementById('boga-sperma-kodu').value,
+                 notlar: document.getElementById('tohumlama-notlari').value 
+            });
+            
+            showPortalMessage("Tohumlama başarıyla kaydedildi.", "success");
+            event.target.reset();
+            refreshAllData();
+        } catch (error) { showPortalMessage("Kayıt sırasında bir hata oluştu.", "error"); }
 }
 
 async function handleDogumSubmit(event) {
-    event.preventDefault();
-    const anneId = document.getElementById('anne-kupe').value;
-    const dogumTarihiSaati = document.getElementById('dogum-tarihi-saati').value;
-    const yavruKupeNo = document.getElementById('yavru-kupe-1').value;
+        event.preventDefault();
+        const anneId = document.getElementById('anne-kupe').value;
+        const dogumTarihiSaati = document.getElementById('dogum-tarihi-saati').value;
+        const yavruSayisi = parseInt(document.getElementById('yavru-sayisi').value) || 0;
 
-    if (!anneId || !dogumTarihiSaati || !yavruKupeNo) {
-        showPortalMessage("Anne, Doğum Tarihi ve Yavru Küpe No alanları zorunludur.", "error");
-        return;
-    }
-    const dogumTarihi = dogumTarihiSaati.split('T')[0];
-    try {
-        const anneRef = db.collection('hayvanlar').doc(anneId);
-        await db.runTransaction(async (t) => {
-            await t.update(anneRef, { gebəlikDurumu: 'Boş', sonTohumlamaTarihi: firebase.firestore.FieldValue.delete(), tahminiDogumTarihi: firebase.firestore.FieldValue.delete() });
-		const yeniYavruRef = db.collection('hayvanlar').doc();
-            await t.set(yeniYavruRef, { 
-                kupeNo: yavruKupeNo, 
-                cinsiyet: document.getElementById('yavru-cinsiyet-1').value, 
-                dogumAgirligi: document.getElementById('yavru-agirlik-1').value,
-                dogumTarihi: dogumTarihi, // Sadece tarih
-                anneId: anneId, 
-                sahipId: userSahipId, 
-                cariId: userCariId, 
-                gebəlikDurumu: 'Boş'
+        if (!anneId || !dogumTarihiSaati || yavruSayisi === 0) {
+            showPortalMessage("Anne, Doğum Tarihi ve Yavru Sayısı alanları zorunludur.", "error");
+            return;
+        }
+
+        for (let i = 1; i <= yavruSayisi; i++) {
+            if (!document.getElementById(`yavru-kupe-${i}`).value) {
+                showPortalMessage(`${i}. yavrunun küpe numarası boş bırakılamaz.`, "error");
+                return;
+            }
+        }
+
+        const dogumTarihi = dogumTarihiSaati.split('T')[0];
+
+        try {
+            const anneRef = db.collection('hayvanlar').doc(anneId);
+            await db.runTransaction(async (t) => {
+                await t.update(anneRef, { 
+                    gebəlikDurumu: 'Boş', 
+                    sonTohumlamaTarihi: firebase.firestore.FieldValue.delete(), 
+                    tahminiDogumTarihi: firebase.firestore.FieldValue.delete() 
+                });
+
+                for (let i = 1; i <= yavruSayisi; i++) {
+                    const yavruKupeNo = document.getElementById(`yavru-kupe-${i}`).value;
+                    const yeniYavruRef = db.collection('hayvanlar').doc();
+                    
+                    await t.set(yeniYavruRef, { 
+                        kupeNo: yavruKupeNo, 
+                        cinsiyet: document.getElementById(`yavru-cinsiyet-${i}`).value, 
+                        dogumAgirligi: document.getElementById(`yavru-agirlik-${i}`).value || null,
+                        dogumTarihi: dogumTarihi,
+                        anneId: anneId, 
+                        sahipId: userSahipId, 
+                        cariId: userCariId, 
+                        gebəlikDurumu: 'Boş',
+                        irk: 'Bilinmiyor'
+                    });
+
+                    await db.collection('dogum_kayitlari').add({
+                        anneId: anneId,
+                        yavruId: yeniYavruRef.id,
+                        yavruKupeNo: yavruKupeNo,
+                        tarih: dogumTarihiSaati,
+                        yavruSayisi: yavruSayisi,
+                        dogumSekli: document.getElementById('dogum-sekli').value,
+                        notlar: document.getElementById('dogum-notlari').value,
+                        sahipId: userSahipId,
+                        cariId: userCariId,
+                     });
+                }
             });
-
-            await db.collection('dogum_kayitlari').add({
-                anneId: anneId,
-                yavruId: yeniYavruRef.id,
-                yavruKupeNo: yavruKupeNo,
-                tarih: dogumTarihiSaati, // Tarih ve saat
-                yavruSayisi: document.getElementById('yavru-sayisi').value,
-                dogumSekli: document.getElementById('dogum-sekli').value,
-                notlar: document.getElementById('dogum-notlari').value,
-                sahipId: userSahipId,
-                cariId: userCariId,
-             });
-        });
-        showPortalMessage("Doğum kaydı başarıyla oluşturuldu.", "success");
-        event.target.reset();
-        refreshAllData();
-    } catch (error) { showPortalMessage("Kayıt sırasında bir hata oluştu: " + error, "error"); }
+            showPortalMessage("Doğum kaydı ve yavrular başarıyla oluşturuldu.", "success");
+            event.target.reset();
+            document.getElementById('yavru-sayisi').dispatchEvent(new Event('input')); 
+            refreshAllData();
+        } catch (error) { 
+            showPortalMessage("Kayıt sırasında bir hata oluştu: " + error.message, "error"); 
+        }
 }
-    
+
 async function fetchHayvanTakipVerileri() {
         const listBody = document.getElementById('hayvanListesiBody');
-        listBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Hayvan verileri yükleniyor...</td></tr>`;
+        listBody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Hayvan verileri yükleniyor...</td></tr>`; 
         try {
             const snapshot = await db.collection('hayvanlar').where('sahipId', '==', userSahipId).where('cariId', '==', userCariId).orderBy('kupeNo', 'asc').get();
-            if (snapshot.empty) { listBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Kayıtlı hayvan bulunmuyor.</td></tr>`; return; }
+            
+            if (snapshot.empty) { 
+                listBody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Kayıtlı hayvan bulunmuyor.</td></tr>`; 
+                return; 
+            }
+            
             let rows = '';
             snapshot.forEach(doc => {
                 const hayvan = doc.data();
                 let kalanGun = '-';
-let tahminiDogumTarihiStr = '-'; // Yeni değişken
-if (hayvan.gebəlikDurumu === 'Gebe' && hayvan.tahminiDogumTarihi) {
-    const tahminiDogumTarihi = new Date(hayvan.tahminiDogumTarihi);
-    const farkMs = tahminiDogumTarihi - new Date();
-    kalanGun = Math.ceil(farkMs / (1000 * 60 * 60 * 24));
-    tahminiDogumTarihiStr = tahminiDogumTarihi.toLocaleDateString('tr-TR'); // Tarihi formatla
-}
-rows += `<tr>
-    <td><strong>${hayvan.kupeNo}</strong></td><td>${hayvan.irk || '-'}</td>
-    <td>${hayvan.gebəlikDurumu || '-'}</td>
-    <td>${tahminiDogumTarihiStr}</td>
-    <td>${kalanGun}</td>
-    <td><button class="btn btn-secondary btn-small btn-edit" data-id="${doc.id}">Düzenle</button> <button class="btn btn-danger btn-small btn-delete" data-id="${doc.id}">Sil</button></td></tr>`;
+                let tahminiDogumTarihiStr = '-';
+                
+                const sonTohumlamaTarihiStr = hayvan.sonTohumlamaTarihi 
+                    ? new Date(hayvan.sonTohumlamaTarihi + 'T00:00:00').toLocaleDateString('tr-TR') 
+                    : '-';
+
+                if (hayvan.gebəlikDurumu === 'Gebe' && hayvan.tahminiDogumTarihi) {
+                    const tahminiDogumTarihi = new Date(hayvan.tahminiDogumTarihi);
+                    const farkMs = tahminiDogumTarihi - new Date();
+                    kalanGun = Math.ceil(farkMs / (1000 * 60 * 60 * 24));
+                    tahminiDogumTarihiStr = tahminiDogumTarihi.toLocaleDateString('tr-TR');
+                }
+
+                rows += `<tr>
+                    <td><strong>${hayvan.kupeNo}</strong></td>
+                    <td>${hayvan.irk || '-'}</td>
+                    <td>${hayvan.gebəlikDurumu || '-'}</td>
+                    <td>${sonTohumlamaTarihiStr}</td>
+                    <td>${tahminiDogumTarihiStr}</td>
+                    <td>${kalanGun}</td>
+                    <td><button class="btn btn-secondary btn-small btn-edit" data-id="${doc.id}">Düzenle</button> <button class="btn btn-danger btn-small btn-delete" data-id="${doc.id}">Sil</button></td>
+                </tr>`;
             });
             listBody.innerHTML = rows;
-        } catch (error) { listBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Veriler yüklenemedi.</td></tr>`; }
+        } catch (error) { 
+            console.error("Hayvan verileri yüklenirken hata:", error);
+            listBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Veriler yüklenemedi.</td></tr>`; 
+        }
+}
+
+async function checkUpcomingBirths() {
+    const stickyContainer = document.getElementById('sticky-alert-container');
+    stickyContainer.innerHTML = ''; 
+
+    try {
+        const snapshot = await db.collection('hayvanlar')
+            .where('sahipId', '==', userSahipId)
+            .where('cariId', '==', userCariId)
+            .where('gebəlikDurumu', '==', 'Gebe')
+            .get();
+
+        if (snapshot.empty) return;
+
+        snapshot.forEach(doc => {
+            const hayvan = doc.data();
+            if (hayvan.tahminiDogumTarihi) {
+                const tahminiDogum = new Date(hayvan.tahminiDogumTarihi + 'T00:00:00');
+                const bugun = new Date();
+                bugun.setHours(0, 0, 0, 0);
+
+                const kalanGun = Math.ceil((tahminiDogum - bugun) / (1000 * 60 * 60 * 24));
+                
+                if (kalanGun <= 15) {
+                    let messageText = '';
+                    if (kalanGun > 0) {
+                        messageText = `DİKKAT: "${hayvan.kupeNo}" küpe numaralı hayvanın doğumuna yaklaşık ${kalanGun} gün kaldı!`;
+                    } else if (kalanGun === 0) {
+                        messageText = `DİKKAT: "${hayvan.kupeNo}" küpe numaralı hayvanın bugün doğum yapması bekleniyor!`;
+                    } else {
+                        messageText = `ÖNEMLİ: "${hayvan.kupeNo}" küpe numaralı hayvanın doğumu ${-kalanGun} gün gecikti!`;
+                    }
+
+                    const warningDiv = document.createElement('div');
+                    warningDiv.className = 'sticky-birth-alert';
+                    const messageSpan = document.createElement('span');
+                    messageSpan.textContent = messageText;
+                    const closeButton = document.createElement('span');
+                    closeButton.className = 'alert-close-btn';
+                    closeButton.innerHTML = '&times;'; // HTML 'X' karakteri
+                    closeButton.onclick = function() {
+                        // Butonun içinde bulunduğu ana uyarı div'ini gizle
+                        this.parentElement.style.display = 'none';
+                    };
+		    warningDiv.appendChild(messageSpan);
+                    warningDiv.appendChild(closeButton);
+                    stickyContainer.appendChild(warningDiv);
+                }
+            }
+        });
+    } catch (error) {
+        console.error("Doğum kontrolü sırasında hata: ", error);
     }
-    
+}  
+  
 async function fetchSutHareketleri(ayYil) {
         const [year, month] = ayYil.split('-');
         const listBody = document.getElementById('sutListesiBody');
@@ -663,8 +788,9 @@ async function fetchSutHareketleri(ayYil) {
             listBody.innerHTML = rows;
             document.getElementById('sutListesiFooter').innerHTML = `<tr><td colspan="3"><strong>DÖNEM TOPLAMI</strong></td><td><strong>${formatSayi(donemToplamLitre)}</strong></td></tr>`;
         } catch (error) { listBody.innerHTML = `<tr><td colspan="4" style="color:red;">Veriler yüklenemedi.</td></tr>`; }
-    }
-    async function fetchYemHareketleri(ayYil) {
+}
+
+async function fetchYemHareketleri(ayYil) {
         const yemRaporuContainer = document.getElementById('yemRaporuContainer');
         yemRaporuContainer.innerHTML = `<p>Yükleniyor...</p>`;
         const [year, month] = ayYil.split('-');
@@ -689,20 +815,8 @@ async function fetchSutHareketleri(ayYil) {
             tableHTML += `</tbody><tfoot><tr><td><strong>TOPLAM</strong></td><td><strong>${toplamYemMiktari}</strong></td></tr></tfoot></table>`;
             yemRaporuContainer.innerHTML = tableHTML;
         } catch (error) { yemRaporuContainer.innerHTML = `<p style="color:red;">Yem verileri yüklenemedi.</p>`; }
-    }
-    </script>
-
-<div id="deleteAnimalModal" class="modal">
-    <div class="modal-content">
-        <span id="closeDeleteAnimalModal" class="close-button">&times;</span>
-        <h2>Hayvan Silme Onayı</h2>
-        <p class="form-group">Bu hayvanı kalıcı olarak silmek için lütfen aşağıdaki kutucuğa "SİL" yazın.</p>
-        <div class="form-group">
-            <input type="text" id="deleteConfirmInput" class="form-control" placeholder="Onay için 'SİL' yazın...">
-        </div>
-        <button id="confirmDeleteAnimalBtn" class="btn btn-danger">Onayla ve Sil</button>
-    </div>
-</div>
+}
+</script>
 
 </body>
 </html>
