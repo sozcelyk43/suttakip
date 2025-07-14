@@ -710,9 +710,11 @@
 </section>
         
 <section id="ayarlar" class="module-section hidden-section">
-    <div class="module-header"><h2>⚙️ Ayarlar</h2></div>
+    <div class="module-header">
+        <h2>⚙️ Ayarlar</h2>
+    </div>
     <div class="container">
-        <div class="ayarlar-ust-bolum">
+        <div class="settings-column">
             <div class="settings-section">
                 <h3>Genel Ayarlar</h3>
                 <form id="ayarlarForm">
@@ -720,53 +722,92 @@
                         <label for="varsayilanSutFiyati">Varsayılan Süt Fiyatı (TL/Lt):</label>
                         <input type="number" id="varsayilanSutFiyati" step="0.01">
                     </div>
-                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                    <button type="submit" class="btn btn-primary">Genel Ayarları Kaydet</button>
                 </form>
             </div>
+            <hr>
+            <div class="settings-section">
+                <h3>Cari Kategori/Köy Tanımları</h3>
+                <form id="cariKategoriForm" action="#">
+                    <div class="form-grid" style="grid-template-columns: 1fr auto; align-items:end;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label for="yeniCariKategoriAdi">Yeni Ad:</label>
+                            <input type="text" id="yeniCariKategoriAdi" required>
+                        </div>
+                        <button type="submit" class="btn" style="height:45px;">Ekle</button>
+                    </div>
+                </form>
+                <div class="list-section" style="margin-top:20px;">
+                    <h4>Tanımlı Kategoriler/Köyler</h4>
+                    <ul id="cariKategoriListesiUl"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-column">
+            <div class="settings-section">
+                <h3>Firma Bilgileri (Makbuzlar İçin)</h3>
+                <form id="firmaBilgileriForm">
+                    <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label for="firmaUnvani">Firma Unvanı:</label>
+                            <input type="text" id="firmaUnvani">
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label for="firmaAdresi">Adres:</label>
+                            <textarea id="firmaAdresi" rows="2"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="firmaVergiDairesi">Vergi Dairesi:</label>
+                            <input type="text" id="firmaVergiDairesi">
+                        </div>
+                        <div class="form-group">
+                            <label for="firmaVkn">Vergi/TC Kimlik No:</label>
+                            <input type="text" id="firmaVkn">
+                        </div>
+                        <div class="form-group">
+                            <label for="firmaTicSicilNo">Ticaret Sicil No:</label>
+                            <input type="text" id="firmaTicSicilNo">
+                        </div>
+                        <div class="form-group">
+                            <label for="firmaTelefon">Telefon:</label>
+                            <input type="tel" id="firmaTelefon">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Firma Bilgilerini Kaydet</button>
+                </form>
+            </div>
+            <hr>
             <div class="settings-section">
                 <h3>Şifre Değiştir</h3>
                 <form id="sifreDegistirForm">
                     <div class="form-group"><label for="eskiSifre">Eski Şifre:</label><input type="password" id="eskiSifre" required></div>
                     <div class="form-group"><label for="yeniSifre">Yeni Şifre:</label><input type="password" id="yeniSifre" required></div>
                     <div class="form-group"><label for="yeniSifreTekrar">Yeni Şifre (Tekrar):</label><input type="password" id="yeniSifreTekrar" required></div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%;">Güncelle</button>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Şifreyi Güncelle</button>
                 </form>
             </div>
         </div>
-        <hr>
-        <div class="settings-section">
-            <h3>Cari Kategori/Köy Tanımları</h3>
-            <form id="cariKategoriForm" action="#">
-                <div class="form-grid" style="grid-template-columns: 1fr auto; align-items:end;">
-                    <div class="form-group" style="margin-bottom:0;">
-                        <label for="yeniCariKategoriAdi">Yeni Ad:</label>
-                        <input type="text" id="yeniCariKategoriAdi" required>
+        
+        <div class="settings-column dont-calisan" style="grid-column: 1 / -1;">
+             <hr class="dont-calisan">
+             <div class="settings-section">
+                <h3>Kullanıcı Yönetimi</h3>
+                <form id="kullaniciForm">
+                    <input type="hidden" id="kullaniciEditId">
+                    <div class="form-grid">
+                        <div class="form-group"><label for="kullaniciAdi">Kullanıcı E-posta:</label><input type="email" id="kullaniciAdi" required></div>
+                        <div class="form-group"><label for="kullaniciSifre">Şifre:</label><input type="password" id="kullaniciSifre" required></div>
                     </div>
-                    <button type="submit" class="btn" style="height:45px;">Ekle</button>
+                    <button type="submit" class="btn" id="kullaniciKaydetBtn">Çalışan Ekle</button>
+                </form>
+                <div class="list-section">
+                    <h4>Kullanıcı Listesi</h4>
+                    <table>
+                        <thead><tr><th>Kullanıcı Adı</th><th>Rol</th><th class="dont-print">İşlemler</th></tr></thead>
+                        <tbody id="kullaniciListesiBody"></tbody>
+                    </table>
                 </div>
-            </form>
-            <div class="list-section" style="margin-top:20px;">
-                <h4>Tanımlı Kategoriler/Köyler</h4>
-                <ul id="cariKategoriListesiUl"></ul>
-            </div>
-        </div>
-        <hr class="dont-calisan">
-        <div class="settings-section dont-calisan">
-            <h3>Kullanıcı Yönetimi</h3>
-            <form id="kullaniciForm">
-                <input type="hidden" id="kullaniciEditId">
-                <div class="form-grid">
-                    <div class="form-group"><label for="kullaniciAdi">Kullanıcı E-posta:</label><input type="email" id="kullaniciAdi" required></div>
-                    <div class="form-group"><label for="kullaniciSifre">Şifre:</label><input type="password" id="kullaniciSifre" required></div>
-                </div>
-                <button type="submit" class="btn" id="kullaniciKaydetBtn">Çalışan Ekle</button>
-            </form>
-            <div class="list-section">
-                <h4>Kullanıcı Listesi</h4>
-                <table>
-                    <thead><tr><th>Kullanıcı Adı</th><th>Rol</th><th class="dont-print">İşlemler</th></tr></thead>
-                    <tbody id="kullaniciListesiBody"></tbody>
-                </table>
             </div>
         </div>
     </div>
@@ -1201,23 +1242,20 @@ sidebarNav.addEventListener('click', async function (event) {
                     displayHareketler(cachedHareketler);
                 }
 
-document.getElementById('mm-onayla-btn')?.addEventListener('click', handleMakbuzOlustur);
+
+
                 document.getElementById('hareketFiltreleBtn')?.addEventListener('click', fetchAndDisplayHareketler);
                 document.getElementById('hd-islem-turu')?.addEventListener('change', () => displayHareketler(cachedHareketler));
                 document.getElementById('hd-cari-secimi')?.addEventListener('change', () => displayHareketler(cachedHareketler));
             }
 	if (targetId === 'ayarlar') { renderCariKategoriListesi(); getSettings(); if (currentUserRole === 'admin') { renderKullaniciListesi(); } }
-	if (targetId === 'mustahsil-merkezi') {console.log("Müstahsil Merkezi modülü açıldı.");}
-	// sidebarNav.addEventListener içindeki ilgili if bloğunu bununla tamamen değiştirin
-
-// Lütfen ilgili "if" bloğunu bununla tamamen değiştirin
-
-if (targetId === 'yem-satisi') {
-    // Gerekli başlangıç fonksiyonları
-    if (document.getElementById('yemSatisSatirlari').childElementCount === 0) {
-        addYemSatisRow();
-    }
-    renderYemSatisListesi();
+	if (targetId === 'mustahsil-merkezi') {console.log("Müstahsil Merkezi modülü açıldı.");
+	document.getElementById('mm-onayla-btn')?.addEventListener('click', handleMakbuzOlustur);}
+     
+	if (targetId === 'yem-satisi') {
+	
+    	if (document.getElementById('yemSatisSatirlari').childElementCount === 0) {addYemSatisRow();}
+    	renderYemSatisListesi();
 
     // DOĞRU ARAMA KODU BURADA
     const cariAraInput = document.getElementById('yemSatisCariAraInput');
@@ -1728,80 +1766,82 @@ function numberToWordsTR(num) {
     return `${tamKisim} TL ${ondalikKisim} Krş.`;
 }
 
-
-// BU ANA FONKSİYONU DA SCRIPT'İNİZE EKLEYİN
+// MEVCUT handleMakbuzOlustur FONKSİYONUNU SİLİP BUNU EKLEYİN
 
 async function handleMakbuzOlustur() {
-    // 1. Gerekli Verileri Topla
+    // 1. Gerekli verileri ve ayarları topla
     const cariId = selectedMmCariId;
     if (!cariId) {
-        showToast("Lütfen bir cari seçin.", true);
-        return;
+        return showToast("Lütfen bir cari seçin.", true);
     }
-    const cariData = window.cariDataMap.get(cariId);
-
-    const aliciData = { // Bu bilgiler normalde Ayarlar'dan gelir, şimdilik sabit.
-        unvan: "ÖRNEK SÜT ÜRÜNLERİ A.Ş.",
-        adres: "Örnek Mahallesi, Sanayi Caddesi No:123, 16400 İnegöl, Bursa",
-        vergiDairesi: "İnegöl Vergi Dairesi",
-        vkn: "1234567890",
-        ticSicilNo: "Bursa - 98765",
-        telefon: "0224 123 45 67"
-    };
-
+    if (!globalSettings.firmaProfili || !globalSettings.firmaProfili.unvan) {
+        return showToast("Lütfen Ayarlar menüsünden kendi firma bilgilerinizi eksiksiz doldurun.", true);
+    }
+    const aliciData = globalSettings.firmaProfili;
+    const saticiData = window.cariDataMap.get(cariId);
     const tableBody = document.getElementById('mm-hareket-tablosu-body');
-    const hareketler = Array.from(tableBody.querySelectorAll('tr')).map(row => {
-        // Bu kısım, tablodaki her satırdan veriyi okur.
-        // Şimdilik sadece ana tutarları alıyoruz.
-        return {
-            aciklama: row.cells[2].textContent,
-            borc: parseFloat(row.cells[5].textContent.replace(/[^0-9,-]+/g, "").replace(",", ".")) || 0,
-            alacak: parseFloat(row.cells[6].textContent.replace(/[^0-9,-]+/g, "").replace(",", ".")) || 0,
-        };
+    const belgeNo = document.getElementById('mm-belge-no').value || `MM-${Date.now()}`;
+
+    // 2. Tablodaki satırları tara ve SADECE SÜT ALIMLARINI işle
+    const sutAlimKalemleri = [];
+    let brutSutTutari = 0;
+
+    Array.from(tableBody.querySelectorAll('tr')).forEach(row => {
+        const islemTuru = row.cells[1].textContent;
+        // Sadece 'Süt Alımı' içeren satırları dikkate al
+        if (islemTuru.includes('Süt Alımı')) {
+            const tutarText = row.cells[6].textContent; // Alacak Tutarı sütunu
+            const alacakTutari = parseFloat(tutarText.replace(/[^0-9,-]+/g, "").replace(",", ".")) || 0;
+            
+            if (alacakTutari > 0) {
+                 brutSutTutari += alacakTutari;
+                 sutAlimKalemleri.push({
+                    tarih: formatDate(row.cells[0].textContent),
+                    aciklama: row.cells[2].textContent || 'Günlük Süt Alımı',
+                    miktar: parseFloat(row.cells[3].textContent) || 0,
+                    birimFiyat: alacakTutari / (parseFloat(row.cells[3].textContent) || 1),
+                    tutar: alacakTutari
+                });
+            }
+        }
     });
 
-    // Brüt tutarı hesapla (Süt + Yem gibi alacak kalemleri)
-    const brutHizmetTutari = hareketler.reduce((acc, item) => acc + item.alacak, 0);
+    if (sutAlimKalemleri.length === 0) {
+        return showToast("Makbuz oluşturmak için seçili tarih aralığında en az bir Süt Alımı işlemi olmalıdır.", true);
+    }
 
-    // 2. Kesintileri Hesapla
-    const kesintiler = calculateDeductions(brutHizmetTutari);
-    
-    // 3. Makbuz HTML Şablonunu Oluştur ve Doldur
-    let makbuzHTML = getMakbuzHTMLTemplate(); // Şablonu alttaki fonksiyondan alacağız.
+    // 3. Yasal kesintileri hesapla
+    const kesintiler = calculateDeductions(brutSutTutari);
 
-    // Statik Bilgileri Doldur
-    makbuzHTML = makbuzHTML.replace('__ALICI_UNVAN__', aliciData.unvan)
+    // 4. Makbuz HTML şablonunu al ve doldur
+    let makbuzHTML = getMakbuzHTMLTemplate();
+
+    // Alıcı ve Satıcı Bilgileri
+    makbuzHTML = makbuzHTML.replace(/__ALICI_UNVAN__/g, aliciData.unvan)
                            .replace('__ALICI_ADRES__', aliciData.adres)
                            .replace('__ALICI_VERGI_DAIRESI__', aliciData.vergiDairesi)
                            .replace('__ALICI_VKN__', aliciData.vkn)
                            .replace('__ALICI_TIC_SICIL_NO__', aliciData.ticSicilNo)
                            .replace('__ALICI_TELEFON__', aliciData.telefon)
-                           .replace('__SATICI_ADI__', cariData.adiSoyadi)
-                           .replace('__SATICI_TC__', cariData.vergiNo || 'Belirtilmemiş')
-                           .replace('__SATICI_ADRES__', cariData.adres || 'Belirtilmemiş')
-                           .replace('__SATICI_BANKA__', cariData.bankaAdi || 'Belirtilmemiş')
-                           .replace('__SATICI_IBAN__', cariData.iban || 'Belirtilmemiş')
-                           .replace('__BELGE_NO__', document.getElementById('mm-belge-no').value || generateId().substring(0,16).toUpperCase())
-                           .replace('__DUZENLEME_TARIHI__', new Date().toLocaleDateString('tr-TR'))
-                           .replace('__DUZENLEME_SAATI__', new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }))
-                           .replace('__TESLIM_EDEN__', cariData.adiSoyadi)
-                           .replace('__TESLIM_ALAN__', aliciData.unvan);
+                           .replace('__SATICI_ADI__', saticiData.adiSoyadi)
+                           .replace('__SATICI_TC__', saticiData.vergiNo || 'Belirtilmemiş')
+                           .replace('__SATICI_ADRES__', saticiData.adres || 'Belirtilmemiş')
+                           .replace('__BELGE_NO__', belgeNo)
+                           .replace('__DUZENLEME_TARIHI__', new Date().toLocaleDateString('tr-TR'));
 
-    // Hareket Kalemlerini Doldur
+    // Kalemleri (Sadece Süt) Doldur
     let kalemlerHTML = '';
-    hareketler.forEach((item, index) => {
-        if (item.alacak > 0) { // Sadece alacak kalemlerini (süt, yem vb.) listeliyoruz.
-            kalemlerHTML += `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td>${item.aciklama}</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td class="text-right">${formatCurrency(item.alacak)}</td>
-                </tr>
-            `;
-        }
+    sutAlimKalemleri.forEach((item, index) => {
+        kalemlerHTML += `
+            <tr>
+                <td>${index + 1}</td>
+                <td>Süt Alımı (${item.tarih})</td>
+                <td class="text-right">${item.miktar.toFixed(2)}</td>
+                <td>Litre</td>
+                <td class="text-right">${formatCurrency(item.birimFiyat)}</td>
+                <td class="text-right">${formatCurrency(item.tutar)}</td>
+            </tr>
+        `;
     });
     makbuzHTML = makbuzHTML.replace('__KALEMLER_GOVDESI__', kalemlerHTML);
 
@@ -1814,17 +1854,15 @@ async function handleMakbuzOlustur() {
                            .replace('__ODENECEK_NET_TUTAR__', formatCurrency(kesintiler.netTutar))
                            .replace('__YAZI_ILE_TUTAR__', numberToWordsTR(kesintiler.netTutar));
 
-
-    // 4. Yeni Pencerede Göster
+    // 5. Yeni pencerede göster ve yazdır
     const makbuzPenceresi = window.open('', '_blank');
     makbuzPenceresi.document.write(makbuzHTML);
     makbuzPenceresi.document.close();
     makbuzPenceresi.focus();
+    setTimeout(() => { makbuzPenceresi.print(); }, 500);
 }
 
-/**
- * Makbuz için HTML ve CSS şablonunu döndürür.
- */
+
 function getMakbuzHTMLTemplate() {
     return `
     <!DOCTYPE html>
@@ -1833,28 +1871,31 @@ function getMakbuzHTMLTemplate() {
         <meta charset="UTF-8">
         <title>e-Müstahsil Makbuzu</title>
         <style>
-            body { font-family: Arial, sans-serif; font-size: 9pt; color: #333; }
-            .makbuz-container { width: 210mm; min-height: 297mm; margin: auto; padding: 10mm; box-sizing: border-box; border: 1px solid #ccc; }
-            .makbuz-header { display: flex; justify-content: space-between; border-bottom: 2px solid #333; padding-bottom: 10px; }
-            .makbuz-title h1 { margin: 0; font-size: 18pt; }
-            .makbuz-title p { margin: 0; font-size: 10pt; }
-            .info-block { border: 1px solid #ccc; padding: 10px; }
-            .info-block p { margin: 2px 0; font-size: 8pt; }
-            .party-info { display: flex; justify-content: space-between; margin-top: 20px; }
-            .party { width: 48%; }
-            .party h3 { border-bottom: 1px solid #ccc; padding-bottom: 5px; font-size: 11pt; }
-            .party p { margin: 3px 0; }
+            @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+            body { font-family: 'Roboto', Arial, sans-serif; font-size: 9pt; color: #333; background-color: #fff; }
+            @page { size: A4; margin: 15mm; }
+            .makbuz-container { width: 100%; height: 100%; }
+            .makbuz-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #000; padding-bottom: 10px; }
+            .makbuz-title h1 { margin: 0; font-size: 16pt; color: #000; }
+            .makbuz-title p { margin: 5px 0 0; font-size: 11pt; color: #555; }
+            .belge-info { text-align: right; }
+            .belge-info p { margin: 2px 0; font-size: 10pt;}
+            .party-info { display: flex; justify-content: space-between; margin-top: 15px; padding-bottom:15px; border-bottom: 1px solid #ccc; }
+            .party { width: 48%; border: 1px solid #ccc; padding: 10px; border-radius: 5px; }
+            .party h3 { background-color: #f2f2f2; padding: 8px; margin: -10px -10px 10px -10px; font-size: 11pt; border-bottom: 1px solid #ccc; border-radius: 5px 5px 0 0; }
+            .party p { margin: 4px 0; line-height: 1.4; }
             .line-items-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            .line-items-table th, .line-items-table td { border: 1px solid #999; padding: 5px; text-align: left; }
-            .line-items-table th { background-color: #f2f2f2; }
-            .totals-section { display: flex; justify-content: flex-end; margin-top: 10px; }
-            .totals-table { width: 45%; }
-            .totals-table td { padding: 4px 8px; }
-            .totals-table tr td:first-child { text-align: right; }
-            .net-tutar-row { font-weight: bold; background-color: #e0e0e0; border-top: 2px solid #333; font-size: 12pt; }
+            .line-items-table th, .line-items-table td { border: 1px solid #999; padding: 6px 8px; text-align: left; }
+            .line-items-table th { background-color: #e9ecef; font-weight: 500; }
+            .totals-section { display: flex; justify-content: flex-end; margin-top: 15px; }
+            .totals-table { width: 45%; border-spacing: 0; }
+            .totals-table td { padding: 5px 8px; }
+            .totals-table tr td:first-child { text-align: right; font-weight: 500; }
+            .totals-table .kesinti-row td:first-child { color: #d9534f; }
+            .net-tutar-row { font-weight: bold; background-color: #e9ecef; border-top: 2px solid #000; font-size: 12pt; }
+            .makbuz-footer { margin-top: 30px; font-size: 8.5pt; border-top: 1px solid #ccc; padding-top: 15px; }
             .signature-area { display: flex; justify-content: space-around; margin-top: 50px; }
             .signature-box { text-align: center; }
-            .makbuz-footer { margin-top: 30px; font-size: 8pt; border-top: 1px solid #ccc; padding-top: 10px; }
             .text-right { text-align: right !important; }
         </style>
     </head>
@@ -1862,61 +1903,47 @@ function getMakbuzHTMLTemplate() {
         <div class="makbuz-container">
             <div class="makbuz-header">
                 <div class="makbuz-title">
-                    <h1>__ALICI_UNVAN__</h1>
-                    <p>e-Müstahsil Makbuzu (Elektronik Belge)</p>
+                    <h1>MÜSTAHSİL MAKBUZU</h1>
+                    <p>__ALICI_UNVAN__</p>
                 </div>
-                <div class="info-block" style="text-align:center;">GİB KAŞESİ ALANI</div>
-            </div>
-            <div class="info-block" style="margin-top:5px;">
-                <p><strong>Belge No:</strong> __BELGE_NO__</p>
-                <p><strong>Düzenleme Tarihi/Saati:</strong> __DUZENLEME_TARIHI__ / __DUZENLEME_SAATI__</p>
+                <div class="belge-info">
+                    <p><strong>Belge No:</strong> __BELGE_NO__</p>
+                    <p><strong>Tarih:</strong> __DUZENLEME_TARIHI__</p>
+                </div>
             </div>
             <div class="party-info">
                 <div class="party">
-                    <h3>ALICI (TÜCCAR / ÇİFTÇİ)</h3>
+                    <h3>ALICI</h3>
                     <p><strong>Unvan:</strong> __ALICI_UNVAN__</p>
                     <p><strong>Adres:</strong> __ALICI_ADRES__</p>
-                    <p><strong>Vergi Dairesi:</strong> __ALICI_VERGI_DAIRESI__</p>
-                    <p><strong>VKN:</strong> __ALICI_VKN__</p>
-                    <p><strong>Tic. Sicil No:</strong> __ALICI_TIC_SICIL_NO__</p>
-                    <p><strong>Telefon:</strong> __ALICI_TELEFON__</p>
+                    <p><strong>V.D./VKN:</strong> __ALICI_VERGI_DAIRESI__ / __ALICI_VKN__</p>
+                    <p><strong>Tel:</strong> __ALICI_TELEFON__</p>
                 </div>
                 <div class="party">
-                    <h3>SATICI (MÜSTAHSİL / ÇİFTÇİ)</h3>
+                    <h3>SATICI (MÜSTAHSİL)</h3>
                     <p><strong>Adı Soyadı:</strong> __SATICI_ADI__</p>
-                    <p><strong>TC Kimlik No:</strong> __SATICI_TC__</p>
                     <p><strong>Adres:</strong> __SATICI_ADRES__</p>
-                    <p><strong>Banka Adı:</strong> __SATICI_BANKA__</p>
-                    <p><strong>IBAN:</strong> __SATICI_IBAN__</p>
+                    <p><strong>V.D./TCKN:</strong> __SATICI_TC__</p>
                 </div>
             </div>
             <table class="line-items-table">
                 <thead>
-                    <tr><th>#</th><th>Mal / Hizmet Adı</th><th>Miktar</th><th>Birim</th><th>Birim Fiyat</th><th class="text-right">Tutar (TL)</th></tr>
+                    <tr><th>#</th><th>Açıklama</th><th class="text-right">Miktar</th><th>Birim</th><th class="text-right">Birim Fiyat</th><th class="text-right">Tutar (TL)</th></tr>
                 </thead>
                 <tbody id="kalemler-govdesi">__KALEMLER_GOVDESI__</tbody>
             </table>
             <div class="totals-section">
                 <table class="totals-table">
                     <tr><td>Mal Hizmet Toplam Tutarı (Brüt)</td><td class="text-right">__BRUT_TUTAR__</td></tr>
-                    <tr><td>Gelir Vergisi Tevkifatı (%2)</td><td class="text-right">- __GELIR_VERGISI__</td></tr>
-                    <tr><td>SGK Tevkifatı (%2)</td><td class="text-right">- __SGK_TEVKIFATI__</td></tr>
-                    <tr><td>Borsa Tescil Ücreti (%0.2)</td><td class="text-right">- __BORSA_TESCIL__</td></tr>
-                    <tr><td><strong>Toplam Kesinti</strong></td><td class="text-right"><strong>- __TOPLAM_KESINTI__</strong></td></tr>
+                    <tr class="kesinti-row"><td>Gelir Vergisi Tevkifatı (%2)</td><td class="text-right">(-) __GELIR_VERGISI__</td></tr>
+                    <tr class="kesinti-row"><td>SGK Tevkifatı (%2)</td><td class="text-right">(-) __SGK_TEVKIFATI__</td></tr>
+                    <tr class="kesinti-row"><td>Borsa Tescil Ücreti (%0.2)</td><td class="text-right">(-) __BORSA_TESCIL__</td></tr>
+                    <tr><td><strong>Toplam Kesinti</strong></td><td class="text-right"><strong>(-) __TOPLAM_KESINTI__</strong></td></tr>
                     <tr class="net-tutar-row"><td>ÖDENECEK NET TUTAR</td><td class="text-right">__ODENECEK_NET_TUTAR__</td></tr>
                 </table>
             </div>
             <div class="makbuz-footer">
                 <p><strong>Yalnız:</strong> __YAZI_ILE_TUTAR__</p>
-                <p style="font-style: italic; margin-top: 15px;">5070 Sayılı Elektronik İmza Kanunu'na göre güvenli elektronik imza ile imzalanmıştır. Bu belge, Vergi Usul Kanunu uyarınca düzenlenmiştir.</p>
-            </div>
-            <div class="signature-area">
-                <div class="signature-box">
-                    <p>Teslim Eden (Müstahsil)</p><br><br><p>__TESLIM_EDEN__</p>
-                </div>
-                <div class="signature-box">
-                    <p>Teslim Alan (Alıcı Adına)</p><br><br><p>__TESLIM_ALAN__</p>
-                </div>
             </div>
         </div>
     </body>
@@ -1925,10 +1952,8 @@ function getMakbuzHTMLTemplate() {
 }
 
 
-/**
- * Fişe düzenlenebilir yeni bir işlem satırı ekler.
- * @param {('sut'|'yem'|'odeme')} type Eklenecek satırın türü.
- */
+
+
 function createMmEditableRow(type) {
     const tableBody = document.getElementById('mm-hareket-tablosu-body');
     // "Hareket bulunamadı" veya "Yükleniyor" mesajı varsa temizle
@@ -2000,25 +2025,27 @@ function createMmEditableRow(type) {
 
 
     async function getSettings() {
-        const varsayilanSutFiyatiInput = document.getElementById('varsayilanSutFiyati');
-        const currentUser = auth.currentUser;
-        if (!currentUser) {
-            console.error("getSettings çağrıldı ancak aktif bir kullanıcı oturumu bulunamadı.");
-            return;
+    const settingsRef = doc(db, 'ayarlar', sahipId);
+    try {
+        const docSnap = await getDoc(settingsRef);
+        if (docSnap.exists()) {
+            globalSettings = docSnap.data();
+
+            // Genel Ayarları Doldur
+            document.getElementById('varsayilanSutFiyati').value = (globalSettings.defaultMilkPrice || 15.50).toFixed(2);
+
+            // Firma Bilgilerini Doldur
+            if (globalSettings.firmaProfili) {
+                document.getElementById('firmaUnvani').value = globalSettings.firmaProfili.unvan || '';
+                document.getElementById('firmaAdresi').value = globalSettings.firmaProfili.adres || '';
+                document.getElementById('firmaVergiDairesi').value = globalSettings.firmaProfili.vergiDairesi || '';
+                document.getElementById('firmaVkn').value = globalSettings.firmaProfili.vkn || '';
+                document.getElementById('firmaTicSicilNo').value = globalSettings.firmaProfili.ticSicilNo || '';
+                document.getElementById('firmaTelefon').value = globalSettings.firmaProfili.telefon || '';
+            }
         }
-        const settingsRef = doc(db, 'ayarlar', sahipId);
-        try {
-            const docSnap = await getDoc(settingsRef);
-            if (docSnap.exists()) {
-                globalSettings = docSnap.data();
-            }
-            if (globalSettings && globalSettings.defaultMilkPrice) {
-                varsayilanSutFiyatiInput.value = globalSettings.defaultMilkPrice.toFixed(2);
-            } else {
-                varsayilanSutFiyatiInput.value = (15.50).toFixed(2);
-            }
-        } catch(e) { console.error("Ayarlar alınırken hata: ", e); }
-    }
+    } catch(e) { console.error("Ayarlar alınırken hata: ", e); }
+}
 
     function populatePeriodSelect() {
         const selectEl = document.getElementById('karneRaporuPeriyotSecimi');
@@ -2039,31 +2066,37 @@ function createMmEditableRow(type) {
         selectEl.innerHTML = optionsHTML;
     }
 
-    async function handleAyarlarKaydet(event) {
-        event.preventDefault();
-        const currentUser = auth.currentUser;
-        if (!currentUser) { showToast("Lütfen giriş yapın.", true); return; }
-        const varsayilanSutFiyatiInput = document.getElementById('varsayilanSutFiyati');
-        const yeniFiyat = parseFloat(varsayilanSutFiyatiInput.value);
-        if (!isNaN(yeniFiyat) && yeniFiyat >= 0) {
-            try {
-                await setDoc(doc(db, 'ayarlar', sahipId), { defaultMilkPrice: yeniFiyat, sahipId: sahipId }, { merge: true });
-                globalSettings.defaultMilkPrice = yeniFiyat;
-                showToast('Genel ayarlar kaydedildi.');
-                const sutAlimiSekmesi = document.getElementById('sut-alimi');
-                if (sutAlimiSekmesi && sutAlimiSekmesi.style.display === 'block') {
-                    await renderTopluSutGirisFormu();
-                    console.log('Süt alım formu yeni fiyatla güncellendi.');
-                }
+  async function handleAyarlarKaydet(event) {
+    event.preventDefault();
+    const formId = event.target.id;
 
-            } catch (error) {
-                console.error("Ayarlar kaydedilirken hata:", error);
-                showToast("Ayarlar kaydedilemedi.", true);
-            }
-        } else {
-            showToast('Lütfen geçerli bir süt fiyatı giriniz.', true);
+    try {
+        if (formId === 'ayarlarForm') {
+            const yeniFiyat = parseFloat(document.getElementById('varsayilanSutFiyati').value);
+            await setDoc(doc(db, 'ayarlar', sahipId), { 
+                defaultMilkPrice: yeniFiyat 
+            }, { merge: true });
+            globalSettings.defaultMilkPrice = yeniFiyat;
+            showToast('Genel ayarlar kaydedildi.');
+
+        } else if (formId === 'firmaBilgileriForm') {
+            const firmaProfili = {
+                unvan: document.getElementById('firmaUnvani').value,
+                adres: document.getElementById('firmaAdresi').value,
+                vergiDairesi: document.getElementById('firmaVergiDairesi').value,
+                vkn: document.getElementById('firmaVkn').value,
+                ticSicilNo: document.getElementById('firmaTicSicilNo').value,
+                telefon: document.getElementById('firmaTelefon').value,
+            };
+            await setDoc(doc(db, 'ayarlar', sahipId), { firmaProfili }, { merge: true });
+            globalSettings.firmaProfili = firmaProfili;
+            showToast('Firma bilgileri kaydedildi.');
         }
+    } catch (error) {
+        console.error("Ayarlar kaydedilirken hata:", error);
+        showToast("Ayarlar kaydedilemedi.", true);
     }
+}
 
     async function handleSifreDegistir(event) {
         event.preventDefault();

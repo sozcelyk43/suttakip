@@ -182,4 +182,5 @@
 	.sidebar ul li.special-module-link a {background-color: #d35400;color: #ffffff !important;border-radius: 5px;margin: 5px 10px;transition: background-color 0.3s ease;}
 	.sidebar ul li.special-module-link a:hover {    background-color: #e67e22; }
 	.sidebar ul li.special-module-link a.active {    background-color: #e67e22;    box-shadow: 0 0 10px rgba(0,0,0,0.5) inset;}
-
+	#ayarlar .container {    display: grid;    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));    gap: 30px;}
+	.settings-column {    display: flex;    flex-direction: column;    gap: 20px;}
