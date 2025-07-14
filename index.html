@@ -1200,7 +1200,8 @@ sidebarNav.addEventListener('click', async function (event) {
                 } else {
                     displayHareketler(cachedHareketler);
                 }
-                
+
+document.getElementById('mm-onayla-btn')?.addEventListener('click', handleMakbuzOlustur);
                 document.getElementById('hareketFiltreleBtn')?.addEventListener('click', fetchAndDisplayHareketler);
                 document.getElementById('hd-islem-turu')?.addEventListener('change', () => displayHareketler(cachedHareketler));
                 document.getElementById('hd-cari-secimi')?.addEventListener('change', () => displayHareketler(cachedHareketler));
@@ -1678,6 +1679,252 @@ function recalculateMmTotals() {
     netTutarElement.style.color = netTutar >= 0 ? 'green' : 'red';
 }
 
+// BU YARDIMCI FONKSİYONLARI SCRIPT'İNİZE EKLEYİN
+
+/**
+ * Verilen brüt tutar üzerinden yasal kesintileri hesaplar.
+ * @param {number} brutTutar - Mal hizmetlerin toplam brüt tutarı.
+ * @returns {object} Kesinti detaylarını ve net tutarı içeren bir nesne.
+ */
+function calculateDeductions(brutTutar) {
+    const gelirVergisiOrani = 0.02; // %2 Stopaj
+    const sgkOrani = 0.02;           // %2 SGK
+    const borsaOrani = 0.002;        // %0.2 Borsa Tescil
+
+    const gelirVergisiTevkifati = brutTutar * gelirVergisiOrani;
+    const sgkTevkifati = brutTutar * sgkOrani;
+    const borsaTescilUcreti = brutTutar * borsaOrani;
+
+    const toplamKesinti = gelirVergisiTevkifati + sgkTevkifati + borsaTescilUcreti;
+    const netTutar = brutTutar - toplamKesinti;
+
+    return {
+        brutTutar,
+        gelirVergisiTevkifati,
+        sgkTevkifati,
+        borsaTescilUcreti,
+        toplamKesinti,
+        netTutar
+    };
+}
+
+/**
+ * Sayıyı Türkçe yazı formatına çevirir. (Basit bir versiyon)
+ * @param {number} num - Yazıya çevrilecek sayı.
+ * @returns {string} Sayının Türkçe okunuşu.
+ */
+function numberToWordsTR(num) {
+    const [tamKisim, ondalikKisim] = String(num.toFixed(2)).split('.');
+    const birlikler = ["", "Bir", "İki", "Üç", "Dört", "Beş", "Altı", "Yedi", "Sekiz", "Dokuz"];
+    const onluklar = ["", "On", "Yirmi", "Otuz", "Kırk", "Elli", "Altmış", "Yetmiş", "Seksen", "Doksan"];
+    const binler = ["", "Bin", "Milyon", "Milyar", "Trilyon"];
+
+    function cevir(n) {
+        if (n < 10) return birlikler[n];
+        if (n < 100) return onluklar[Math.floor(n / 10)] + " " + birlikler[n % 10];
+        if (n < 1000) return (n % 100 === 0 ? "" : "Yüz") + " " + cevir(n % 100);
+    }
+    // Bu fonksiyon daha da geliştirilebilir, şimdilik basit tutuyoruz.
+    return `${tamKisim} TL ${ondalikKisim} Krş.`;
+}
+
+
+// BU ANA FONKSİYONU DA SCRIPT'İNİZE EKLEYİN
+
+async function handleMakbuzOlustur() {
+    // 1. Gerekli Verileri Topla
+    const cariId = selectedMmCariId;
+    if (!cariId) {
+        showToast("Lütfen bir cari seçin.", true);
+        return;
+    }
+    const cariData = window.cariDataMap.get(cariId);
+
+    const aliciData = { // Bu bilgiler normalde Ayarlar'dan gelir, şimdilik sabit.
+        unvan: "ÖRNEK SÜT ÜRÜNLERİ A.Ş.",
+        adres: "Örnek Mahallesi, Sanayi Caddesi No:123, 16400 İnegöl, Bursa",
+        vergiDairesi: "İnegöl Vergi Dairesi",
+        vkn: "1234567890",
+        ticSicilNo: "Bursa - 98765",
+        telefon: "0224 123 45 67"
+    };
+
+    const tableBody = document.getElementById('mm-hareket-tablosu-body');
+    const hareketler = Array.from(tableBody.querySelectorAll('tr')).map(row => {
+        // Bu kısım, tablodaki her satırdan veriyi okur.
+        // Şimdilik sadece ana tutarları alıyoruz.
+        return {
+            aciklama: row.cells[2].textContent,
+            borc: parseFloat(row.cells[5].textContent.replace(/[^0-9,-]+/g, "").replace(",", ".")) || 0,
+            alacak: parseFloat(row.cells[6].textContent.replace(/[^0-9,-]+/g, "").replace(",", ".")) || 0,
+        };
+    });
+
+    // Brüt tutarı hesapla (Süt + Yem gibi alacak kalemleri)
+    const brutHizmetTutari = hareketler.reduce((acc, item) => acc + item.alacak, 0);
+
+    // 2. Kesintileri Hesapla
+    const kesintiler = calculateDeductions(brutHizmetTutari);
+    
+    // 3. Makbuz HTML Şablonunu Oluştur ve Doldur
+    let makbuzHTML = getMakbuzHTMLTemplate(); // Şablonu alttaki fonksiyondan alacağız.
+
+    // Statik Bilgileri Doldur
+    makbuzHTML = makbuzHTML.replace('__ALICI_UNVAN__', aliciData.unvan)
+                           .replace('__ALICI_ADRES__', aliciData.adres)
+                           .replace('__ALICI_VERGI_DAIRESI__', aliciData.vergiDairesi)
+                           .replace('__ALICI_VKN__', aliciData.vkn)
+                           .replace('__ALICI_TIC_SICIL_NO__', aliciData.ticSicilNo)
+                           .replace('__ALICI_TELEFON__', aliciData.telefon)
+                           .replace('__SATICI_ADI__', cariData.adiSoyadi)
+                           .replace('__SATICI_TC__', cariData.vergiNo || 'Belirtilmemiş')
+                           .replace('__SATICI_ADRES__', cariData.adres || 'Belirtilmemiş')
+                           .replace('__SATICI_BANKA__', cariData.bankaAdi || 'Belirtilmemiş')
+                           .replace('__SATICI_IBAN__', cariData.iban || 'Belirtilmemiş')
+                           .replace('__BELGE_NO__', document.getElementById('mm-belge-no').value || generateId().substring(0,16).toUpperCase())
+                           .replace('__DUZENLEME_TARIHI__', new Date().toLocaleDateString('tr-TR'))
+                           .replace('__DUZENLEME_SAATI__', new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }))
+                           .replace('__TESLIM_EDEN__', cariData.adiSoyadi)
+                           .replace('__TESLIM_ALAN__', aliciData.unvan);
+
+    // Hareket Kalemlerini Doldur
+    let kalemlerHTML = '';
+    hareketler.forEach((item, index) => {
+        if (item.alacak > 0) { // Sadece alacak kalemlerini (süt, yem vb.) listeliyoruz.
+            kalemlerHTML += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${item.aciklama}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="text-right">${formatCurrency(item.alacak)}</td>
+                </tr>
+            `;
+        }
+    });
+    makbuzHTML = makbuzHTML.replace('__KALEMLER_GOVDESI__', kalemlerHTML);
+
+    // Toplamlar ve Kesintileri Doldur
+    makbuzHTML = makbuzHTML.replace('__BRUT_TUTAR__', formatCurrency(kesintiler.brutTutar))
+                           .replace('__GELIR_VERGISI__', formatCurrency(kesintiler.gelirVergisiTevkifati))
+                           .replace('__SGK_TEVKIFATI__', formatCurrency(kesintiler.sgkTevkifati))
+                           .replace('__BORSA_TESCIL__', formatCurrency(kesintiler.borsaTescilUcreti))
+                           .replace('__TOPLAM_KESINTI__', formatCurrency(kesintiler.toplamKesinti))
+                           .replace('__ODENECEK_NET_TUTAR__', formatCurrency(kesintiler.netTutar))
+                           .replace('__YAZI_ILE_TUTAR__', numberToWordsTR(kesintiler.netTutar));
+
+
+    // 4. Yeni Pencerede Göster
+    const makbuzPenceresi = window.open('', '_blank');
+    makbuzPenceresi.document.write(makbuzHTML);
+    makbuzPenceresi.document.close();
+    makbuzPenceresi.focus();
+}
+
+/**
+ * Makbuz için HTML ve CSS şablonunu döndürür.
+ */
+function getMakbuzHTMLTemplate() {
+    return `
+    <!DOCTYPE html>
+    <html lang="tr">
+    <head>
+        <meta charset="UTF-8">
+        <title>e-Müstahsil Makbuzu</title>
+        <style>
+            body { font-family: Arial, sans-serif; font-size: 9pt; color: #333; }
+            .makbuz-container { width: 210mm; min-height: 297mm; margin: auto; padding: 10mm; box-sizing: border-box; border: 1px solid #ccc; }
+            .makbuz-header { display: flex; justify-content: space-between; border-bottom: 2px solid #333; padding-bottom: 10px; }
+            .makbuz-title h1 { margin: 0; font-size: 18pt; }
+            .makbuz-title p { margin: 0; font-size: 10pt; }
+            .info-block { border: 1px solid #ccc; padding: 10px; }
+            .info-block p { margin: 2px 0; font-size: 8pt; }
+            .party-info { display: flex; justify-content: space-between; margin-top: 20px; }
+            .party { width: 48%; }
+            .party h3 { border-bottom: 1px solid #ccc; padding-bottom: 5px; font-size: 11pt; }
+            .party p { margin: 3px 0; }
+            .line-items-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            .line-items-table th, .line-items-table td { border: 1px solid #999; padding: 5px; text-align: left; }
+            .line-items-table th { background-color: #f2f2f2; }
+            .totals-section { display: flex; justify-content: flex-end; margin-top: 10px; }
+            .totals-table { width: 45%; }
+            .totals-table td { padding: 4px 8px; }
+            .totals-table tr td:first-child { text-align: right; }
+            .net-tutar-row { font-weight: bold; background-color: #e0e0e0; border-top: 2px solid #333; font-size: 12pt; }
+            .signature-area { display: flex; justify-content: space-around; margin-top: 50px; }
+            .signature-box { text-align: center; }
+            .makbuz-footer { margin-top: 30px; font-size: 8pt; border-top: 1px solid #ccc; padding-top: 10px; }
+            .text-right { text-align: right !important; }
+        </style>
+    </head>
+    <body>
+        <div class="makbuz-container">
+            <div class="makbuz-header">
+                <div class="makbuz-title">
+                    <h1>__ALICI_UNVAN__</h1>
+                    <p>e-Müstahsil Makbuzu (Elektronik Belge)</p>
+                </div>
+                <div class="info-block" style="text-align:center;">GİB KAŞESİ ALANI</div>
+            </div>
+            <div class="info-block" style="margin-top:5px;">
+                <p><strong>Belge No:</strong> __BELGE_NO__</p>
+                <p><strong>Düzenleme Tarihi/Saati:</strong> __DUZENLEME_TARIHI__ / __DUZENLEME_SAATI__</p>
+            </div>
+            <div class="party-info">
+                <div class="party">
+                    <h3>ALICI (TÜCCAR / ÇİFTÇİ)</h3>
+                    <p><strong>Unvan:</strong> __ALICI_UNVAN__</p>
+                    <p><strong>Adres:</strong> __ALICI_ADRES__</p>
+                    <p><strong>Vergi Dairesi:</strong> __ALICI_VERGI_DAIRESI__</p>
+                    <p><strong>VKN:</strong> __ALICI_VKN__</p>
+                    <p><strong>Tic. Sicil No:</strong> __ALICI_TIC_SICIL_NO__</p>
+                    <p><strong>Telefon:</strong> __ALICI_TELEFON__</p>
+                </div>
+                <div class="party">
+                    <h3>SATICI (MÜSTAHSİL / ÇİFTÇİ)</h3>
+                    <p><strong>Adı Soyadı:</strong> __SATICI_ADI__</p>
+                    <p><strong>TC Kimlik No:</strong> __SATICI_TC__</p>
+                    <p><strong>Adres:</strong> __SATICI_ADRES__</p>
+                    <p><strong>Banka Adı:</strong> __SATICI_BANKA__</p>
+                    <p><strong>IBAN:</strong> __SATICI_IBAN__</p>
+                </div>
+            </div>
+            <table class="line-items-table">
+                <thead>
+                    <tr><th>#</th><th>Mal / Hizmet Adı</th><th>Miktar</th><th>Birim</th><th>Birim Fiyat</th><th class="text-right">Tutar (TL)</th></tr>
+                </thead>
+                <tbody id="kalemler-govdesi">__KALEMLER_GOVDESI__</tbody>
+            </table>
+            <div class="totals-section">
+                <table class="totals-table">
+                    <tr><td>Mal Hizmet Toplam Tutarı (Brüt)</td><td class="text-right">__BRUT_TUTAR__</td></tr>
+                    <tr><td>Gelir Vergisi Tevkifatı (%2)</td><td class="text-right">- __GELIR_VERGISI__</td></tr>
+                    <tr><td>SGK Tevkifatı (%2)</td><td class="text-right">- __SGK_TEVKIFATI__</td></tr>
+                    <tr><td>Borsa Tescil Ücreti (%0.2)</td><td class="text-right">- __BORSA_TESCIL__</td></tr>
+                    <tr><td><strong>Toplam Kesinti</strong></td><td class="text-right"><strong>- __TOPLAM_KESINTI__</strong></td></tr>
+                    <tr class="net-tutar-row"><td>ÖDENECEK NET TUTAR</td><td class="text-right">__ODENECEK_NET_TUTAR__</td></tr>
+                </table>
+            </div>
+            <div class="makbuz-footer">
+                <p><strong>Yalnız:</strong> __YAZI_ILE_TUTAR__</p>
+                <p style="font-style: italic; margin-top: 15px;">5070 Sayılı Elektronik İmza Kanunu'na göre güvenli elektronik imza ile imzalanmıştır. Bu belge, Vergi Usul Kanunu uyarınca düzenlenmiştir.</p>
+            </div>
+            <div class="signature-area">
+                <div class="signature-box">
+                    <p>Teslim Eden (Müstahsil)</p><br><br><p>__TESLIM_EDEN__</p>
+                </div>
+                <div class="signature-box">
+                    <p>Teslim Alan (Alıcı Adına)</p><br><br><p>__TESLIM_ALAN__</p>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+}
+
+
 /**
  * Fişe düzenlenebilir yeni bir işlem satırı ekler.
  * @param {('sut'|'yem'|'odeme')} type Eklenecek satırın türü.
@@ -2006,6 +2253,8 @@ async function updateDashboardStats() {
     globalCache.set(cacheKey, { data: true, timestamp: now });
 }
 
+// ESKİ handleCariKaydet FONKSİYONUNU SİLİP BUNU YAPIŞTIRIN
+
 async function handleCariKaydet(event) {
     event.preventDefault();
     const currentUser = auth.currentUser;
@@ -2013,6 +2262,7 @@ async function handleCariKaydet(event) {
         showToast("Lütfen giriş yapın.", true);
         return;
     }
+
     const editingId = document.getElementById('cariEditId').value;
     const secilenGruplar = [];
     if (document.getElementById('grupUretici').checked) secilenGruplar.push('üretici');
@@ -2020,6 +2270,7 @@ async function handleCariKaydet(event) {
     if (document.getElementById('grupSutAlici').checked) secilenGruplar.push('süt alıcı');
     const rotaSirasiInput = document.getElementById('cariRotaSirasi').value;
     const yeniRotaSirasi = rotaSirasiInput ? parseInt(rotaSirasiInput, 10) : null;
+
     const formData = {
         kodu: document.getElementById('cariKodu').value,
         rotaSirasi: yeniRotaSirasi,
@@ -2040,61 +2291,71 @@ async function handleCariKaydet(event) {
     };
 
     try {
+        // --- 1. Adım: Rota Sırası Güncellemelerini Hazırla ---
+        const batch = writeBatch(db);
+        let eskiRotaSirasi = null;
+
+        if (editingId) {
+            const cariRef = doc(db, 'cariler', editingId);
+            const cariDoc = await getDoc(cariRef);
+            if (!cariDoc.exists()) throw new Error("Düzenlenecek cari bulunamadı!");
+            eskiRotaSirasi = cariDoc.data().rotaSirasi;
+        }
+
+        if (eskiRotaSirasi !== yeniRotaSirasi) {
+            // Durum 1: Bir rotadan diğerine geçiş (Örn: 5'ten 2'ye)
+            if (yeniRotaSirasi && eskiRotaSirasi) {
+                 if (yeniRotaSirasi > eskiRotaSirasi) { // Aşağı kaydırma (2 -> 5)
+                    const q = query(collection(db, 'cariler'), where('sahipId', '==', sahipId), where('rotaSirasi', '>', eskiRotaSirasi), where('rotaSirasi', '<=', yeniRotaSirasi));
+                    const snapshot = await getDocs(q);
+                    snapshot.forEach(d => batch.update(d.ref, { rotaSirasi: d.data().rotaSirasi - 1 }));
+                } else { // Yukarı kaydırma (5 -> 2)
+                    const q = query(collection(db, 'cariler'), where('sahipId', '==', sahipId), where('rotaSirasi', '>=', yeniRotaSirasi), where('rotaSirasi', '<', eskiRotaSirasi));
+                    const snapshot = await getDocs(q);
+                    snapshot.forEach(d => batch.update(d.ref, { rotaSirasi: d.data().rotaSirasi + 1 }));
+                }
+            }
+            // Durum 2: Mevcut bir cariye yeni rota ekleme veya yeni cari oluşturma
+            else if (yeniRotaSirasi) {
+                const q = query(collection(db, 'cariler'), where('sahipId', '==', sahipId), where('rotaSirasi', '>=', yeniRotaSirasi));
+                const snapshot = await getDocs(q);
+                snapshot.forEach(d => batch.update(d.ref, { rotaSirasi: d.data().rotaSirasi + 1 }));
+            }
+            // Durum 3: Mevcut bir cariden rotayı kaldırma
+            else if (eskiRotaSirasi) {
+                 const q = query(collection(db, 'cariler'), where('sahipId', '==', sahipId), where('rotaSirasi', '>', eskiRotaSirasi));
+                 const snapshot = await getDocs(q);
+                 snapshot.forEach(d => batch.update(d.ref, { rotaSirasi: d.data().rotaSirasi - 1 }));
+            }
+        }
+        
+        // Rota sırası güncellemelerini uygula
+        await batch.commit();
+
+
+        // --- 2. Adım: Ana Cari ve Bakiye İşlemini Transaction İçinde Yap ---
         await runTransaction(db, async (transaction) => {
             let cariIdForBakiye;
+
             if (editingId) {
                 cariIdForBakiye = editingId;
                 const cariRef = doc(db, 'cariler', editingId);
-                const cariDoc = await transaction.get(cariRef);
-                if (!cariDoc.exists()) throw "Düzenlenecek cari bulunamadı!";
-
-                const acilisBakiyeQuery = query(
-                    collection(db, 'odemeVeTahsilatlar'),
-                    where('cariId', '==', editingId),
-                    where('aciklama', '==', 'Açılış Bakiyesi')
-                );
-                const acilisBakiyeSnapshot = await transaction.get(acilisBakiyeQuery);
-                acilisBakiyeSnapshot.forEach(doc => {
-                    transaction.delete(doc.ref);
-                });
-
-                const eskiRotaSirasi = cariDoc.data().rotaSirasi;
-                if (eskiRotaSirasi !== yeniRotaSirasi) {
-                    if (yeniRotaSirasi && eskiRotaSirasi) {
-                        if (yeniRotaSirasi > eskiRotaSirasi) {
-                            const carilerToUpdateQuery = query(collection(db, 'cariler'), where('sahipId', '==', sahipId), where('rotaSirasi', '>', eskiRotaSirasi), where('rotaSirasi', '<=', yeniRotaSirasi));
-                            const snapshot = await transaction.get(carilerToUpdateQuery);
-                            snapshot.forEach(doc => transaction.update(doc.ref, { rotaSirasi: doc.data().rotaSirasi - 1 }));
-                        } else {
-                            const carilerToUpdateQuery = query(collection(db, 'cariler'), where('sahipId', '==', sahipId), where('rotaSirasi', '>=', yeniRotaSirasi), where('rotaSirasi', '<', eskiRotaSirasi));
-                            const snapshot = await transaction.get(carilerToUpdateQuery);
-                            snapshot.forEach(doc => transaction.update(doc.ref, { rotaSirasi: doc.data().rotaSirasi + 1 }));
-                        }
-                    } else if (yeniRotaSirasi && !eskiRotaSirasi) {
-                        const carilerToUpdateQuery = query(collection(db, 'cariler'), where('sahipId', '==', sahipId), where('rotaSirasi', '>=', yeniRotaSirasi));
-                        const snapshot = await transaction.get(carilerToUpdateQuery);
-                        snapshot.forEach(doc => transaction.update(doc.ref, { rotaSirasi: doc.data().rotaSirasi + 1 }));
-                    } else if (!yeniRotaSirasi && eskiRotaSirasi) {
-                        const carilerToUpdateQuery = query(collection(db, 'cariler'), where('sahipId', '==', sahipId), where('rotaSirasi', '>', eskiRotaSirasi));
-                        const snapshot = await transaction.get(carilerToUpdateQuery);
-                        snapshot.forEach(doc => transaction.update(doc.ref, { rotaSirasi: doc.data().rotaSirasi - 1 }));
-                    }
-                }
                 transaction.update(cariRef, formData);
 
-            } else {
-                if (yeniRotaSirasi) {
-                    const carilerToUpdateQuery = query(collection(db, 'cariler'), where('sahipId', '==', sahipId), where('rotaSirasi', '>=', yeniRotaSirasi));
-                    const snapshot = await transaction.get(carilerToUpdateQuery);
-                    snapshot.forEach(doc => {
-                        transaction.update(doc.ref, { rotaSirasi: doc.data().rotaSirasi + 1 });
-                    });
-                }
+                // Eski açılış bakiyesini bul ve sil (Bu kısım transactional değil ama riski düşük)
+                const acilisBakiyeQuery = query(collection(db, 'odemeVeTahsilatlar'), where('cariId', '==', editingId), where('aciklama', '==', 'Açılış Bakiyesi'));
+                const acilisBakiyeSnapshot = await getDocs(acilisBakiyeQuery);
+                acilisBakiyeSnapshot.forEach(docToDelete => {
+                    transaction.delete(docToDelete.ref);
+                });
+
+            } else { // Yeni kayıt
                 const newCariRef = doc(collection(db, 'cariler'));
                 transaction.set(newCariRef, formData);
                 cariIdForBakiye = newCariRef.id;
             }
 
+            // Gerekirse yeni açılış bakiyesini ekle
             const acilisBakiye = parseFloat(document.getElementById('cariAcilisBakiye').value) || 0;
             const bakiyeTuru = document.getElementById('cariAcilisBakiyeTuru').value;
             if (acilisBakiye > 0 && bakiyeTuru !== 'yok') {
@@ -2112,6 +2373,7 @@ async function handleCariKaydet(event) {
             }
         });
 
+        // --- 3. Adım: Formu ve Listeyi Güncelle ---
         resetCariForm();
         await renderCariListesi();
         showToast('Cari başarıyla kaydedildi!');
@@ -2123,45 +2385,73 @@ async function handleCariKaydet(event) {
 }
 
 
-// LÜTFEN MEVCUT renderCariListesi FONKSİYONUNU BUNUNLA TAMAMEN DEĞİŞTİRİN
 
 async function renderCariListesi() {
-    if (!isAppInitialized) return;
-    const cariListesiBody = document.getElementById('cariListesiBody');
-    const tarihFiltresiEl = document.getElementById('cariTarihFiltresi');
-    const searchTermEl = document.getElementById('cariSearchInput');
-    const kategoriEl = document.getElementById('cariKategoriFiltre');
-    const durumEl = document.getElementById('cariDurumFiltre');
-    const grupEl = document.getElementById('cariGrupFiltre');
+    // Elementleri alıyoruz (varsa)
+    const cariListesiBody     = document.getElementById('cariListesiBody');
+    const cariListesiFooter   = document.getElementById('cariListesiFooter');
+    const tarihFiltresiEl     = document.getElementById('cariTarihFiltresi');
+    const searchTermEl        = document.getElementById('cariSearchInput');
+    const kategoriEl          = document.getElementById('cariKategoriFiltre');
+    const durumEl             = document.getElementById('cariDurumFiltre');
+    const grupEl              = document.getElementById('cariGrupFiltre');
+    const raporTarihEtiketiEl = document.getElementById('raporTarihEtiketi');
 
-    // Elementlerin varlığını kontrol ederek değerlerini alıyoruz.
+    // Değerleri al (güvenli)
     const tarihFiltresi = tarihFiltresiEl ? tarihFiltresiEl.value : '';
-    const searchTerm = searchTermEl ? searchTermEl.value.toLowerCase() : '';
-    const kategori = kategoriEl ? kategoriEl.value : '';
-    const durum = durumEl ? durumEl.value : '';
-    const grup = grupEl ? grupEl.value : '';
-    
-    document.getElementById('raporTarihEtiketi').textContent = tarihFiltresi ? `${formatDate(tarihFiltresi)} Tarihi İtibarıyla` : 'Güncel Durum';
-    cariListesiBody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Veriler yükleniyor ve hesaplanıyor...</td></tr>';
+    const searchTerm    = searchTermEl    ? searchTermEl.value.toLowerCase() : '';
+    const kategori      = kategoriEl      ? kategoriEl.value : '';
+    const durum         = durumEl         ? durumEl.value : '';
+    const grup          = grupEl          ? grupEl.value : '';
+
+    // Başlık etiketi
+    if (raporTarihEtiketiEl) {
+        raporTarihEtiketiEl.textContent = tarihFiltresi
+            ? `${formatDate(tarihFiltresi)} Tarihi İtibarıyla`
+            : 'Güncel Durum';
+    }
+
+    // Yükleniyor mesajı
+    if (cariListesiBody) {
+        cariListesiBody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Veriler yükleniyor ve hesaplanıyor...</td></tr>';
+    }
+    if (cariListesiFooter) {
+        cariListesiFooter.innerHTML = '';
+    }
 
     try {
-        const cariConstraints = [where("sahipId", "==", sahipId)];
-        if (kategori) { cariConstraints.push(where("kategori", "==", kategori)); }
-        if (durum) { cariConstraints.push(where("durum", "==", durum)); }
-        if (grup) { cariConstraints.push(where("cariGrup", "array-contains", grup)); }
-        const carilerQuery = query(collection(db, 'cariler'), ...cariConstraints);
+        // ==== Firestore sorguları ====
 
-        const hareketConstraints = [where('sahipId', '==', sahipId)];
-        if (tarihFiltresi) {
-            hareketConstraints.push(where('tarih', '<=', tarihFiltresi));
-        }
-        
-        const sutQuery = query(collection(db, 'sut_alimlari'), ...hareketConstraints);
-        const yemSatisQuery = query(collection(db, 'yem_satislari'), ...hareketConstraints);
-        const odemeQuery = query(collection(db, 'odemeVeTahsilatlar'), ...hareketConstraints);
-        const yemAlimQuery = query(collection(db, 'yem_alimlari'), ...hareketConstraints);
+        // Cari filtreleri
+        const cariConstraints = [ where('sahipId', '==', sahipId) ];
+        if (kategori) cariConstraints.push(where('kategori','==',kategori));
+        if (durum)    cariConstraints.push(where('durum','==',durum));
+        if (grup)     cariConstraints.push(where('cariGrup','array-contains',grup));
 
-        const [carilerSnapshot, sutSnapshot, yemSatisSnapshot, odemeSnapshot, yemAlimSnapshot] = await Promise.all([
+        const carilerQuery = query(
+            collection(db, 'cariler'),
+            ...cariConstraints,
+            orderBy('rotaSirasi','asc'),
+            limit(200)
+        );
+
+        // Hareket filtreleri
+        const hareketConstraints = [ where('sahipId','==',sahipId) ];
+        if (tarihFiltresi) hareketConstraints.push(where('tarih','<=',tarihFiltresi));
+
+        const sutQuery      = query(collection(db,'sut_alimlari'),       ...hareketConstraints);
+        const yemSatisQuery = query(collection(db,'yem_satislari'),      ...hareketConstraints);
+        const odemeQuery    = query(collection(db,'odemeVeTahsilatlar'), ...hareketConstraints);
+        const yemAlimQuery  = query(collection(db,'yem_alimlari'),       ...hareketConstraints);
+
+        // Hepsini eş zamanlı çek
+        const [
+            carilerSnapshot,
+            sutSnapshot,
+            yemSatisSnapshot,
+            odemeSnapshot,
+            yemAlimSnapshot
+        ] = await Promise.all([
             getDocs(carilerQuery),
             getDocs(sutQuery),
             getDocs(yemSatisQuery),
@@ -2169,123 +2459,135 @@ async function renderCariListesi() {
             getDocs(yemAlimQuery)
         ]);
 
+        // ==== Bakiye hesaplama ====
         const bakiyeMap = new Map();
-        carilerSnapshot.forEach(doc => {
-            bakiyeMap.set(doc.id, {
-                data: doc.data(),
-                borc: 0,
-                alacak: 0
-            });
+        carilerSnapshot.forEach(docSnap => {
+            bakiyeMap.set(docSnap.id, { data: docSnap.data(), borc: 0, alacak: 0 });
         });
 
-        sutSnapshot.forEach(doc => {
-            const alim = doc.data();
-            if (bakiyeMap.has(alim.cariId)) bakiyeMap.get(alim.cariId).alacak += alim.toplamTutar || 0;
+        sutSnapshot.forEach(d => {
+            const v = d.data();
+            if (bakiyeMap.has(v.cariId)) bakiyeMap.get(v.cariId).alacak += v.toplamTutar || 0;
         });
-        yemAlimSnapshot.forEach(doc => {
-            const alim = doc.data();
-            if (bakiyeMap.has(alim.cariId)) bakiyeMap.get(alim.cariId).alacak += alim.toplamTutar || 0;
+        yemAlimSnapshot.forEach(d => {
+            const v = d.data();
+            if (bakiyeMap.has(v.cariId)) bakiyeMap.get(v.cariId).alacak += v.toplamTutar || 0;
         });
-        yemSatisSnapshot.forEach(doc => {
-            const satis = doc.data();
-            if (bakiyeMap.has(satis.cariId)) bakiyeMap.get(satis.cariId).borc += satis.toplamTutar || 0;
+        yemSatisSnapshot.forEach(d => {
+            const v = d.data();
+            if (bakiyeMap.has(v.cariId)) bakiyeMap.get(v.cariId).borc += v.toplamTutar || 0;
         });
-        odemeSnapshot.forEach(doc => {
-            const data = doc.data();
-            if (bakiyeMap.has(data.cariId)) {
-                const cariBakiye = bakiyeMap.get(data.cariId);
-                if (data.islemTuru === 'odeme' || data.islemTuru === 'alacak') cariBakiye.alacak += data.tutar || 0;
-                else if (data.islemTuru === 'tahsilat' || data.islemTuru === 'borc') cariBakiye.borc += data.tutar || 0;
+        odemeSnapshot.forEach(d => {
+            const v = d.data();
+            if (bakiyeMap.has(v.cariId)) {
+                const entry = bakiyeMap.get(v.cariId);
+                if (v.islemTuru === 'odeme' || v.islemTuru === 'alacak') entry.alacak += v.tutar || 0;
+                else if (v.islemTuru === 'tahsilat' || v.islemTuru === 'borc') entry.borc += v.tutar || 0;
             }
         });
 
-        // DEĞİŞİKLİK 1: .values() yerine .entries() kullanarak ID'leri de alıyoruz.
+        // ==== Liste düzeni ====
         let cariler = Array.from(bakiyeMap.entries());
-
         if (searchTerm) {
-            cariler = cariler.filter(([id, item]) => 
-                item.data.kodu?.toLowerCase().includes(searchTerm) || 
-                item.data.adiSoyadi?.toLowerCase().includes(searchTerm)
-            );
+            cariler = cariler.filter(([id,item]) => {
+                const c = item.data;
+                return c.kodu?.toLowerCase().includes(searchTerm)
+                    || c.adiSoyadi?.toLowerCase().includes(searchTerm);
+            });
         }
-        
-        // DEĞİŞİKLİK 2: Sıralama mantığını güncelliyoruz (a[1] ve b[1] kullanarak).
-        cariler.sort((a, b) => 
-            (a[1].data.rotaSirasi || 9999) - (b[1].data.rotaSirasi || 9999) || 
-            (a[1].data.adiSoyadi || '').localeCompare(b[1].data.adiSoyadi || '', 'tr')
-        );
+        cariler.sort((a,b) => {
+            const ra = a[1].data.rotaSirasi || 9999;
+            const rb = b[1].data.rotaSirasi || 9999;
+            if (ra !== rb) return ra - rb;
+            return (a[1].data.adiSoyadi||'').localeCompare(b[1].data.adiSoyadi||'', 'tr');
+        });
 
+        // ==== Tablo çıktısı ====
         if (cariler.length === 0) {
-            cariListesiBody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Filtreye uygun cari bulunmuyor.</td></tr>';
+            if (cariListesiBody) {
+                cariListesiBody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Filtreye uygun cari bulunmuyor.</td></tr>';
+            }
             return;
         }
 
         let rowsHTML = '';
-        let genelToplamBorc = 0, genelToplamAlacak = 0;
-        let bakiyeBorclarToplami = 0, bakiyeAlacaklarToplami = 0;
-        
-        // DEĞİŞİKLİK 3: Döngüde ID'yi doğrudan alıyoruz.
-        cariler.forEach(([id, item]) => {
+        let toplamBorc = 0, toplamAlacak = 0;
+        let detayAlacak = 0, detayBorc = 0;
+
+        cariler.forEach(([id,item]) => {
             const c = item.data;
-            const bakiye = item.alacak - item.borc;
+            const borc   = item.borc;
+            const alacak = item.alacak;
+            const bakiye = alacak - borc;
 
-            genelToplamBorc += item.borc;
-            genelToplamAlacak += item.alacak;
+            toplamBorc   += borc;
+            toplamAlacak += alacak;
+            if (bakiye >= 0) detayAlacak += bakiye;
+            else detayBorc += Math.abs(bakiye);
 
-            if (bakiye >= 0) bakiyeAlacaklarToplami += bakiye;
-            else bakiyeBorclarToplami += Math.abs(bakiye);
+            const durumStyle  = c.durum === 'aktif' ? 'color:green;' : 'color:red;';
+            const bakiyeStyle = bakiye >= 0      ? 'color:green;' : 'color:red;';
+            const bakiyeText  = `${formatCurrency(bakiye)} ${bakiye>=0? '(A)':'(B)'}`;
 
-            const durumStyle = c.durum === 'aktif' ? 'color:green;' : 'color:red;';
-            const bakiyeStyle = bakiye >= 0 ? 'color:green;' : 'color:red;';
-            const bakiyeText = `${formatCurrency(bakiye)} ${bakiye >= 0 ? '(A)' : '(B)'}`;
-
-            // DEĞİŞİKLİK 4: Butonlara doğru ID'yi basıyoruz.
-            rowsHTML += `<tr>
-                <td>${c.kodu || ''}</td>
-                <td>${c.adiSoyadi || ''}</td>
-                <td>${c.kategori || ''}</td>
-                <td>${c.cariGrup ? c.cariGrup.join(', ') : 'Belirtilmemiş'}</td>
-                <td>${c.rotaSirasi || ''}</td>
-                <td style="${durumStyle}">${c.durum === 'aktif' ? 'Aktif' : 'Pasif'}</td>
-                <td>${c.telefon || ''}</td>
-                <td>${formatCurrency(item.borc)}</td>
-                <td>${formatCurrency(item.alacak)}</td>
+            rowsHTML += `
+              <tr>
+                <td>${c.kodu       ?? ''}</td>
+                <td>${c.adiSoyadi  ?? ''}</td>
+                <td>${c.kategori   ?? ''}</td>
+                <td>${c.cariGrup? c.cariGrup.join(', '): '—'}</td>
+                <td>${c.rotaSirasi ?? ''}</td>
+                <td style="${durumStyle}">${c.durum==='aktif'?'Aktif':'Pasif'}</td>
+                <td>${c.telefon    ?? ''}</td>
+                <td>${formatCurrency(borc)}</td>
+                <td>${formatCurrency(alacak)}</td>
                 <td style="${bakiyeStyle}">${bakiyeText}</td>
-                <td class="dont-print" style="white-space: nowrap;">
-                    <button class="btn btn-edit btn-sm" onclick="editCari('${id}')">Düzenle</button>
-                    <button class="btn btn-delete btn-sm" onclick="deleteCari('${id}')">Sil</button>
+                <td class="dont-print" style="white-space:nowrap;">
+                  <button class="btn btn-edit btn-sm"   onclick="editCari('${id}')">Düzenle</button>
+                  <button class="btn btn-delete btn-sm" onclick="deleteCari('${id}')">Sil</button>
                 </td>
-            </tr>`;
+              </tr>`;
         });
-        
-        const toplamBakiye = genelToplamAlacak - genelToplamBorc;
-        const toplamBakiyeStyle = toplamBakiye >= 0 ? 'color:green;' : 'color:red;';
-        const footerRowsHTML = `...`; // Footer kısmı aynı kalabilir, buraya eklemedim.
-        cariListesiBody.innerHTML = rowsHTML;
-        document.getElementById('cariListesiFooter').innerHTML = `
-            <tr style="background-color: #f8f9fa; font-weight: bold;">
-                 <td colspan="7">GENEL TOPLAM</td>
-                 <td>${formatCurrency(genelToplamBorc)}</td>
-                 <td>${formatCurrency(genelToplamAlacak)}</td>
-                 <td style="${toplamBakiyeStyle}">${formatCurrency(toplamBakiye)}</td>
-                 <td class="dont-print"></td>
-             </tr>
-             <tr style="background-color: #f8f9fa;">
-                 <td colspan="9" style="text-align: right;"><strong>Bakiye Detay (Borçlu Olduğunuz Müşteriler Toplamı):</strong></td>
-                 <td style="color: green; font-weight: bold;">${formatCurrency(bakiyeAlacaklarToplami)}</td>
-                 <td class="dont-print"></td>
-             </tr>
-             <tr style="background-color: #f8f9fa;">
-                 <td colspan="9" style="text-align: right;"><strong>Bakiye Detay (Alacaklı Olduğunuz Müşteriler Toplamı):</strong></td>
-                 <td style="color: red; font-weight: bold;">${formatCurrency(bakiyeBorclarToplami)}</td>
-                 <td class="dont-print"></td>
-             </tr>`;
+
+        // Footer
+        const netBakiye = toplamAlacak - toplamBorc;
+        const netStyle  = netBakiye >= 0 ? 'color:green;' : 'color:red;';
+
+        const footerHTML = `
+          <tr style="background:#f8f9fa;font-weight:bold;">
+            <td colspan="7">GENEL TOPLAM</td>
+            <td>${formatCurrency(toplamBorc)}</td>
+            <td>${formatCurrency(toplamAlacak)}</td>
+            <td style="${netStyle}">${formatCurrency(netBakiye)}</td>
+            <td class="dont-print"></td>
+          </tr>
+          <tr style="background:#f8f9fa;">
+            <td colspan="9" style="text-align:right;"><strong>Bakiye (Alacaklı Müşteriler):</strong></td>
+            <td style="color:green;font-weight:bold;">${formatCurrency(detayAlacak)}</td>
+            <td class="dont-print"></td>
+          </tr>
+          <tr style="background:#f8f9fa;">
+            <td colspan="9" style="text-align:right;"><strong>Bakiye (Borçlu Müşteriler):</strong></td>
+            <td style="color:red;font-weight:bold;">${formatCurrency(detayBorc)}</td>
+            <td class="dont-print"></td>
+          </tr>`;
+
+        // Son olarak DOM güncellemesi
+        if (cariListesiBody)   cariListesiBody.innerHTML   = rowsHTML;
+        if (cariListesiFooter) cariListesiFooter.innerHTML = footerHTML;
 
     } catch (error) {
         console.error("Cariler listelenirken hata:", error);
-        cariListesiBody.innerHTML = '<tr><td colspan="11" style="color:red; text-align:center;">Liste yüklenirken bir hata oluştu. Hata: ' + error.message + '</td></tr>';
+        if (cariListesiBody) {
+            cariListesiBody.innerHTML =
+              `<tr><td colspan="11" style="color:red; text-align:center;">
+                 Liste yüklenirken hata oluştu: ${error.message}
+               </td></tr>`;
+        }
     }
 }
+
+
+
 
 
     async function updateSayimForm() {
@@ -2564,30 +2866,33 @@ async function editCari(id) {
         const docRef = doc(db, 'cariler', id);
         const docSnap = await getDoc(docRef);
         if (!docSnap.exists()) return;
-        const cari = docSnap.data();
+        const cari = docSnap.data() || {};
 
         editingCariId = id;
-        document.getElementById('cariEditId').value = id;
-        document.getElementById('cariKodu').value = cari.kodu || '';
-        document.getElementById('cariRotaSirasi').value = cari.rotaSirasi || null;
-        document.getElementById('cariAdiSoyadi').value = cari.adiSoyadi || '';
-        document.getElementById('cariKategori').value = cari.kategori || '';
-        document.getElementById('grupUretici').checked = false;
-        document.getElementById('grupTedarikci').checked = false;
-        document.getElementById('grupSutAlici').checked = false;
+        document.getElementById('cariEditId').value       = id;
+        document.getElementById('cariKodu').value         = cari.kodu            ?? '';
+        document.getElementById('cariRotaSirasi').value   = cari.rotaSirasi != null ? cari.rotaSirasi : '';
+        document.getElementById('cariAdiSoyadi').value    = cari.adiSoyadi       ?? '';
+        document.getElementById('cariKategori').value     = cari.kategori        ?? '';
 
+        // Checkbox’ları temizle
+        document.getElementById('grupUretici').checked   = false;
+        document.getElementById('grupTedarikci').checked = false;
+        document.getElementById('grupSutAlici').checked  = false;
+
+        // Null-safe grup atama
         if (Array.isArray(cari.cariGrup)) {
             cari.cariGrup.forEach(grup => {
-                if (grup === 'üretici') document.getElementById('grupUretici').checked = true;
-                if (grup === 'tedarikçi') document.getElementById('grupTedarikci').checked = true;
-                if (grup === 'süt alıcı') document.getElementById('grupSutAlici').checked = true;
+                if (grup === 'üretici')    document.getElementById('grupUretici').checked   = true;
+                if (grup === 'tedarikçi')  document.getElementById('grupTedarikci').checked = true;
+                if (grup === 'süt alıcı')  document.getElementById('grupSutAlici').checked  = true;
             });
         }
 
-        document.getElementById('cariDurum').value = cari.durum || 'aktif';
-        document.getElementById('cariTipi').value = cari.cariTipi || 'sut_ve_yem';
-        document.getElementById('cariTelefon').value = cari.telefon || '';
-        document.getElementById('cariAcilisBakiye').disabled = false;
+        document.getElementById('cariDurum').value            = cari.durum       ?? 'aktif';
+        document.getElementById('cariTipi').value             = cari.cariTipi    ?? 'sut_ve_yem';
+        document.getElementById('cariTelefon').value          = cari.telefon     ?? '';
+        document.getElementById('cariAcilisBakiye').disabled  = false;
         document.getElementById('cariAcilisBakiyeTuru').disabled = false;
         
         const acilisBakiyeQuery = query(
@@ -2599,16 +2904,23 @@ async function editCari(id) {
         const acilisBakiyeSnapshot = await getDocs(acilisBakiyeQuery);
 
         if (!acilisBakiyeSnapshot.empty) {
-            const acilisBakiyeDoc = acilisBakiyeSnapshot.docs[0].data();
-            document.getElementById('cariAcilisBakiye').value = acilisBakiyeDoc.tutar;
-            document.getElementById('cariAcilisBakiyeTuru').value = acilisBakiyeDoc.islemTuru;
+            const acilisBakiyeDoc = acilisBakiyeSnapshot.docs[0].data() || {};
+            document.getElementById('cariAcilisBakiye').value     = acilisBakiyeDoc.tutar     ?? '';
+            document.getElementById('cariAcilisBakiyeTuru').value = acilisBakiyeDoc.islemTuru ?? 'yok';
         } else {
-            document.getElementById('cariAcilisBakiye').value = '';
+            document.getElementById('cariAcilisBakiye').value     = '';
             document.getElementById('cariAcilisBakiyeTuru').value = 'yok';
         }
 
-        setEditingMode(document.getElementById('cariFormBaslik'), document.getElementById('cariKaydetBtn'), document.getElementById('cariFormTemizleBtn'), id, 'Cari');
-        document.getElementById('cariFormBaslik').scrollIntoView({ behavior: 'smooth' });
+        setEditingMode(
+            document.getElementById('cariFormBaslik'),
+            document.getElementById('cariKaydetBtn'),
+            document.getElementById('cariFormTemizleBtn'),
+            id,
+            'Cari'
+        );
+        document.getElementById('cariFormBaslik')
+                .scrollIntoView({ behavior: 'smooth' });
 
     } catch (e) {
         console.error("Cari bilgileri yüklenirken hata:", e);
