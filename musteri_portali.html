@@ -89,7 +89,7 @@
 
     <div class="main-content">
         <div class="module-header">
-    		<h2>HAYVAN TAKİP SİSTEMİ</h2>
+    		<h2>MÜŞTERİ PANELİ</h2>
     		<h3>Hoş Geldiniz, <span id="musteriAdi">...</span></h3>
 	</div>
         <div class="container">
@@ -158,17 +158,24 @@
                 <option value="Diğer">Diğer</option>
             </select>
         </div>
-        <div class="form-group">
+
+          <div class="form-group">
             <label for="yeni-hayvan-cinsiyet">Cinsiyet</label>
             <select id="yeni-hayvan-cinsiyet" class="form-control">
                 <option value="Dişi">Dişi</option>
                 <option value="Erkek">Erkek</option>
             </select>
         </div>
+
+        <div class="form-group">
+            <label for="yeni-hayvan-rumuz">Rumuz (Lakap)</label>
+            <input type="text" id="yeni-hayvan-rumuz" class="form-control" placeholder="Örn: Sarıkız, Paşa...">
+        </div>
         <div class="form-group">
             <label for="yeni-hayvan-dogum-tarihi">Doğum Tarihi</label>
             <input type="date" id="yeni-hayvan-dogum-tarihi" class="form-control" required>
         </div>
+
         <div class="form-group">
             <label for="yeni-hayvan-gebelik-durumu">Gebelik Durumu</label>
             <select id="yeni-hayvan-gebelik-durumu" class="form-control">
@@ -250,6 +257,14 @@
                     <label for="edit-hayvan-kupe">Küpe Numarası</label>
                     <input type="text" id="edit-hayvan-kupe" class="form-control" required>
                 </div>
+
+<div class="form-group">
+    <label for="edit-hayvan-rumuz">Rumuz (Lakap)</label>
+    <input type="text" id="edit-hayvan-rumuz" class="form-control">
+</div>
+
+
+
 <div class="form-group">
     <label for="edit-hayvan-cinsiyet">Cinsiyet</label>
     <select id="edit-hayvan-cinsiyet" class="form-control">
@@ -374,16 +389,16 @@
 
     function showPortalMessage(message, type = 'error') {
         const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer);
-                toast.addEventListener('mouseleave', Swal.resumeTimer);
-            }
-        });
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 10000, // 3000'den 10000'e değiştirildi (10 saniye)
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
+    }
+});
 
         Toast.fire({
             icon: type,
@@ -496,14 +511,15 @@
         try {
             const hayvanlarRef = collection(db, 'hayvanlar');
             await addDoc(hayvanlarRef, {
-                kupeNo: kupeNo,
-                irk: document.getElementById('yeni-hayvan-irk').value,
-                cinsiyet: document.getElementById('yeni-hayvan-cinsiyet').value,
-                dogumTarihi: dogumTarihi,
-                gebəlikDurumu: document.getElementById('yeni-hayvan-gebelik-durumu').value,
-                sahipId: userSahipId,
-                cariId: userCariId
-            });
+    kupeNo: kupeNo,
+    irk: document.getElementById('yeni-hayvan-irk').value,
+    cinsiyet: document.getElementById('yeni-hayvan-cinsiyet').value,
+    rumuz: document.getElementById('yeni-hayvan-rumuz').value || null, // EKLENDİ
+    dogumTarihi: dogumTarihi,
+    gebəlikDurumu: document.getElementById('yeni-hayvan-gebelik-durumu').value,
+    sahipId: userSahipId,
+    cariId: userCariId
+});
             showPortalMessage("Hayvan başarıyla kaydedildi.", "success");
             event.target.reset();
             refreshAllData();
@@ -545,6 +561,7 @@
                     const hayvan = docSnap.data();
                     document.getElementById('edit-hayvan-id').value = docSnap.id;
                     document.getElementById('edit-hayvan-kupe').value = hayvan.kupeNo || '';
+document.getElementById('edit-hayvan-rumuz').value = hayvan.rumuz || '';
                     document.getElementById('edit-hayvan-irk').value = hayvan.irk || '';
                     document.getElementById('edit-hayvan-cinsiyet').value = hayvan.cinsiyet || 'Dişi';
                     document.getElementById('edit-hayvan-dogum-tarihi').value = hayvan.dogumTarihi || '';
@@ -569,6 +586,7 @@
 
         const dataToUpdate = {
             kupeNo: document.getElementById('edit-hayvan-kupe').value,
+rumuz: document.getElementById('edit-hayvan-rumuz').value || null,
             irk: document.getElementById('edit-hayvan-irk').value,
             cinsiyet: document.getElementById('edit-hayvan-cinsiyet').value,
             dogumTarihi: document.getElementById('edit-hayvan-dogum-tarihi').value,
@@ -781,17 +799,17 @@
 
 	
     	rows += `<tr>
-        <td data-label="Küpe No"><strong>${hayvan.kupeNo}</strong></td>
-        <td data-label="Irk">${hayvan.irk || '-'}</td>
-        <td data-label="Gebelik Durumu">${hayvan.gebəlikDurumu || '-'}</td>
-        <td data-label="Son Tohumlama">${sonTohumlamaTarihiStr}</td>
-        <td data-label="Tahmini Doğum">${tahminiDogumTarihiStr}</td>
-        <td data-label="Kalan Gün">${kalanGun}</td>
-        <td data-label="İşlemler">
-            <button class="btn btn-secondary btn-small btn-edit" data-id="${doc.id}">Düzenle</button>
-            <button class="btn btn-danger btn-small btn-delete" data-id="${doc.id}">Sil</button>
-        </td>
-    	</tr>`;
+    <td data-label="Küpe No"><strong>${hayvan.kupeNo}</strong></td>
+    <td data-label="Irk">${hayvan.irk || '-'}</td>
+    <td data-label="Cinsiyet">${hayvan.cinsiyet || '-'}</td> <td data-label="Rumuz">${hayvan.rumuz || '-'}</td> <td data-label="Gebelik Durumu">${hayvan.gebəlikDurumu || '-'}</td>
+    <td data-label="Son Tohumlama">${sonTohumlamaTarihiStr}</td>
+    <td data-label="Tahmini Doğum">${tahminiDogumTarihiStr}</td>
+    <td data-label="Kalan Gün">${kalanGun}</td>
+    <td data-label="İşlemler">
+        <button class="btn btn-secondary btn-small btn-edit" data-id="${doc.id}">Düzenle</button>
+        <button class="btn btn-danger btn-small btn-delete" data-id="${doc.id}">Sil</button>
+    </td>
+</tr>`;
 	});
 
             listBody.innerHTML += rows;
@@ -810,57 +828,60 @@
         }
     }
 
-    async function checkUpcomingBirths() {
-        const stickyContainer = document.getElementById('sticky-alert-container');
-        stickyContainer.innerHTML = '';
 
-        try {
-            const hayvanlarRef = collection(db, 'hayvanlar');
-            const q = query(hayvanlarRef, where('sahipId', '==', userSahipId), where('cariId', '==', userCariId), where('gebəlikDurumu', '==', 'Gebe'));
-            const snapshot = await getDocs(q);
 
-            if (snapshot.empty) return;
+async function checkUpcomingBirths() {
+    try {
+        const hayvanlarRef = collection(db, 'hayvanlar');
+        const q = query(hayvanlarRef, where('sahipId', '==', userSahipId), where('cariId', '==', userCariId), where('gebəlikDurumu', '==', 'Gebe'));
+        const snapshot = await getDocs(q);
 
-            snapshot.forEach(doc => {
-                const hayvan = doc.data();
-                if (hayvan.tahminiDogumTarihi) {
-                    const tahminiDogum = new Date(hayvan.tahminiDogumTarihi + 'T00:00:00');
-                    const bugun = new Date();
-                    bugun.setHours(0, 0, 0, 0);
+        if (snapshot.empty) return;
 
-                    const kalanGun = Math.ceil((tahminiDogum - bugun) / (1000 * 60 * 60 * 24));
+        const upcomingBirthsMessages = [];
 
-                    if (kalanGun <= 15) {
-                        let messageText = '';
-                        if (kalanGun > 0) {
-                            messageText = `DİKKAT: "${hayvan.kupeNo}" küpe numaralı hayvanın doğumuna yaklaşık ${kalanGun} gün kaldı!`;
-                        } else if (kalanGun === 0) {
-                            messageText = `DİKKAT: "${hayvan.kupeNo}" küpe numaralı hayvanın bugün doğum yapması bekleniyor!`;
-                        } else {
-                            messageText = `ÖNEMLİ: "${hayvan.kupeNo}" küpe numaralı hayvanın doğumu ${-kalanGun} gün gecikti!`;
-                        }
+        snapshot.forEach(doc => {
+            const hayvan = doc.data();
+            if (hayvan.tahminiDogumTarihi) {
+                const tahminiDogum = new Date(hayvan.tahminiDogumTarihi + 'T00:00:00');
+                const bugun = new Date();
+                bugun.setHours(0, 0, 0, 0);
 
-                        const warningDiv = document.createElement('div');
-                        warningDiv.className = 'sticky-birth-alert';
-                        const messageSpan = document.createElement('span');
-                        messageSpan.textContent = messageText;
-                        const closeButton = document.createElement('span');
-                        closeButton.className = 'alert-close-btn';
-                        closeButton.innerHTML = '&times;';
-                        closeButton.onclick = function() {
-                            this.parentElement.style.display = 'none';
-                        };
-                        warningDiv.appendChild(messageSpan);
-                        warningDiv.appendChild(closeButton);
-                        stickyContainer.appendChild(warningDiv);
+                const kalanGun = Math.ceil((tahminiDogum - bugun) / (1000 * 60 * 60 * 24));
+
+                if (kalanGun >= 0 && kalanGun <= 15) {
+                    let messageText = '';
+                    if (kalanGun > 0) {
+                        messageText = `<b>${hayvan.kupeNo}</b> küpeli hayvanın doğumuna <b>${kalanGun} gün</b> kaldı!`;
+                    } else {
+                        messageText = `<b>${hayvan.kupeNo}</b> küpeli hayvanın <b>bugün</b> doğum yapması bekleniyor!`;
                     }
+                    upcomingBirthsMessages.push(messageText);
                 }
-            });
-        } catch (error) {
-            console.error("Doğum kontrolü sırasında hata: ", error);
-        }
-    }
+            }
+        });
 
+        if (upcomingBirthsMessages.length > 0) {
+            const notificationTitle = upcomingBirthsMessages.length > 1 ?
+                'Yaklaşan Doğumlar Var!' :
+                'Yaklaşan Bir Doğum Var!';
+            
+            const notificationHtml = `<ul style="text-align: left; list-style-position: inside; margin: 0; padding: 0;">
+                ${upcomingBirthsMessages.map(msg => `<li>${msg}</li>`).join('')}
+            </ul>`;
+
+            Swal.fire({
+                icon: 'warning',
+                title: notificationTitle,
+                html: notificationHtml,
+                timer: 15000,
+                timerProgressBar: true,
+            });
+        }
+    } catch (error) {
+        console.error("Doğum kontrolü sırasında hata: ", error);
+    }
+}
     async function fetchSutHareketleri(ayYil) {
         const [year, month] = ayYil.split('-');
         const listBody = document.getElementById('sutListesiBody');
