@@ -1,8 +1,8 @@
 	body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;line-height:1.6;margin:0;padding:0;background-color:#f4f7f9;color:#333;display:flex;min-height:100vh}
-	.sidebar{width:235px;background-color:#2c3e50;color:#fff;padding:18px;box-shadow:2px 0 5px rgba(0,0,0,.1);position:fixed;height:100%;overflow-y:auto;
+	.sidebar{width:210px;background-color:#2c3e50;color:#fff;padding:10px;box-shadow:2px 0 5px rgba(0,0,0,.1);position:fixed;height:100%;overflow-y:auto;
 		transition:transform .3s ease-in-out}
 	.main-content{flex-grow:1;padding:24px;margin-left:250px;background-color:#ecf0f1;transition:margin-left .3s ease-in-out}
-	.container{padding:25px;background-color:#fff;box-shadow:0 4px 15px rgba(0,0,0,.07);border-radius:8px;margin-bottom:25px;overflow-x:auto}
+	.container{padding:20px;background-color:#fff;box-shadow:0 4px 15px rgba(0,0,0,.07);border-radius:8px;margin-bottom:25px;overflow-x:auto}
 	.module-header{background-color:#fff;color:#2c3e50;padding:15px 20px;margin-bottom:20px;border-radius:8px;display:flex;justify-content:space-between;
 		align-items:center;border:1px solid #dfe4e8}
 	.module-header h2{margin:0;font-size:1.6em}
@@ -179,4 +179,7 @@
 	.custom-modal-box h3 {    margin-top: 0;    color: var(--dark-color);}
 	.custom-modal-box p {    margin: 15px 0;}
 	.custom-modal-buttons {display: flex;justify-content: flex-end;    gap: 10px;    margin-top: 25px;		}
+	.sidebar ul li.special-module-link a {background-color: #d35400;color: #ffffff !important;border-radius: 5px;margin: 5px 10px;transition: background-color 0.3s ease;}
+	.sidebar ul li.special-module-link a:hover {    background-color: #e67e22; }
+	.sidebar ul li.special-module-link a.active {    background-color: #e67e22;    box-shadow: 0 0 10px rgba(0,0,0,0.5) inset;}
 
