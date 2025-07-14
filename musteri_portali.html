@@ -80,6 +80,9 @@
     #hayvanTakipContainer td[data-label="İşlemler"]:before {content: "";}}
     #hayvanTakipContainer td[data-label="Küpe No"] {background-color: #e69138;color: white;font-weight: bold;border-top-left-radius: 8px;border-top-right-radius: 8px;}
     #hayvanTakipContainer td[data-label="Küpe No"]::before {    color: white;    font-weight: normal; }
+	.module-header {    display: flex;    align-items: center;    justify-content: flex-start;     gap: 20px; }
+	.header-logo {    width: 120px;      height: 60px;     border-radius: 8px;    object-fit: contain; }
+	.header-text {    text-align: left; }
 
 </style>
 </head>
@@ -89,9 +92,13 @@
 
     <div class="main-content">
         <div class="module-header">
-    		<h2>MÜŞTERİ PANELİ</h2>
-    		<h3>Hoş Geldiniz, <span id="musteriAdi">...</span></h3>
-	</div>
+    <img src="logo.png" alt="Logo" class="header-logo">
+    <div class="header-text">
+        <h2>MÜŞTERİ PANELİ</h2>
+        <h3>Hoş Geldiniz, <span id="musteriAdi">...</span></h3>
+    </div>
+</div>
+
         <div class="container">
             <div id="portal-message" class="alert-message"></div>
             <div class="filter-buttons">
@@ -617,19 +624,28 @@ rumuz: document.getElementById('edit-hayvan-rumuz').value || null,
     }
 
     async function populateHayvanlarSelects() {
-        const tohumlamaSelect = document.getElementById('tohumlama-hayvan-kupe');
-        const dogumSelect = document.getElementById('anne-kupe');
-        tohumlamaSelect.innerHTML = '<option value="">Tohumlanacak hayvanı seçin...</option>';
-        dogumSelect.innerHTML = '<option value="">Doğum yapan anneyi seçin...</option>';
-        
+    const tohumlamaSelect = document.getElementById('tohumlama-hayvan-kupe');
+    const dogumSelect = document.getElementById('anne-kupe');
+    tohumlamaSelect.innerHTML = '<option value="">Tohumlanacak hayvanı seçin...</option>';
+    dogumSelect.innerHTML = '<option value="">Doğum yapan anneyi seçin...</option>';
+
+    try {
         const hayvanlarRef = collection(db, 'hayvanlar');
-        const q = query(hayvanlarRef, where('sahipId', '==', userSahipId), where('cariId', '==', userCariId), orderBy('kupeNo'));
+        const q = query(hayvanlarRef, 
+                        where('sahipId', '==', userSahipId), 
+                        where('cariId', '==', userCariId), 
+                        orderBy('kupeNo'));
+        
         const snapshot = await getDocs(q);
 
         if (snapshot.empty) return;
+
         snapshot.forEach(doc => {
             const hayvan = doc.data();
-            const option = new Option(`${hayvan.kupeNo} (${hayvan.gebəlikDurumu || 'Boş'})`, doc.id);
+            // Menüde rumuz bilgisini de göstererek daha kullanışlı hale getirelim
+            const optionText = `${hayvan.kupeNo} (${hayvan.rumuz || 'Rumuz Yok'}) - ${hayvan.gebəlikDurumu || 'Boş'}`;
+            const option = new Option(optionText, doc.id);
+            
             if (hayvan.cinsiyet === 'Dişi' && hayvan.gebəlikDurumu !== 'Gebe') {
                 tohumlamaSelect.add(option.cloneNode(true));
             }
@@ -637,7 +653,11 @@ rumuz: document.getElementById('edit-hayvan-rumuz').value || null,
                 dogumSelect.add(option.cloneNode(true));
             }
         });
+    } catch (error) {
+        console.error("Hayvan select menüleri doldurulurken hata:", error);
+        showPortalMessage("Menüler için hayvan listesi yüklenemedi.", "error");
     }
+}
 
     async function handleTohumlamaSubmit(event) {
         event.preventDefault();
@@ -745,89 +765,90 @@ rumuz: document.getElementById('edit-hayvan-rumuz').value || null,
         }
     }
 
-    async function fetchHayvanTakipVerileri(isLoadMore = false) {
-        const listBody = document.getElementById('hayvanListesiBody');
-        const loadMoreBtn = document.getElementById('loadMoreBtn');
+async function fetchHayvanTakipVerileri(isLoadMore = false) {
+    const listBody = document.getElementById('hayvanListesiBody');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
 
-        if (!isLoadMore) {
-            lastVisibleDoc = null;
-            listBody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Hayvan verileri yükleniyor...</td></tr>`;
-        }
-
-        try {
-            const hayvanlarRef = collection(db, 'hayvanlar');
-            let q;
-
-            if (isLoadMore && lastVisibleDoc) {
-                q = query(hayvanlarRef,
-                    where('sahipId', '==', userSahipId),
-                    where('cariId', '==', userCariId),
-                    orderBy('kupeNo', 'asc'),
-                    startAfter(lastVisibleDoc),
-                    limit(PAGE_SIZE));
-            } else {
-                q = query(hayvanlarRef,
-                    where('sahipId', '==', userSahipId),
-                    where('cariId', '==', userCariId),
-                    orderBy('kupeNo', 'asc'),
-                    limit(PAGE_SIZE));
-            }
-
-            const querySnapshot = await getDocs(q);
-
-            if (querySnapshot.empty && !isLoadMore) {
-                listBody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Kayıtlı hayvan bulunmuyor.</td></tr>`;
-                loadMoreBtn.style.display = 'none';
-                return;
-            }
-
-            if (!isLoadMore) {
-                listBody.innerHTML = '';
-            }
-
-	let rows = '';
-	querySnapshot.forEach(doc => {
-    	const hayvan = doc.data();
-    	let kalanGun = '-';
-    	let tahminiDogumTarihiStr = '-';
-    	const sonTohumlamaTarihiStr = hayvan.sonTohumlamaTarihi ? new Date(hayvan.sonTohumlamaTarihi + 'T00:00:00').toLocaleDateString('tr-TR') : '-';
-    	if (hayvan.gebəlikDurumu === 'Gebe' && hayvan.tahminiDogumTarihi) {
-        const tahminiDogumTarihi = new Date(hayvan.tahminiDogumTarihi);
-        kalanGun = Math.ceil((tahminiDogumTarihi - new Date()) / (1000 * 60 * 60 * 24));
-        tahminiDogumTarihiStr = tahminiDogumTarihi.toLocaleDateString('tr-TR');
-    	}
-
-	
-    	rows += `<tr>
-    <td data-label="Küpe No"><strong>${hayvan.kupeNo}</strong></td>
-    <td data-label="Irk">${hayvan.irk || '-'}</td>
-    <td data-label="Cinsiyet">${hayvan.cinsiyet || '-'}</td> <td data-label="Rumuz">${hayvan.rumuz || '-'}</td> <td data-label="Gebelik Durumu">${hayvan.gebəlikDurumu || '-'}</td>
-    <td data-label="Son Tohumlama">${sonTohumlamaTarihiStr}</td>
-    <td data-label="Tahmini Doğum">${tahminiDogumTarihiStr}</td>
-    <td data-label="Kalan Gün">${kalanGun}</td>
-    <td data-label="İşlemler">
-        <button class="btn btn-secondary btn-small btn-edit" data-id="${doc.id}">Düzenle</button>
-        <button class="btn btn-danger btn-small btn-delete" data-id="${doc.id}">Sil</button>
-    </td>
-</tr>`;
-	});
-
-            listBody.innerHTML += rows;
-
-            lastVisibleDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
-
-            if (querySnapshot.docs.length < PAGE_SIZE) {
-                loadMoreBtn.style.display = 'none';
-            } else {
-                loadMoreBtn.style.display = 'inline-block';
-            }
-
-        } catch (error) {
-            console.error("Hayvan verileri yüklenirken hata:", error);
-            listBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Veriler yüklenemedi.</td></tr>`;
-        }
+    if (!isLoadMore) {
+        lastVisibleDoc = null;
+        // Yeni sütunlar eklendiği için colspan 9 olmalı
+        listBody.innerHTML = `<tr><td colspan="9" style="text-align:center;">Hayvan verileri yükleniyor...</td></tr>`;
     }
 
+    try {
+        const hayvanlarRef = collection(db, 'hayvanlar');
+        let q;
+
+        if (isLoadMore && lastVisibleDoc) {
+            q = query(hayvanlarRef,
+                where('sahipId', '==', userSahipId),
+                where('cariId', '==', userCariId),
+                orderBy('tahminiDogumTarihi', 'asc'), // SIRALAMA DÜZELTİLDİ
+                startAfter(lastVisibleDoc),
+                limit(PAGE_SIZE));
+        } else {
+            q = query(hayvanlarRef,
+                where('sahipId', '==', userSahipId),
+                where('cariId', '==', userCariId),
+                orderBy('tahminiDogumTarihi', 'asc'), // SIRALAMA DÜZELTİLDİ
+                limit(PAGE_SIZE));
+        }
+
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty && !isLoadMore) {
+            // Yeni sütunlar eklendiği için colspan 9 olmalı
+            listBody.innerHTML = `<tr><td colspan="9" style="text-align:center;">Kayıtlı hayvan bulunmuyor.</td></tr>`;
+            loadMoreBtn.style.display = 'none';
+            return;
+        }
+
+        if (!isLoadMore) {
+            listBody.innerHTML = '';
+        }
+
+        let rows = '';
+        querySnapshot.forEach(doc => {
+            const hayvan = doc.data();
+            let kalanGun = '-';
+            let tahminiDogumTarihiStr = '-';
+            const sonTohumlamaTarihiStr = hayvan.sonTohumlamaTarihi ? new Date(hayvan.sonTohumlamaTarihi + 'T00:00:00').toLocaleDateString('tr-TR') : '-';
+            if (hayvan.gebəlikDurumu === 'Gebe' && hayvan.tahminiDogumTarihi) {
+                const tahminiDogumTarihi = new Date(hayvan.tahminiDogumTarihi);
+                kalanGun = Math.ceil((tahminiDogumTarihi - new Date()) / (1000 * 60 * 60 * 24));
+                tahminiDogumTarihiStr = tahminiDogumTarihi.toLocaleDateString('tr-TR');
+            }
+            rows += `<tr>
+                <td data-label="Küpe No"><strong>${hayvan.kupeNo}</strong></td>
+                <td data-label="Irk">${hayvan.irk || '-'}</td>
+                <td data-label="Cinsiyet">${hayvan.cinsiyet || '-'}</td>
+                <td data-label="Rumuz">${hayvan.rumuz || '-'}</td>
+                <td data-label="Gebelik Durumu">${hayvan.gebəlikDurumu || '-'}</td>
+                <td data-label="Son Tohumlama">${sonTohumlamaTarihiStr}</td>
+                <td data-label="Tahmini Doğum">${tahminiDogumTarihiStr}</td>
+                <td data-label="Kalan Gün">${kalanGun}</td>
+                <td data-label="İşlemler">
+                    <button class="btn btn-secondary btn-small btn-edit" data-id="${doc.id}">Düzenle</button>
+                    <button class="btn btn-danger btn-small btn-delete" data-id="${doc.id}">Sil</button>
+                </td>
+            </tr>`;
+        });
+
+        listBody.innerHTML += rows;
+        lastVisibleDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+
+        if (querySnapshot.docs.length < PAGE_SIZE) {
+            loadMoreBtn.style.display = 'none';
+        } else {
+            loadMoreBtn.style.display = 'inline-block';
+        }
+
+    } catch (error) {
+        console.error("Hayvan verileri yüklenirken hata:", error);
+        // Yeni sütunlar eklendiği için colspan 9 olmalı
+        listBody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:red;">Veriler yüklenemedi.</td></tr>`;
+    }
+}
 
 
 async function checkUpcomingBirths() {
