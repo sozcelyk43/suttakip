@@ -2123,24 +2123,22 @@ async function handleCariKaydet(event) {
 }
 
 
+// LÜTFEN MEVCUT renderCariListesi FONKSİYONUNU BUNUNLA TAMAMEN DEĞİŞTİRİN
+
 async function renderCariListesi() {
- if (!isAppInitialized) return;
+    if (!isAppInitialized) return;
     const cariListesiBody = document.getElementById('cariListesiBody');
-    
-    // Elementlerin varlığını kontrol ederek değerlerini alıyoruz.
     const tarihFiltresiEl = document.getElementById('cariTarihFiltresi');
-    const tarihFiltresi = tarihFiltresiEl ? tarihFiltresiEl.value : '';
-
     const searchTermEl = document.getElementById('cariSearchInput');
-    const searchTerm = searchTermEl ? searchTermEl.value.toLowerCase() : '';
-
     const kategoriEl = document.getElementById('cariKategoriFiltre');
-    const kategori = kategoriEl ? kategoriEl.value : '';
-
     const durumEl = document.getElementById('cariDurumFiltre');
-    const durum = durumEl ? durumEl.value : '';
-
     const grupEl = document.getElementById('cariGrupFiltre');
+
+    // Elementlerin varlığını kontrol ederek değerlerini alıyoruz.
+    const tarihFiltresi = tarihFiltresiEl ? tarihFiltresiEl.value : '';
+    const searchTerm = searchTermEl ? searchTermEl.value.toLowerCase() : '';
+    const kategori = kategoriEl ? kategoriEl.value : '';
+    const durum = durumEl ? durumEl.value : '';
     const grup = grupEl ? grupEl.value : '';
     
     document.getElementById('raporTarihEtiketi').textContent = tarihFiltresi ? `${formatDate(tarihFiltresi)} Tarihi İtibarıyla` : 'Güncel Durum';
@@ -2162,6 +2160,7 @@ async function renderCariListesi() {
         const yemSatisQuery = query(collection(db, 'yem_satislari'), ...hareketConstraints);
         const odemeQuery = query(collection(db, 'odemeVeTahsilatlar'), ...hareketConstraints);
         const yemAlimQuery = query(collection(db, 'yem_alimlari'), ...hareketConstraints);
+
         const [carilerSnapshot, sutSnapshot, yemSatisSnapshot, odemeSnapshot, yemAlimSnapshot] = await Promise.all([
             getDocs(carilerQuery),
             getDocs(sutQuery),
@@ -2169,6 +2168,7 @@ async function renderCariListesi() {
             getDocs(odemeQuery),
             getDocs(yemAlimQuery)
         ]);
+
         const bakiyeMap = new Map();
         carilerSnapshot.forEach(doc => {
             bakiyeMap.set(doc.id, {
@@ -2177,46 +2177,42 @@ async function renderCariListesi() {
                 alacak: 0
             });
         });
+
         sutSnapshot.forEach(doc => {
             const alim = doc.data();
-            if (bakiyeMap.has(alim.cariId)) {
-                bakiyeMap.get(alim.cariId).alacak += alim.toplamTutar || 0;
-            }
+            if (bakiyeMap.has(alim.cariId)) bakiyeMap.get(alim.cariId).alacak += alim.toplamTutar || 0;
         });
-
         yemAlimSnapshot.forEach(doc => {
             const alim = doc.data();
-            if (bakiyeMap.has(alim.cariId)) {
-                bakiyeMap.get(alim.cariId).alacak += alim.toplamTutar || 0;
-            }
+            if (bakiyeMap.has(alim.cariId)) bakiyeMap.get(alim.cariId).alacak += alim.toplamTutar || 0;
         });
         yemSatisSnapshot.forEach(doc => {
             const satis = doc.data();
-            if (bakiyeMap.has(satis.cariId)) {
-                bakiyeMap.get(satis.cariId).borc += satis.toplamTutar || 0;
-            }
+            if (bakiyeMap.has(satis.cariId)) bakiyeMap.get(satis.cariId).borc += satis.toplamTutar || 0;
         });
         odemeSnapshot.forEach(doc => {
             const data = doc.data();
             if (bakiyeMap.has(data.cariId)) {
                 const cariBakiye = bakiyeMap.get(data.cariId);
-                if (data.islemTuru === 'odeme' || data.islemTuru === 'alacak') {
-                    cariBakiye.alacak += data.tutar || 0;
-                } else if (data.islemTuru === 'tahsilat' || data.islemTuru === 'borc') {
-                    cariBakiye.borc += data.tutar || 0;
-                }
+                if (data.islemTuru === 'odeme' || data.islemTuru === 'alacak') cariBakiye.alacak += data.tutar || 0;
+                else if (data.islemTuru === 'tahsilat' || data.islemTuru === 'borc') cariBakiye.borc += data.tutar || 0;
             }
         });
-        let cariler = Array.from(bakiyeMap.values());
+
+        // DEĞİŞİKLİK 1: .values() yerine .entries() kullanarak ID'leri de alıyoruz.
+        let cariler = Array.from(bakiyeMap.entries());
+
         if (searchTerm) {
-            cariler = cariler.filter(c => 
-                c.data.kodu?.toLowerCase().includes(searchTerm) || 
-                c.data.adiSoyadi?.toLowerCase().includes(searchTerm)
+            cariler = cariler.filter(([id, item]) => 
+                item.data.kodu?.toLowerCase().includes(searchTerm) || 
+                item.data.adiSoyadi?.toLowerCase().includes(searchTerm)
             );
         }
+        
+        // DEĞİŞİKLİK 2: Sıralama mantığını güncelliyoruz (a[1] ve b[1] kullanarak).
         cariler.sort((a, b) => 
-            (a.data.rotaSirasi || 9999) - (b.data.rotaSirasi || 9999) || 
-            (a.data.adiSoyadi || '').localeCompare(b.data.adiSoyadi || '', 'tr')
+            (a[1].data.rotaSirasi || 9999) - (b[1].data.rotaSirasi || 9999) || 
+            (a[1].data.adiSoyadi || '').localeCompare(b[1].data.adiSoyadi || '', 'tr')
         );
 
         if (cariler.length === 0) {
@@ -2228,7 +2224,8 @@ async function renderCariListesi() {
         let genelToplamBorc = 0, genelToplamAlacak = 0;
         let bakiyeBorclarToplami = 0, bakiyeAlacaklarToplami = 0;
         
-        cariler.forEach(item => {
+        // DEĞİŞİKLİK 3: Döngüde ID'yi doğrudan alıyoruz.
+        cariler.forEach(([id, item]) => {
             const c = item.data;
             const bakiye = item.alacak - item.borc;
 
@@ -2242,6 +2239,7 @@ async function renderCariListesi() {
             const bakiyeStyle = bakiye >= 0 ? 'color:green;' : 'color:red;';
             const bakiyeText = `${formatCurrency(bakiye)} ${bakiye >= 0 ? '(A)' : '(B)'}`;
 
+            // DEĞİŞİKLİK 4: Butonlara doğru ID'yi basıyoruz.
             rowsHTML += `<tr>
                 <td>${c.kodu || ''}</td>
                 <td>${c.adiSoyadi || ''}</td>
@@ -2254,16 +2252,17 @@ async function renderCariListesi() {
                 <td>${formatCurrency(item.alacak)}</td>
                 <td style="${bakiyeStyle}">${bakiyeText}</td>
                 <td class="dont-print" style="white-space: nowrap;">
-                    <button class="btn btn-edit btn-sm" onclick="editCari('${bakiyeMap.keys().next().value}')">Düzenle</button>
-                    <button class="btn btn-delete btn-sm" onclick="deleteCari('${bakiyeMap.keys().next().value}')">Sil</button>
+                    <button class="btn btn-edit btn-sm" onclick="editCari('${id}')">Düzenle</button>
+                    <button class="btn btn-delete btn-sm" onclick="deleteCari('${id}')">Sil</button>
                 </td>
             </tr>`;
         });
         
         const toplamBakiye = genelToplamAlacak - genelToplamBorc;
         const toplamBakiyeStyle = toplamBakiye >= 0 ? 'color:green;' : 'color:red;';
-
-        const footerRowsHTML = `
+        const footerRowsHTML = `...`; // Footer kısmı aynı kalabilir, buraya eklemedim.
+        cariListesiBody.innerHTML = rowsHTML;
+        document.getElementById('cariListesiFooter').innerHTML = `
             <tr style="background-color: #f8f9fa; font-weight: bold;">
                  <td colspan="7">GENEL TOPLAM</td>
                  <td>${formatCurrency(genelToplamBorc)}</td>
@@ -2282,13 +2281,13 @@ async function renderCariListesi() {
                  <td class="dont-print"></td>
              </tr>`;
 
-        cariListesiBody.innerHTML = rowsHTML + footerRowsHTML;
-
     } catch (error) {
         console.error("Cariler listelenirken hata:", error);
         cariListesiBody.innerHTML = '<tr><td colspan="11" style="color:red; text-align:center;">Liste yüklenirken bir hata oluştu. Hata: ' + error.message + '</td></tr>';
     }
 }
+
+
     async function updateSayimForm() {
         const yemId = document.getElementById('sayimYemSecimi').value;
         const mevcutStokInput = document.getElementById('sayimMevcutStok');
