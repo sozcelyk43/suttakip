@@ -292,19 +292,19 @@
     
         <div class="list-section" style="margin-top: 20px;">
             <h3>Stok Sayım Hareketleri</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Tarih</th>
-                        <th>Yem Adı</th>
-                        <th>Önceki Stok</th>
-                        <th>Sayılan Miktar</th>
-                        <th>Fark</th>
-                        <th>Açıklama</th>
-                    </tr>
-                </thead>
-                <tbody id="stokSayimGecmisiBody"></tbody>
-            </table>
+<table>
+    <thead>
+        <tr>
+            <th>Tarih</th>
+            <th>Yem Adı</th>
+            <th>Önceki Stok</th>
+            <th>Sayılan Miktar</th>
+            <th>Fark</th>
+            <th>Açıklama</th>
+            <th class="dont-print">İşlemler</th> </tr>
+    </thead>
+    <tbody id="stokSayimGecmisiBody"></tbody>
+</table>
         </div>
         </div>
 </section>
@@ -904,6 +904,7 @@
         window.deleteSutAlimi = deleteSutAlimi;
         window.editYemSatisi = editYemSatisi;
         window.deleteYemSatisi = deleteYemSatisi;
+	window.deleteStokSayimi = deleteStokSayimi;
 
         cariSearchInput?.addEventListener('input', () => {
             const queryText = cariSearchInput.value.trim().toLowerCase();
@@ -1913,30 +1914,84 @@ async function renderCariListesi() {
         }
     }
 
-    async function renderStokSayimGecmisi() {
-        const listBody = document.getElementById('stokSayimGecmisiBody');
-        if (!listBody) return;
-        listBody.innerHTML = '<tr><td colspan="6">Yükleniyor...</td></tr>';
-        try {
-            const q = query(collection(db, 'stok_sayim_hareketleri'), where('sahipId', '==', sahipId), orderBy('tarih', 'desc'), limit(10));
-            const snapshot = await getDocs(q);
-            if (snapshot.empty) {
-                listBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Kayıtlı stok sayım hareketi bulunmuyor.</td></tr>';
-                return;
-            }
-            let rows = '';
-            snapshot.forEach(docSnap => {
-                const sayim = docSnap.data();
-                const farkStyle = sayim.fark < 0 ? 'color:red;' : 'color:green;';
-                const farkText = `${sayim.fark > 0 ? '+' : ''}${sayim.fark}`;
-                rows += `<tr><td>${formatDate(sayim.tarih)}</td><td>${sayim.yemAdi}</td><td>${sayim.mevcutStok}</td><td>${sayim.fizikselStok}</td><td style="${farkStyle}; font-weight:bold;">${farkText}</td><td>${sayim.not || ''}</td></tr>`;
-            });
-            listBody.innerHTML = rows;
-        } catch (error) {
-            console.error("Stok sayım geçmişi yüklenirken hata:", error);
-            listBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">Geçmiş yüklenemedi.</td></tr>';
+
+async function renderStokSayimGecmisi() {
+    const listBody = document.getElementById('stokSayimGecmisiBody');
+    if (!listBody) return;
+    listBody.innerHTML = '<tr><td colspan="7">Yükleniyor...</td></tr>'; // Colspan 7 oldu
+    try {
+        const q = query(collection(db, 'stok_sayim_hareketleri'), where('sahipId', '==', sahipId), orderBy('kayitZamani', 'desc'), limit(10));
+        const snapshot = await getDocs(q);
+        if (snapshot.empty) {
+            listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Kayıtlı stok sayım hareketi bulunmuyor.</td></tr>'; // Colspan 7 oldu
+            return;
         }
+        let rows = '';
+        snapshot.forEach(docSnap => {
+            const sayim = docSnap.data();
+            const farkStyle = sayim.fark < 0 ? 'color:red;' : 'color:green;';
+            const farkText = `${sayim.fark > 0 ? '+' : ''}${sayim.fark}`;
+            rows += `<tr>
+                <td>${formatDate(sayim.tarih)}</td>
+                <td>${sayim.yemAdi}</td>
+                <td>${sayim.mevcutStok}</td>
+                <td>${sayim.fizikselStok}</td>
+                <td style="${farkStyle}; font-weight:bold;">${farkText}</td>
+                <td>${sayim.not || ''}</td>
+                <td class="dont-print">
+                    <button class="btn btn-delete btn-sm" onclick="deleteStokSayimi('${docSnap.id}')">Sil</button>
+                </td>
+            </tr>`;
+        });
+        listBody.innerHTML = rows;
+    } catch (error) {
+        console.error("Stok sayım geçmişi yüklenirken hata:", error);
+        listBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Geçmiş yüklenemedi.</td></tr>'; // Colspan 7 oldu
     }
+}
+
+async function deleteStokSayimi(sayimId) {
+    if (!sayimId) return;
+
+    showCustomConfirm("Bu stok sayım kaydını silmek istediğinizden emin misiniz? Bu işlem, ilgili yemin stoğunu sayım öncesi miktara geri döndürecektir. Bu işlem geri alınamaz!", async () => {
+        const sayimRef = doc(db, 'stok_sayim_hareketleri', sayimId);
+        
+        try {
+            await runTransaction(db, async (transaction) => {
+                const sayimDoc = await transaction.get(sayimRef);
+                if (!sayimDoc.exists()) {
+                    throw new Error("Silinecek sayım kaydı bulunamadı.");
+                }
+                const sayimData = sayimDoc.data();
+                const yemRef = doc(db, 'yemler', sayimData.yemId);
+                const yemDoc = await transaction.get(yemRef);
+                
+                if (!yemDoc.exists()) {
+                    transaction.delete(sayimRef);
+                    return;
+                }
+                
+                const mevcutYemStok = yemDoc.data().stokMiktari;
+                if(mevcutYemStok !== sayimData.fizikselStok) {
+                    throw new Error("Bu sayımdan sonra başka stok hareketleri olmuş. Veri tutarlılığı için silme işlemi iptal edildi. Önce sonraki hareketleri geri almalısınız.");
+                }
+
+                transaction.update(yemRef, { stokMiktari: sayimData.mevcutStok });
+                transaction.delete(sayimRef);
+            });
+
+            showToast("Stok sayımı başarıyla silindi ve stok geri alındı.");
+            await renderYemStokListesi();
+            await renderStokSayimGecmisi();
+
+        } catch (error) {
+            console.error("Stok sayımı silinirken hata:", error);
+            showToast("Hata: " + error.message, true);
+        }
+    });
+}
+
+
 
     function generateRandomColors(count) {
         const colors = [];
