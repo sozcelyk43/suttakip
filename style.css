@@ -213,3 +213,9 @@
 	legend {    font-weight: bold;    font-size: 1.1em;    padding: 0 10px;    margin-left: 10px;    color: #2c3e50;}
 	.form-buttons-container {    padding: 20px 0;    border-top: 1px solid #e9ecef;    margin-top: 25px;}
 	@media (max-width: 992px) {    .form-layout-columns {        grid-template-columns: 1fr;     }}
+	.settings-card {    background-color: #ffffff;    border: 1px solid #e9ecef;    border-radius: 8px;    padding: 25px 30px;    margin-bottom: 30px; 
+    		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);    overflow: hidden;}
+	.settings-card h3 {    margin-top: 0;    margin-bottom: 20px;    padding-bottom: 15px;    border-bottom: 1px solid #f1f3f5;    color: #2c3e50;    font-size: 1.4em;}
+	.settings-card h4 {    margin-top: 0;    margin-bottom: 15px;    font-size: 1.1em;    color: #34495e;}
+	.settings-grid {    display: grid;    grid-template-columns: 1fr 1fr;    gap: 30px;}
+	@media (max-width: 992px) {    .settings-grid {        grid-template-columns: 1fr;     }}

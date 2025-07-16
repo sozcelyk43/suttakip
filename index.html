@@ -656,107 +656,89 @@
         <h2>⚙️ Ayarlar</h2>
     </div>
     <div class="container">
-        <div class="settings-column">
-            <div class="settings-section">
-                <h3>Genel Ayarlar</h3>
-                <form id="ayarlarForm">
-                    <div class="form-group">
-                        <label for="varsayilanSutFiyati">Varsayılan Süt Fiyatı (TL/Lt):</label>
-                        <input type="number" id="varsayilanSutFiyati" step="0.01">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Genel Ayarları Kaydet</button>
-                </form>
-            </div>
-            <hr>
-            <div class="settings-section">
-                <h3>Cari Kategori/Köy Tanımları</h3>
-                <form id="cariKategoriForm" action="#">
-                    <div class="form-grid" style="grid-template-columns: 1fr auto; align-items:end;">
-                        <div class="form-group" style="margin-bottom:0;">
-                            <label for="yeniCariKategoriAdi">Yeni Ad:</label>
-                            <input type="text" id="yeniCariKategoriAdi" required>
+
+        <div class="settings-card">
+            <h3>Genel Tanımlar ve Parametreler</h3>
+            <div class="settings-grid">
+                <div class="settings-group">
+                    <h4>Varsayılan Süt Fiyatı</h4>
+                    <form id="ayarlarForm">
+                        <div class="form-group">
+                            <label for="varsayilanSutFiyati">Fiyat (TL/Lt):</label>
+                            <input type="number" id="varsayilanSutFiyati" step="0.01">
                         </div>
-                        <button type="submit" class="btn" style="height:45px;">Ekle</button>
+                        <button type="submit" class="btn btn-primary">Kaydet</button>
+                    </form>
+                </div>
+                <div class="settings-group">
+                    <h4>Cari Kategori/Köy Tanımları</h4>
+                    <form id="cariKategoriForm" action="#">
+                        <div class="form-grid" style="grid-template-columns: 1fr auto; align-items:end;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label for="yeniCariKategoriAdi">Yeni Ad:</label>
+                                <input type="text" id="yeniCariKategoriAdi" required>
+                            </div>
+                            <button type="submit" class="btn" style="height:45px;">Ekle</button>
+                        </div>
+                    </form>
+                    <div class="list-section" style="margin-top:20px;">
+                        <h5>Tanımlı Kategoriler/Köyler</h5>
+                        <ul id="cariKategoriListesiUl"></ul>
                     </div>
-                </form>
-                <div class="list-section" style="margin-top:20px;">
-                    <h4>Tanımlı Kategoriler/Köyler</h4>
-                    <ul id="cariKategoriListesiUl"></ul>
                 </div>
             </div>
         </div>
 
-        <div class="settings-column">
-            <div class="settings-section">
-                <h3>Firma Bilgileri (Makbuzlar İçin)</h3>
-                <form id="firmaBilgileriForm">
-                    <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
-                        <div class="form-group" style="grid-column: span 2;">
-                            <label for="firmaUnvani">Firma Unvanı:</label>
-                            <input type="text" id="firmaUnvani" disabled>
-                        </div>
-                        <div class="form-group" style="grid-column: span 2;">
-                            <label for="firmaAdresi">Adres:</label>
-                            <textarea id="firmaAdresi" rows="2" disabled></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="firmaVergiDairesi">Vergi Dairesi:</label>
-                            <input type="text" id="firmaVergiDairesi" disabled>
-                        </div>
-                        <div class="form-group">
-                            <label for="firmaVkn">Vergi/TC Kimlik No:</label>
-                            <input type="text" id="firmaVkn" disabled>
-                        </div>
-                        <div class="form-group">
-                            <label for="firmaTicSicilNo">Ticaret Sicil No:</label>
-                            <input type="text" id="firmaTicSicilNo" disabled>
-                        </div>
-                        <div class="form-group">
-                            <label for="firmaTelefon">Telefon:</label>
-                            <input type="tel" id="firmaTelefon" disabled>
-                        </div>
-                    </div>
-                    <div class="form-buttons">
-                        <button type="button" class="btn" id="firmaDuzenleBtn">Düzenle</button>
-                        <button type="submit" class="btn btn-primary" id="firmaKaydetBtn" style="display:none;">Değişiklikleri Kaydet</button>
-                    </div>
-                </form>
-            </div>
-            <hr>
-            <div class="settings-section">
-                <h3>Şifre Değiştir</h3>
-                <form id="sifreDegistirForm">
-                    <div class="form-group"><label for="eskiSifre">Eski Şifre:</label><input type="password" id="eskiSifre" required></div>
-                    <div class="form-group"><label for="yeniSifre">Yeni Şifre:</label><input type="password" id="yeniSifre" required></div>
-                    <div class="form-group"><label for="yeniSifreTekrar">Yeni Şifre (Tekrar):</label><input type="password" id="yeniSifreTekrar" required></div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%;">Şifreyi Güncelle</button>
-                </form>
-            </div>
-        </div>
-        
-        <div class="settings-column dont-calisan" style="grid-column: 1 / -1;">
-             <hr class="dont-calisan">
-             <div class="settings-section">
-                <h3>Kullanıcı Yönetimi</h3>
-                <form id="kullaniciForm">
-                    <input type="hidden" id="kullaniciEditId">
-                    <div class="form-grid">
-                        <div class="form-group"><label for="kullaniciAdi">Kullanıcı E-posta:</label><input type="email" id="kullaniciAdi" required></div>
-                        <div class="form-group"><label for="kullaniciSifre">Şifre:</label><input type="password" id="kullaniciSifre" required></div>
-                    </div>
-                    <button type="submit" class="btn" id="kullaniciKaydetBtn">Çalışan Ekle</button>
-                </form>
-                <div class="list-section" style="margin-top:20px;">
-                    <h4>Kullanıcı Listesi</h4>
-                    <table>
-                        <thead><tr><th>Kullanıcı Adı</th><th>Rol</th><th class="dont-print">İşlemler</th></tr></thead>
-                        <tbody id="kullaniciListesiBody"></tbody>
-                    </table>
+        <div class="settings-card">
+            <h3>Firma Bilgileri (Makbuzlar İçin)</h3>
+            <form id="firmaBilgileriForm">
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="form-group" style="grid-column: span 2;"><label for="firmaUnvani">Firma Unvanı:</label><input type="text" id="firmaUnvani" disabled></div>
+                    <div class="form-group" style="grid-column: span 2;"><label for="firmaAdresi">Adres:</label><textarea id="firmaAdresi" rows="2" disabled></textarea></div>
+                    <div class="form-group"><label for="firmaVergiDairesi">Vergi Dairesi:</label><input type="text" id="firmaVergiDairesi" disabled></div>
+                    <div class="form-group"><label for="firmaVkn">Vergi/TC Kimlik No:</label><input type="text" id="firmaVkn" disabled></div>
+                    <div class="form-group"><label for="firmaTicSicilNo">Ticaret Sicil No:</label><input type="text" id="firmaTicSicilNo" disabled></div>
+                    <div class="form-group"><label for="firmaTelefon">Telefon:</label><input type="tel" id="firmaTelefon" disabled></div>
                 </div>
+                <div class="form-buttons">
+                    <button type="button" class="btn" id="firmaDuzenleBtn">Düzenle</button>
+                    <button type="submit" class="btn btn-primary" id="firmaKaydetBtn" style="display:none;">Değişiklikleri Kaydet</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="settings-card">
+            <h3>Güvenlik Ayarları</h3>
+            <form id="sifreDegistirForm">
+                <div class="form-group"><label for="eskiSifre">Eski Şifre:</label><input type="password" id="eskiSifre" required></div>
+                <div class="form-group"><label for="yeniSifre">Yeni Şifre:</label><input type="password" id="yeniSifre" required></div>
+                <div class="form-group"><label for="yeniSifreTekrar">Yeni Şifre (Tekrar):</label><input type="password" id="yeniSifreTekrar" required></div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Şifreyi Güncelle</button>
+            </form>
+        </div>
+
+        <div class="settings-card dont-calisan">
+            <h3>Kullanıcı Yönetimi</h3>
+            <form id="kullaniciForm">
+                <input type="hidden" id="kullaniciEditId">
+                <div class="form-grid">
+                    <div class="form-group"><label for="kullaniciAdi">Kullanıcı E-posta:</label><input type="email" id="kullaniciAdi" required></div>
+                    <div class="form-group"><label for="kullaniciSifre">Şifre:</label><input type="password" id="kullaniciSifre" required></div>
+                </div>
+                <button type="submit" class="btn" id="kullaniciKaydetBtn">Çalışan Ekle</button>
+            </form>
+            <div class="list-section" style="margin-top:20px;">
+                <h4>Kullanıcı Listesi</h4>
+                <table>
+                    <thead><tr><th>Kullanıcı Adı</th><th>Rol</th><th class="dont-print">İşlemler</th></tr></thead>
+                    <tbody id="kullaniciListesiBody"></tbody>
+                </table>
             </div>
         </div>
+
     </div>
 </section>
+
 
 </section>
 </div> 
@@ -898,16 +880,12 @@ onAuthStateChanged(auth, async (user) => {
                 sahipId = userData.sahipId || user.uid;
 
                 if (currentUserRole === 'admin') {
-                    // Oturumda daha önce seçim yapılmış mı diye kontrol et
                     if (sessionStorage.getItem('panelSecildi')) {
-                        // Seçim yapılmışsa, direkt uygulamayı başlat
                         uygulamayiBaslat();
                     } else {
-                        // İlk giriş ise, seçim ekranını göster
                         document.getElementById('secim-modal-overlay').classList.add('show');
                     }
                 } else {
-                    // Diğer roller direkt yönlendirilir
                     const targetPage = currentUserRole === 'calisan' ? 'hizli-giris.html' : 'musteri_portali.html';
                     window.location.href = targetPage;
                 }
@@ -940,8 +918,6 @@ async function uygulamayiBaslat() {
 document.getElementById('moduleSwitchSelect')?.addEventListener('change', function() {
         if (this.value) window.location.href = this.value;
     });
-
-
 
     const moduleSections = document.querySelectorAll('.main-content .module-section');
     const logoutButton = document.getElementById('logoutButton');
@@ -984,8 +960,6 @@ document.getElementById('moduleSwitchSelect')?.addEventListener('change', functi
     window.editYemSatisi = editYemSatisi;
     window.deleteYemSatisi = deleteYemSatisi;
     window.deleteStokSayimi = deleteStokSayimi;
-    window.updateBatchTotals = updateBatchTotals;
-
 
     const odemeCariAramaInput = document.getElementById('odemeCariAramaInput');
     if (odemeCariAramaInput) {
@@ -1196,7 +1170,7 @@ document.getElementById('moduleSwitchSelect')?.addEventListener('change', functi
         
         if (targetId === 'ayarlar') { 
     renderCariKategoriListesi(); 
-    getSettings(); // Bu fonksiyon zaten toggleFirmaBilgileriEdit(false) çağıracak
+    getSettings();
     if (currentUserRole === 'admin') { 
         renderKullaniciListesi(); 
     } 
@@ -1258,14 +1232,6 @@ document.getElementById('moduleSwitchSelect')?.addEventListener('change', functi
         raporCariAramaInput.addEventListener('blur', function() { setTimeout(() => { suggestionsBox.style.display = 'none'; }, 200); });
     }
 
-
-
-
-
-
-
-
-
     const sutRaporuCariAramaInput = document.getElementById('sutRaporuCariAramaInput');
     if (sutRaporuCariAramaInput) {
         const suggestionsBox = document.getElementById('sutRaporuCariSuggestions');
@@ -1299,16 +1265,6 @@ document.getElementById('moduleSwitchSelect')?.addEventListener('change', functi
         sutRaporuCariAramaInput.addEventListener('blur', function() { setTimeout(() => { suggestionsBox.style.display = 'none'; }, 200); });
     }
     
-    document.getElementById('mm-batch-getir-btn')?.addEventListener('click', renderBatchOnayEkrani);
-    document.getElementById('mm-batch-gonder-btn')?.addEventListener('click', handleBatchMakbuzGonder);
-    document.getElementById('mm-batch-select-all')?.addEventListener('change', (e) => {
-        document.querySelectorAll('.mm-batch-checkbox').forEach(cb => cb.checked = e.target.checked);
-        updateBatchTotals();
-    });
-    document.getElementById('mm-batch-iptal-btn')?.addEventListener('click', () => {
-        document.getElementById('mm-batch-sonuc-alani').style.display = 'none';
-    });
-
     document.getElementById('raporOlusturBtn')?.addEventListener('click', handleHesapOzetiRaporuOlustur);
     document.getElementById('sutRaporuOlusturBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: false}));
     document.getElementById('sutRaporuTumunuGosterBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: true, kategori: false}));
@@ -1340,17 +1296,8 @@ document.getElementById('moduleSwitchSelect')?.addEventListener('change', functi
     document.getElementById('yemAlisMiktar').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
     document.getElementById('yemAlisBirimFiyati').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
     document.getElementById('firmaDuzenleBtn')?.addEventListener('click', () => toggleFirmaBilgileriEdit(true));
-
- const dashboardLink = document.querySelector('#sidebarNav a[href="#dashboard"]');
-    if (dashboardLink && !dashboardLink.classList.contains('active')) {
-        dashboardLink.click();
-    }
-
-
-
-
-
-}
+    const dashboardLink = document.querySelector('#sidebarNav a[href="#dashboard"]');
+    if (dashboardLink && !dashboardLink.classList.contains('active')) {dashboardLink.click();}}
 
 async function loadInitialData() {
     try {
@@ -1428,13 +1375,11 @@ async function handleMmVeriGetir() {
     const tableBody = document.getElementById('mm-hareket-tablosu-body');
 
     if (!cariId || !baslangicTarihi || !bitisTarihi) {
-        return showToast("Lütfen cari, başlangıç ve bitiş tarihlerini seçin.", true);
-    }
+        return showToast("Lütfen cari, başlangıç ve bitiş tarihlerini seçin.", true);}
 
     tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px;">Süt verileri toplanıyor...</td></tr>`;
 
     try {
-        // Sadece süt alımlarını sorgula
         const sutQuery = query(collection(db, 'sut_alimlari'),
             where('sahipId', '==', sahipId),
             where('cariId', '==', cariId),
@@ -1451,7 +1396,6 @@ async function handleMmVeriGetir() {
             return;
         }
 
-        // Değerleri topla
         let toplamAksam = 0;
         let toplamSabah = 0;
         let toplamLitre = 0;
@@ -1467,7 +1411,6 @@ async function handleMmVeriGetir() {
 
         const ortalamaFiyat = toplamLitre > 0 ? (toplamBrutTutar / toplamLitre) : 0;
         
-        // Tek satırlık özet tablosunu oluştur
         tableBody.innerHTML = `
             <tr>
                 <td style="text-align:right;">${toplamAksam.toFixed(2)}</td>
@@ -1478,7 +1421,6 @@ async function handleMmVeriGetir() {
             </tr>
         `;
 
-        // Fiş Özeti'ni güncelle (Artık sadece süt tutarı var)
         document.getElementById('mm-devir-bakiye').textContent = "0,00 ₺"; // Devir bu ekranda gösterilmiyor
         document.getElementById('mm-toplam-alacak').textContent = formatCurrency(toplamBrutTutar);
         document.getElementById('mm-toplam-borc').textContent = "0,00 ₺";
@@ -1501,7 +1443,6 @@ function toggleFirmaBilgileriEdit(isEditing) {
     kaydetBtn.style.display = isEditing ? 'inline-block' : 'none';
 }
 
-// BU YENİ FONKSİYONU SCRIPT'İNİZE EKLEYİN
 function showMakbuzOnayEkrani() {
     const brutTutarStr = document.getElementById('mm-net-tutar').textContent;
     const brutTutar = parseFloat(brutTutarStr.replace(/[^0-9,-]+/g, "").replace(",", ".")) || 0;
@@ -1510,11 +1451,9 @@ function showMakbuzOnayEkrani() {
         return showToast("Makbuz oluşturmak için pozitif bir tutar olmalıdır.", true);
     }
 
-    // Gerekli verileri al
     const cariAdi = document.getElementById('mmCariArama').value;
     const kesintiler = calculateDeductions(brutTutar);
 
-    // Modal'daki alanları doldur
     document.getElementById('onay-cari-adi').textContent = cariAdi;
     document.getElementById('onay-brut-tutar').textContent = formatCurrency(kesintiler.brutTutar);
     document.getElementById('onay-gv').textContent = `(-) ${formatCurrency(kesintiler.gelirVergisiTevkifati)}`;
@@ -1526,7 +1465,6 @@ function showMakbuzOnayEkrani() {
     const confirmBtn = document.getElementById('makbuz-onay-confirm');
     const cancelBtn = document.getElementById('makbuz-onay-cancel');
 
-    // Butonlara event listener'ları ata
     const confirmClickHandler = () => {
         handleMakbuzOlustur(); // Asıl makbuz oluşturma fonksiyonu burada çağrılır
         overlay.classList.remove('show');
@@ -1535,12 +1473,8 @@ function showMakbuzOnayEkrani() {
     
     confirmBtn.onclick = confirmClickHandler;
     cancelBtn.onclick = () => overlay.classList.remove('show');
-
-    // Modalı göster
     overlay.classList.add('show');
 }
-
-
 
 function recalculateMmTotals() {
     const tableBody = document.getElementById('mm-hareket-tablosu-body');
@@ -1551,7 +1485,6 @@ function recalculateMmTotals() {
     let donemToplamBorc = 0;
 
     tableBody.querySelectorAll('tr').forEach(row => {
-        // Düzenlenebilir satırlar için anlık hesaplama
         if (row.classList.contains('editable-row')) {
             const miktar = parseFloat(row.querySelector('.mm-input-miktar')?.value) || 0;
             const fiyat = parseFloat(row.querySelector('.mm-input-fiyat')?.value) || 0;
@@ -1578,7 +1511,6 @@ function recalculateMmTotals() {
         }
     });
 
-    // Özet alanını güncelle
     document.getElementById('mm-toplam-alacak').textContent = formatCurrency(donemToplamAlacak);
     document.getElementById('mm-toplam-borc').textContent = formatCurrency(donemToplamBorc);
 
@@ -1588,379 +1520,10 @@ function recalculateMmTotals() {
     netTutarElement.style.color = netTutar >= 0 ? 'green' : 'red';
 }
 
-// BU YARDIMCI FONKSİYONLARI SCRIPT'İNİZE EKLEYİN
-
-/**
- * Verilen brüt tutar üzerinden yasal kesintileri hesaplar.
- * @param {number} brutTutar - Mal hizmetlerin toplam brüt tutarı.
- * @returns {object} Kesinti detaylarını ve net tutarı içeren bir nesne.
- */
-function calculateDeductions(brutTutar) {
-    const gelirVergisiOrani = 0.02; // %2 Stopaj
-    const sgkOrani = 0.02;           // %2 SGK
-    const borsaOrani = 0.002;        // %0.2 Borsa Tescil
-
-    const gelirVergisiTevkifati = brutTutar * gelirVergisiOrani;
-    const sgkTevkifati = brutTutar * sgkOrani;
-    const borsaTescilUcreti = brutTutar * borsaOrani;
-
-    const toplamKesinti = gelirVergisiTevkifati + sgkTevkifati + borsaTescilUcreti;
-    const netTutar = brutTutar - toplamKesinti;
-
-    return {
-        brutTutar,
-        gelirVergisiTevkifati,
-        sgkTevkifati,
-        borsaTescilUcreti,
-        toplamKesinti,
-        netTutar
-    };
-}
-
-/**
- * Sayıyı Türkçe yazı formatına çevirir. (Basit bir versiyon)
- * @param {number} num - Yazıya çevrilecek sayı.
- * @returns {string} Sayının Türkçe okunuşu.
- */
-function numberToWordsTR(num) {
-    const [tamKisim, ondalikKisim] = String(num.toFixed(2)).split('.');
-    const birlikler = ["", "Bir", "İki", "Üç", "Dört", "Beş", "Altı", "Yedi", "Sekiz", "Dokuz"];
-    const onluklar = ["", "On", "Yirmi", "Otuz", "Kırk", "Elli", "Altmış", "Yetmiş", "Seksen", "Doksan"];
-    const binler = ["", "Bin", "Milyon", "Milyar", "Trilyon"];
-
-    function cevir(n) {
-        if (n < 10) return birlikler[n];
-        if (n < 100) return onluklar[Math.floor(n / 10)] + " " + birlikler[n % 10];
-        if (n < 1000) return (n % 100 === 0 ? "" : "Yüz") + " " + cevir(n % 100);
-    }
-    // Bu fonksiyon daha da geliştirilebilir, şimdilik basit tutuyoruz.
-    return `${tamKisim} TL ${ondalikKisim} Krş.`;
-}
-
-
-// MEVCUT renderBatchOnayEkrani FONKSİYONUNU SİLİP BUNU EKLEYİN
-
-async function renderBatchOnayEkrani() {
-    const baslangic = document.getElementById('mm-batch-baslangic').value;
-    const bitis = document.getElementById('mm-batch-bitis').value;
-    
-    // HATA BURADAYDI: Bu satır eksikti. Kategori dropdown'ının değeri burada okunmalı.
-    const kategori = document.getElementById('mm-batch-kategori').value;
-
-    const tableBody = document.getElementById('mm-batch-table-body');
-    const sonucAlani = document.getElementById('mm-batch-sonuc-alani');
-
-    if (!baslangic || !bitis) {
-        return showToast("Lütfen dönem başlangıç ve bitiş tarihlerini seçin.", true);
-    }
-    
-    tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:20px;">Veriler yükleniyor...</td></tr>`;
-    sonucAlani.style.display = 'block';
-    updateBatchTotals();
-
-    try {
-        const sutQuery = query(collection(db, 'sut_alimlari'),
-            where('sahipId', '==', sahipId),
-            where('tarih', '>=', baslangic),
-            where('tarih', '<=', bitis)
-        );
-        
-        // Kategori seçiliyse carileri ona göre filtrele, değilse tümünü al
-        const carilerQuery = kategori 
-            ? query(collection(db, 'cariler'), where("sahipId", "==", sahipId), where("kategori", "==", kategori))
-            : query(collection(db, 'cariler'), where("sahipId", "==", sahipId));
-
-        const [sutSnap, carilerSnap] = await Promise.all([
-            getDocs(sutQuery),
-            getDocs(carilerQuery)
-        ]);
-
-        const cariMap = new Map(carilerSnap.docs.map(doc => [doc.id, doc.data()]));
-        const mustahsilVerileri = new Map();
-
-        sutSnap.forEach(doc => {
-            const alim = doc.data();
-            // Eğer bu cari, filtrelenmiş cari listesinde yoksa (farklı kategorideyse) atla
-            if (!cariMap.has(alim.cariId)) return; 
-
-            if (!mustahsilVerileri.has(alim.cariId)) {
-                mustahsilVerileri.set(alim.cariId, { toplamSut: 0, brutTutar: 0 });
-            }
-            const mustahsil = mustahsilVerileri.get(alim.cariId);
-            mustahsil.toplamSut += alim.toplam || 0;
-            mustahsil.brutTutar += alim.toplamTutar || 0;
-        });
-
-        if (mustahsilVerileri.size === 0) {
-             tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:20px;">Bu dönemde ve kategoride veri bulunamadı.</td></tr>`;
-             return;
-        }
-
-        let tableHTML = '';
-        mustahsilVerileri.forEach((data, cariId) => {
-            const cariData = cariMap.get(cariId);
-            if (!cariData) return;
-
-            const birimFiyat = data.toplamSut > 0 ? data.brutTutar / data.toplamSut : 0;
-            const kesintiler = calculateDeductions(data.brutTutar);
-
-            tableHTML += `
-                <tr data-cari-id="${cariId}" data-cari-adi="${cariData.adiSoyadi}">
-                    <td><input type="checkbox" class="mm-batch-checkbox" onchange="updateBatchTotals()"></td>
-                    <td>${cariData.adiSoyadi}</td>
-                    <td class="data-sut">${data.toplamSut.toFixed(2)}</td>
-                    <td class="data-fiyat">${birimFiyat.toFixed(2)}</td>
-                    <td class="data-brut">${data.brutTutar.toFixed(2)}</td>
-                    <td class="data-stopaj">${kesintiler.gelirVergisiTevkifati.toFixed(2)}</td>
-                    <td class="data-sgk">${kesintiler.sgkTevkifati.toFixed(2)}</td>
-                    <td class="data-net" style="font-weight:bold;">${kesintiler.netTutar.toFixed(2)}</td>
-                    <td><span class="badge badge-pending">Bekliyor</span></td>
-                </tr>
-            `;
-        });
-        tableBody.innerHTML = tableHTML;
-
-    } catch (error) {
-        console.error("Toplu müstahsil verisi getirilirken hata:", error);
-        tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:red;">Hata oluştu!</td></tr>`;
-    }
-}
-
-function updateBatchTotals() {
-    const allCheckboxes = document.querySelectorAll('.mm-batch-checkbox');
-    let secilenSayi = 0;
-    let toplamTutar = 0;
-
-    allCheckboxes.forEach(cb => {
-        if (cb.checked) {
-            secilenSayi++;
-            const netTutar = parseFloat(cb.closest('tr').querySelector('.data-net').textContent) || 0;
-            toplamTutar += netTutar;
-        }
-    });
-
-    document.getElementById('mm-batch-secilen-sayi').textContent = secilenSayi;
-    document.getElementById('mm-batch-toplam-tutar').textContent = formatCurrency(toplamTutar);
-}
-
-// handleBatchMakbuzGonder fonksiyonunu tamamen bununla değiştirin
-
-async function handleBatchMakbuzGonder() {
-    const secilenSatirlar = document.querySelectorAll('.mm-batch-checkbox:checked');
-    if (secilenSatirlar.length === 0) {
-        return showToast("Lütfen en az bir müstahsil seçin.", true);
-    }
-
-    const onayMesaji = `${secilenSatirlar.length} adet müstahsil için makbuz oluşturulacak. Bu işlem, tarayıcınızda yeni sekmeler açacaktır. Devam etmek istiyor musunuz?`;
-
-    // 1. ADIM: Önce kullanıcıdan onayı al
-    showCustomConfirm(onayMesaji, () => {
-        // 2. ADIM: Kullanıcı "Evet" derse işlemleri başlat
-        showToast(`${secilenSatirlar.length} adet makbuz oluşturuluyor...`, false, 3000);
-
-        secilenSatirlar.forEach((cb, index) => {
-            const satir = cb.closest('tr');
-            const durumHucre = satir.querySelector('td:last-child .badge');
-            
-            // Her makbuz için yeni bir sekme aç
-            const makbuzPenceresi = window.open('', '_blank');
-            if (!makbuzPenceresi) {
-                showToast("Pop-up engelleyici aktif olabilir. Lütfen izin verin.", true);
-                durumHucre.textContent = 'Engellendi';
-                durumHucre.className = 'badge badge-danger';
-                return; // Bu döngüyü sonlandır
-            }
-            makbuzPenceresi.document.write('<body>Makbuz içeriği hazırlanıyor...</body>');
-
-            try {
-                const veri = {
-                    cariId: satir.dataset.cariId,
-                    cariAdi: satir.dataset.cariAdi,
-                    brutTutar: parseFloat(satir.querySelector('.data-brut').textContent)
-                };
-
-                // Makbuz oluşturma fonksiyonunu pencere referansıyla çağır
-                handleMakbuzOlustur(veri, makbuzPenceresi);
-                durumHucre.textContent = 'Oluşturuldu';
-                durumHucre.className = 'badge badge-success';
-            } catch (e) {
-                durumHucre.textContent = 'Hata';
-                durumHucre.className = 'badge badge-danger';
-                makbuzPenceresi.document.write(`<body>Bir hata oluştu: ${e.message}</body>`);
-                makbuzPenceresi.document.close();
-                console.error("Makbuz oluşturulurken hata:", e);
-            }
-        });
-    }, "Toplu Makbuz Onayı");
-}
-
-
-async function handleMakbuzOlustur(veri, makbuzPenceresi) {
-    try {
-        const { cariId, cariAdi, brutTutar } = veri;
-        
-        if (!globalSettings.firmaProfili || !globalSettings.firmaProfili.unvan) {
-            throw new Error("Lütfen Ayarlar menüsünden firma bilgilerinizi doldurun.");
-        }
-        
-        const aliciData = globalSettings.firmaProfili;
-        const saticiData = window.cariDataMap.get(cariId);
-
-        if (!saticiData) {
-            throw new Error(`${cariAdi} için cari verisi bulunamadı.`);
-        }
-
-        const belgeNo = `MM-${cariId.substring(0, 4)}-${Date.now()}`;
-        const kesintiler = calculateDeductions(brutTutar);
-        let makbuzHTML = getMakbuzHTMLTemplate();
-
-        // Yer tutucuları doldur
-        makbuzHTML = makbuzHTML.replace(/__ALICI_UNVAN__/g, aliciData.unvan || '')
-                               .replace('__ALICI_ADRES__', aliciData.adres || '')
-                               .replace('__ALICI_VERGI_DAIRESI__', aliciData.vergiDairesi || '')
-                               .replace('__ALICI_VKN__', aliciData.vkn || '')
-                               .replace('__ALICI_TELEFON__', aliciData.telefon || '')
-                               .replace('__SATICI_ADI__', cariAdi)
-                               .replace('__SATICI_TC__', saticiData.vergiNo || 'Belirtilmemiş')
-                               .replace('__SATICI_ADRES__', saticiData.adres || 'Belirtilmemiş')
-                               .replace('__BELGE_NO__', belgeNo)
-                               .replace('__DUZENLEME_TARIHI__', new Date().toLocaleDateString('tr-TR'))
-                               .replace('__BRUT_TUTAR__', formatCurrency(kesintiler.brutTutar))
-                               .replace('__GELIR_VERGISI__', formatCurrency(kesintiler.gelirVergisiTevkifati))
-                               .replace('__SGK_TEVKIFATI__', formatCurrency(kesintiler.sgkTevkifati))
-                               .replace('__BORSA_TESCIL__', formatCurrency(kesintiler.borsaTescilUcreti))
-                               .replace('__TOPLAM_KESINTI__', formatCurrency(kesintiler.toplamKesinti))
-                               .replace('__ODENECEK_NET_TUTAR__', formatCurrency(kesintiler.netTutar))
-                               .replace('__YAZI_ILE_TUTAR__', numberToWordsTR(kesintiler.netTutar));
-        
-        // Makbuz kalemlerini (sadece toplamı gösteren satır) ekle
-        const kalemlerHTML = `
-            <tr>
-                <td>1</td>
-                <td>Dönem Toplam Süt Bedeli</td>
-                <td class="text-right"></td>
-                <td></td>
-                <td class="text-right"></td>
-                <td class="text-right">${formatCurrency(kesintiler.brutTutar)}</td>
-            </tr>
-        `;
-        makbuzHTML = makbuzHTML.replace('__KALEMLER_GOVDESI__', kalemlerHTML);
-
-        // Önceden açılan pencerenin içeriğini doldur
-        if (makbuzPenceresi && !makbuzPenceresi.closed) {
-            makbuzPenceresi.document.open();
-            makbuzPenceresi.document.write(makbuzHTML);
-            makbuzPenceresi.document.close();
-        } else {
-            // Pencere bir şekilde kapanmışsa veya yoksa hata ver
-             throw new Error("Makbuz penceresi bulunamadı veya kapatıldı.");
-        }
-
-    } catch (error) {
-        console.error("handleMakbuzOlustur içinde hata:", error);
-        // Hata durumunda pencereye hata mesajı yaz
-        if (makbuzPenceresi && !makbuzPenceresi.closed) {
-            makbuzPenceresi.document.body.innerHTML = `Bir hata oluştu: ${error.message}`;
-        }
-        // Bu hatayı, çağıran fonksiyona da bildir
-        throw error;
-    }
-}
-
-function getMakbuzHTMLTemplate() {
-    return `
-    <!DOCTYPE html>
-    <html lang="tr">
-    <head>
-        <meta charset="UTF-8">
-        <title>e-Müstahsil Makbuzu</title>
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-            body { font-family: 'Roboto', Arial, sans-serif; font-size: 9pt; color: #333; background-color: #fff; }
-            @page { size: A4; margin: 15mm; }
-            .makbuz-container { width: 100%; height: 100%; }
-            .makbuz-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #000; padding-bottom: 10px; }
-            .makbuz-title h1 { margin: 0; font-size: 16pt; color: #000; }
-            .makbuz-title p { margin: 5px 0 0; font-size: 11pt; color: #555; }
-            .belge-info { text-align: right; }
-            .belge-info p { margin: 2px 0; font-size: 10pt;}
-            .party-info { display: flex; justify-content: space-between; margin-top: 15px; padding-bottom:15px; border-bottom: 1px solid #ccc; }
-            .party { width: 48%; border: 1px solid #ccc; padding: 10px; border-radius: 5px; }
-            .party h3 { background-color: #f2f2f2; padding: 8px; margin: -10px -10px 10px -10px; font-size: 11pt; border-bottom: 1px solid #ccc; border-radius: 5px 5px 0 0; }
-            .party p { margin: 4px 0; line-height: 1.4; }
-            .line-items-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            .line-items-table th, .line-items-table td { border: 1px solid #999; padding: 6px 8px; text-align: left; }
-            .line-items-table th { background-color: #e9ecef; font-weight: 500; }
-            .totals-section { display: flex; justify-content: flex-end; margin-top: 15px; }
-            .totals-table { width: 45%; border-spacing: 0; }
-            .totals-table td { padding: 5px 8px; }
-            .totals-table tr td:first-child { text-align: right; font-weight: 500; }
-            .totals-table .kesinti-row td:first-child { color: #d9534f; }
-            .net-tutar-row { font-weight: bold; background-color: #e9ecef; border-top: 2px solid #000; font-size: 12pt; }
-            .makbuz-footer { margin-top: 30px; font-size: 8.5pt; border-top: 1px solid #ccc; padding-top: 15px; }
-            .signature-area { display: flex; justify-content: space-around; margin-top: 50px; }
-            .signature-box { text-align: center; }
-            .text-right { text-align: right !important; }
-        </style>
-    </head>
-    <body>
-        <div class="makbuz-container">
-            <div class="makbuz-header">
-                <div class="makbuz-title">
-                    <h1>MÜSTAHSİL MAKBUZU</h1>
-                    <p>__ALICI_UNVAN__</p>
-                </div>
-                <div class="belge-info">
-                    <p><strong>Belge No:</strong> __BELGE_NO__</p>
-                    <p><strong>Tarih:</strong> __DUZENLEME_TARIHI__</p>
-                </div>
-            </div>
-            <div class="party-info">
-                <div class="party">
-                    <h3>ALICI</h3>
-                    <p><strong>Unvan:</strong> __ALICI_UNVAN__</p>
-                    <p><strong>Adres:</strong> __ALICI_ADRES__</p>
-                    <p><strong>V.D./VKN:</strong> __ALICI_VERGI_DAIRESI__ / __ALICI_VKN__</p>
-                    <p><strong>Tel:</strong> __ALICI_TELEFON__</p>
-                </div>
-                <div class="party">
-                    <h3>SATICI (MÜSTAHSİL)</h3>
-                    <p><strong>Adı Soyadı:</strong> __SATICI_ADI__</p>
-                    <p><strong>Adres:</strong> __SATICI_ADRES__</p>
-                    <p><strong>V.D./TCKN:</strong> __SATICI_TC__</p>
-                </div>
-            </div>
-            <table class="line-items-table">
-                <thead>
-                    <tr><th>#</th><th>Açıklama</th><th class="text-right">Miktar</th><th>Birim</th><th class="text-right">Birim Fiyat</th><th class="text-right">Tutar (TL)</th></tr>
-                </thead>
-                <tbody id="kalemler-govdesi">__KALEMLER_GOVDESI__</tbody>
-            </table>
-            <div class="totals-section">
-                <table class="totals-table">
-                    <tr><td>Mal Hizmet Toplam Tutarı (Brüt)</td><td class="text-right">__BRUT_TUTAR__</td></tr>
-                    <tr class="kesinti-row"><td>Gelir Vergisi Tevkifatı (%2)</td><td class="text-right">(-) __GELIR_VERGISI__</td></tr>
-                    <tr class="kesinti-row"><td>SGK Tevkifatı (%2)</td><td class="text-right">(-) __SGK_TEVKIFATI__</td></tr>
-                    <tr class="kesinti-row"><td>Borsa Tescil Ücreti (%0.2)</td><td class="text-right">(-) __BORSA_TESCIL__</td></tr>
-                    <tr><td><strong>Toplam Kesinti</strong></td><td class="text-right"><strong>(-) __TOPLAM_KESINTI__</strong></td></tr>
-                    <tr class="net-tutar-row"><td>ÖDENECEK NET TUTAR</td><td class="text-right">__ODENECEK_NET_TUTAR__</td></tr>
-                </table>
-            </div>
-            <div class="makbuz-footer">
-                <p><strong>Yalnız:</strong> __YAZI_ILE_TUTAR__</p>
-            </div>
-        </div>
-    </body>
-    </html>
-    `;
-}
-
-
 
 
 function createMmEditableRow(type) {
     const tableBody = document.getElementById('mm-hareket-tablosu-body');
-    // "Hareket bulunamadı" veya "Yükleniyor" mesajı varsa temizle
     if (tableBody.rows.length === 1 && tableBody.rows[0].cells.length === 1) {
         tableBody.innerHTML = '';
     }
@@ -2005,7 +1568,6 @@ function createMmEditableRow(type) {
             <td class="dont-print"><button class="btn btn-delete btn-sm" onclick="this.closest('tr').remove(); recalculateMmTotals();">X</button></td>
         `;
     } else if (type === 'odeme') {
-        // Ödeme için başlangıç türünü alacak (müşteriden gelen para) olarak ayarlıyoruz.
         newRow.dataset.tur = 'odeme_alacak';
         contentHTML = `
             <td><input type="date" class="form-control" value="${today}"></td>
@@ -2027,33 +1589,39 @@ function createMmEditableRow(type) {
     recalculateMmTotals(); // Ekledikten sonra toplamları bir kez daha hesapla
 }
 
-
-// MEVCUT getSettings FONKSİYONUNU BUNUNLA DEĞİŞTİRİN
-
 async function getSettings() {
-    // Ayarlar zaten yüklendiyse tekrar yükleme
-    if (globalSettings && globalSettings.firmaProfili) {
-        return globalSettings;
-    }
-
     const settingsRef = doc(db, 'ayarlar', sahipId);
     try {
         const docSnap = await getDoc(settingsRef);
         if (docSnap.exists()) {
             globalSettings = docSnap.data();
+
+            const sutFiyatiInput = document.getElementById('varsayilanSutFiyati');
+            if (sutFiyatiInput) {
+                sutFiyatiInput.value = (globalSettings.defaultMilkPrice || 0).toFixed(2);
+            }
+
+            const firmaProfili = globalSettings.firmaProfili || {};
+            document.getElementById('firmaUnvani').value = firmaProfili.unvan || '';
+            document.getElementById('firmaAdresi').value = firmaProfili.adres || '';
+            document.getElementById('firmaVergiDairesi').value = firmaProfili.vergiDairesi || '';
+            document.getElementById('firmaVkn').value = firmaProfili.vkn || '';
+            document.getElementById('firmaTicSicilNo').value = firmaProfili.ticSicilNo || '';
+            document.getElementById('firmaTelefon').value = firmaProfili.telefon || '';
+            
         } else {
-            // Eğer ayar dokümanı hiç yoksa, varsayılan bir nesne ata
-            globalSettings = { defaultMilkPrice: 15.50, firmaProfili: null };
+            globalSettings = { defaultMilkPrice: 0, firmaProfili: null };
         }
-        return globalSettings;
+
     } catch(e) { 
         console.error("Ayarlar alınırken hata: ", e);
-        // Hata durumunda da varsayılan bir nesne döndür
-        return { defaultMilkPrice: 15.50, firmaProfili: null };
+        showToast("Ayarlar yüklenirken bir hata oluştu.", true);
+    } finally {
+        toggleFirmaBilgileriEdit(false);
     }
 }
 
-    function populatePeriodSelect() {
+function populatePeriodSelect() {
         const selectEl = document.getElementById('karneRaporuPeriyotSecimi');
         if (!selectEl) return;
         const now = new Date();
@@ -2077,7 +1645,6 @@ async function getSettings() {
     const formId = event.target.id;
     try {
         if (formId === 'ayarlarForm') {
-            // ... (bu kısım aynı kalıyor) ...
         } else if (formId === 'firmaBilgileriForm') {
             const firmaProfili = {
                 unvan: document.getElementById('firmaUnvani').value,
@@ -2090,7 +1657,6 @@ async function getSettings() {
             await setDoc(doc(db, 'ayarlar', sahipId), { firmaProfili }, { merge: true });
             globalSettings.firmaProfili = firmaProfili;
             showToast('Firma bilgileri kaydedildi.');
-            // Kaydettikten sonra formu tekrar kilitle
             toggleFirmaBilgileriEdit(false);
         }
     } catch (error) { /* ... */ }
@@ -2284,7 +1850,6 @@ async function updateDashboardStats() {
     globalCache.set(cacheKey, { data: true, timestamp: now });
 }
 
-// ESKİ handleCariKaydet FONKSİYONUNU SİLİP BUNU YAPIŞTIRIN
 
 async function handleCariKaydet(event) {
     event.preventDefault();
@@ -2328,7 +1893,6 @@ async function handleCariKaydet(event) {
 };
 
     try {
-        // --- 1. Adım: Rota Sırası Güncellemelerini Hazırla ---
         const batch = writeBatch(db);
         let eskiRotaSirasi = null;
 
@@ -2340,7 +1904,6 @@ async function handleCariKaydet(event) {
         }
 
         if (eskiRotaSirasi !== yeniRotaSirasi) {
-            // Durum 1: Bir rotadan diğerine geçiş (Örn: 5'ten 2'ye)
             if (yeniRotaSirasi && eskiRotaSirasi) {
                  if (yeniRotaSirasi > eskiRotaSirasi) { // Aşağı kaydırma (2 -> 5)
                     const q = query(collection(db, 'cariler'), where('sahipId', '==', sahipId), where('rotaSirasi', '>', eskiRotaSirasi), where('rotaSirasi', '<=', yeniRotaSirasi));
@@ -2352,13 +1915,11 @@ async function handleCariKaydet(event) {
                     snapshot.forEach(d => batch.update(d.ref, { rotaSirasi: d.data().rotaSirasi + 1 }));
                 }
             }
-            // Durum 2: Mevcut bir cariye yeni rota ekleme veya yeni cari oluşturma
             else if (yeniRotaSirasi) {
                 const q = query(collection(db, 'cariler'), where('sahipId', '==', sahipId), where('rotaSirasi', '>=', yeniRotaSirasi));
                 const snapshot = await getDocs(q);
                 snapshot.forEach(d => batch.update(d.ref, { rotaSirasi: d.data().rotaSirasi + 1 }));
             }
-            // Durum 3: Mevcut bir cariden rotayı kaldırma
             else if (eskiRotaSirasi) {
                  const q = query(collection(db, 'cariler'), where('sahipId', '==', sahipId), where('rotaSirasi', '>', eskiRotaSirasi));
                  const snapshot = await getDocs(q);
@@ -2366,11 +1927,7 @@ async function handleCariKaydet(event) {
             }
         }
         
-        // Rota sırası güncellemelerini uygula
         await batch.commit();
-
-
-        // --- 2. Adım: Ana Cari ve Bakiye İşlemini Transaction İçinde Yap ---
         await runTransaction(db, async (transaction) => {
             let cariIdForBakiye;
 
@@ -2379,7 +1936,6 @@ async function handleCariKaydet(event) {
                 const cariRef = doc(db, 'cariler', editingId);
                 transaction.update(cariRef, formData);
 
-                // Eski açılış bakiyesini bul ve sil (Bu kısım transactional değil ama riski düşük)
                 const acilisBakiyeQuery = query(collection(db, 'odemeVeTahsilatlar'), where('cariId', '==', editingId), where('aciklama', '==', 'Açılış Bakiyesi'));
                 const acilisBakiyeSnapshot = await getDocs(acilisBakiyeQuery);
                 acilisBakiyeSnapshot.forEach(docToDelete => {
@@ -2392,7 +1948,6 @@ async function handleCariKaydet(event) {
                 cariIdForBakiye = newCariRef.id;
             }
 
-            // Gerekirse yeni açılış bakiyesini ekle
             const acilisBakiye = parseFloat(document.getElementById('cariAcilisBakiye').value) || 0;
             const bakiyeTuru = document.getElementById('cariAcilisBakiyeTuru').value;
             if (acilisBakiye > 0 && bakiyeTuru !== 'yok') {
@@ -2410,7 +1965,6 @@ async function handleCariKaydet(event) {
             }
         });
 
-        // --- 3. Adım: Formu ve Listeyi Güncelle ---
         resetCariForm();
         await renderCariListesi();
         showToast('Cari başarıyla kaydedildi!');
@@ -2424,7 +1978,6 @@ async function handleCariKaydet(event) {
 
 
 async function renderCariListesi() {
-    // Elementleri alıyoruz (varsa)
     const cariListesiBody     = document.getElementById('cariListesiBody');
     const cariListesiFooter   = document.getElementById('cariListesiFooter');
     const tarihFiltresiEl     = document.getElementById('cariTarihFiltresi');
@@ -2433,22 +1986,18 @@ async function renderCariListesi() {
     const durumEl             = document.getElementById('cariDurumFiltre');
     const grupEl              = document.getElementById('cariGrupFiltre');
     const raporTarihEtiketiEl = document.getElementById('raporTarihEtiketi');
-
-    // Değerleri al (güvenli)
     const tarihFiltresi = tarihFiltresiEl ? tarihFiltresiEl.value : '';
     const searchTerm    = searchTermEl    ? searchTermEl.value.toLowerCase() : '';
     const kategori      = kategoriEl      ? kategoriEl.value : '';
     const durum         = durumEl         ? durumEl.value : '';
     const grup          = grupEl          ? grupEl.value : '';
 
-    // Başlık etiketi
     if (raporTarihEtiketiEl) {
         raporTarihEtiketiEl.textContent = tarihFiltresi
             ? `${formatDate(tarihFiltresi)} Tarihi İtibarıyla`
             : 'Güncel Durum';
     }
 
-    // Yükleniyor mesajı
     if (cariListesiBody) {
         cariListesiBody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Veriler yükleniyor ve hesaplanıyor...</td></tr>';
     }
@@ -2457,9 +2006,6 @@ async function renderCariListesi() {
     }
 
     try {
-        // ==== Firestore sorguları ====
-
-        // Cari filtreleri
         const cariConstraints = [ where('sahipId', '==', sahipId) ];
         if (kategori) cariConstraints.push(where('kategori','==',kategori));
         if (durum)    cariConstraints.push(where('durum','==',durum));
@@ -2472,7 +2018,6 @@ async function renderCariListesi() {
             limit(200)
         );
 
-        // Hareket filtreleri
         const hareketConstraints = [ where('sahipId','==',sahipId) ];
         if (tarihFiltresi) hareketConstraints.push(where('tarih','<=',tarihFiltresi));
 
@@ -2481,7 +2026,6 @@ async function renderCariListesi() {
         const odemeQuery    = query(collection(db,'odemeVeTahsilatlar'), ...hareketConstraints);
         const yemAlimQuery  = query(collection(db,'yem_alimlari'),       ...hareketConstraints);
 
-        // Hepsini eş zamanlı çek
         const [
             carilerSnapshot,
             sutSnapshot,
@@ -2496,7 +2040,6 @@ async function renderCariListesi() {
             getDocs(yemAlimQuery)
         ]);
 
-        // ==== Bakiye hesaplama ====
         const bakiyeMap = new Map();
         carilerSnapshot.forEach(docSnap => {
             bakiyeMap.set(docSnap.id, { data: docSnap.data(), borc: 0, alacak: 0 });
@@ -2523,7 +2066,6 @@ async function renderCariListesi() {
             }
         });
 
-        // ==== Liste düzeni ====
         let cariler = Array.from(bakiyeMap.entries());
         if (searchTerm) {
             cariler = cariler.filter(([id,item]) => {
@@ -2539,7 +2081,6 @@ async function renderCariListesi() {
             return (a[1].data.adiSoyadi||'').localeCompare(b[1].data.adiSoyadi||'', 'tr');
         });
 
-        // ==== Tablo çıktısı ====
         if (cariler.length === 0) {
             if (cariListesiBody) {
                 cariListesiBody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Filtreye uygun cari bulunmuyor.</td></tr>';
@@ -2585,7 +2126,6 @@ async function renderCariListesi() {
               </tr>`;
         });
 
-        // Footer
         const netBakiye = toplamAlacak - toplamBorc;
         const netStyle  = netBakiye >= 0 ? 'color:green;' : 'color:red;';
 
@@ -2623,11 +2163,7 @@ async function renderCariListesi() {
     }
 }
 
-
-
-
-
-    async function updateSayimForm() {
+async function updateSayimForm() {
         const yemId = document.getElementById('sayimYemSecimi').value;
         const mevcutStokInput = document.getElementById('sayimMevcutStok');
         const fizikselStokInput = document.getElementById('sayimFizikselStok');
@@ -2647,7 +2183,7 @@ async function renderCariListesi() {
         farkInput.style.color = fark < 0 ? 'red' : 'green';
     }
 
-    async function handleStokSayimKaydet(event) {
+async function handleStokSayimKaydet(event) {
         event.preventDefault();
         const tarih = document.getElementById('sayimTarihi').value;
         const yemId = document.getElementById('sayimYemSecimi').value;
@@ -2773,7 +2309,7 @@ async function deleteStokSayimi(sayimId) {
 
 
 
-    function generateRandomColors(count) {
+function generateRandomColors(count) {
         const colors = [];
         for (let i = 0; i < count; i++) {
             const r = Math.floor(Math.random() * 200);
@@ -2783,8 +2319,6 @@ async function deleteStokSayimi(sayimId) {
         }
         return colors;
     }
-
-// MEVCUT İKİ GRAFİK FONKSİYONUNU SİLİP BUNLARI YAPIŞTIRIN
 
 async function renderGunlukSutGrafik() {
     if (isGunlukChartRendering) return; // Eğer zaten çiziliyorsa, tekrar başlatma
@@ -2945,13 +2479,10 @@ async function editCari(id) {
         document.getElementById('cariRotaSirasi').value   = cari.rotaSirasi != null ? cari.rotaSirasi : '';
         document.getElementById('cariAdiSoyadi').value    = cari.adiSoyadi       ?? '';
         document.getElementById('cariKategori').value     = cari.kategori        ?? '';
-
-        // Checkbox’ları temizle
         document.getElementById('grupUretici').checked   = false;
         document.getElementById('grupTedarikci').checked = false;
         document.getElementById('grupSutAlici').checked  = false;
 
-        // Null-safe grup atama
         if (Array.isArray(cari.cariGrup)) {
             cari.cariGrup.forEach(grup => {
                 if (grup === 'üretici')    document.getElementById('grupUretici').checked   = true;
@@ -2983,15 +2514,11 @@ async function editCari(id) {
             document.getElementById('cariAcilisBakiyeTuru').value = 'yok';
         }
 
-        // e-Müstahsil Parametrelerini Doldur
         const params = cari.eMustahsilParams || {}; // Eğer parametre yoksa boş nesne ata
         document.getElementById('paramBorsaTescili').checked = params.borsaTesciliVar || false;
-        // Eğer tanımsızsa (undefined) veya true ise işaretli olsun, sadece false ise işaretsiz olsun.
         document.getElementById('paramSgkKesintisi').checked = params.sgkKesintisiUygula !== false; 
         document.getElementById('paramStopajOrani').value = params.stopajOrani != null ? params.stopajOrani : 4;
         document.getElementById('paramBorsaTescilOrani').value = params.borsaTescilOrani != null ? params.borsaTescilOrani : '';
-
-        // Form başlığını ve butonları düzenleme moduna al
         setEditingMode(            
             document.getElementById('cariFormBaslik'),            
             document.getElementById('cariKaydetBtn'),            
@@ -2999,9 +2526,7 @@ async function editCari(id) {
             id,            
             'Cari'        
         );        
-
-        // Formun başına git
-        document.getElementById('cariFormBaslik').scrollIntoView({ behavior: 'smooth' });
+       document.getElementById('cariFormBaslik').scrollIntoView({ behavior: 'smooth' });
 
     } catch (e) {
         console.error("Cari bilgileri yüklenirken hata:", e);
