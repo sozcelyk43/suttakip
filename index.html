@@ -18,8 +18,6 @@
 		<li class="quick-entry-link"><a href="hizli-giris.html" target="_blank">⚡ Hızlı Süt Girişi</a>        	</li>
                 <li><a href="#dashboard" class="nav-link active">📝 Kontrol Paneli</a></li>
                 <li><a href="#cari-yonetimi" class="nav-link">👥 Cari Yönetimi</a></li>
-                <li class="special-module-link"><a href="#mustahsil-merkezi" class="nav-link">🧾 Müstahsil Merkezi</a></li>
-
                 <li><a href="#sut-alimi" class="nav-link">🥛 Günlük Süt Alımı</a></li>
                 <li><a href="#yem-stok-yonetimi" class="nav-link">📦 Stok Yönetimi</a></li>
                 <li><a href="#yem-satisi" class="nav-link">🌾 Yem Satışı</a></li>
@@ -75,87 +73,12 @@
                 </div>
 
                 <div class="charts-container-vertical">
-                    <div class="chart-card"><h3>Bugünkü Süt Alım Dağılımı (Kategori Bazlı)</h3><div class="chart-wrapper"><canvas id="gunlukSutGrafik"></canvas></div>
-                    </div><div class="chart-card"><h3>Aylık Süt Dağılımı (Kategori Bazlı)</h3><div class="chart-filters">
-        		<input type="month" id="aylikChartAySecimi">
-        		<button id="aylikChartGosterBtn" class="btn btn-sm">Grafiği Göster</button></div>
-    		    <div class="chart-wrapper"><canvas id="aylikSutGrafik"></canvas></div></div>
-</section>
-<section id="mustahsil-merkezi" class="module-section hidden-section">
-    <div class="module-header">
-        <h2>🧾 Müstahsil İşlem Merkezi</h2>
-    </div>
-    <div class="container">
-
-        <div id="mm-filters" class="form-section">
-            <div class="form-grid" style="grid-template-columns: 3fr 1fr 1fr 1fr auto; align-items: end; gap: 15px;">
-                <div class="form-group" style="position: relative;">
-    <label for="mmCariArama">Cari Seçin:</label>
-    <input type="text" id="mmCariArama" class="form-control" placeholder="Aramak için cari adı veya kodu yazın..." autocomplete="off">
-    <input type="hidden" id="mmCariId">
-    <div id="mmCariSuggestions" class="autocomplete-box"></div>
-</div>
-                <div class="form-group">
-                    <label for="mm-baslangic-tarihi">Başlangıç Tarihi:</label>
-                    <input type="date" id="mm-baslangic-tarihi" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label for="mm-bitis-tarihi">Bitiş Tarihi:</label>
-                    <input type="date" id="mm-bitis-tarihi" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label for="mm-belge-no">Belge No:</label>
-                    <input type="text" id="mm-belge-no" class="form-control" placeholder="Örn: MM-2025-001">
-                </div>
-                <button id="mm-verileri-getir-btn" class="btn btn-primary" style="height: 45px;">Getir</button>
+                <div class="chart-card"><h3>Bugünkü Süt Alım Dağılımı (Kategori Bazlı)</h3><div class="chart-wrapper"><canvas id="gunlukSutGrafik"></canvas></div></div>
+                <div class="chart-card"><h3>Aylık Süt Dağılımı (Kategori Bazlı)</h3><div class="chart-filters"><input type="month" id="aylikChartAySecimi"><button id="aylikChartGosterBtn" class="btn btn-sm">Grafiği Göster</button></div><div class="chart-wrapper"><canvas id="aylikSutGrafik"></canvas></div></div>
             </div>
         </div>
-        <hr>
+    </section> 
 
-        <div id="mm-islem-detaylari" class="list-section">
-            <h3>İşlem Kalemleri</h3>
-            <table id="mm-hareket-tablosu" class="report-table">
-                <thead>
-                    <tr>
-                        <th style="width: 120px;">Tarih</th>
-                        <th style="width: 150px;">İşlem Türü</th>
-                        <th>Açıklama</th>
-                        <th style="width: 100px;">Miktar</th>
-                        <th style="width: 120px;">Birim Fiyat</th>
-                        <th style="width: 130px;">Borç Tutarı (₺)</th>
-                        <th style="width: 130px;">Alacak Tutarı (₺)</th>
-                        <th class="dont-print" style="width: 50px;">Sil</th>
-                    </tr>
-                </thead>
-                <tbody id="mm-hareket-tablosu-body">
-                    <tr>
-                        <td colspan="8" style="text-align: center; padding: 20px;">Lütfen bir cari seçip tarih aralığı belirleyerek "Getir" butonuna basın.</td>
-                    </tr>
-                </tbody>
-            </table>
-            <div id="mm-action-buttons" class="dont-print" style="margin-top: 15px; display: flex; gap: 10px;">
-    <button id="mm-sut-ekle-btn" class="btn btn-sm btn-success">✚ Süt Alımı Ekle</button>
-    <button id="mm-yem-ekle-btn" class="btn btn-sm btn-warning">✚ Yem Satışı Ekle</button>
-    <button id="mm-odeme-ekle-btn" class="btn btn-sm btn-info">✚ Ödeme/Tahsilat Ekle</button>
-</div>
-        </div>
-        <hr>
-
-        <div id="mm-ozet-alani" class="final-summary" style="max-width: 500px; margin-left: auto; background: #f9f9f9; padding: 15px; border-radius: 8px;">
-            <h5 style="text-align:center; margin-top:0;">FİŞ ÖZETİ</h5>
-            <p><span>Önceki Dönemden Devir:</span> <strong id="mm-devir-bakiye">0,00 ₺</strong></p>
-            <p style="color: green;"><span>(+) Toplam Alacak:</span> <strong id="mm-toplam-alacak">0,00 ₺</strong></p>
-            <p style="color: red;"><span>(-) Toplam Borç:</span> <strong id="mm-toplam-borc">0,00 ₺</strong></p>
-            <hr>
-            <p style="font-size: 1.2em;"><strong>NET BAKİYE:</strong> <strong id="mm-net-tutar">0,00 ₺</strong></p>
-        </div>
-        
-        <div id="mm-kaydet-butonlari" class="dont-print" style="text-align: right; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
-             <button id="mm-onayla-btn" class="btn btn-primary btn-lg">Onayla ve Makbuzu Oluştur</button>
-        </div>
-
-    </div>
-</section>
 			
 <section id="cari-yonetimi" class="module-section hidden-section">
     <div class="module-header"><h2>👥 Cari Yönetimi</h2></div>
@@ -751,30 +674,33 @@
                     <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
                         <div class="form-group" style="grid-column: span 2;">
                             <label for="firmaUnvani">Firma Unvanı:</label>
-                            <input type="text" id="firmaUnvani">
+                            <input type="text" id="firmaUnvani" disabled>
                         </div>
                         <div class="form-group" style="grid-column: span 2;">
                             <label for="firmaAdresi">Adres:</label>
-                            <textarea id="firmaAdresi" rows="2"></textarea>
+                            <textarea id="firmaAdresi" rows="2" disabled></textarea>
                         </div>
                         <div class="form-group">
                             <label for="firmaVergiDairesi">Vergi Dairesi:</label>
-                            <input type="text" id="firmaVergiDairesi">
+                            <input type="text" id="firmaVergiDairesi" disabled>
                         </div>
                         <div class="form-group">
                             <label for="firmaVkn">Vergi/TC Kimlik No:</label>
-                            <input type="text" id="firmaVkn">
+                            <input type="text" id="firmaVkn" disabled>
                         </div>
                         <div class="form-group">
                             <label for="firmaTicSicilNo">Ticaret Sicil No:</label>
-                            <input type="text" id="firmaTicSicilNo">
+                            <input type="text" id="firmaTicSicilNo" disabled>
                         </div>
                         <div class="form-group">
                             <label for="firmaTelefon">Telefon:</label>
-                            <input type="tel" id="firmaTelefon">
+                            <input type="tel" id="firmaTelefon" disabled>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Firma Bilgilerini Kaydet</button>
+                    <div class="form-buttons">
+                        <button type="button" class="btn" id="firmaDuzenleBtn">Düzenle</button>
+                        <button type="submit" class="btn btn-primary" id="firmaKaydetBtn" style="display:none;">Değişiklikleri Kaydet</button>
+                    </div>
                 </form>
             </div>
             <hr>
@@ -801,7 +727,7 @@
                     </div>
                     <button type="submit" class="btn" id="kullaniciKaydetBtn">Çalışan Ekle</button>
                 </form>
-                <div class="list-section">
+                <div class="list-section" style="margin-top:20px;">
                     <h4>Kullanıcı Listesi</h4>
                     <table>
                         <thead><tr><th>Kullanıcı Adı</th><th>Rol</th><th class="dont-print">İşlemler</th></tr></thead>
@@ -918,6 +844,8 @@
     let editingCariId = null, editingYemTanimId = null, editingYemAlisId = null, editingYemSatisId = null, editingOdemeId = null;
     let gunlukSutunChartInstance = null;
     let aylikSutunChartInstance = null;
+	let isGunlukChartRendering = false; 	
+	let isAylikChartRendering = false; 
     let raporCariSecimiOrjinalSecenekler = [];
     let sutAlimGecmisiListener = null; 
     let topluGirisListener = null;   
@@ -937,47 +865,35 @@
 
     Chart.register(ChartDataLabels);
 
+// MEVCUT onAuthStateChanged FONKSİYONUNU BUNUNLA DEĞİŞTİRİN
+
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         document.getElementById('logoutUserEmail').textContent = user.email;
         currentUserId = user.uid;
         try {
-            const userDocRef = doc(db, 'kullanicilar', currentUserId);
+            const userDocRef = doc(db, 'kullanicilar', user.uid);
             const userDocSnap = await getDoc(userDocRef);
+
             if (userDocSnap.exists()) {
                 const userData = userDocSnap.data();
                 currentUserRole = userData.rol;
-                sahipId = userData.sahipId;
+                sahipId = userData.sahipId || user.uid;
 
-                if (currentUserRole === 'calisan') {
-                    window.location.href = 'hizli-giris.html';
-                    return;
-                } else if (currentUserRole === 'uretici') {
-                    window.location.href = 'musteri_portali.html';
-                    return;
+                if (currentUserRole === 'admin') {
+                    // Admin ise, SADECE seçim modalını göster. Başka bir şey yapma.
+                    document.getElementById('secim-modal-overlay').classList.add('show');
+                } else {
+                    // Diğer roller (çalışan, üretici) ilgili sayfalarına yönlendirilir.
+                    const targetPage = currentUserRole === 'calisan' ? 'hizli-giris.html' : 'musteri_portali.html';
+                    window.location.href = targetPage;
                 }
-                
-                if (currentUserRole === 'admin' && !sahipId) {
-                    sahipId = currentUserId;
-                }
-                if (!sahipId) {
-                    showToast('Kullanıcı profilinizde "sahipId" alanı bulunamadı. Lütfen yöneticinizle iletişime geçin.', true);
-                    handleLogout();
-                    return;
-                }
-
-               
-                await loadInitialData(); 
-		isAppInitialized = true;
-                uygulamayiBaslat();
-
             } else {
-                showToast("Giriş başarılı ancak kullanıcı profili veritabanında bulunamadı.", true);
+                showToast("Kullanıcı profili bulunamadı.", true);
                 handleLogout();
             }
         } catch (error) {
-            console.error("Kullanıcı profili alınırken hata:", error);
-            showToast(`Uygulama başlatılamadı. Veritabanı hatası oluştu.\nTeknik Detay: ${error.message}`, true);
+            console.error("Giriş sırasında hata:", error);
             handleLogout();
         }
     } else {
@@ -985,483 +901,428 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-    function uygulamayiBaslat() {
-        if (window.isAppInitialized) {return;}window.isAppInitialized = true;
+document.getElementById('secim-sut-takibi-btn')?.addEventListener('click', () => {
+    // Süt Takibi seçildiğinde, ana uygulama başlatma fonksiyonunu çağır.
+    uygulamayiBaslat();
+});
 
-        const sidebarNav = document.getElementById('sidebarNav');
-        const moduleSections = document.querySelectorAll('.main-content .module-section');
-        const logoutButton = document.getElementById('logoutButton');
-        const cariForm = document.getElementById('cariForm');
-        const cariFormTemizleBtn = document.getElementById('cariFormTemizleBtn');
-        const yemTanimForm = document.getElementById('yemTanimForm');
-        const yemTanimFormTemizleBtn = document.getElementById('yemTanimFormTemizleBtn');
-        const yemAlisForm = document.getElementById('yemAlisForm');
-        const yemAlisFormTemizleBtn = document.getElementById('yemAlisFormTemizleBtn');
-        const odemeForm = document.getElementById('odemeForm');
-        const odemeFormTemizleBtn = document.getElementById('odemeFormTemizleBtn');
-        const ayarlarForm = document.getElementById('ayarlarForm');
-        const cariKategoriForm = document.getElementById('cariKategoriForm');
-        const kullaniciForm = document.getElementById('kullaniciForm');
-        const sifreDegistirForm = document.getElementById('sifreDegistirForm');
-        const cariKategoriFiltre = document.getElementById('cariKategoriFiltre');
-        const cariListesiYazdirBtn = document.getElementById('cariListesiYazdirBtn');
-        const topluGirisTarihInput = document.getElementById('topluGirisTarih');
-        const topluGirisKategoriSelect = document.getElementById('topluGirisKategori');
-        const sutDuzenleForm = document.getElementById('sutDuzenleForm');
-        const odemeCariSecimi = document.getElementById('odemeYapilanTedarikci');
-        const menuToggleBtn = document.getElementById('menuToggleBtn');
-        const sidebar = document.querySelector('.sidebar');
-        const cariSuggestionBox = document.getElementById('cariSearchSuggestions');
-        
-        window.editCari = editCari;
-        window.deleteCari = deleteCari;
-        window.sutMiktarGuncelle = sutMiktarGuncelle;
-        window.handleTopluSutKaydet = handleTopluSutKaydet;
-        window.editYemTanimi = editYemTanimi;
-        window.deleteYemTanimi = deleteYemTanimi;
-        window.editYemAlisi = editYemAlisi;
-        window.deleteYemAlisi = deleteYemAlisi;
-        window.removeYemSatisRow = removeYemSatisRow;
-        window.editOdeme = editOdeme;
-        window.deleteOdeme = deleteOdeme;
-        window.closeSutDuzenleForm = closeSutDuzenleForm;
-        window.editSutAlimi = editSutAlimi;
-        window.deleteSutAlimi = deleteSutAlimi;
-        window.editYemSatisi = editYemSatisi;
-        window.deleteYemSatisi = deleteYemSatisi;
-	window.deleteStokSayimi = deleteStokSayimi;
-
-const mmCariAramaInput = document.getElementById('mmCariArama'); // Değişti
-if (mmCariAramaInput) {
-    const suggestionsBox = document.getElementById('mmCariSuggestions'); // Değişti
-    const cariIdInput = document.getElementById('mmCariId'); // Değişti
-
-    mmCariAramaInput.addEventListener('input', function() {
-        const queryText = this.value.toLowerCase().trim();
-        suggestionsBox.innerHTML = '';
-        if (queryText.length < 2) {
-            suggestionsBox.style.display = 'none';
-            return;
-        }
-
-        const matches = [];
-        window.cariDataMap.forEach((cari, id) => {
-            if (cari.adiSoyadi?.toLowerCase().includes(queryText) || cari.kodu?.toLowerCase().includes(queryText)) {
-                matches.push({ id: id, adi: cari.adiSoyadi });
-            }
-        });
-
-        if (matches.length > 0) {
-            suggestionsBox.style.display = 'block';
-            matches.slice(0, 10).forEach(match => {
-                const div = document.createElement('div');
-                div.textContent = match.adi;
-                div.addEventListener('click', () => {
-                    mmCariAramaInput.value = match.adi;
-                selectedMmCariId = match.id; 
-                    suggestionsBox.style.display = 'none';
-                });
-                suggestionsBox.appendChild(div);
-            });
-        } else {
-            suggestionsBox.style.display = 'none';
-        }
-    });
-
-    mmCariAramaInput.addEventListener('blur', function() {
-        setTimeout(() => { suggestionsBox.style.display = 'none'; }, 200);
-    });
-}
+document.getElementById('secim-mustahsil-merkezi-btn')?.addEventListener('click', () => {
+    // Müstahsil seçildiğinde, ilgili sayfaya yönlendir.
+    window.location.href = 'mustahsil.html';
+});
 
 
-const mmGetirBtn = document.getElementById('mm-verileri-getir-btn');
-if (mmGetirBtn) {
-    mmGetirBtn.addEventListener('click', handleMmVeriGetir);
-}
-
-
-
-        const odemeCariAramaInput = document.getElementById('odemeCariAramaInput');
-        if (odemeCariAramaInput) {
-            const suggestionsBox = document.getElementById('odemeCariSuggestions');
-            const cariSelect = document.getElementById('odemeYapilanTedarikci');
-            let debounceTimer; 
-            odemeCariAramaInput.addEventListener('input', function() {
-                clearTimeout(debounceTimer); 
-                const queryText = this.value.toLowerCase();
-                suggestionsBox.innerHTML = '';
-                suggestionsBox.style.display = 'none';
-                if (queryText.length < 2) {cariSelect.value = "";cariSelect.dispatchEvent(new Event('change'));return;}
-                debounceTimer = setTimeout(async () => {
-                    const matches = [];
-                    window.cariDataMap.forEach((cari, id) => {
-                        if (cari.adiSoyadi && cari.adiSoyadi.toLowerCase().includes(queryText)) {matches.push({ id: id, adi: cari.adiSoyadi });}});
-        console.log('Bulunan eşleşmeler:', matches);
-
-                    if (matches.length > 0) {
-                        const bakiyePromises = matches.map(match => calculateCariBakiyeDetayli(match.id));
-                        const bakiyeler = await Promise.all(bakiyePromises);
-                        suggestionsBox.innerHTML = ''; 
-                        suggestionsBox.style.display = 'block';
-
-                        matches.slice(0, 10).forEach((match, index) => {
-                            const bakiyeDetay = bakiyeler[index];
-                            const bakiye = bakiyeDetay.bakiye;
-                            const bakiyeMiktar = new Intl.NumberFormat('tr-TR').format(Math.abs(bakiye));
-                            const bakiyeDurum = bakiye >= 0 ? 'Alacaklı' : 'Borçlu';
-                            const bakiyeRenk = bakiye >= 0 ? 'green' : 'red';
-                            const etiketText = `(${bakiyeMiktar} tl ${bakiyeDurum})`;
-                            const div = document.createElement('div');
-                            div.innerHTML = `${match.adi} <span style="color: ${bakiyeRenk}; font-weight: bold; float: right;">${etiketText}</span>`;
-                            div.addEventListener('click', () => {
-                                odemeCariAramaInput.value = match.adi;
-                                cariSelect.value = match.id;
-                                cariSelect.dispatchEvent(new Event('change')); 
-                                suggestionsBox.style.display = 'none';
-                            });
-                            suggestionsBox.appendChild(div);
-                        });
-                    }
-                }, 400); 
-            });
-            odemeCariAramaInput.addEventListener('blur', function() {setTimeout(() => {suggestionsBox.style.display = 'none';}, 200);});
-        }
-        
-        const cariAraInput = document.getElementById('yemSatisCariAraInput');
-        const cariIdHidden = document.getElementById('topluSatisCari');
-        const oneriKutusu = document.getElementById('cariOneriListesi');
-
-        if (cariAraInput) {
-            cariAraInput.addEventListener('input', function () {
-                const arama = this.value.toLowerCase();
-                const eslesenler = [];
-                window.cariDataMap.forEach((cari, id) => {
-                    if (cari.adiSoyadi?.toLowerCase().includes(arama)) {eslesenler.push({ id, ad: cari.adiSoyadi });}
-                });
-
-                oneriKutusu.innerHTML = "";
-                eslesenler.slice(0, 10).forEach(cari => {
-                    const div = document.createElement('div');
-                    div.textContent = cari.ad;
-                    div.addEventListener('click', () => {
-                        cariAraInput.value = cari.ad;
-                        cariIdHidden.value = cari.id;
-                        oneriKutusu.innerHTML = "";
-                    });
-                    oneriKutusu.appendChild(div);
-                });
-            });
-            cariAraInput.addEventListener('blur', function () {
-                setTimeout(() => oneriKutusu.innerHTML = "", 150);
-            });
-        }
+// --- BLOK 2: ANA UYGULAMA BAŞLATMA FONKSİYONU (GÜNCELLENDİ) ---
+async function uygulamayiBaslat() {
+    // Seçim ekranını gizle (eğer hala açıksa)
+    document.getElementById('secim-modal-overlay').classList.remove('show');
     
-
-        if (menuToggleBtn && sidebar) {
-            menuToggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
-            sidebar.addEventListener('click', (event) => {
-                if (window.innerWidth <= 1024 && event.target.closest('a.nav-link')) {
-                    sidebar.classList.add('collapsed');
-                }
-            });
-        }
-
-        applyRolePermissions();
-        loadAndRenderAllData();
-        updateMonthlyStats();
-
-sidebarNav.addEventListener('click', async function (event) {
-            const link = event.target.closest('a.nav-link');
-            if (!link || link.id === 'logoutButton') return;
-            event.preventDefault();
-
-            sidebarNav.querySelectorAll('a.nav-link').forEach(lnk => lnk.classList.remove('active'));
-            link.classList.add('active');
-
-            const targetId = link.getAttribute('href').substring(1);
-            moduleSections.forEach(section => { section.style.display = 'none'; });
-            const activeSection = document.getElementById(targetId);
-            if (activeSection) activeSection.style.display = 'block';
-            if (activeSection) activeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            if (targetId === 'dashboard') { updateDashboardStats(); updateMonthlyStats(); }
-            if (targetId === 'cari-yonetimi') {
-                populateCariKategoriFiltre();
-                renderCariListesi();
-                populateCariKategoriSelect(document.getElementById('cariKategori'));
-                generateNextCariKodu();
-
-            }
-            if (targetId === 'sut-alimi') { if (topluGirisTarihInput) topluGirisTarihInput.value = getTodayForInput(); populateCariKategoriSelect(topluGirisKategoriSelect); renderTopluSutGirisFormu(); renderSutAlimGecmisi(); }
-            if (targetId === 'yem-stok-yonetimi') { populateCariSelect(document.getElementById('yemAlisTedarikci'), 'tedarikçi'); populateYemSelect(document.getElementById('yemSecimiAlis')); populateYemSelect(document.getElementById('sayimYemSecimi')); renderStokSayimGecmisi(); renderYemAlisHareketleri(); renderYemStokListesi(); }
-            if (targetId === 'tahsilat-ve-odemeler') { populateCariSelect(document.getElementById('odemeYapilanTedarikci')); renderOdemeListesi(); }
-            if (targetId === 'hesap-ozeti') { populateCariSelect(document.getElementById('raporCariSecimi')); if (!document.getElementById('raporTarihAraligi').value) { document.getElementById('raporTarihAraligi').value = getMonthYearForInput(); } const aramaInput = document.getElementById('raporCariAramaInput'); if (aramaInput) aramaInput.value = ''; const tumSecenekler = document.getElementById('raporCariSecimi').options; for (let i = 0; i < tumSecenekler.length; i++) { tumSecenekler[i].style.display = ""; } }
-            if (targetId === 'sut-alim-raporu') { populateCariSelect(document.getElementById('sutRaporuTedarikciSecimi'), 'üretici'); populateCariKategoriSelect(document.getElementById('sutRaporuKategoriSecimi'), "Tümü"); const baslangicTarihiInput = document.getElementById('sutRaporuBaslangicTarihi'); const bitisTarihiInput = document.getElementById('sutRaporuBitisTarihi'); if (baslangicTarihiInput && !baslangicTarihiInput.value && bitisTarihiInput && !bitisTarihiInput.value) { const today = new Date(); const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1); const formatForInput = (date) => { const year = date.getFullYear(); const month = String(date.getMonth() + 1).padStart(2, '0'); const day = String(date.getDate()).padStart(2, '0'); return `${year}-${month}-${day}`; }; baslangicTarihiInput.value = formatForInput(firstDayOfMonth); bitisTarihiInput.value = formatForInput(today); } }
-
-            if (targetId === 'aylik-yem-raporu') {
-                if (!document.getElementById('yemRaporuAySecimi').value) {
-                    document.getElementById('yemRaporuAySecimi').value = getMonthYearForInput();
-                }
-                const koySelect = document.getElementById('yemRaporuKoySecimi');
-                if (koySelect.options.length <= 1) {
-                    const q = query(collection(db, 'cari_kategorileri'), where("sahipId", "==", sahipId), orderBy('ad'));
-                    getDocs(q)
-                        .then(snapshot => {
-                            snapshot.forEach(docSnap => {
-                                const kategori = docSnap.data();
-                                const option = document.createElement('option');
-                                option.value = kategori.ad;
-                                option.textContent = kategori.ad;
-                                koySelect.appendChild(option);
-                            });
-                        })
-                        .catch(error => {
-                            console.error("Köy/Kategori filtresi yüklenirken hata:", error);
-                        });
-                }
-            }
-            if (targetId === 'dinamik-sut-raporu') { populatePeriodSelect(); populateCariKategoriSelect(document.getElementById('karneRaporuKategoriSecimi'), "Tüm Kategoriler"); }
-            if (targetId === 'hareket-dokumu') {
-                populateCariSelect(document.getElementById('hd-cari-secimi'), null, "Tüm Cariler");
-                
-                const baslangicInput = document.getElementById('hd-baslangic-tarihi');
-                const bitisInput = document.getElementById('hd-bitis-tarihi');
-
-                if (cachedHareketler.length === 0) {
-                    const today = new Date();
-                    const ayinIlkGunu = new Date(today.getFullYear(), today.getMonth(), 1);
-                    const bugunTarihi = new Date();
-                    const formatForInput = (date) => {
-                        const pad = (num) => String(num).padStart(2, '0');
-                        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-                    };
-                    baslangicInput.value = formatForInput(ayinIlkGunu);
-                    bitisInput.value = formatForInput(bugunTarihi);
-                    
-                    fetchAndDisplayHareketler();
-                } else {
-                    displayHareketler(cachedHareketler);
-                }
+    // Uygulama zaten başlatıldıysa tekrar başlatma
+    if (window.isAppInitialized) { return; }
+    window.isAppInitialized = true;
+    
+    // Gerekli verileri ve ayarları yükle
+    await getSettings();
+    await loadInitialData();
 
 
-
-                document.getElementById('hareketFiltreleBtn')?.addEventListener('click', fetchAndDisplayHareketler);
-                document.getElementById('hd-islem-turu')?.addEventListener('change', () => displayHareketler(cachedHareketler));
-                document.getElementById('hd-cari-secimi')?.addEventListener('change', () => displayHareketler(cachedHareketler));
-            }
-	if (targetId === 'ayarlar') { renderCariKategoriListesi(); getSettings(); if (currentUserRole === 'admin') { renderKullaniciListesi(); } }
-	if (targetId === 'mustahsil-merkezi') {console.log("Müstahsil Merkezi modülü açıldı.");
-	document.getElementById('mm-onayla-btn')?.addEventListener('click', handleMakbuzOlustur);}
      
-	if (targetId === 'yem-satisi') {
-	
-    	if (document.getElementById('yemSatisSatirlari').childElementCount === 0) {addYemSatisRow();}
-    	renderYemSatisListesi();
 
-    // DOĞRU ARAMA KODU BURADA
+
+
+
+
+    const sidebarNav = document.getElementById('sidebarNav');
+    const moduleSections = document.querySelectorAll('.main-content .module-section');
+    const logoutButton = document.getElementById('logoutButton');
+    const cariForm = document.getElementById('cariForm');
+    const cariFormTemizleBtn = document.getElementById('cariFormTemizleBtn');
+    const yemTanimForm = document.getElementById('yemTanimForm');
+    const yemTanimFormTemizleBtn = document.getElementById('yemTanimFormTemizleBtn');
+    const yemAlisForm = document.getElementById('yemAlisForm');
+    const yemAlisFormTemizleBtn = document.getElementById('yemAlisFormTemizleBtn');
+    const odemeForm = document.getElementById('odemeForm');
+    const odemeFormTemizleBtn = document.getElementById('odemeFormTemizleBtn');
+    const ayarlarForm = document.getElementById('ayarlarForm');
+    const cariKategoriForm = document.getElementById('cariKategoriForm');
+    const kullaniciForm = document.getElementById('kullaniciForm');
+    const sifreDegistirForm = document.getElementById('sifreDegistirForm');
+    const cariKategoriFiltre = document.getElementById('cariKategoriFiltre');
+    const cariListesiYazdirBtn = document.getElementById('cariListesiYazdirBtn');
+    const topluGirisTarihInput = document.getElementById('topluGirisTarih');
+    const topluGirisKategoriSelect = document.getElementById('topluGirisKategori');
+    const sutDuzenleForm = document.getElementById('sutDuzenleForm');
+    const odemeCariSecimi = document.getElementById('odemeYapilanTedarikci');
+    const menuToggleBtn = document.getElementById('menuToggleBtn');
+    const sidebar = document.querySelector('.sidebar');
+    const cariSuggestionBox = document.getElementById('cariSearchSuggestions');
+    
+    window.editCari = editCari;
+    window.deleteCari = deleteCari;
+    window.sutMiktarGuncelle = sutMiktarGuncelle;
+    window.handleTopluSutKaydet = handleTopluSutKaydet;
+    window.editYemTanimi = editYemTanimi;
+    window.deleteYemTanimi = deleteYemTanimi;
+    window.editYemAlisi = editYemAlisi;
+    window.deleteYemAlisi = deleteYemAlisi;
+    window.removeYemSatisRow = removeYemSatisRow;
+    window.editOdeme = editOdeme;
+    window.deleteOdeme = deleteOdeme;
+    window.closeSutDuzenleForm = closeSutDuzenleForm;
+    window.editSutAlimi = editSutAlimi;
+    window.deleteSutAlimi = deleteSutAlimi;
+    window.editYemSatisi = editYemSatisi;
+    window.deleteYemSatisi = deleteYemSatisi;
+    window.deleteStokSayimi = deleteStokSayimi;
+    window.updateBatchTotals = updateBatchTotals;
+
+
+    const odemeCariAramaInput = document.getElementById('odemeCariAramaInput');
+    if (odemeCariAramaInput) {
+        const suggestionsBox = document.getElementById('odemeCariSuggestions');
+        const cariSelect = document.getElementById('odemeYapilanTedarikci');
+        let debounceTimer; 
+        odemeCariAramaInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer); 
+            const queryText = this.value.toLowerCase();
+            suggestionsBox.innerHTML = '';
+            suggestionsBox.style.display = 'none';
+            if (queryText.length < 2) {cariSelect.value = "";cariSelect.dispatchEvent(new Event('change'));return;}
+            debounceTimer = setTimeout(async () => {
+                const matches = [];
+                window.cariDataMap.forEach((cari, id) => {
+                    if (cari.adiSoyadi && cari.adiSoyadi.toLowerCase().includes(queryText)) {matches.push({ id: id, adi: cari.adiSoyadi });}});
+    
+                if (matches.length > 0) {
+                    const bakiyePromises = matches.map(match => calculateCariBakiyeDetayli(match.id));
+                    const bakiyeler = await Promise.all(bakiyePromises);
+                    suggestionsBox.innerHTML = ''; 
+                    suggestionsBox.style.display = 'block';
+
+                    matches.slice(0, 10).forEach((match, index) => {
+                        const bakiyeDetay = bakiyeler[index];
+                        const bakiye = bakiyeDetay.bakiye;
+                        const bakiyeMiktar = new Intl.NumberFormat('tr-TR').format(Math.abs(bakiye));
+                        const bakiyeDurum = bakiye >= 0 ? 'Alacaklı' : 'Borçlu';
+                        const bakiyeRenk = bakiye >= 0 ? 'green' : 'red';
+                        const etiketText = `(${bakiyeMiktar} tl ${bakiyeDurum})`;
+                        const div = document.createElement('div');
+                        div.innerHTML = `${match.adi} <span style="color: ${bakiyeRenk}; font-weight: bold; float: right;">${etiketText}</span>`;
+                        div.addEventListener('click', () => {
+                            odemeCariAramaInput.value = match.adi;
+                            cariSelect.value = match.id;
+                            cariSelect.dispatchEvent(new Event('change')); 
+                            suggestionsBox.style.display = 'none';
+                        });
+                        suggestionsBox.appendChild(div);
+                    });
+                }
+            }, 400); 
+        });
+        odemeCariAramaInput.addEventListener('blur', function() {setTimeout(() => {suggestionsBox.style.display = 'none';}, 200);});
+    }
+    
     const cariAraInput = document.getElementById('yemSatisCariAraInput');
     const cariIdHidden = document.getElementById('topluSatisCari');
     const oneriKutusu = document.getElementById('cariOneriListesi');
 
-    if (cariAraInput && cariIdHidden && oneriKutusu) {
-         if (!cariAraInput.dataset.listenerEkli) { // Tekrar eklenmesini önle
-            cariAraInput.addEventListener('input', function () {
-                const arama = this.value.toLowerCase().trim();
-                oneriKutusu.innerHTML = ""; // Önceki önerileri temizle
-                oneriKutusu.style.display = 'none';
-
-                if (arama.length < 2) return;
-
-                const eslesenler = [];
-                window.cariDataMap.forEach((cari, id) => {
-                    if (cari.adiSoyadi?.toLowerCase().includes(arama)) {
-                        eslesenler.push({ id, ad: cari.adiSoyadi });
-                    }
-                });
-
-                if (eslesenler.length > 0) {
-                    oneriKutusu.style.display = 'block';
-                    eslesenler.slice(0, 10).forEach(cari => {
-                        const div = document.createElement('div');
-                        div.textContent = cari.ad;
-                        div.addEventListener('click', () => {
-                            cariAraInput.value = cari.ad;
-                            cariIdHidden.value = cari.id;
-                            oneriKutusu.innerHTML = "";
-                            oneriKutusu.style.display = 'none';
-                        });
-                        oneriKutusu.appendChild(div);
-                    });
-                }
+    if (cariAraInput) {
+        cariAraInput.addEventListener('input', function () {
+            const arama = this.value.toLowerCase();
+            const eslesenler = [];
+            window.cariDataMap.forEach((cari, id) => {
+                if (cari.adiSoyadi?.toLowerCase().includes(arama)) {eslesenler.push({ id, ad: cari.adiSoyadi });}
             });
 
-            cariAraInput.addEventListener('blur', function () {
-                 setTimeout(() => {
+            oneriKutusu.innerHTML = "";
+            eslesenler.slice(0, 10).forEach(cari => {
+                const div = document.createElement('div');
+                div.textContent = cari.ad;
+                div.addEventListener('click', () => {
+                    cariAraInput.value = cari.ad;
+                    cariIdHidden.value = cari.id;
                     oneriKutusu.innerHTML = "";
-                    oneriKutusu.style.display = 'none';
-                 }, 200);
+                });
+                oneriKutusu.appendChild(div);
             });
-
-            cariAraInput.dataset.listenerEkli = 'true';
-         }
+        });
+        cariAraInput.addEventListener('blur', function () {
+            setTimeout(() => oneriKutusu.innerHTML = "", 150);
+        });
     }
+
+    if (menuToggleBtn && sidebar) {
+        menuToggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+        sidebar.addEventListener('click', (event) => {
+            if (window.innerWidth <= 1024 && event.target.closest('a.nav-link')) {
+                sidebar.classList.add('collapsed');
+            }
+        });
+    }
+
+    applyRolePermissions();
+    loadAndRenderAllData();
+    updateMonthlyStats();
+
+    sidebarNav.addEventListener('click', async function (event) {
+        const link = event.target.closest('a.nav-link');
+        if (!link || link.id === 'logoutButton') return;
+        event.preventDefault();
+        
+        sidebarNav.querySelectorAll('a.nav-link').forEach(lnk => lnk.classList.remove('active'));
+        link.classList.add('active');
+
+        const targetId = link.getAttribute('href').substring(1);
+        moduleSections.forEach(section => { section.style.display = 'none'; });
+        const activeSection = document.getElementById(targetId);
+        
+        if (activeSection) {
+            activeSection.style.display = 'block';
+            activeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        if (targetId === 'dashboard') {
+            updateDashboardStats();
+            updateMonthlyStats();
+        }
+        
+        if (targetId === 'cari-yonetimi') {
+            populateCariKategoriFiltre();
+            renderCariListesi();
+            populateCariKategoriSelect(document.getElementById('cariKategori'));
+            generateNextCariKodu();
+        }
+        
+        if (targetId === 'mustahsil-merkezi') {
+            const baslangicInput = document.getElementById('mm-batch-baslangic');
+            const bitisInput = document.getElementById('mm-batch-bitis');
+           populateCariKategoriSelect(document.getElementById('mm-batch-kategori'), "Tüm Kategoriler");
+
+            if (baslangicInput && bitisInput && (!baslangicInput.value || !bitisInput.value)) {
+                const today = new Date();
+                const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                const formatForInput = (date) => date.toISOString().split('T')[0];
+                baslangicInput.value = formatForInput(firstDayOfMonth);
+                bitisInput.value = formatForInput(today);
+            }
+        }
+        
+        if (targetId === 'sut-alimi') {
+            if (topluGirisTarihInput) topluGirisTarihInput.value = getTodayForInput();
+            populateCariKategoriSelect(topluGirisKategoriSelect);
+            renderTopluSutGirisFormu();
+            renderSutAlimGecmisi();
+        }
+        
+        if (targetId === 'yem-stok-yonetimi') {
+            populateCariSelect(document.getElementById('yemAlisTedarikci'), 'tedarikçi');
+            populateYemSelect(document.getElementById('yemSecimiAlis'));
+            populateYemSelect(document.getElementById('sayimYemSecimi'));
+            renderStokSayimGecmisi();
+            renderYemAlisHareketleri();
+            renderYemStokListesi();
+        }
+        
+        if (targetId === 'yem-satisi') {
+            if (document.getElementById('yemSatisSatirlari').childElementCount === 0) {
+                addYemSatisRow();
+            }
+            renderYemSatisListesi();
+        }
+    
+        if (targetId === 'tahsilat-ve-odemeler') {
+            populateCariSelect(document.getElementById('odemeYapilanTedarikci'));
+            renderOdemeListesi();
+        }
+        
+        if (targetId === 'hesap-ozeti') {
+            populateCariSelect(document.getElementById('raporCariSecimi'));
+            if (!document.getElementById('raporTarihAraligi').value) {
+                document.getElementById('raporTarihAraligi').value = getMonthYearForInput();
+            }
+        }
+        
+        if (targetId === 'sut-alim-raporu') {
+            populateCariSelect(document.getElementById('sutRaporuTedarikciSecimi'), 'üretici');
+            populateCariKategoriSelect(document.getElementById('sutRaporuKategoriSecimi'), "Tümü");
+            const baslangicTarihiInput = document.getElementById('sutRaporuBaslangicTarihi');
+            const bitisTarihiInput = document.getElementById('sutRaporuBitisTarihi');
+            if (baslangicTarihiInput && !baslangicTarihiInput.value && bitisTarihiInput && !bitisTarihiInput.value) {
+                const today = new Date();
+                const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                const formatForInput = (date) => date.toISOString().split('T')[0];
+                baslangicTarihiInput.value = formatForInput(firstDayOfMonth);
+                bitisTarihiInput.value = formatForInput(today);
+            }
+        }
+        
+        if (targetId === 'aylik-yem-raporu') {
+            if (!document.getElementById('yemRaporuAySecimi').value) {
+                document.getElementById('yemRaporuAySecimi').value = getMonthYearForInput();
+            }
+            populateCariKategoriSelect(document.getElementById('yemRaporuKoySecimi'), 'Tüm Köyler');
+        }
+        
+        if (targetId === 'dinamik-sut-raporu') {
+            populatePeriodSelect();
+            populateCariKategoriSelect(document.getElementById('karneRaporuKategoriSecimi'), "Tüm Kategoriler");
+        }
+        
+        if (targetId === 'hareket-dokumu') {
+            populateCariSelect(document.getElementById('hd-cari-secimi'), null, "Tüm Cariler");
+            const baslangicInput = document.getElementById('hd-baslangic-tarihi');
+            const bitisInput = document.getElementById('hd-bitis-tarihi');
+            if (cachedHareketler.length === 0) {
+                const today = new Date();
+                const ayinIlkGunu = new Date(today.getFullYear(), today.getMonth(), 1);
+                const formatForInput = (date) => date.toISOString().split('T')[0];
+                baslangicInput.value = formatForInput(ayinIlkGunu);
+                bitisInput.value = formatForInput(today);
+                fetchAndDisplayHareketler();
+            } else {
+                displayHareketler(cachedHareketler);
+            }
+        }
+        
+        if (targetId === 'ayarlar') { 
+    renderCariKategoriListesi(); 
+    getSettings(); // Bu fonksiyon zaten toggleFirmaBilgileriEdit(false) çağıracak
+    if (currentUserRole === 'admin') { 
+        renderKullaniciListesi(); 
+    } 
 }
+    });
 
-
-	if (window.innerWidth <= 1024 && sidebar.classList.contains('active')) { sidebar.classList.remove('active'); if (menuToggleBtn) { menuToggleBtn.classList.remove('active'); } }});
-        
-        logoutButton.addEventListener('click', handleLogout);
-        cariForm.addEventListener('submit', handleCariKaydet);
-        yemTanimForm.addEventListener('submit', handleYemTanimKaydet);
-        yemAlisForm.addEventListener('submit', handleYemAlisKaydet);
-        odemeForm.addEventListener('submit', handleOdemeKaydet);
-        ayarlarForm.addEventListener('submit', handleAyarlarKaydet);
-        cariKategoriForm.addEventListener('submit', handleCariKategoriEkle);
-        if(kullaniciForm) kullaniciForm.addEventListener('submit', handleKullaniciKaydet);
-        sifreDegistirForm.addEventListener('submit', handleSifreDegistir);
-        if(sutDuzenleForm) sutDuzenleForm.addEventListener('submit', handleSutAlimiGuncelle);
-
-        if(cariFormTemizleBtn) cariFormTemizleBtn.addEventListener('click', resetCariForm);
-        if(yemTanimFormTemizleBtn) yemTanimFormTemizleBtn.addEventListener('click', resetYemTanimForm);
-        if(yemAlisFormTemizleBtn) yemAlisFormTemizleBtn.addEventListener('click', resetYemAlisForm);
-        if(odemeFormTemizleBtn) odemeFormTemizleBtn.addEventListener('click', resetOdemeForm);
-        
-        cariKategoriFiltre.addEventListener('change', renderCariListesi);
-        document.getElementById('cariTarihselRaporBtn')?.addEventListener('click', renderCariListesi);
-        topluGirisTarihInput?.addEventListener('change', () => { renderTopluSutGirisFormu(); renderSutAlimGecmisi(); });
-        topluGirisKategoriSelect?.addEventListener('change', renderTopluSutGirisFormu);
-        document.getElementById('aylikChartGosterBtn')?.addEventListener('click', renderAylikSutunGrafik);
-        
-        if(odemeCariSecimi) { odemeCariSecimi.addEventListener('change', async (event) => {}); }
-        
-        const raporCariAramaInput = document.getElementById('raporCariAramaInput');
-        if (raporCariAramaInput) {
-            const suggestionsBox = document.getElementById('raporCariSuggestions');
-            const cariSelect = document.getElementById('raporCariSecimi');
-
-            raporCariAramaInput.addEventListener('input', function() {
-                const queryText = this.value.toLowerCase();
-                suggestionsBox.innerHTML = ''; 
-                suggestionsBox.style.display = 'none';
-
-                if (queryText.length < 2) { 
-                    return;
+    logoutButton.addEventListener('click', handleLogout);
+    cariForm.addEventListener('submit', handleCariKaydet);
+    yemTanimForm.addEventListener('submit', handleYemTanimKaydet);
+    yemAlisForm.addEventListener('submit', handleYemAlisKaydet);
+    odemeForm.addEventListener('submit', handleOdemeKaydet);
+    ayarlarForm.addEventListener('submit', handleAyarlarKaydet);
+    document.getElementById('firmaBilgileriForm')?.addEventListener('submit', handleAyarlarKaydet);
+    cariKategoriForm.addEventListener('submit', handleCariKategoriEkle);
+    if(kullaniciForm) kullaniciForm.addEventListener('submit', handleKullaniciKaydet);
+    sifreDegistirForm.addEventListener('submit', handleSifreDegistir);
+    if(sutDuzenleForm) sutDuzenleForm.addEventListener('submit', handleSutAlimiGuncelle);
+    if(cariFormTemizleBtn) cariFormTemizleBtn.addEventListener('click', resetCariForm);
+    if(yemTanimFormTemizleBtn) yemTanimFormTemizleBtn.addEventListener('click', resetYemTanimForm);
+    if(yemAlisFormTemizleBtn) yemAlisFormTemizleBtn.addEventListener('click', resetYemAlisForm);
+    if(odemeFormTemizleBtn) odemeFormTemizleBtn.addEventListener('click', resetOdemeForm);
+    cariKategoriFiltre.addEventListener('change', renderCariListesi);
+    document.getElementById('cariTarihselRaporBtn')?.addEventListener('click', renderCariListesi);
+    topluGirisTarihInput?.addEventListener('change', () => { renderTopluSutGirisFormu(); renderSutAlimGecmisi(); });
+    topluGirisKategoriSelect?.addEventListener('change', renderTopluSutGirisFormu);
+    document.getElementById('aylikChartGosterBtn')?.addEventListener('click', renderAylikSutunGrafik);
+    if(odemeCariSecimi) { odemeCariSecimi.addEventListener('change', async (event) => {}); }
+    
+    const raporCariAramaInput = document.getElementById('raporCariAramaInput');
+    if (raporCariAramaInput) {
+        const suggestionsBox = document.getElementById('raporCariSuggestions');
+        const cariSelect = document.getElementById('raporCariSecimi');
+        raporCariAramaInput.addEventListener('input', function() {
+            const queryText = this.value.toLowerCase();
+            suggestionsBox.innerHTML = ''; 
+            suggestionsBox.style.display = 'none';
+            if (queryText.length < 2) { return; }
+            const matches = [];
+            window.cariDataMap.forEach((cari, id) => {
+                if (cari.adiSoyadi && cari.adiSoyadi.toLowerCase().includes(queryText)) {
+                    matches.push({ id: id, adi: cari.adiSoyadi });
                 }
-
-                const matches = [];
-                window.cariDataMap.forEach((cari, id) => {
-                    if (cari.adiSoyadi && cari.adiSoyadi.toLowerCase().includes(queryText)) {
-                        matches.push({ id: id, adi: cari.adiSoyadi });
-                    }
-                });
-
-                if (matches.length > 0) {
-                    suggestionsBox.style.display = 'block';
-                    matches.slice(0, 10).forEach(match => { 
-                        const div = document.createElement('div');
-                        div.textContent = match.adi;
-                        div.addEventListener('click', () => {
-                            raporCariAramaInput.value = match.adi; 
-                            cariSelect.value = match.id; 
-                            suggestionsBox.innerHTML = ''; 
-                            suggestionsBox.style.display = 'none';
-                        });
-                        suggestionsBox.appendChild(div);
+            });
+            if (matches.length > 0) {
+                suggestionsBox.style.display = 'block';
+                matches.slice(0, 10).forEach(match => { 
+                    const div = document.createElement('div');
+                    div.textContent = match.adi;
+                    div.addEventListener('click', () => {
+                        raporCariAramaInput.value = match.adi; 
+                        cariSelect.value = match.id; 
+                        suggestionsBox.innerHTML = ''; 
+                        suggestionsBox.style.display = 'none';
                     });
-                }
-            });
-
-            raporCariAramaInput.addEventListener('blur', function() {
-                setTimeout(() => {
-                    suggestionsBox.style.display = 'none';
-                }, 200); 
-            });
-        }
-
-        const sutRaporuCariAramaInput = document.getElementById('sutRaporuCariAramaInput');
-        if (sutRaporuCariAramaInput) {
-            const suggestionsBox = document.getElementById('sutRaporuCariSuggestions');
-            const cariSelect = document.getElementById('sutRaporuTedarikciSecimi');
-
-            sutRaporuCariAramaInput.addEventListener('input', function() {
-                const queryText = this.value.toLowerCase();
-                suggestionsBox.innerHTML = '';
-                suggestionsBox.style.display = 'none';
-
-                if (queryText.length < 2) { 
-                    cariSelect.value = ""; 
-                    return;
-                }
-
-                const matches = [];
-                window.cariDataMap.forEach((cari, id) => {
-                    if (cari.adiSoyadi && cari.cariGrup && cari.cariGrup.includes('üretici') && cari.adiSoyadi.toLowerCase().includes(queryText)) {
-                        matches.push({ id: id, adi: cari.adiSoyadi });
-                    }
+                    suggestionsBox.appendChild(div);
                 });
-
-                if (matches.length > 0) {
-                    suggestionsBox.style.display = 'block';
-                    matches.slice(0, 10).forEach(match => {
-                        const div = document.createElement('div');
-                        div.textContent = match.adi;
-                        
-                        div.addEventListener('click', () => {
-                            sutRaporuCariAramaInput.value = match.adi; 
-                            cariSelect.value = match.id; 
-                            
-                            suggestionsBox.innerHTML = '';
-                            suggestionsBox.style.display = 'none';
-                        });
-                        suggestionsBox.appendChild(div);
-                    });
-                }
-            });
-
-            sutRaporuCariAramaInput.addEventListener('blur', function() {
-                setTimeout(() => {
-                    suggestionsBox.style.display = 'none';
-                }, 200);
-            });
-        }
-
-
-
-
-	document.getElementById('mm-sut-ekle-btn')?.addEventListener('click', () => createMmEditableRow('sut'));
-	document.getElementById('mm-yem-ekle-btn')?.addEventListener('click', () => createMmEditableRow('yem'));
-	document.getElementById('mm-odeme-ekle-btn')?.addEventListener('click', () => createMmEditableRow('odeme'));
-        document.getElementById('raporOlusturBtn')?.addEventListener('click', handleHesapOzetiRaporuOlustur);
-        document.getElementById('sutRaporuOlusturBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: false}));
-        document.getElementById('sutRaporuTumunuGosterBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: true, kategori: false}));
-        document.getElementById('sutRaporuKategoriGosterBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: true}));
-        document.getElementById('yemAdetRaporuBtn')?.addEventListener('click', () => handleYemPivotRaporu('adet'));
-        document.getElementById('yemDetayliSatisRaporuBtn')?.addEventListener('click', () => handleYemPivotRaporu('satis'));
-        document.getElementById('yemMusteriKarRaporuBtn')?.addEventListener('click', () => handleYemPivotRaporu('karlilik'));
-        document.getElementById('karneRaporuOlusturBtn')?.addEventListener('click', handleDinamikSutRaporu);
-        document.getElementById('hareketFiltreleBtn')?.addEventListener('click', fetchAndDisplayHareketler);
-        document.getElementById('cariDurumFiltre')?.addEventListener('change', renderCariListesi);
-        document.getElementById('cariGrupFiltre')?.addEventListener('change', renderCariListesi);
-        document.getElementById('yemSatirEkleBtn')?.addEventListener('click', addYemSatisRow);
-        document.getElementById('tumSatislariKaydetBtn')?.addEventListener('click', handleTopluYemSatisKaydet);
-        document.getElementById('stokSayimForm')?.addEventListener('submit', handleStokSayimKaydet);
-        document.getElementById('sayimYemSecimi')?.addEventListener('change', updateSayimForm);
-        document.getElementById('sayimFizikselStok')?.addEventListener('input', updateSayimForm);
-        cariListesiYazdirBtn?.addEventListener('click', () => handleYazdir('cari-list-printable-area'));
-        document.getElementById('raporYazdirBtn')?.addEventListener('click', () => handleYazdir('report-content-to-print'));
-        document.getElementById('sutRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('sutAlimRaporAlani'));
-        document.getElementById('yemRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('yemRaporuAlani', 'landscape'));
-        document.getElementById('karneYazdirBtn')?.addEventListener('click', () => handleYazdir('dinamikRaporContainer', 'landscape'));
-        document.getElementById('karnePdfBtn')?.addEventListener('click', () => exportTableToPdf('dinamikRaporContainer', 'sut_karnesi', 'karnePdfBtn'));
-        document.getElementById('karneXlsxBtn')?.addEventListener('click', () => exportTableToExcel('dinamikRaporContainer', 'sut_karnesi'));
-        document.getElementById('hesapOzetiPdfBtn')?.addEventListener('click', () => exportTableToPdf('report-content-to-print', 'hesap_ozeti', 'hesapOzetiPdfBtn'));
-        document.getElementById('hesapOzetiXlsxBtn')?.addEventListener('click', () => exportTableToExcel('hesap-ozeti-export-area', 'hesap_ozeti'));
-        document.getElementById('sutRaporuPdfBtn')?.addEventListener('click', () => exportTableToPdf('sutAlimRaporAlani', 'sut_alim_raporu', 'sutRaporuPdfBtn'));
-        document.getElementById('sutRaporuXlsxBtn')?.addEventListener('click', () => exportTableToExcel('sut-raporu-export-area', 'sut_alim_raporu'));
-        document.getElementById('yemRaporuPdfBtn')?.addEventListener('click', () => exportTableToPdf('yemRaporuAlani', 'yem_raporu', 'yemRaporuPdfBtn'));
-        document.getElementById('yemRaporuXlsxBtn')?.addEventListener('click', () => exportTableToExcel('yemRaporuAlani', 'yem_raporu'));
-        document.getElementById('yemAlisMiktar').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
-        document.getElementById('yemAlisBirimFiyati').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
+            }
+        });
+        raporCariAramaInput.addEventListener('blur', function() { setTimeout(() => { suggestionsBox.style.display = 'none'; }, 200); });
     }
+
+    const sutRaporuCariAramaInput = document.getElementById('sutRaporuCariAramaInput');
+    if (sutRaporuCariAramaInput) {
+        const suggestionsBox = document.getElementById('sutRaporuCariSuggestions');
+        const cariSelect = document.getElementById('sutRaporuTedarikciSecimi');
+        sutRaporuCariAramaInput.addEventListener('input', function() {
+            const queryText = this.value.toLowerCase();
+            suggestionsBox.innerHTML = '';
+            suggestionsBox.style.display = 'none';
+            if (queryText.length < 2) { cariSelect.value = ""; return; }
+            const matches = [];
+            window.cariDataMap.forEach((cari, id) => {
+                if (cari.adiSoyadi && cari.cariGrup && cari.cariGrup.includes('üretici') && cari.adiSoyadi.toLowerCase().includes(queryText)) {
+                    matches.push({ id: id, adi: cari.adiSoyadi });
+                }
+            });
+            if (matches.length > 0) {
+                suggestionsBox.style.display = 'block';
+                matches.slice(0, 10).forEach(match => {
+                    const div = document.createElement('div');
+                    div.textContent = match.adi;
+                    div.addEventListener('click', () => {
+                        sutRaporuCariAramaInput.value = match.adi; 
+                        cariSelect.value = match.id; 
+                        suggestionsBox.innerHTML = '';
+                        suggestionsBox.style.display = 'none';
+                    });
+                    suggestionsBox.appendChild(div);
+                });
+            }
+        });
+        sutRaporuCariAramaInput.addEventListener('blur', function() { setTimeout(() => { suggestionsBox.style.display = 'none'; }, 200); });
+    }
+    
+    document.getElementById('mm-batch-getir-btn')?.addEventListener('click', renderBatchOnayEkrani);
+    document.getElementById('mm-batch-gonder-btn')?.addEventListener('click', handleBatchMakbuzGonder);
+    document.getElementById('mm-batch-select-all')?.addEventListener('change', (e) => {
+        document.querySelectorAll('.mm-batch-checkbox').forEach(cb => cb.checked = e.target.checked);
+        updateBatchTotals();
+    });
+    document.getElementById('mm-batch-iptal-btn')?.addEventListener('click', () => {
+        document.getElementById('mm-batch-sonuc-alani').style.display = 'none';
+    });
+    document.getElementById('raporOlusturBtn')?.addEventListener('click', handleHesapOzetiRaporuOlustur);
+    document.getElementById('sutRaporuOlusturBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: false}));
+    document.getElementById('sutRaporuTumunuGosterBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: true, kategori: false}));
+    document.getElementById('sutRaporuKategoriGosterBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: true}));
+    document.getElementById('yemAdetRaporuBtn')?.addEventListener('click', () => handleYemPivotRaporu('adet'));
+    document.getElementById('yemDetayliSatisRaporuBtn')?.addEventListener('click', () => handleYemPivotRaporu('satis'));
+    document.getElementById('yemMusteriKarRaporuBtn')?.addEventListener('click', () => handleYemPivotRaporu('karlilik'));
+    document.getElementById('karneRaporuOlusturBtn')?.addEventListener('click', handleDinamikSutRaporu);
+    document.getElementById('hareketFiltreleBtn')?.addEventListener('click', fetchAndDisplayHareketler);
+    document.getElementById('cariDurumFiltre')?.addEventListener('change', renderCariListesi);
+    document.getElementById('cariGrupFiltre')?.addEventListener('change', renderCariListesi);
+    document.getElementById('yemSatirEkleBtn')?.addEventListener('click', addYemSatisRow);
+    document.getElementById('stokSayimForm')?.addEventListener('submit', handleStokSayimKaydet);
+    document.getElementById('sayimYemSecimi')?.addEventListener('change', updateSayimForm);
+    document.getElementById('sayimFizikselStok')?.addEventListener('input', updateSayimForm);
+    cariListesiYazdirBtn?.addEventListener('click', () => handleYazdir('cari-list-printable-area'));
+    document.getElementById('raporYazdirBtn')?.addEventListener('click', () => handleYazdir('report-content-to-print'));
+    document.getElementById('sutRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('sutAlimRaporAlani'));
+    document.getElementById('yemRaporuYazdirBtn')?.addEventListener('click', () => handleYazdir('yemRaporuAlani', 'landscape'));
+    document.getElementById('karneYazdirBtn')?.addEventListener('click', () => handleYazdir('dinamikRaporContainer', 'landscape'));
+    document.getElementById('karnePdfBtn')?.addEventListener('click', () => exportTableToPdf('dinamikRaporContainer', 'sut_karnesi', 'karnePdfBtn'));
+    document.getElementById('karneXlsxBtn')?.addEventListener('click', () => exportTableToExcel('dinamikRaporContainer', 'sut_karnesi'));
+    document.getElementById('hesapOzetiPdfBtn')?.addEventListener('click', () => exportTableToPdf('report-content-to-print', 'hesap_ozeti', 'hesapOzetiPdfBtn'));
+    document.getElementById('hesapOzetiXlsxBtn')?.addEventListener('click', () => exportTableToExcel('hesap-ozeti-export-area', 'hesap_ozeti'));
+    document.getElementById('sutRaporuPdfBtn')?.addEventListener('click', () => exportTableToPdf('sutAlimRaporAlani', 'sut_alim_raporu', 'sutRaporuPdfBtn'));
+    document.getElementById('sutRaporuXlsxBtn')?.addEventListener('click', () => exportTableToExcel('sut-raporu-export-area', 'sut_alim_raporu'));
+    document.getElementById('yemRaporuPdfBtn')?.addEventListener('click', () => exportTableToPdf('yemRaporuAlani', 'yem_raporu', 'yemRaporuPdfBtn'));
+    document.getElementById('yemRaporuXlsxBtn')?.addEventListener('click', () => exportTableToExcel('yemRaporuAlani', 'yem_raporu'));
+    document.getElementById('yemAlisMiktar').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
+    document.getElementById('yemAlisBirimFiyati').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
+    document.getElementById('firmaDuzenleBtn')?.addEventListener('click', () => toggleFirmaBilgileriEdit(true));
+
+}
 
 async function loadInitialData() {
     console.log("Başlangıç verileri yükleniyor...");
@@ -1537,8 +1398,6 @@ async function loadAndRenderAllData() {
         signOut(auth).then(() => { window.location.href = 'login.html'; }).catch(error => console.error("Logout error", error));
     }
 
-// LÜTFEN MEVCUT handleMmVeriGetir FONKSİYONUNU BUNUNLA TAMAMEN DEĞİŞTİRİN
-
 async function handleMmVeriGetir() {
     const cariId = selectedMmCariId;
     const baslangicTarihi = document.getElementById('mm-baslangic-tarihi').value;
@@ -1546,127 +1405,116 @@ async function handleMmVeriGetir() {
     const tableBody = document.getElementById('mm-hareket-tablosu-body');
 
     if (!cariId || !baslangicTarihi || !bitisTarihi) {
-        showToast("Lütfen cari, başlangıç ve bitiş tarihlerini eksiksiz seçin.", true);
-        return;
+        return showToast("Lütfen cari, başlangıç ve bitiş tarihlerini seçin.", true);
     }
 
-    tableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 20px;">Veriler yükleniyor, lütfen bekleyin...</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px;">Süt verileri toplanıyor...</td></tr>`;
 
     try {
-        // Devir hesaplama kısmı aynı kalıyor
-        const devirBitisTarihi = new Date(baslangicTarihi);
-        devirBitisTarihi.setDate(devirBitisTarihi.getDate() - 1);
-        const devirBitisTarihiStr = devirBitisTarihi.toISOString().split('T')[0];
-        const devirBakiyeDetay = await calculateCariBakiyeDetayli(cariId, devirBitisTarihiStr);
-        const devredenBakiye = devirBakiyeDetay.bakiye;
-        document.getElementById('mm-devir-bakiye').textContent = `${formatCurrency(devredenBakiye)} (${devredenBakiye >= 0 ? 'Alacak' : 'Borç'})`;
+        // Sadece süt alımlarını sorgula
+        const sutQuery = query(collection(db, 'sut_alimlari'),
+            where('sahipId', '==', sahipId),
+            where('cariId', '==', cariId),
+            where('tarih', '>=', baslangicTarihi),
+            where('tarih', '<=', bitisTarihi)
+        );
+        const sutAlimlariSnap = await getDocs(sutQuery);
 
-        // Veri çekme sorguları aynı kalıyor
-        const createPeriodQuery = (collectionName) => {
-            return query(collection(db, collectionName),
-                where('sahipId', '==', sahipId),
-                where('cariId', '==', cariId),
-                where('tarih', '>=', baslangicTarihi),
-                where('tarih', '<=', bitisTarihi)
-            );
-        };
-        const [sutAlimlariSnap, yemSatislariSnap, odemelerSnap] = await Promise.all([
-            getDocs(createPeriodQuery('sut_alimlari')),
-            getDocs(createPeriodQuery('yem_satislari')),
-            getDocs(createPeriodQuery('odemeVeTahsilatlar'))
-        ]);
-        
-        // BİRLEŞİK LİSTE OLUŞTURMA KISMINI GÜNCELLİYORUZ
-        let birlesikListe = [];
-        let donemToplamAlacak = 0;
-        let donemToplamBorc = 0;
+        if (sutAlimlariSnap.empty) {
+            tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px;">Bu tarih aralığında süt alımı bulunamadı.</td></tr>`;
+            // Özet alanını sıfırla
+            document.getElementById('mm-toplam-alacak').textContent = formatCurrency(0);
+            document.getElementById('mm-net-tutar').textContent = formatCurrency(0);
+            return;
+        }
+
+        // Değerleri topla
+        let toplamAksam = 0;
+        let toplamSabah = 0;
+        let toplamLitre = 0;
+        let toplamBrutTutar = 0;
 
         sutAlimlariSnap.forEach(doc => {
             const data = doc.data();
-            const tutar = data.toplamTutar || 0;
-            birlesikListe.push({
-                tarih: data.tarih,
-                tur: 'Süt Alımı',
-                aciklama: 'Günlük Süt',
-                miktar: data.toplam,
-                fiyat: data.fiyat,
-                borc: 0,
-                alacak: tutar
-            });
-            donemToplamAlacak += tutar;
+            toplamAksam += data.aksam || 0;
+            toplamSabah += data.sabah || 0;
+            toplamLitre += data.toplam || 0;
+            toplamBrutTutar += data.toplamTutar || 0;
         });
 
-        yemSatislariSnap.forEach(doc => {
-            const data = doc.data();
-            const yemAdi = window.yemDataMap.get(data.yemId)?.ad || 'Bilinmeyen Yem';
-            const tutar = data.toplamTutar || 0;
-            birlesikListe.push({
-                tarih: data.tarih,
-                tur: 'Yem Satışı',
-                aciklama: yemAdi,
-                miktar: data.miktar,
-                fiyat: data.satisFiyati,
-                borc: tutar,
-                alacak: 0
-            });
-            donemToplamBorc += tutar;
-        });
+        const ortalamaFiyat = toplamLitre > 0 ? (toplamBrutTutar / toplamLitre) : 0;
+        
+        // Tek satırlık özet tablosunu oluştur
+        tableBody.innerHTML = `
+            <tr>
+                <td style="text-align:right;">${toplamAksam.toFixed(2)}</td>
+                <td style="text-align:right;">${toplamSabah.toFixed(2)}</td>
+                <td style="text-align:right; font-weight:bold;">${toplamLitre.toFixed(2)}</td>
+                <td style="text-align:right;">${formatCurrency(ortalamaFiyat)}</td>
+                <td style="text-align:right; font-weight:bold; color:green;">${formatCurrency(toplamBrutTutar)}</td>
+            </tr>
+        `;
 
-        odemelerSnap.forEach(doc => {
-            const data = doc.data();
-            const tutar = data.tutar || 0;
-            if (data.islemTuru === 'odeme') {
-                birlesikListe.push({
-                    tarih: data.tarih, tur: 'Tahsilat', aciklama: data.aciklama || data.odemeTuru,
-                    borc: 0, alacak: tutar
-                });
-                donemToplamAlacak += tutar;
-            } else {
-                birlesikListe.push({
-                    tarih: data.tarih, tur: 'Ödeme', aciklama: data.aciklama || data.odemeTuru,
-                    borc: tutar, alacak: 0
-                });
-                donemToplamBorc += tutar;
-            }
-        });
-
-        birlesikListe.sort((a, b) => new Date(a.tarih) - new Date(b.tarih));
-
-        // TABLOYU OLUŞTURMA (RENDER) KISMINI GÜNCELLİYORUZ
-        if (birlesikListe.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 20px;">Seçili tarih aralığında hiçbir hareket bulunamadı.</td></tr>`;
-        } else {
-            let rowsHTML = '';
-            birlesikListe.forEach(hareket => {
-                rowsHTML += `
-                    <tr>
-                        <td>${formatDate(hareket.tarih)}</td>
-                        <td>${hareket.tur}</td>
-                        <td>${hareket.aciklama || ''}</td>
-                        <td style="text-align:right;">${hareket.miktar ? hareket.miktar.toFixed(2) : ''}</td>
-                        <td style="text-align:right;">${hareket.fiyat ? formatCurrency(hareket.fiyat) : ''}</td>
-                        <td style="color:red; text-align:right;">${hareket.borc > 0 ? formatCurrency(hareket.borc) : ''}</td>
-                        <td style="color:green; text-align:right;">${hareket.alacak > 0 ? formatCurrency(hareket.alacak) : ''}</td>
-                        <td class="dont-print"><button class="btn btn-delete btn-sm">X</button></td>
-                    </tr>
-                `;
-            });
-            tableBody.innerHTML = rowsHTML;
-        }
-
-        // Özet alanı güncelleme kısmı aynı kalıyor
-        document.getElementById('mm-toplam-alacak').textContent = formatCurrency(donemToplamAlacak);
-        document.getElementById('mm-toplam-borc').textContent = formatCurrency(donemToplamBorc);
-        const netTutar = devredenBakiye + donemToplamAlacak - donemToplamBorc;
-        const netTutarElement = document.getElementById('mm-net-tutar');
-        netTutarElement.textContent = `${formatCurrency(netTutar)} (${netTutar >= 0 ? 'Cari Alacaklı' : 'Cari Borçlu'})`;
-        netTutarElement.style.color = netTutar >= 0 ? 'green' : 'red';
-
+        // Fiş Özeti'ni güncelle (Artık sadece süt tutarı var)
+        document.getElementById('mm-devir-bakiye').textContent = "0,00 ₺"; // Devir bu ekranda gösterilmiyor
+        document.getElementById('mm-toplam-alacak').textContent = formatCurrency(toplamBrutTutar);
+        document.getElementById('mm-toplam-borc').textContent = "0,00 ₺";
+        document.getElementById('mm-net-tutar').textContent = formatCurrency(toplamBrutTutar);
+        
     } catch (error) {
-        console.error("Müstahsil fişi verileri getirilirken hata:", error);
+        console.error("Müstahsil süt verileri getirilirken hata:", error);
         showToast("Veriler getirilirken bir hata oluştu: " + error.message, true);
-        tableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: red;">Bir hata oluştu. Lütfen konsolu kontrol edin.</td></tr>`;
     }
+}
+
+function toggleFirmaBilgileriEdit(isEditing) {
+    const form = document.getElementById('firmaBilgileriForm');
+    const inputs = form.querySelectorAll('input, textarea');
+    const duzenleBtn = document.getElementById('firmaDuzenleBtn');
+    const kaydetBtn = document.getElementById('firmaKaydetBtn');
+
+    inputs.forEach(input => input.disabled = !isEditing);
+    duzenleBtn.style.display = isEditing ? 'none' : 'inline-block';
+    kaydetBtn.style.display = isEditing ? 'inline-block' : 'none';
+}
+
+// BU YENİ FONKSİYONU SCRIPT'İNİZE EKLEYİN
+function showMakbuzOnayEkrani() {
+    const brutTutarStr = document.getElementById('mm-net-tutar').textContent;
+    const brutTutar = parseFloat(brutTutarStr.replace(/[^0-9,-]+/g, "").replace(",", ".")) || 0;
+
+    if (brutTutar <= 0) {
+        return showToast("Makbuz oluşturmak için pozitif bir tutar olmalıdır.", true);
+    }
+
+    // Gerekli verileri al
+    const cariAdi = document.getElementById('mmCariArama').value;
+    const kesintiler = calculateDeductions(brutTutar);
+
+    // Modal'daki alanları doldur
+    document.getElementById('onay-cari-adi').textContent = cariAdi;
+    document.getElementById('onay-brut-tutar').textContent = formatCurrency(kesintiler.brutTutar);
+    document.getElementById('onay-gv').textContent = `(-) ${formatCurrency(kesintiler.gelirVergisiTevkifati)}`;
+    document.getElementById('onay-sgk').textContent = `(-) ${formatCurrency(kesintiler.sgkTevkifati)}`;
+    document.getElementById('onay-borsa').textContent = `(-) ${formatCurrency(kesintiler.borsaTescilUcreti)}`;
+    document.getElementById('onay-net-tutar').textContent = formatCurrency(kesintiler.netTutar);
+
+    const overlay = document.getElementById('makbuz-onay-modal-overlay');
+    const confirmBtn = document.getElementById('makbuz-onay-confirm');
+    const cancelBtn = document.getElementById('makbuz-onay-cancel');
+
+    // Butonlara event listener'ları ata
+    const confirmClickHandler = () => {
+        handleMakbuzOlustur(); // Asıl makbuz oluşturma fonksiyonu burada çağrılır
+        overlay.classList.remove('show');
+        confirmBtn.replaceWith(confirmBtn.cloneNode(true)); // listener'ı temizle
+    };
+    
+    confirmBtn.onclick = confirmClickHandler;
+    cancelBtn.onclick = () => overlay.classList.remove('show');
+
+    // Modalı göster
+    overlay.classList.add('show');
 }
 
 
@@ -1766,102 +1614,235 @@ function numberToWordsTR(num) {
     return `${tamKisim} TL ${ondalikKisim} Krş.`;
 }
 
-// MEVCUT handleMakbuzOlustur FONKSİYONUNU SİLİP BUNU EKLEYİN
 
-async function handleMakbuzOlustur() {
-    // 1. Gerekli verileri ve ayarları topla
-    const cariId = selectedMmCariId;
-    if (!cariId) {
-        return showToast("Lütfen bir cari seçin.", true);
+// MEVCUT renderBatchOnayEkrani FONKSİYONUNU SİLİP BUNU EKLEYİN
+
+async function renderBatchOnayEkrani() {
+    const baslangic = document.getElementById('mm-batch-baslangic').value;
+    const bitis = document.getElementById('mm-batch-bitis').value;
+    
+    // HATA BURADAYDI: Bu satır eksikti. Kategori dropdown'ının değeri burada okunmalı.
+    const kategori = document.getElementById('mm-batch-kategori').value;
+
+    const tableBody = document.getElementById('mm-batch-table-body');
+    const sonucAlani = document.getElementById('mm-batch-sonuc-alani');
+
+    if (!baslangic || !bitis) {
+        return showToast("Lütfen dönem başlangıç ve bitiş tarihlerini seçin.", true);
     }
-    if (!globalSettings.firmaProfili || !globalSettings.firmaProfili.unvan) {
-        return showToast("Lütfen Ayarlar menüsünden kendi firma bilgilerinizi eksiksiz doldurun.", true);
-    }
-    const aliciData = globalSettings.firmaProfili;
-    const saticiData = window.cariDataMap.get(cariId);
-    const tableBody = document.getElementById('mm-hareket-tablosu-body');
-    const belgeNo = document.getElementById('mm-belge-no').value || `MM-${Date.now()}`;
+    
+    tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:20px;">Veriler yükleniyor...</td></tr>`;
+    sonucAlani.style.display = 'block';
+    updateBatchTotals();
 
-    // 2. Tablodaki satırları tara ve SADECE SÜT ALIMLARINI işle
-    const sutAlimKalemleri = [];
-    let brutSutTutari = 0;
+    try {
+        const sutQuery = query(collection(db, 'sut_alimlari'),
+            where('sahipId', '==', sahipId),
+            where('tarih', '>=', baslangic),
+            where('tarih', '<=', bitis)
+        );
+        
+        // Kategori seçiliyse carileri ona göre filtrele, değilse tümünü al
+        const carilerQuery = kategori 
+            ? query(collection(db, 'cariler'), where("sahipId", "==", sahipId), where("kategori", "==", kategori))
+            : query(collection(db, 'cariler'), where("sahipId", "==", sahipId));
 
-    Array.from(tableBody.querySelectorAll('tr')).forEach(row => {
-        const islemTuru = row.cells[1].textContent;
-        // Sadece 'Süt Alımı' içeren satırları dikkate al
-        if (islemTuru.includes('Süt Alımı')) {
-            const tutarText = row.cells[6].textContent; // Alacak Tutarı sütunu
-            const alacakTutari = parseFloat(tutarText.replace(/[^0-9,-]+/g, "").replace(",", ".")) || 0;
-            
-            if (alacakTutari > 0) {
-                 brutSutTutari += alacakTutari;
-                 sutAlimKalemleri.push({
-                    tarih: formatDate(row.cells[0].textContent),
-                    aciklama: row.cells[2].textContent || 'Günlük Süt Alımı',
-                    miktar: parseFloat(row.cells[3].textContent) || 0,
-                    birimFiyat: alacakTutari / (parseFloat(row.cells[3].textContent) || 1),
-                    tutar: alacakTutari
-                });
+        const [sutSnap, carilerSnap] = await Promise.all([
+            getDocs(sutQuery),
+            getDocs(carilerQuery)
+        ]);
+
+        const cariMap = new Map(carilerSnap.docs.map(doc => [doc.id, doc.data()]));
+        const mustahsilVerileri = new Map();
+
+        sutSnap.forEach(doc => {
+            const alim = doc.data();
+            // Eğer bu cari, filtrelenmiş cari listesinde yoksa (farklı kategorideyse) atla
+            if (!cariMap.has(alim.cariId)) return; 
+
+            if (!mustahsilVerileri.has(alim.cariId)) {
+                mustahsilVerileri.set(alim.cariId, { toplamSut: 0, brutTutar: 0 });
             }
+            const mustahsil = mustahsilVerileri.get(alim.cariId);
+            mustahsil.toplamSut += alim.toplam || 0;
+            mustahsil.brutTutar += alim.toplamTutar || 0;
+        });
+
+        if (mustahsilVerileri.size === 0) {
+             tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:20px;">Bu dönemde ve kategoride veri bulunamadı.</td></tr>`;
+             return;
+        }
+
+        let tableHTML = '';
+        mustahsilVerileri.forEach((data, cariId) => {
+            const cariData = cariMap.get(cariId);
+            if (!cariData) return;
+
+            const birimFiyat = data.toplamSut > 0 ? data.brutTutar / data.toplamSut : 0;
+            const kesintiler = calculateDeductions(data.brutTutar);
+
+            tableHTML += `
+                <tr data-cari-id="${cariId}" data-cari-adi="${cariData.adiSoyadi}">
+                    <td><input type="checkbox" class="mm-batch-checkbox" onchange="updateBatchTotals()"></td>
+                    <td>${cariData.adiSoyadi}</td>
+                    <td class="data-sut">${data.toplamSut.toFixed(2)}</td>
+                    <td class="data-fiyat">${birimFiyat.toFixed(2)}</td>
+                    <td class="data-brut">${data.brutTutar.toFixed(2)}</td>
+                    <td class="data-stopaj">${kesintiler.gelirVergisiTevkifati.toFixed(2)}</td>
+                    <td class="data-sgk">${kesintiler.sgkTevkifati.toFixed(2)}</td>
+                    <td class="data-net" style="font-weight:bold;">${kesintiler.netTutar.toFixed(2)}</td>
+                    <td><span class="badge badge-pending">Bekliyor</span></td>
+                </tr>
+            `;
+        });
+        tableBody.innerHTML = tableHTML;
+
+    } catch (error) {
+        console.error("Toplu müstahsil verisi getirilirken hata:", error);
+        tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:red;">Hata oluştu!</td></tr>`;
+    }
+}
+
+function updateBatchTotals() {
+    const allCheckboxes = document.querySelectorAll('.mm-batch-checkbox');
+    let secilenSayi = 0;
+    let toplamTutar = 0;
+
+    allCheckboxes.forEach(cb => {
+        if (cb.checked) {
+            secilenSayi++;
+            const netTutar = parseFloat(cb.closest('tr').querySelector('.data-net').textContent) || 0;
+            toplamTutar += netTutar;
         }
     });
 
-    if (sutAlimKalemleri.length === 0) {
-        return showToast("Makbuz oluşturmak için seçili tarih aralığında en az bir Süt Alımı işlemi olmalıdır.", true);
-    }
-
-    // 3. Yasal kesintileri hesapla
-    const kesintiler = calculateDeductions(brutSutTutari);
-
-    // 4. Makbuz HTML şablonunu al ve doldur
-    let makbuzHTML = getMakbuzHTMLTemplate();
-
-    // Alıcı ve Satıcı Bilgileri
-    makbuzHTML = makbuzHTML.replace(/__ALICI_UNVAN__/g, aliciData.unvan)
-                           .replace('__ALICI_ADRES__', aliciData.adres)
-                           .replace('__ALICI_VERGI_DAIRESI__', aliciData.vergiDairesi)
-                           .replace('__ALICI_VKN__', aliciData.vkn)
-                           .replace('__ALICI_TIC_SICIL_NO__', aliciData.ticSicilNo)
-                           .replace('__ALICI_TELEFON__', aliciData.telefon)
-                           .replace('__SATICI_ADI__', saticiData.adiSoyadi)
-                           .replace('__SATICI_TC__', saticiData.vergiNo || 'Belirtilmemiş')
-                           .replace('__SATICI_ADRES__', saticiData.adres || 'Belirtilmemiş')
-                           .replace('__BELGE_NO__', belgeNo)
-                           .replace('__DUZENLEME_TARIHI__', new Date().toLocaleDateString('tr-TR'));
-
-    // Kalemleri (Sadece Süt) Doldur
-    let kalemlerHTML = '';
-    sutAlimKalemleri.forEach((item, index) => {
-        kalemlerHTML += `
-            <tr>
-                <td>${index + 1}</td>
-                <td>Süt Alımı (${item.tarih})</td>
-                <td class="text-right">${item.miktar.toFixed(2)}</td>
-                <td>Litre</td>
-                <td class="text-right">${formatCurrency(item.birimFiyat)}</td>
-                <td class="text-right">${formatCurrency(item.tutar)}</td>
-            </tr>
-        `;
-    });
-    makbuzHTML = makbuzHTML.replace('__KALEMLER_GOVDESI__', kalemlerHTML);
-
-    // Toplamlar ve Kesintileri Doldur
-    makbuzHTML = makbuzHTML.replace('__BRUT_TUTAR__', formatCurrency(kesintiler.brutTutar))
-                           .replace('__GELIR_VERGISI__', formatCurrency(kesintiler.gelirVergisiTevkifati))
-                           .replace('__SGK_TEVKIFATI__', formatCurrency(kesintiler.sgkTevkifati))
-                           .replace('__BORSA_TESCIL__', formatCurrency(kesintiler.borsaTescilUcreti))
-                           .replace('__TOPLAM_KESINTI__', formatCurrency(kesintiler.toplamKesinti))
-                           .replace('__ODENECEK_NET_TUTAR__', formatCurrency(kesintiler.netTutar))
-                           .replace('__YAZI_ILE_TUTAR__', numberToWordsTR(kesintiler.netTutar));
-
-    // 5. Yeni pencerede göster ve yazdır
-    const makbuzPenceresi = window.open('', '_blank');
-    makbuzPenceresi.document.write(makbuzHTML);
-    makbuzPenceresi.document.close();
-    makbuzPenceresi.focus();
-    setTimeout(() => { makbuzPenceresi.print(); }, 500);
+    document.getElementById('mm-batch-secilen-sayi').textContent = secilenSayi;
+    document.getElementById('mm-batch-toplam-tutar').textContent = formatCurrency(toplamTutar);
 }
 
+// handleBatchMakbuzGonder fonksiyonunu tamamen bununla değiştirin
+
+async function handleBatchMakbuzGonder() {
+    const secilenSatirlar = document.querySelectorAll('.mm-batch-checkbox:checked');
+    if (secilenSatirlar.length === 0) {
+        return showToast("Lütfen en az bir müstahsil seçin.", true);
+    }
+
+    const onayMesaji = `${secilenSatirlar.length} adet müstahsil için makbuz oluşturulacak. Bu işlem, tarayıcınızda yeni sekmeler açacaktır. Devam etmek istiyor musunuz?`;
+
+    // 1. ADIM: Önce kullanıcıdan onayı al
+    showCustomConfirm(onayMesaji, () => {
+        // 2. ADIM: Kullanıcı "Evet" derse işlemleri başlat
+        showToast(`${secilenSatirlar.length} adet makbuz oluşturuluyor...`, false, 3000);
+
+        secilenSatirlar.forEach((cb, index) => {
+            const satir = cb.closest('tr');
+            const durumHucre = satir.querySelector('td:last-child .badge');
+            
+            // Her makbuz için yeni bir sekme aç
+            const makbuzPenceresi = window.open('', '_blank');
+            if (!makbuzPenceresi) {
+                showToast("Pop-up engelleyici aktif olabilir. Lütfen izin verin.", true);
+                durumHucre.textContent = 'Engellendi';
+                durumHucre.className = 'badge badge-danger';
+                return; // Bu döngüyü sonlandır
+            }
+            makbuzPenceresi.document.write('<body>Makbuz içeriği hazırlanıyor...</body>');
+
+            try {
+                const veri = {
+                    cariId: satir.dataset.cariId,
+                    cariAdi: satir.dataset.cariAdi,
+                    brutTutar: parseFloat(satir.querySelector('.data-brut').textContent)
+                };
+
+                // Makbuz oluşturma fonksiyonunu pencere referansıyla çağır
+                handleMakbuzOlustur(veri, makbuzPenceresi);
+                durumHucre.textContent = 'Oluşturuldu';
+                durumHucre.className = 'badge badge-success';
+            } catch (e) {
+                durumHucre.textContent = 'Hata';
+                durumHucre.className = 'badge badge-danger';
+                makbuzPenceresi.document.write(`<body>Bir hata oluştu: ${e.message}</body>`);
+                makbuzPenceresi.document.close();
+                console.error("Makbuz oluşturulurken hata:", e);
+            }
+        });
+    }, "Toplu Makbuz Onayı");
+}
+
+
+async function handleMakbuzOlustur(veri, makbuzPenceresi) {
+    try {
+        const { cariId, cariAdi, brutTutar } = veri;
+        
+        if (!globalSettings.firmaProfili || !globalSettings.firmaProfili.unvan) {
+            throw new Error("Lütfen Ayarlar menüsünden firma bilgilerinizi doldurun.");
+        }
+        
+        const aliciData = globalSettings.firmaProfili;
+        const saticiData = window.cariDataMap.get(cariId);
+
+        if (!saticiData) {
+            throw new Error(`${cariAdi} için cari verisi bulunamadı.`);
+        }
+
+        const belgeNo = `MM-${cariId.substring(0, 4)}-${Date.now()}`;
+        const kesintiler = calculateDeductions(brutTutar);
+        let makbuzHTML = getMakbuzHTMLTemplate();
+
+        // Yer tutucuları doldur
+        makbuzHTML = makbuzHTML.replace(/__ALICI_UNVAN__/g, aliciData.unvan || '')
+                               .replace('__ALICI_ADRES__', aliciData.adres || '')
+                               .replace('__ALICI_VERGI_DAIRESI__', aliciData.vergiDairesi || '')
+                               .replace('__ALICI_VKN__', aliciData.vkn || '')
+                               .replace('__ALICI_TELEFON__', aliciData.telefon || '')
+                               .replace('__SATICI_ADI__', cariAdi)
+                               .replace('__SATICI_TC__', saticiData.vergiNo || 'Belirtilmemiş')
+                               .replace('__SATICI_ADRES__', saticiData.adres || 'Belirtilmemiş')
+                               .replace('__BELGE_NO__', belgeNo)
+                               .replace('__DUZENLEME_TARIHI__', new Date().toLocaleDateString('tr-TR'))
+                               .replace('__BRUT_TUTAR__', formatCurrency(kesintiler.brutTutar))
+                               .replace('__GELIR_VERGISI__', formatCurrency(kesintiler.gelirVergisiTevkifati))
+                               .replace('__SGK_TEVKIFATI__', formatCurrency(kesintiler.sgkTevkifati))
+                               .replace('__BORSA_TESCIL__', formatCurrency(kesintiler.borsaTescilUcreti))
+                               .replace('__TOPLAM_KESINTI__', formatCurrency(kesintiler.toplamKesinti))
+                               .replace('__ODENECEK_NET_TUTAR__', formatCurrency(kesintiler.netTutar))
+                               .replace('__YAZI_ILE_TUTAR__', numberToWordsTR(kesintiler.netTutar));
+        
+        // Makbuz kalemlerini (sadece toplamı gösteren satır) ekle
+        const kalemlerHTML = `
+            <tr>
+                <td>1</td>
+                <td>Dönem Toplam Süt Bedeli</td>
+                <td class="text-right"></td>
+                <td></td>
+                <td class="text-right"></td>
+                <td class="text-right">${formatCurrency(kesintiler.brutTutar)}</td>
+            </tr>
+        `;
+        makbuzHTML = makbuzHTML.replace('__KALEMLER_GOVDESI__', kalemlerHTML);
+
+        // Önceden açılan pencerenin içeriğini doldur
+        if (makbuzPenceresi && !makbuzPenceresi.closed) {
+            makbuzPenceresi.document.open();
+            makbuzPenceresi.document.write(makbuzHTML);
+            makbuzPenceresi.document.close();
+        } else {
+            // Pencere bir şekilde kapanmışsa veya yoksa hata ver
+             throw new Error("Makbuz penceresi bulunamadı veya kapatıldı.");
+        }
+
+    } catch (error) {
+        console.error("handleMakbuzOlustur içinde hata:", error);
+        // Hata durumunda pencereye hata mesajı yaz
+        if (makbuzPenceresi && !makbuzPenceresi.closed) {
+            makbuzPenceresi.document.body.innerHTML = `Bir hata oluştu: ${error.message}`;
+        }
+        // Bu hatayı, çağıran fonksiyona da bildir
+        throw error;
+    }
+}
 
 function getMakbuzHTMLTemplate() {
     return `
@@ -2024,27 +2005,29 @@ function createMmEditableRow(type) {
 }
 
 
-    async function getSettings() {
+// MEVCUT getSettings FONKSİYONUNU BUNUNLA DEĞİŞTİRİN
+
+async function getSettings() {
+    // Ayarlar zaten yüklendiyse tekrar yükleme
+    if (globalSettings && globalSettings.firmaProfili) {
+        return globalSettings;
+    }
+
     const settingsRef = doc(db, 'ayarlar', sahipId);
     try {
         const docSnap = await getDoc(settingsRef);
         if (docSnap.exists()) {
             globalSettings = docSnap.data();
-
-            // Genel Ayarları Doldur
-            document.getElementById('varsayilanSutFiyati').value = (globalSettings.defaultMilkPrice || 15.50).toFixed(2);
-
-            // Firma Bilgilerini Doldur
-            if (globalSettings.firmaProfili) {
-                document.getElementById('firmaUnvani').value = globalSettings.firmaProfili.unvan || '';
-                document.getElementById('firmaAdresi').value = globalSettings.firmaProfili.adres || '';
-                document.getElementById('firmaVergiDairesi').value = globalSettings.firmaProfili.vergiDairesi || '';
-                document.getElementById('firmaVkn').value = globalSettings.firmaProfili.vkn || '';
-                document.getElementById('firmaTicSicilNo').value = globalSettings.firmaProfili.ticSicilNo || '';
-                document.getElementById('firmaTelefon').value = globalSettings.firmaProfili.telefon || '';
-            }
+        } else {
+            // Eğer ayar dokümanı hiç yoksa, varsayılan bir nesne ata
+            globalSettings = { defaultMilkPrice: 15.50, firmaProfili: null };
         }
-    } catch(e) { console.error("Ayarlar alınırken hata: ", e); }
+        return globalSettings;
+    } catch(e) { 
+        console.error("Ayarlar alınırken hata: ", e);
+        // Hata durumunda da varsayılan bir nesne döndür
+        return { defaultMilkPrice: 15.50, firmaProfili: null };
+    }
 }
 
     function populatePeriodSelect() {
@@ -2066,19 +2049,12 @@ function createMmEditableRow(type) {
         selectEl.innerHTML = optionsHTML;
     }
 
-  async function handleAyarlarKaydet(event) {
+ async function handleAyarlarKaydet(event) {
     event.preventDefault();
     const formId = event.target.id;
-
     try {
         if (formId === 'ayarlarForm') {
-            const yeniFiyat = parseFloat(document.getElementById('varsayilanSutFiyati').value);
-            await setDoc(doc(db, 'ayarlar', sahipId), { 
-                defaultMilkPrice: yeniFiyat 
-            }, { merge: true });
-            globalSettings.defaultMilkPrice = yeniFiyat;
-            showToast('Genel ayarlar kaydedildi.');
-
+            // ... (bu kısım aynı kalıyor) ...
         } else if (formId === 'firmaBilgileriForm') {
             const firmaProfili = {
                 unvan: document.getElementById('firmaUnvani').value,
@@ -2091,11 +2067,10 @@ function createMmEditableRow(type) {
             await setDoc(doc(db, 'ayarlar', sahipId), { firmaProfili }, { merge: true });
             globalSettings.firmaProfili = firmaProfili;
             showToast('Firma bilgileri kaydedildi.');
+            // Kaydettikten sonra formu tekrar kilitle
+            toggleFirmaBilgileriEdit(false);
         }
-    } catch (error) {
-        console.error("Ayarlar kaydedilirken hata:", error);
-        showToast("Ayarlar kaydedilemedi.", true);
-    }
+    } catch (error) { /* ... */ }
 }
 
     async function handleSifreDegistir(event) {
@@ -2780,119 +2755,153 @@ async function deleteStokSayimi(sayimId) {
         return colors;
     }
 
-   async function renderGunlukSutGrafik() {
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
-    const ctx = document.getElementById('gunlukSutGrafik').getContext('2d');
-    if (gunlukSutunChartInstance) {
-        gunlukSutunChartInstance.destroy();
-    }
+// MEVCUT İKİ GRAFİK FONKSİYONUNU SİLİP BUNLARI YAPIŞTIRIN
+
+async function renderGunlukSutGrafik() {
+    if (isGunlukChartRendering) return; // Eğer zaten çiziliyorsa, tekrar başlatma
+    isGunlukChartRendering = true;      // Kilidi aktif et
+
     try {
+        const currentUser = auth.currentUser;
+        if (!currentUser) return;
+        
+        const ctx = document.getElementById('gunlukSutGrafik').getContext('2d');
+        if (gunlukSutunChartInstance) {
+            gunlukSutunChartInstance.destroy();
+        }
+        
         const tarihStr = getTodayForInput();
         const qAlimlar = query(collection(db, 'sut_alimlari'), where('sahipId', '==', sahipId), where('tarih', '==', tarihStr));
         const alimlarSnapshot = await getDocs(qAlimlar);
+
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            if (alimlarSnapshot.empty) {
-                ctx.font = "16px Segoe UI"; ctx.fillStyle = "#666"; ctx.textAlign = "center";
-                ctx.fillText("Bugün için süt alım verisi bulunmuyor.", ctx.canvas.width / 2, ctx.canvas.height / 2);
-                return;
-            }
-            const qCariler = query(collection(db, 'cariler'), where('sahipId', '==', sahipId), where('cariGrup', 'array-contains', 'üretici'));
-            const carilerSnapshot = await getDocs(qCariler);
-            const kategoriMap = new Map();
-            carilerSnapshot.forEach(docSnap => {
-                kategoriMap.set(docSnap.id, docSnap.data().kategori || 'Belirtilmemiş');
-            });
-            const dataByKategori = {};
-            alimlarSnapshot.forEach(docSnap => {
-                const alim = docSnap.data();
-                if (alim.islemKaynagi === 'tank-aktarim') { return; }
-                const kategori = kategoriMap.get(alim.cariId) || 'Tanımsız/Diğer';
-                if (!dataByKategori[kategori]) { dataByKategori[kategori] = 0; }
-                dataByKategori[kategori] += parseFloat(alim.toplam || 0);
-            });
-            const labels = Object.keys(dataByKategori);
-            const data = Object.values(dataByKategori);
-            let backgroundColors = [];
-            if (data.length > 0) {
-                const maxValue = Math.max(...data);
-                const minValue = Math.min(...data.filter(val => val > 0));
-                backgroundColors = data.map(value => {
-                    if (value === maxValue) return 'rgba(40, 167, 69, 0.7)';
-                    else if (value === minValue) return 'rgba(220, 53, 69, 0.7)';
-                    else return 'rgba(255, 193, 7, 0.7)';
-                });
-            }
-            const maxValueForScale = data.length > 0 ? Math.max(...data) : 0;
-            const chartMax = maxValueForScale > 0 ? maxValueForScale * 1.15 : 100;
-            gunlukSutunChartInstance = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Toplam Süt (Lt)', data: data, backgroundColor: backgroundColors, borderColor: 'rgba(54, 162, 235, 1)', borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end', formatter: (value) => value.toFixed(1) + ' Lt', color: '#333', font: { weight: 'bold' } } }, scales: { y: { beginAtZero: true, max: chartMax } } } });
-        } catch(error) { console.error("Günlük süt grafiği oluşturulurken hata:", error); }
-    }
+        if (alimlarSnapshot.empty) {
+            ctx.font = "16px Segoe UI"; ctx.fillStyle = "#666"; ctx.textAlign = "center";
+            ctx.fillText("Bugün için süt alım verisi bulunmuyor.", ctx.canvas.width / 2, ctx.canvas.height / 2);
+            return;
+        }
 
-   async function renderAylikSutunGrafik() {
-    const ayYil = document.getElementById('aylikChartAySecimi').value;
-    const ctx = document.getElementById('aylikSutGrafik').getContext('2d');
-    if (aylikSutunChartInstance) {
-        aylikSutunChartInstance.destroy();
-    }
+        const qCariler = query(collection(db, 'cariler'), where('sahipId', '==', sahipId), where('cariGrup', 'array-contains', 'üretici'));
+        const carilerSnapshot = await getDocs(qCariler);
+        const kategoriMap = new Map();
+        carilerSnapshot.forEach(docSnap => {
+            kategoriMap.set(docSnap.id, docSnap.data().kategori || 'Belirtilmemiş');
+        });
 
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        const dataByKategori = {};
+        alimlarSnapshot.forEach(docSnap => {
+            const alim = docSnap.data();
+            if (alim.islemKaynagi === 'tank-aktarim') return;
+            const kategori = kategoriMap.get(alim.cariId) || 'Tanımsız/Diğer';
+            if (!dataByKategori[kategori]) { dataByKategori[kategori] = 0; }
+            dataByKategori[kategori] += parseFloat(alim.toplam || 0);
+        });
+
+        const labels = Object.keys(dataByKategori);
+        const data = Object.values(dataByKategori);
+        
+        let backgroundColors = [];
+        if (data.length > 0) {
+            const maxValue = Math.max(...data);
+            const minValue = Math.min(...data.filter(val => val > 0));
+            backgroundColors = data.map(value => {
+                if (value === maxValue) return 'rgba(40, 167, 69, 0.7)';
+                else if (value === minValue) return 'rgba(220, 53, 69, 0.7)';
+                else return 'rgba(255, 193, 7, 0.7)';
+            });
+        }
+        const maxValueForScale = data.length > 0 ? Math.max(...data) : 0;
+        const chartMax = maxValueForScale > 0 ? maxValueForScale * 1.15 : 100;
+        
+        gunlukSutunChartInstance = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'Toplam Süt (Lt)', data, backgroundColor: backgroundColors, borderColor: 'rgba(54, 162, 235, 1)', borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end', formatter: (value) => value.toFixed(1) + ' Lt', color: '#333', font: { weight: 'bold' } } }, scales: { y: { beginAtZero: true, max: chartMax } } } });
+    
+    } catch(error) { 
+        console.error("Günlük süt grafiği oluşturulurken hata:", error); 
+    } finally {
+        isGunlukChartRendering = false; // İşlem bitince kilidi serbest bırak
+    }
+}
+
+async function renderAylikSutunGrafik() {
+    if (isAylikChartRendering) return; // Eğer zaten çiziliyorsa, tekrar başlatma
+    isAylikChartRendering = true;      // Kilidi aktif et
+
+    try {
+        const ayYil = document.getElementById('aylikChartAySecimi').value;
+        const ctx = document.getElementById('aylikSutGrafik').getContext('2d');
+        if (aylikSutunChartInstance) {
+            aylikSutunChartInstance.destroy();
+        }
+
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         if (!ayYil) {
             ctx.font = "16px Segoe UI"; ctx.fillStyle = "#666"; ctx.textAlign = "center";
             ctx.fillText("Lütfen bir ay seçip 'Grafiği Göster' butonuna basın.", ctx.canvas.width / 2, ctx.canvas.height / 2);
             return;
         }
+
         const currentUser = auth.currentUser;
         if (!currentUser) return;
+        
         ctx.font = "16px Segoe UI"; ctx.fillStyle = "#666"; ctx.textAlign = "center";
         ctx.fillText("Grafik oluşturuluyor...", ctx.canvas.width / 2, ctx.canvas.height / 2);
-        try {
-            const [year, month] = ayYil.split('-');
-            const startDate = new Date(year, month - 1, 1);
-            const endDate = new Date(year, month, 0);
-            const pad = (num) => String(num).padStart(2, '0');
-            const startDateStr = `${startDate.getFullYear()}-${pad(startDate.getMonth() + 1)}-${pad(startDate.getDate())}`;
-            const endDateStr = `${endDate.getFullYear()}-${pad(endDate.getMonth() + 1)}-${pad(endDate.getDate())}`;
-            const qAlimlar = query(collection(db, 'sut_alimlari'), where('sahipId', '==', sahipId), where('tarih', '>=', startDateStr), where('tarih', '<=', endDateStr));
-            const alimlarSnapshot = await getDocs(qAlimlar);
-            if (alimlarSnapshot.empty) {
-                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-                ctx.fillText("Bu ayda süt alımı yok.", ctx.canvas.width / 2, ctx.canvas.height / 2);
-                return; 
-            }
-            const qCariler = query(collection(db, 'cariler'), where('sahipId', '==', sahipId), where('cariGrup', 'array-contains', 'üretici'));
-            const carilerSnapshot = await getDocs(qCariler);
-            const kategoriMap = new Map();
-            carilerSnapshot.forEach(docSnap => {
-                kategoriMap.set(docSnap.id, docSnap.data().kategori || 'Belirtilmemiş');
+
+        const [year, month] = ayYil.split('-');
+        const startDateStr = `${year}-${month}-01`;
+        const endDate = new Date(year, month, 0);
+        const endDateStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
+        
+        const qAlimlar = query(collection(db, 'sut_alimlari'), where('sahipId', '==', sahipId), where('tarih', '>=', startDateStr), where('tarih', '<=', endDateStr));
+        const alimlarSnapshot = await getDocs(qAlimlar);
+        
+        if (alimlarSnapshot.empty) {
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.fillText("Bu ayda süt alımı yok.", ctx.canvas.width / 2, ctx.canvas.height / 2);
+            return; 
+        }
+
+        const qCariler = query(collection(db, 'cariler'), where('sahipId', '==', sahipId), where('cariGrup', 'array-contains', 'üretici'));
+        const carilerSnapshot = await getDocs(qCariler);
+        const kategoriMap = new Map();
+        carilerSnapshot.forEach(docSnap => {
+            kategoriMap.set(docSnap.id, docSnap.data().kategori || 'Belirtilmemiş');
+        });
+
+        const dataByKategori = {};
+        alimlarSnapshot.forEach(docSnap => {
+            const alim = docSnap.data();
+            if (alim.islemKaynagi === 'tank-aktarim') return;
+            const kategori = kategoriMap.get(alim.cariId) || 'Tanımsız/Diğer';
+            if (!dataByKategori[kategori]) { dataByKategori[kategori] = 0; }
+            dataByKategori[kategori] += parseFloat(alim.toplam || 0);
+        });
+
+        const sortedDataArray = Object.entries(dataByKategori).sort((a, b) => b[1] - a[1]);
+        const labels = sortedDataArray.map(item => item[0]);
+        const data = sortedDataArray.map(item => item[1]);
+        
+        let backgroundColors = [];
+        if (data.length > 0) {
+            const maxValue = data[0]; 
+            const minValue = data[data.length - 1]; 
+            backgroundColors = data.map(value => {
+                if (value === maxValue) return 'rgba(40, 167, 69, 0.7)';
+                else if (value === minValue) return 'rgba(220, 53, 69, 0.7)';
+                else return 'rgba(255, 193, 7, 0.7)';
             });
-            const dataByKategori = {};
-            alimlarSnapshot.forEach(docSnap => {
-                const alim = docSnap.data();
-                if (alim.islemKaynagi === 'tank-aktarim') return;
-                const kategori = kategoriMap.get(alim.cariId) || 'Tanımsız/Diğer';
-                if (!dataByKategori[kategori]) { dataByKategori[kategori] = 0; }
-                dataByKategori[kategori] += parseFloat(alim.toplam || 0);
-            });
-            const sortedDataArray = Object.entries(dataByKategori).sort((a, b) => b[1] - a[1]);
-            const labels = sortedDataArray.map(item => item[0]);
-            const data = sortedDataArray.map(item => item[1]);
-            let backgroundColors = [];
-            if (data.length > 0) {
-                const maxValue = data[0]; 
-                const minValue = data[data.length - 1]; 
-                backgroundColors = data.map(value => {
-                    if (value === maxValue) return 'rgba(40, 167, 69, 0.7)';
-                    else if (value === minValue) return 'rgba(220, 53, 69, 0.7)';
-                    else return 'rgba(255, 193, 7, 0.7)';
-                });
-            }
-            const maxValueForScale = data.length > 0 ? data[0] : 0;
-            const chartMax = maxValueForScale > 0 ? maxValueForScale * 1.15 : 100;
-            aylikSutunChartInstance = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Toplam Süt (Lt)', data: data, backgroundColor: backgroundColors, borderColor: 'rgba(75, 192, 192, 1)', borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end', formatter: (value) => value.toFixed(0) + ' Lt', color: '#333', font: { weight: 'bold' } } }, scales: { y: { beginAtZero: true, max: chartMax } } } });
-        } catch (error) { console.error("Aylık süt grafiği oluşturulurken hata:", error); }
+        }
+        
+        const maxValueForScale = data.length > 0 ? data[0] : 0;
+        const chartMax = maxValueForScale > 0 ? maxValueForScale * 1.15 : 100;
+        
+        aylikSutunChartInstance = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'Toplam Süt (Lt)', data, backgroundColor: backgroundColors, borderColor: 'rgba(75, 192, 192, 1)', borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end', formatter: (value) => value.toFixed(0) + ' Lt', color: '#333', font: { weight: 'bold' } } }, scales: { y: { beginAtZero: true, max: chartMax } } } });
+
+    } catch (error) { 
+        console.error("Aylık süt grafiği oluşturulurken hata:", error); 
+    } finally {
+        isAylikChartRendering = false; // İşlem bitince kilidi serbest bırak
     }
-    
+}
     
 async function editCari(id) {
     try {
@@ -5560,6 +5569,38 @@ function handleYazdir(elementId, orientation = 'portrait') {
         </div>
     </div>
 </div>
+<div id="makbuz-onay-modal-overlay" class="custom-modal-overlay">
+    <div class="custom-modal-box" style="max-width: 500px;">
+        <h3 id="makbuz-onay-title">Makbuz Önizleme ve Onay</h3>
+        <div id="makbuz-onay-icerik" style="line-height: 1.8;">
+            <p><strong>Müstahsil (Satıcı):</strong> <span id="onay-cari-adi"></span></p>
+            <hr>
+            <p>Brüt Süt Tutarı: <strong style="float:right;" id="onay-brut-tutar"></strong></p>
+            <p style="color:#d9534f;">Gelir Vergisi Tevkifatı (%2): <strong style="float:right;" id="onay-gv"></strong></p>
+            <p style="color:#d9534f;">SGK Tevkifatı (%2): <strong style="float:right;" id="onay-sgk"></strong></p>
+            <p style="color:#d9534f;">Borsa Tescil Ücreti (%0.2): <strong style="float:right;" id="onay-borsa"></strong></p>
+            <hr>
+            <p style="font-size: 1.2em;"><strong>ÖDENECEK NET TUTAR:</strong> <strong style="float:right; font-size: 1.3em;" id="onay-net-tutar"></strong></p>
+        </div>
+        <div class="custom-modal-buttons">
+            <button id="makbuz-onay-cancel" class="btn">İptal</button>
+            <button id="makbuz-onay-confirm" class="btn btn-danger">Onayla ve Makbuzu Oluştur</button>
+        </div>
+    </div>
+</div>
+
+<div id="secim-modal-overlay" class="custom-modal-overlay">
+    <div class="custom-modal-box" style="text-align: center;">
+        <img src="logo.png" alt="Logo" style="width: 100px; margin-bottom: 20px;">
+        <h3 id="custom-confirm-title">Lütfen Bir Modül Seçin</h3>
+        <p id="custom-confirm-message">Hangi işlem merkezine devam etmek istersiniz?</p>
+        <div class="custom-modal-buttons" style="flex-direction: column; gap: 15px;">
+            <button id="secim-sut-takibi-btn" class="btn btn-primary" style="width: 100%; padding: 15px; font-size: 1.1em;">📝 Süt Takibi Merkezi</button>
+            <button id="secim-mustahsil-merkezi-btn" class="btn btn-success" style="width: 100%; padding: 15px; font-size: 1.1em;">🧾 Müstahsil ve Muhasebe Merkezi</button>
+        </div>
+    </div>
+</div>
+
 
 </body>
 </html>

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Müstahsil ve Muhasebe Merkezi</title>
+    <link rel="stylesheet" href="style.css">
+    <meta name="theme-color" content="#2c3e50">
+    <link rel="manifest" href="/suttakip/manifest.json">
+    <link rel="icon" href="https://raw.githubusercontent.com/sozcelyk43/suttakip/refs/heads/main/favicon.ico" type="image/x-icon" />
+</head>
+<body>
+<div class="sidebar">
+    <img src="logo.png" alt="Uygulama Logosu" class="sidebar-logo">
+    <nav id="sidebarNav">
+        <ul>
+            <li><a href="index.html" class="nav-link">📝 Süt Takibi Merkezi</a></li>
+            <li class="logout-link"><a href="#" id="logoutButton"><div>🚪 Çıkış Yap</div><div id="logoutUserEmail"></div></a></li>
+        </ul>
+    </nav>
+</div>
+
+<div class="main-content">
+    <button id="menuToggleBtn" class="menu-toggle-btn dont-print">☰</button>
+
+    <section id="mustahsil-merkezi" class="module-section">
+        <div class="module-header">
+            <h2>🧾 E-Müstahsil Kontrol ve Onay Ekranı</h2>
+        </div>
+        <div class="container">
+            <div class="form-section">
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr auto; align-items: end; gap: 15px;">
+                    <div class="form-group">
+                        <label for="mm-batch-baslangic">Dönem Başlangıç:</label>
+                        <input type="date" id="mm-batch-baslangic" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="mm-batch-bitis">Dönem Bitiş:</label>
+                        <input type="date" id="mm-batch-bitis" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="mm-batch-kategori">Kategori/Köy:</label>
+                        <select id="mm-batch-kategori" class="form-control">
+                            <option value="">Tüm Kategoriler</option>
+                        </select>
+                    </div>
+                    <button id="mm-batch-getir-btn" class="btn btn-primary" style="height: 45px;">Verileri Getir</button>
+                </div>
+            </div>
+
+            <div id="mm-batch-sonuc-alani" class="list-section" style="margin-top:20px; display:none;">
+                <div class="table-wrapper" style="overflow-x: auto;">
+                    <table id="mm-batch-table" class="report-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 20px;"><input type="checkbox" id="mm-batch-select-all"></th>
+                                <th>Müstahsil Adı</th>
+                                <th>Toplam Süt (LT)</th>
+                                <th>Birim Fiyat (₺)</th>
+                                <th>Brüt Tutar (₺)</th>
+                                <th>Stopaj (%2)</th>
+                                <th>SGK Kesintisi (%2)</th>
+                                <th>Net Tutar (₺)</th>
+                                <th>Durum</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mm-batch-table-body"></tbody>
+                    </table>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f8f9fa; margin-top: 10px; border-radius: 5px;">
+                    <div><strong>Seçilen Kayıt Sayısı:</strong> <span id="mm-batch-secilen-sayi">0</span></div>
+                    <div><strong>Seçilenlerin Toplam Net Tutar:</strong> <span id="mm-batch-toplam-tutar" style="font-size: 1.2em;">0,00 ₺</span></div>
+                    <div>
+                        <button id="mm-batch-iptal-btn" class="btn">İptal Et / Geri Dön</button>
+                        <button id="mm-batch-gonder-btn" class="btn btn-success">Seçilenler için Makbuz Oluştur</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div> 
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import { getFirestore, collection, doc, getDoc, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    const firebaseConfig = {
+        apiKey: "AIzaSyCWG4nFwpXRffr_3MO8-Us9mWK6Wsfn0mY",
+        authDomain: "sut-takip-projem.firebaseapp.com",
+        projectId: "sut-takip-projem",
+        storageBucket: "sut-takip-projem.appspot.com",
+        messagingSenderId: "512756958486",
+        appId: "1:512756958486:web:13cceb6835e2c575e9fc37",
+        measurementId: "G-LYLT9WFVNK"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // --- GLOBAL DEĞİŞKENLER ---
+    let sahipId = '';
+    let globalSettings = {};
+    window.cariDataMap = new Map();
+
+    // --- UYGULAMA BAŞLANGIÇ NOKTASI ---
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            document.getElementById('logoutUserEmail').textContent = user.email;
+            try {
+                const userDocRef = doc(db, 'kullanicilar', user.uid);
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists()) {
+                    const userData = userDocSnap.data();
+                    sahipId = userData.sahipId || user.uid;
+                    if (userData.rol !== 'admin') {
+                        // Sadece adminler bu sayfayı görebilir, diğerleri ana sayfaya yönlendirilir.
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                    // Admin ise, uygulamayı başlat
+                    await getSettings();
+                    await loadInitialData();
+                    uygulamayiBaslat_Mustahsil();
+                } else {
+                    handleLogout();
+                }
+            } catch (error) {
+                console.error("Giriş sırasında hata:", error);
+                handleLogout();
+            }
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
+
+    /**
+     * Sadece bu sayfaya özel olay dinleyicilerini ve başlangıç ayarlarını yapar.
+     */
+    function uygulamayiBaslat_Mustahsil() {
+        // Butonların olay dinleyicilerini ata
+        document.getElementById('logoutButton').addEventListener('click', handleLogout);
+        document.getElementById('menuToggleBtn').addEventListener('click', () => {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+        });
+        document.getElementById('mm-batch-getir-btn').addEventListener('click', renderBatchOnayEkrani);
+        document.getElementById('mm-batch-gonder-btn').addEventListener('click', handleBatchMakbuzGonder);
+        document.getElementById('mm-batch-select-all').addEventListener('change', (e) => {
+            document.querySelectorAll('.mm-batch-checkbox').forEach(cb => cb.checked = e.target.checked);
+            updateBatchTotals();
+        });
+        document.getElementById('mm-batch-iptal-btn').addEventListener('click', () => {
+            document.getElementById('mm-batch-sonuc-alani').style.display = 'none';
+        });
+
+        // Varsayılan tarih aralığını ayarla (içinde bulunulan ay)
+        const baslangicInput = document.getElementById('mm-batch-baslangic');
+        const bitisInput = document.getElementById('mm-batch-bitis');
+        const today = new Date();
+        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        baslangicInput.value = firstDayOfMonth.toISOString().split('T')[0];
+        bitisInput.value = today.toISOString().split('T')[0];
+
+        // Kategori filtresini doldur
+        populateCariKategoriSelect(document.getElementById('mm-batch-kategori'), "Tüm Kategoriler");
+    }
+
+    // --- VERİ YÜKLEME FONKSİYONLARI ---
+
+    async function getSettings() {
+        const settingsRef = doc(db, 'ayarlar', sahipId);
+        try {
+            const docSnap = await getDoc(settingsRef);
+            globalSettings = docSnap.exists() ? docSnap.data() : {};
+        } catch(e) { console.error("Ayarlar alınırken hata: ", e); }
+    }
+
+    async function loadInitialData() {
+        try {
+            const carilerQuery = query(collection(db, 'cariler'), where("sahipId", "==", sahipId));
+            const carilerSnapshot = await getDocs(carilerQuery);
+            carilerSnapshot.forEach(doc => {
+                window.cariDataMap.set(doc.id, doc.data());
+            });
+        } catch (error) { console.error("Başlangıç verileri (Cariler) yüklenirken hata:", error); }
+    }
+
+    // --- MÜSTHSİL MERKEZİ ANA FONKSİYONLARI ---
+
+    async function renderBatchOnayEkrani() {
+        const baslangic = document.getElementById('mm-batch-baslangic').value;
+        const bitis = document.getElementById('mm-batch-bitis').value;
+        const kategori = document.getElementById('mm-batch-kategori').value;
+        const tableBody = document.getElementById('mm-batch-table-body');
+        const sonucAlani = document.getElementById('mm-batch-sonuc-alani');
+
+        if (!baslangic || !bitis) return showToast("Lütfen dönem başlangıç ve bitiş tarihlerini seçin.", true);
+        
+        tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:20px;">Veriler yükleniyor...</td></tr>`;
+        sonucAlani.style.display = 'block';
+        updateBatchTotals();
+
+        try {
+            const sutQuery = query(collection(db, 'sut_alimlari'), where('sahipId', '==', sahipId), where('tarih', '>=', baslangic), where('tarih', '<=', bitis));
+            const carilerQuery = kategori 
+                ? query(collection(db, 'cariler'), where("sahipId", "==", sahipId), where("kategori", "==", kategori))
+                : query(collection(db, 'cariler'), where("sahipId", "==", sahipId));
+
+            const [sutSnap, carilerSnap] = await Promise.all([getDocs(sutQuery), getDocs(carilerQuery)]);
+
+            const cariMap = new Map(carilerSnap.docs.map(doc => [doc.id, doc.data()]));
+            const mustahsilVerileri = new Map();
+
+            sutSnap.forEach(doc => {
+                const alim = doc.data();
+                if (!cariMap.has(alim.cariId)) return; 
+                if (!mustahsilVerileri.has(alim.cariId)) {
+                    mustahsilVerileri.set(alim.cariId, { toplamSut: 0, brutTutar: 0 });
+                }
+                const mustahsil = mustahsilVerileri.get(alim.cariId);
+                mustahsil.toplamSut += alim.toplam || 0;
+                mustahsil.brutTutar += alim.toplamTutar || 0;
+            });
+
+            if (mustahsilVerileri.size === 0) {
+                 tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:20px;">Bu dönemde ve kategoride veri bulunamadı.</td></tr>`;
+                 return;
+            }
+
+            let tableHTML = '';
+            mustahsilVerileri.forEach((data, cariId) => {
+                const cariData = cariMap.get(cariId);
+                if (!cariData) return;
+                const birimFiyat = data.toplamSut > 0 ? data.brutTutar / data.toplamSut : 0;
+                const kesintiler = calculateDeductions(data.brutTutar);
+                tableHTML += `
+                    <tr data-cari-id="${cariId}" data-cari-adi="${cariData.adiSoyadi}">
+                        <td><input type="checkbox" class="mm-batch-checkbox" onchange="updateBatchTotals()"></td>
+                        <td>${cariData.adiSoyadi}</td>
+                        <td class="data-sut">${data.toplamSut.toFixed(2)}</td>
+                        <td class="data-fiyat">${birimFiyat.toFixed(2)}</td>
+                        <td class="data-brut">${data.brutTutar.toFixed(2)}</td>
+                        <td class="data-stopaj">${kesintiler.gelirVergisiTevkifati.toFixed(2)}</td>
+                        <td class="data-sgk">${kesintiler.sgkTevkifati.toFixed(2)}</td>
+                        <td class="data-net" style="font-weight:bold;">${kesintiler.netTutar.toFixed(2)}</td>
+                        <td><span class="badge badge-pending">Bekliyor</span></td>
+                    </tr>
+                `;
+            });
+            tableBody.innerHTML = tableHTML;
+        } catch (error) {
+            console.error("Toplu müstahsil verisi getirilirken hata:", error);
+            tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:red;">Hata oluştu!</td></tr>`;
+        }
+    }
+
+    function updateBatchTotals() {
+        const allCheckboxes = document.querySelectorAll('.mm-batch-checkbox');
+        let secilenSayi = 0;
+        let toplamTutar = 0;
+        allCheckboxes.forEach(cb => {
+            if (cb.checked) {
+                secilenSayi++;
+                const netTutar = parseFloat(cb.closest('tr').querySelector('.data-net').textContent) || 0;
+                toplamTutar += netTutar;
+            }
+        });
+        document.getElementById('mm-batch-secilen-sayi').textContent = secilenSayi;
+        document.getElementById('mm-batch-toplam-tutar').textContent = formatCurrency(toplamTutar);
+    }
+    window.updateBatchTotals = updateBatchTotals; // onchange'in erişebilmesi için global yap
+
+    async function handleBatchMakbuzGonder() {
+        const secilenSatirlar = document.querySelectorAll('.mm-batch-checkbox:checked');
+        if (secilenSatirlar.length === 0) return showToast("Lütfen en az bir müstahsil seçin.", true);
+
+        const onayMesaji = `${secilenSatirlar.length} adet müstahsil için makbuz oluşturulacak. Bu işlem, tarayıcınızda yeni sekmeler açacaktır. Devam etmek istiyor musunuz?`;
+        
+        showCustomConfirm(onayMesaji, () => {
+            showToast(`${secilenSatirlar.length} adet makbuz oluşturuluyor...`, false, 3000);
+            secilenSatirlar.forEach((cb, index) => {
+                const satir = cb.closest('tr');
+                const durumHucre = satir.querySelector('td:last-child .badge');
+                const makbuzPenceresi = window.open('', '_blank');
+
+                if (!makbuzPenceresi) {
+                    showToast("Pop-up engelleyici aktif olabilir. Lütfen izin verin.", true);
+                    durumHucre.textContent = 'Engellendi';
+                    durumHucre.className = 'badge badge-danger';
+                    return;
+                }
+                makbuzPenceresi.document.write('<body>Makbuz içeriği hazırlanıyor...</body>');
+
+                try {
+                    const veri = {
+                        cariId: satir.dataset.cariId,
+                        cariAdi: satir.dataset.cariAdi,
+                        brutTutar: parseFloat(satir.querySelector('.data-brut').textContent)
+                    };
+                    handleMakbuzOlustur(veri, makbuzPenceresi);
+                    durumHucre.textContent = 'Oluşturuldu';
+                    durumHucre.className = 'badge badge-success';
+                } catch (e) {
+                    durumHucre.textContent = 'Hata';
+                    durumHucre.className = 'badge badge-danger';
+                    makbuzPenceresi.document.write(`<body>Bir hata oluştu: ${e.message}</body>`);
+                    makbuzPenceresi.document.close();
+                    console.error("Makbuz oluşturulurken hata:", e);
+                }
+            });
+        }, "Toplu Makbuz Onayı");
+    }
+
+    function handleMakbuzOlustur(veri, makbuzPenceresi) {
+        try {
+            const { cariId, cariAdi, brutTutar } = veri;
+            if (!globalSettings.firmaProfili || !globalSettings.firmaProfili.unvan) throw new Error("Lütfen Ayarlar menüsünden firma bilgilerinizi doldurun.");
+            
+            const aliciData = globalSettings.firmaProfili;
+            const saticiData = window.cariDataMap.get(cariId);
+            if (!saticiData) throw new Error(`${cariAdi} için cari verisi bulunamadı.`);
+
+            const belgeNo = `MM-${cariId.substring(0, 4)}-${Date.now()}`;
+            const kesintiler = calculateDeductions(brutTutar);
+            let makbuzHTML = getMakbuzHTMLTemplate();
+
+            makbuzHTML = makbuzHTML.replace(/__ALICI_UNVAN__/g, aliciData.unvan || '').replace('__ALICI_ADRES__', aliciData.adres || '').replace('__ALICI_VERGI_DAIRESI__', aliciData.vergiDairesi || '').replace('__ALICI_VKN__', aliciData.vkn || '').replace('__ALICI_TELEFON__', aliciData.telefon || '').replace('__SATICI_ADI__', cariAdi).replace('__SATICI_TC__', saticiData.vergiNo || 'Belirtilmemiş').replace('__SATICI_ADRES__', saticiData.adres || 'Belirtilmemiş').replace('__BELGE_NO__', belgeNo).replace('__DUZENLEME_TARIHI__', new Date().toLocaleDateString('tr-TR')).replace('__BRUT_TUTAR__', formatCurrency(kesintiler.brutTutar)).replace('__GELIR_VERGISI__', formatCurrency(kesintiler.gelirVergisiTevkifati)).replace('__SGK_TEVKIFATI__', formatCurrency(kesintiler.sgkTevkifati)).replace('__BORSA_TESCIL__', formatCurrency(kesintiler.borsaTescilUcreti)).replace('__TOPLAM_KESINTI__', formatCurrency(kesintiler.toplamKesinti)).replace('__ODENECEK_NET_TUTAR__', formatCurrency(kesintiler.netTutar)).replace('__YAZI_ILE_TUTAR__', numberToWordsTR(kesintiler.netTutar));
+            
+            const kalemlerHTML = `<tr><td>1</td><td>Dönem Toplam Süt Bedeli</td><td class="text-right"></td><td></td><td class="text-right"></td><td class="text-right">${formatCurrency(kesintiler.brutTutar)}</td></tr>`;
+            makbuzHTML = makbuzHTML.replace('__KALEMLER_GOVDESI__', kalemlerHTML);
+
+            if (makbuzPenceresi && !makbuzPenceresi.closed) {
+                makbuzPenceresi.document.open();
+                makbuzPenceresi.document.write(makbuzHTML);
+                makbuzPenceresi.document.close();
+            } else { throw new Error("Makbuz penceresi bulunamadı veya kapatıldı."); }
+        } catch (error) {
+            console.error("handleMakbuzOlustur içinde hata:", error);
+            if (makbuzPenceresi && !makbuzPenceresi.closed) {
+                makbuzPenceresi.document.body.innerHTML = `Bir hata oluştu: ${error.message}`;
+            }
+            throw error;
+        }
+    }
+    
+    // --- YARDIMCI FONKSİYONLAR ---
+
+    function handleLogout() {
+        signOut(auth).then(() => { window.location.href = 'login.html'; }).catch(error => console.error("Logout error", error));
+    }
+
+    async function populateCariKategoriSelect(selectElement, defaultOptionText = "Seçiniz...") {
+        if(!selectElement) return;
+        try {
+            const q = query(collection(db, 'cari_kategorileri'), where("sahipId", "==", sahipId), orderBy('ad'));
+            const snapshot = await getDocs(q);
+            const kategoriler = snapshot.docs.map(doc => doc.data());
+            selectElement.innerHTML = `<option value="">${defaultOptionText}</option>`;
+            kategoriler.forEach(kat => {
+                const option = document.createElement('option');
+                option.value = kat.ad;
+                option.textContent = kat.ad;
+                selectElement.appendChild(option);
+            });
+        } catch(error) { console.error("Kategori seçimi yüklenirken hata:", error); }
+    }
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast-message');
+        if (!toast) return;
+        toast.textContent = message;
+        toast.style.backgroundColor = isError ? '#e74c3c' : '#28a745';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function showCustomConfirm(message, onConfirm, title = "İşlem Onayı", onCancel = () => {}) {
+        const overlay = document.getElementById('custom-confirm-overlay');
+        const yesBtn = document.getElementById('custom-confirm-yes');
+        const cancelBtn = document.getElementById('custom-confirm-cancel');
+        document.getElementById('custom-confirm-title').textContent = title;
+        document.getElementById('custom-confirm-message').textContent = message;
+        
+        const cleanupAndConfirm = () => { onConfirm(); overlay.classList.remove('show'); };
+        const cleanupAndCancel = () => { onCancel(); overlay.classList.remove('show'); };
+        
+        yesBtn.onclick = cleanupAndConfirm;
+        cancelBtn.onclick = cleanupAndCancel;
+        overlay.classList.add('show');
+    }
+
+    function formatCurrency(number) { return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(number || 0); }
+
+    function calculateDeductions(brutTutar) {
+        const gelirVergisiTevkifati = brutTutar * 0.02;
+        const sgkTevkifati = brutTutar * 0.02;
+        const borsaTescilUcreti = brutTutar * 0.002;
+        const toplamKesinti = gelirVergisiTevkifati + sgkTevkifati + borsaTescilUcreti;
+        return { brutTutar, gelirVergisiTevkifati, sgkTevkifati, borsaTescilUcreti, toplamKesinti, netTutar: brutTutar - toplamKesinti };
+    }
+
+    function numberToWordsTR(num) {
+        const [tamKisim, ondalikKisim] = String((num || 0).toFixed(2)).split('.');
+        return `${tamKisim} TL ${ondalikKisim} Krş.`;
+    }
+
+    function getMakbuzHTMLTemplate() {
+    return `
+    <!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><title>e-Müstahsil Makbuzu</title><style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+    body{font-family:'Roboto',Arial,sans-serif;font-size:9pt;color:#333;background-color:#fff;}@page{size:A4;margin:15mm;}.makbuz-container{width:100%;height:100%;}
+    .makbuz-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #000;padding-bottom:10px;}.makbuz-title h1{margin:0;font-size:16pt;color:#000;}.makbuz-title p{margin:5px 0 0;font-size:11pt;color:#555;}
+    .belge-info{text-align:right;}.belge-info p{margin:2px 0;font-size:10pt;}.party-info{display:flex;justify-content:space-between;margin-top:15px;padding-bottom:15px;border-bottom:1px solid #ccc;}
+    .party{width:48%;border:1px solid #ccc;padding:10px;border-radius:5px;}.party h3{background-color:#f2f2f2;padding:8px;margin:-10px -10px 10px -10px;font-size:11pt;border-bottom:1px solid #ccc;border-radius:5px 5px 0 0;}.party p{margin:4px 0;line-height:1.4;}
+    .line-items-table{width:100%;border-collapse:collapse;margin-top:20px;}.line-items-table th,.line-items-table td{border:1px solid #999;padding:6px 8px;text-align:left;}.line-items-table th{background-color:#e9ecef;font-weight:500;}
+    .totals-section{display:flex;justify-content:flex-end;margin-top:15px;}.totals-table{width:45%;border-spacing:0;}.totals-table td{padding:5px 8px;}.totals-table tr td:first-child{text-align:right;font-weight:500;}
+    .totals-table .kesinti-row td:first-child{color:#d9534f;}.net-tutar-row{font-weight:bold;background-color:#e9ecef;border-top:2px solid #000;font-size:12pt;}.makbuz-footer{margin-top:30px;font-size:8.5pt;border-top:1px solid #ccc;padding-top:15px;}
+    .text-right{text-align:right!important;}</style></head><body><div class="makbuz-container"><div class="makbuz-header"><div class="makbuz-title"><h1>MÜSTAHSİL MAKBUZU</h1><p>__ALICI_UNVAN__</p></div><div class="belge-info"><p><strong>Belge No:</strong> __BELGE_NO__</p><p><strong>Tarih:</strong> __DUZENLEME_TARIHI__</p></div></div>
+    <div class="party-info"><div class="party"><h3>ALICI</h3><p><strong>Unvan:</strong> __ALICI_UNVAN__</p><p><strong>Adres:</strong> __ALICI_ADRES__</p><p><strong>V.D./VKN:</strong> __ALICI_VERGI_DAIRESI__ / __ALICI_VKN__</p><p><strong>Tel:</strong> __ALICI_TELEFON__</p></div><div class="party"><h3>SATICI (MÜSTAHSİL)</h3><p><strong>Adı Soyadı:</strong> __SATICI_ADI__</p><p><strong>Adres:</strong> __SATICI_ADRES__</p><p><strong>V.D./TCKN:</strong> __SATICI_TC__</p></div></div>
+    <table class="line-items-table"><thead><tr><th>#</th><th>Açıklama</th><th class="text-right">Miktar</th><th>Birim</th><th class="text-right">Birim Fiyat</th><th class="text-right">Tutar (TL)</th></tr></thead><tbody id="kalemler-govdesi">__KALEMLER_GOVDESI__</tbody></table>
+    <div class="totals-section"><table class="totals-table"><tr><td>Mal Hizmet Toplam Tutarı (Brüt)</td><td class="text-right">__BRUT_TUTAR__</td></tr><tr class="kesinti-row"><td>Gelir Vergisi Tevkifatı (%2)</td><td class="text-right">(-) __GELIR_VERGISI__</td></tr><tr class="kesinti-row"><td>SGK Tevkifatı (%2)</td><td class="text-right">(-) __SGK_TEVKIFATI__</td></tr><tr class="kesinti-row"><td>Borsa Tescil Ücreti (%0.2)</td><td class="text-right">(-) __BORSA_TESCIL__</td></tr>
+    <tr><td><strong>Toplam Kesinti</strong></td><td class="text-right"><strong>(-) __TOPLAM_KESINTI__</strong></td></tr><tr class="net-tutar-row"><td>ÖDENECEK NET TUTAR</td><td class="text-right">__ODENECEK_NET_TUTAR__</td></tr></table></div><div class="makbuz-footer"><p><strong>Yalnız:</strong> __YAZI_ILE_TUTAR__</p></div></div></body></html>`;
+    }
+
+</script>
+
+<div id="toast-message" class="toast-message"></div>
+<div id="custom-confirm-overlay" class="custom-modal-overlay">
+    <div class="custom-modal-box">
+        <h3 id="custom-confirm-title">İşlem Onayı</h3>
+        <p id="custom-confirm-message">Bu işlemi yapmak istediğinizden emin misiniz?</p>
+        <div class="custom-modal-buttons">
+            <button id="custom-confirm-cancel" class="btn">Hayır</button>
+            <button id="custom-confirm-yes" class="btn btn-danger">Evet</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
