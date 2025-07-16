@@ -10,15 +10,13 @@
     <link rel="icon" href="https://raw.githubusercontent.com/sozcelyk43/suttakip/refs/heads/main/favicon.ico" type="image/x-icon" />
 </head>
 <body class="full-width-page">
-
 <div class="main-content">
     <section id="mustahsil-merkezi" class="module-section">
         <div class="module-header">
-    <h2>💼 Mali Müşavir Paneli</h2>
-
-   <div class="module-switcher">
-    <label for="moduleSwitchSelect">Panel Değiştir</label>
-    <select id="moduleSwitchSelect">
+    	<h2>💼 Mali Müşavir Paneli</h2>
+   	<div class="module-switcher">
+    	<label for="moduleSwitchSelect">Panel Değiştir</label>
+    	<select id="moduleSwitchSelect">
         <option value="index.html">📒 Hesap Defteri</option>
         <option value="mustahsil.html" selected>💼 Mali Müşavir Paneli</option>
     </select>
@@ -142,26 +140,39 @@
     });
 
    
+
 function uygulamayiBaslat_Mustahsil() {
+    document.getElementById('logoutButton')?.addEventListener('click', handleLogout);
+    document.getElementById('mm-batch-getir-btn')?.addEventListener('click', renderBatchOnayEkrani);
+    document.getElementById('mm-batch-gonder-btn')?.addEventListener('click', handleBatchMakbuzGonder);
+    document.getElementById('mm-batch-select-all')?.addEventListener('change', (e) => {
+        document.querySelectorAll('.mm-batch-checkbox').forEach(cb => cb.checked = e.target.checked);
+        updateBatchTotals();
+    });
+    document.getElementById('mm-batch-iptal-btn')?.addEventListener('click', () => {
+        const sonucAlani = document.getElementById('mm-batch-sonuc-alani');
+        if(sonucAlani) sonucAlani.style.display = 'none';
+    });
+    document.getElementById('moduleSwitchSelect')?.addEventListener('change', function() {
+        if (this.value) window.location.href = this.value;
+    });
 
-	document.getElementById('moduleSwitchSelect')?.addEventListener('change', function() {if (this.value) {window.location.href = this.value;}});
-        document.getElementById('logoutButton')?.addEventListener('click', handleLogout);
-        document.getElementById('mm-batch-getir-btn')?.addEventListener('click', renderBatchOnayEkrani);
-        document.getElementById('mm-batch-gonder-btn')?.addEventListener('click', handleBatchMakbuzGonder);
-        document.getElementById('mm-batch-select-all')?.addEventListener('change', (e) => {
-	document.querySelectorAll('.mm-batch-checkbox').forEach(cb => cb.checked = e.target.checked);
-	updateBatchTotals();});
-        document.getElementById('mm-batch-iptal-btn')?.addEventListener('click', () => {const sonucAlani = document.getElementById('mm-batch-sonuc-alani');
-            if(sonucAlani) sonucAlani.style.display = 'none';});
-        const baslangicInput = document.getElementById('mm-batch-baslangic');
-        const bitisInput = document.getElementById('mm-batch-bitis');
-        const today = new Date();
-        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-        baslangicInput.value = firstDayOfMonth.toISOString().split('T')[0];
-        bitisInput.value = today.toISOString().split('T')[0];
-
-        populateCariKategoriSelect(document.getElementById('mm-batch-kategori'), "Tüm Kategoriler");
-    }
+   const formatForInput = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // +1 çünkü aylar 0'dan başlar
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+    
+    const baslangicInput = document.getElementById('mm-batch-baslangic');
+    const bitisInput = document.getElementById('mm-batch-bitis');
+    const today = new Date(); // Şu anki yerel tarih
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1); // İçinde bulunulan ayın ilk günü
+    
+    baslangicInput.value = formatForInput(firstDayOfMonth);
+    bitisInput.value = formatForInput(today);
+    populateCariKategoriSelect(document.getElementById('mm-batch-kategori'), "Tüm Kategoriler");
+}
 
 async function getSettings() {
         if (!sahipId) return;
@@ -183,9 +194,8 @@ async function loadInitialData() {
             });
         } catch (error) { console.error("Başlangıç verileri (Cariler) yüklenirken hata:", error); }
     }
-
-    // --- MÜSTHSİL MERKEZİ ANA FONKSİYONLARI ---
-    async function renderBatchOnayEkrani() {
+	
+async function renderBatchOnayEkrani() {
         const baslangic = document.getElementById('mm-batch-baslangic').value;
         const bitis = document.getElementById('mm-batch-bitis').value;
         const kategori = document.getElementById('mm-batch-kategori').value;
@@ -229,7 +239,7 @@ async function loadInitialData() {
                 const cariData = cariMap.get(cariId);
                 if (!cariData) return;
                 const birimFiyat = data.toplamSut > 0 ? data.brutTutar / data.toplamSut : 0;
-                const kesintiler = calculateDeductions(data.brutTutar);
+const kesintiler = calculateDeductions(data.brutTutar, cariData.eMustahsilParams);
                 tableHTML += `<tr data-cari-id="${cariId}" data-cari-adi="${cariData.adiSoyadi}"><td><input type="checkbox" class="mm-batch-checkbox" onchange="updateBatchTotals()"></td><td>${cariData.adiSoyadi}</td><td class="data-sut">${data.toplamSut.toFixed(2)}</td><td class="data-fiyat">${birimFiyat.toFixed(2)}</td><td class="data-brut">${data.brutTutar.toFixed(2)}</td><td class="data-stopaj">${kesintiler.gelirVergisiTevkifati.toFixed(2)}</td><td class="data-sgk">${kesintiler.sgkTevkifati.toFixed(2)}</td><td class="data-net" style="font-weight:bold;">${kesintiler.netTutar.toFixed(2)}</td><td><span class="badge badge-pending">Bekliyor</span></td></tr>`;
             });
             tableBody.innerHTML = tableHTML;
@@ -239,7 +249,7 @@ async function loadInitialData() {
         }
     }
 
-    function updateBatchTotals() {
+function updateBatchTotals() {
         const allCheckboxes = document.querySelectorAll('.mm-batch-checkbox');
         let secilenSayi = 0;
         let toplamTutar = 0;
@@ -289,7 +299,7 @@ async function loadInitialData() {
         }, "Toplu Makbuz Onayı");
     }
 
-    function handleMakbuzOlustur(veri, makbuzPenceresi) {
+function handleMakbuzOlustur(veri, makbuzPenceresi) {
         try {
             const { cariId, cariAdi, brutTutar } = veri;
             if (!globalSettings.firmaProfili || !globalSettings.firmaProfili.unvan) throw new Error("Lütfen Ayarlar menüsünden firma bilgilerinizi doldurun.");
@@ -320,12 +330,9 @@ async function loadInitialData() {
         }
     }
     
-    // --- YARDIMCI FONKSİYONLAR ---
-    function handleLogout() {
-        signOut(auth).then(() => { window.location.href = 'login.html'; }).catch(error => console.error("Logout error", error));
-    }
+function handleLogout() {signOut(auth).then(() => { window.location.href = 'login.html'; }).catch(error => console.error("Logout error", error));}
 
-    async function populateCariKategoriSelect(selectElement, defaultOptionText = "Seçiniz...") {
+async function populateCariKategoriSelect(selectElement, defaultOptionText = "Seçiniz...") {
         if(!selectElement) return;
         try {
             const q = query(collection(db, 'cari_kategorileri'), where("sahipId", "==", sahipId), orderBy('ad'));
@@ -341,7 +348,7 @@ async function loadInitialData() {
         } catch(error) { console.error("Kategori seçimi yüklenirken hata:", error); }
     }
 
-    function showToast(message, isError = false) {
+function showToast(message, isError = false) {
         const toastContainer = document.body;
         const toast = document.createElement('div');
         toast.id = 'toast-message';
@@ -356,7 +363,7 @@ async function loadInitialData() {
         }, 3000);
     }
 
-    function showCustomConfirm(message, onConfirm, title = "İşlem Onayı") {
+function showCustomConfirm(message, onConfirm, title = "İşlem Onayı") {
         let overlay = document.getElementById('custom-confirm-overlay');
         if (!overlay) {
             overlay = document.createElement('div');
@@ -379,39 +386,116 @@ async function loadInitialData() {
         overlay.classList.add('show');
     }
 
-    function formatCurrency(number) { return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(number || 0); }
+function formatCurrency(number) { return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(number || 0); }
 
-    function calculateDeductions(brutTutar) {
-        const gelirVergisiTevkifati = brutTutar * 0.02;
-        const sgkTevkifati = brutTutar * 0.02;
-        const borsaTescilUcreti = brutTutar * 0.002;
-        const toplamKesinti = gelirVergisiTevkifati + sgkTevkifati + borsaTescilUcreti;
-        return { brutTutar, gelirVergisiTevkifati, sgkTevkifati, borsaTescilUcreti, toplamKesinti, netTutar: brutTutar - toplamKesinti };
-    }
+function calculateDeductions(brutTutar, params = {}) {
+    const p = {
+        borsaTesciliVar: params.borsaTesciliVar || false,
+        sgkKesintisiUygula: params.sgkKesintisiUygula !== false, 
+        stopajOrani: params.stopajOrani || 4, 
+        borsaTescilOrani: params.borsaTescilOrani || 0.1 
+    };
 
-    function numberToWordsTR(num) {
+    const gelirVergisiOrani = p.stopajOrani / 100;
+    const sgkOrani = p.sgkKesintisiUygula ? 0.02 : 0; 
+    const borsaOrani = p.borsaTesciliVar ? (p.borsaTescilOrani / 100) : 0;
+
+    const gelirVergisiTevkifati = brutTutar * gelirVergisiOrani;
+    const sgkTevkifati = brutTutar * sgkOrani;
+    const borsaTescilUcreti = brutTutar * borsaOrani;
+
+    const toplamKesinti = gelirVergisiTevkifati + sgkTevkifati + borsaTescilUcreti;
+    const netTutar = brutTutar - toplamKesinti;
+
+    return { brutTutar, gelirVergisiTevkifati, sgkTevkifati, borsaTescilUcreti, toplamKesinti, netTutar };
+}
+
+function numberToWordsTR(num) {
         const [tamKisim, ondalikKisim] = String((num || 0).toFixed(2)).split('.');
         return `${tamKisim} TL ${ondalikKisim} Krş.`;
     }
 
-    function getMakbuzHTMLTemplate() {
+function getMakbuzHTMLTemplate() {
     return `
-    <!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><title>e-Müstahsil Makbuzu</title><style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-    body{font-family:'Roboto',Arial,sans-serif;font-size:9pt;color:#333;background-color:#fff;}@page{size:A4;margin:15mm;}.makbuz-container{width:100%;height:100%;}
-    .makbuz-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #000;padding-bottom:10px;}.makbuz-title h1{margin:0;font-size:16pt;color:#000;}.makbuz-title p{margin:5px 0 0;font-size:11pt;color:#555;}
-    .belge-info{text-align:right;}.belge-info p{margin:2px 0;font-size:10pt;}.party-info{display:flex;justify-content:space-between;margin-top:15px;padding-bottom:15px;border-bottom:1px solid #ccc;}
-    .party{width:48%;border:1px solid #ccc;padding:10px;border-radius:5px;}.party h3{background-color:#f2f2f2;padding:8px;margin:-10px -10px 10px -10px;font-size:11pt;border-bottom:1px solid #ccc;border-radius:5px 5px 0 0;}.party p{margin:4px 0;line-height:1.4;}
-    .line-items-table{width:100%;border-collapse:collapse;margin-top:20px;}.line-items-table th,.line-items-table td{border:1px solid #999;padding:6px 8px;text-align:left;}.line-items-table th{background-color:#e9ecef;font-weight:500;}
-    .totals-section{display:flex;justify-content:flex-end;margin-top:15px;}.totals-table{width:45%;border-spacing:0;}.totals-table td{padding:5px 8px;}.totals-table tr td:first-child{text-align:right;font-weight:500;}
-    .totals-table .kesinti-row td:first-child{color:#d9534f;}.net-tutar-row{font-weight:bold;background-color:#e9ecef;border-top:2px solid #000;font-size:12pt;}.makbuz-footer{margin-top:30px;font-size:8.5pt;border-top:1px solid #ccc;padding-top:15px;}
-    .text-right{text-align:right!important;}</style></head><body><div class="makbuz-container"><div class="makbuz-header"><div class="makbuz-title"><h1>MÜSTAHSİL MAKBUZU</h1><p>__ALICI_UNVAN__</p></div><div class="belge-info"><p><strong>Belge No:</strong> __BELGE_NO__</p><p><strong>Tarih:</strong> __DUZENLEME_TARIHI__</p></div></div>
-    <div class="party-info"><div class="party"><h3>ALICI</h3><p><strong>Unvan:</strong> __ALICI_UNVAN__</p><p><strong>Adres:</strong> __ALICI_ADRES__</p><p><strong>V.D./VKN:</strong> __ALICI_VERGI_DAIRESI__ / __ALICI_VKN__</p><p><strong>Tel:</strong> __ALICI_TELEFON__</p></div><div class="party"><h3>SATICI (MÜSTAHSİL)</h3><p><strong>Adı Soyadı:</strong> __SATICI_ADI__</p><p><strong>Adres:</strong> __SATICI_ADRES__</p><p><strong>V.D./TCKN:</strong> __SATICI_TC__</p></div></div>
-    <table class="line-items-table"><thead><tr><th>#</th><th>Açıklama</th><th class="text-right">Miktar</th><th>Birim</th><th class="text-right">Birim Fiyat</th><th class="text-right">Tutar (TL)</th></tr></thead><tbody id="kalemler-govdesi">__KALEMLER_GOVDESI__</tbody></table>
-    <div class="totals-section"><table class="totals-table"><tr><td>Mal Hizmet Toplam Tutarı (Brüt)</td><td class="text-right">__BRUT_TUTAR__</td></tr><tr class="kesinti-row"><td>Gelir Vergisi Tevkifatı (%2)</td><td class="text-right">(-) __GELIR_VERGISI__</td></tr><tr class="kesinti-row"><td>SGK Tevkifatı (%2)</td><td class="text-right">(-) __SGK_TEVKIFATI__</td></tr><tr class="kesinti-row"><td>Borsa Tescil Ücreti (%0.2)</td><td class="text-right">(-) __BORSA_TESCIL__</td></tr>
-    <tr><td><strong>Toplam Kesinti</strong></td><td class="text-right"><strong>(-) __TOPLAM_KESINTI__</strong></td></tr><tr class="net-tutar-row"><td>ÖDENECEK NET TUTAR</td><td class="text-right">__ODENECEK_NET_TUTAR__</td></tr></table></div><div class="makbuz-footer"><p><strong>Yalnız:</strong> __YAZI_ILE_TUTAR__</p></div></div></body></html>`;
-    }
+    <!DOCTYPE html>
+    <html lang="tr">
+    <head>
+        <meta charset="UTF-8">
+        <title>e-Müstahsil Makbuzu</title>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+            
+            /* A4 SAYFA AYARLARI */
+            @page {
+                size: A4 portrait;
+                margin: 1.5cm; /* Kenar boşlukları */
+            }
 
+            body { 
+                font-family: 'Roboto', Arial, sans-serif; 
+                font-size: 9pt; /* Ana yazı boyutu */
+                color: #333; 
+                -webkit-print-color-adjust: exact; /* Arka plan renklerini yazdırmayı zorla */
+            }
+
+            .makbuz-container { width: 100%; height: 100%; }
+            .makbuz-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #000; padding-bottom: 8px; }
+            .makbuz-title h1 { margin: 0; font-size: 18pt; color: #000; letter-spacing: -1px;} /* Boyut ayarlandı */
+            .makbuz-title p { margin: 4px 0 0; font-size: 10pt; color: #555; }
+            
+            .belge-info { text-align: right; }
+            .belge-info p { margin: 2px 0; font-size: 9pt;} /* Boyut ayarlandı */
+            
+            .party-info { display: flex; justify-content: space-between; margin-top: 12px; padding-bottom:12px; border-bottom: 1px solid #ccc; }
+            .party { width: 48.5%; border: 1px solid #ccc; padding: 8px; border-radius: 5px; } /* Boşluklar ayarlandı */
+            .party h3 { background-color: #f2f2f2; padding: 6px; margin: -8px -8px 8px -8px; font-size: 10pt; border-bottom: 1px solid #ccc; border-radius: 5px 5px 0 0; } /* Boşluklar ayarlandı */
+            .party p { margin: 3px 0; line-height: 1.3; font-size: 8.5pt;} /* Boyut ve satır yüksekliği ayarlandı */
+            
+            .line-items-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+            .line-items-table th, .line-items-table td { border: 1px solid #999; padding: 5px 6px; text-align: left; } /* Boşluklar ayarlandı */
+            .line-items-table th { background-color: #e9ecef; font-weight: 500; }
+            
+            .totals-section { display: flex; justify-content: flex-end; margin-top: 12px; }
+            .totals-table { width: 50%; border-spacing: 0; }
+            .totals-table td { padding: 4px 6px; font-size: 9pt; } /* Boşluklar ayarlandı */
+            .totals-table tr td:first-child { text-align: right; font-weight: 500; }
+            .totals-table .kesinti-row td:first-child { color: #d9534f; }
+            
+            .net-tutar-row { font-weight: bold; background-color: #e9ecef; border-top: 2px solid #000; font-size: 11pt; } /* Boyut ayarlandı */
+            
+            .makbuz-footer { margin-top: 25px; font-size: 8pt; border-top: 1px solid #ccc; padding-top: 10px; }
+            .text-right { text-align: right !important; }
+        </style>
+    </head>
+    <body>
+        <div class="makbuz-container">
+            <div class="makbuz-header">
+                <div class="makbuz-title"><h1>MÜSTAHSİL MAKBUZU</h1><p>__ALICI_UNVAN__</p></div>
+                <div class="belge-info"><p><strong>Belge No:</strong> __BELGE_NO__</p><p><strong>Tarih:</strong> __DUZENLEME_TARIHI__</p></div>
+            </div>
+            <div class="party-info">
+                <div class="party"><h3>ALICI</h3><p><strong>Unvan:</strong> __ALICI_UNVAN__</p><p><strong>Adres:</strong> __ALICI_ADRES__</p><p><strong>V.D./VKN:</strong> __ALICI_VERGI_DAIRESI__ / __ALICI_VKN__</p><p><strong>Tel:</strong> __ALICI_TELEFON__</p></div>
+                <div class="party"><h3>SATICI (MÜSTAHSİL)</h3><p><strong>Adı Soyadı:</strong> __SATICI_ADI__</p><p><strong>Adres:</strong> __SATICI_ADRES__</p><p><strong>V.D./TCKN:</strong> __SATICI_TC__</p></div>
+            </div>
+            <table class="line-items-table">
+                <thead><tr><th>#</th><th>Açıklama</th><th class="text-right">Miktar</th><th>Birim</th><th class="text-right">Birim Fiyat</th><th class="text-right">Tutar (TL)</th></tr></thead>
+                <tbody id="kalemler-govdesi">__KALEMLER_GOVDESI__</tbody>
+            </table>
+            <div class="totals-section">
+                <table class="totals-table">
+                    <tr><td>Mal Hizmet Toplam Tutarı (Brüt)</td><td class="text-right">__BRUT_TUTAR__</td></tr>
+                    <tr class="kesinti-row"><td>Gelir Vergisi Tevkifatı (%2)</td><td class="text-right">(-) __GELIR_VERGISI__</td></tr>
+                    <tr class="kesinti-row"><td>SGK Tevkifatı (%2)</td><td class="text-right">(-) __SGK_TEVKIFATI__</td></tr>
+                    <tr class="kesinti-row"><td>Borsa Tescil Ücreti (%0.2)</td><td class="text-right">(-) __BORSA_TESCIL__</td></tr>
+                    <tr><td><strong>Toplam Kesinti</strong></td><td class="text-right"><strong>(-) __TOPLAM_KESINTI__</strong></td></tr>
+                    <tr class="net-tutar-row"><td>ÖDENECEK NET TUTAR</td><td class="text-right">__ODENECEK_NET_TUTAR__</td></tr>
+                </table>
+            </div>
+            <div class="makbuz-footer"><p><strong>Yalnız:</strong> __YAZI_ILE_TUTAR__</p></div>
+        </div>
+    </body>
+    </html>`;
+}
 </script>
 
 <div id="toast-message" class="toast-message"></div>
