@@ -15,8 +15,9 @@
         <img src="logo.png" alt="Uygulama Logosu" class="sidebar-logo">
         <nav id="sidebarNav">
             <ul>
-		<li class="quick-entry-link"><a href="hizli-giris.html" target="_blank">⚡ Hızlı Süt Girişi</a>        	</li>
-                <li><a href="#dashboard" class="nav-link active">📝 Kontrol Paneli</a></li>
+		<li class="quick-entry-link"><a href="hizli-giris.html" target="_blank">⚡ Hızlı Süt Girişi</a></li>
+		<li class="special-module-link"><a href="mustahsil.html">💼 Mali Müşavir</a></li>
+                <li><a href="#dashboard" class="nav-link">📝 Kontrol Paneli</a></li>
                 <li><a href="#cari-yonetimi" class="nav-link">👥 Cari Yönetimi</a></li>
                 <li><a href="#sut-alimi" class="nav-link">🥛 Günlük Süt Alımı</a></li>
                 <li><a href="#yem-stok-yonetimi" class="nav-link">📦 Stok Yönetimi</a></li>
@@ -28,6 +29,15 @@
                 <li><a href="#aylik-yem-raporu" class="nav-link">📈 Aylık Yem Raporu</a></li>
                 <li><a href="#hareket-dokumu" class="nav-link">📋 Hareket Dökümü</a></li>
                 <li><a href="#ayarlar" class="nav-link">⚙️ Ayarlar</a></li>
+		<li class="dont-calisan">
+    <div class="module-switcher" style="margin: 15px 10px;">
+        <label for="moduleSwitchSelect">Panel Değiştir</label>
+        <select id="moduleSwitchSelect" style="width: 100%;">
+            <option value="index.html" selected>📒 Hesap Defteri</option>
+            <option value="mustahsil.html">💼 Mali Müşavir Paneli</option>
+        </select>
+    </div>
+</li>
                <li class="logout-link"><a href="#" id="logoutButton"><div>🚪 Çıkış Yap</div><div id="logoutUserEmail"></div> </a></li>
             </ul>
         </nav>
@@ -865,8 +875,6 @@
 
     Chart.register(ChartDataLabels);
 
-// MEVCUT onAuthStateChanged FONKSİYONUNU BUNUNLA DEĞİŞTİRİN
-
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         document.getElementById('logoutUserEmail').textContent = user.email;
@@ -881,58 +889,51 @@ onAuthStateChanged(auth, async (user) => {
                 sahipId = userData.sahipId || user.uid;
 
                 if (currentUserRole === 'admin') {
-                    // Admin ise, SADECE seçim modalını göster. Başka bir şey yapma.
-                    document.getElementById('secim-modal-overlay').classList.add('show');
+                    // Oturumda daha önce seçim yapılmış mı diye kontrol et
+                    if (sessionStorage.getItem('panelSecildi')) {
+                        // Seçim yapılmışsa, direkt uygulamayı başlat
+                        uygulamayiBaslat();
+                    } else {
+                        // İlk giriş ise, seçim ekranını göster
+                        document.getElementById('secim-modal-overlay').classList.add('show');
+                    }
                 } else {
-                    // Diğer roller (çalışan, üretici) ilgili sayfalarına yönlendirilir.
+                    // Diğer roller direkt yönlendirilir
                     const targetPage = currentUserRole === 'calisan' ? 'hizli-giris.html' : 'musteri_portali.html';
                     window.location.href = targetPage;
                 }
-            } else {
-                showToast("Kullanıcı profili bulunamadı.", true);
-                handleLogout();
-            }
-        } catch (error) {
-            console.error("Giriş sırasında hata:", error);
-            handleLogout();
-        }
+            } else { handleLogout(); }
+        } catch (error) { handleLogout(); }
     } else {
         window.location.href = 'login.html';
     }
 });
 
 document.getElementById('secim-sut-takibi-btn')?.addEventListener('click', () => {
-    // Süt Takibi seçildiğinde, ana uygulama başlatma fonksiyonunu çağır.
-    uygulamayiBaslat();
+    sessionStorage.setItem('panelSecildi', 'true'); // Seçim yapıldığını kaydet
+    document.getElementById('secim-modal-overlay').classList.remove('show');
+    uygulamayiBaslat(); // Uygulamayı başlat
 });
 
 document.getElementById('secim-mustahsil-merkezi-btn')?.addEventListener('click', () => {
-    // Müstahsil seçildiğinde, ilgili sayfaya yönlendir.
+    sessionStorage.setItem('panelSecildi', 'true'); // Seçim yapıldığını kaydet
     window.location.href = 'mustahsil.html';
 });
 
-
-// --- BLOK 2: ANA UYGULAMA BAŞLATMA FONKSİYONU (GÜNCELLENDİ) ---
 async function uygulamayiBaslat() {
-    // Seçim ekranını gizle (eğer hala açıksa)
-    document.getElementById('secim-modal-overlay').classList.remove('show');
-    
-    // Uygulama zaten başlatıldıysa tekrar başlatma
     if (window.isAppInitialized) { return; }
     window.isAppInitialized = true;
     
-    // Gerekli verileri ve ayarları yükle
     await getSettings();
     await loadInitialData();
 
-
-     
-
-
-
-
-
     const sidebarNav = document.getElementById('sidebarNav');
+document.getElementById('moduleSwitchSelect')?.addEventListener('change', function() {
+        if (this.value) window.location.href = this.value;
+    });
+
+
+
     const moduleSections = document.querySelectorAll('.main-content .module-section');
     const logoutButton = document.getElementById('logoutButton');
     const cariForm = document.getElementById('cariForm');
@@ -1248,6 +1249,14 @@ async function uygulamayiBaslat() {
         raporCariAramaInput.addEventListener('blur', function() { setTimeout(() => { suggestionsBox.style.display = 'none'; }, 200); });
     }
 
+
+
+
+
+
+
+
+
     const sutRaporuCariAramaInput = document.getElementById('sutRaporuCariAramaInput');
     if (sutRaporuCariAramaInput) {
         const suggestionsBox = document.getElementById('sutRaporuCariSuggestions');
@@ -1290,6 +1299,7 @@ async function uygulamayiBaslat() {
     document.getElementById('mm-batch-iptal-btn')?.addEventListener('click', () => {
         document.getElementById('mm-batch-sonuc-alani').style.display = 'none';
     });
+
     document.getElementById('raporOlusturBtn')?.addEventListener('click', handleHesapOzetiRaporuOlustur);
     document.getElementById('sutRaporuOlusturBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: false}));
     document.getElementById('sutRaporuTumunuGosterBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: true, kategori: false}));
@@ -1321,6 +1331,15 @@ async function uygulamayiBaslat() {
     document.getElementById('yemAlisMiktar').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
     document.getElementById('yemAlisBirimFiyati').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
     document.getElementById('firmaDuzenleBtn')?.addEventListener('click', () => toggleFirmaBilgileriEdit(true));
+
+ const dashboardLink = document.querySelector('#sidebarNav a[href="#dashboard"]');
+    if (dashboardLink && !dashboardLink.classList.contains('active')) {
+        dashboardLink.click();
+    }
+
+
+
+
 
 }
 
