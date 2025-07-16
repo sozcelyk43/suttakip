@@ -1325,7 +1325,6 @@ async function uygulamayiBaslat() {
 }
 
 async function loadInitialData() {
-    console.log("Başlangıç verileri yükleniyor...");
     try {
         const carilerQuery = query(collection(db, 'cariler'), where("sahipId", "==", sahipId));
         const yemlerQuery = query(collection(db, 'yemler'), where("sahipId", "==", sahipId));
@@ -1337,12 +1336,10 @@ async function loadInitialData() {
         carilerSnapshot.forEach(doc => {
             window.cariDataMap.set(doc.id, doc.data());
         });
-        console.log(`${window.cariDataMap.size} adet cari yüklendi.`);
         window.yemDataMap = new Map();
         yemlerSnapshot.forEach(doc => {
             window.yemDataMap.set(doc.id, doc.data());
         });
-        console.log(`${window.yemDataMap.size} adet yem yüklendi.`);
 
     } catch (error) {
         console.error("Başlangıç verileri yüklenirken kritik hata:", error);
@@ -1351,7 +1348,6 @@ async function loadInitialData() {
 }
 
 async function loadAndRenderAllData() {
-        console.log("Veri yükleme fonksiyonları kontrollü bir şekilde başlatılıyor...");
         try { await renderCariListesi(); } catch (e) { console.warn("Cari listesi yüklenemedi.", e); }
         try { await renderYemStokListesi(); } catch (e) { console.warn("Yem stoku yüklenemedi.", e); }
         try { await renderOdemeListesi(); } catch (e) { console.warn("Ödeme listesi yüklenemedi.", e); }
@@ -1359,7 +1355,6 @@ async function loadAndRenderAllData() {
         try { await populateCariKategoriFiltre(); } catch (e) { console.warn("Cari kategori filtresi doldurulamadı.", e); }
         try { await populateCariKategoriSelect(document.getElementById('topluGirisKategori')); } catch (e) { console.warn("Toplu giriş kategorisi doldurulamadı.", e); }
         try { await updateDashboardStats(); } catch (e) { console.warn("Panel istatistikleri güncellenemedi.", e); }
-        console.log("Veri yükleme denemeleri tamamlandı.");
     }
 
     function formatDateTime(timestamp) {
