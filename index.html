@@ -9,6 +9,44 @@
     <meta name="theme-color" content="#2c3e50">
     <link rel="manifest" href="/suttakip/manifest.json">
     <link rel="icon" href="https://raw.githubusercontent.com/sozcelyk43/suttakip/refs/heads/main/favicon.ico" type="image/x-icon" />
+	<style>
+  /* Sayfa yüklenirken içeriğin anlık görünmesini engeller */
+  .sidebar, .main-content {
+    visibility: hidden;
+  }
+
+  /* Dış katmanı tüm ekranı kaplayacak ve ortalayacak şekilde ayarlar */
+  #secim-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw; /* Ekran genişliğinin tamamı */
+    height: 100vh; /* Ekran yüksekliğinin tamamı */
+    background-color: rgba(44, 62, 80, 0.95);
+    z-index: 99999; /* Her şeyin üstünde olmasını garantiler */
+    
+    display: flex;
+    justify-content: center; /* Yatayda Mükemmel Ortalama */
+    align-items: center;    /* Dikeyde Mükemmel Ortalama */
+    
+    padding: 15px; /* Kenarlardan boşluk bırakır */
+    box-sizing: border-box;
+  }
+
+  /* İçerik kutusunun mobil uyumlu ve düzgün görünmesini sağlar */
+  .custom-modal-box {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    
+    width: 100%;
+    max-width: 450px; /* Genişliğini sınırlar */
+    
+    text-align: center;
+    box-sizing: border-box;
+  }
+</style>
 </head>
 <body>
 <div class="sidebar">
@@ -908,6 +946,13 @@ document.getElementById('secim-mustahsil-merkezi-btn')?.addEventListener('click'
 });
 
 async function uygulamayiBaslat() {
+    // --- GÜNCELLENMİŞ KOD BAŞLANGICI ---
+    // Modal seçim ekranını gizle ve ana arayüzü görünür yap
+    document.getElementById('secim-modal-overlay').style.display = 'none';
+    document.querySelector('.sidebar').style.visibility = 'visible';
+    document.querySelector('.main-content').style.visibility = 'visible';
+    // --- GÜNCELLENMİŞ KOD SONU ---
+
     if (window.isAppInitialized) { return; }
     window.isAppInitialized = true;
     
@@ -1129,15 +1174,17 @@ document.getElementById('moduleSwitchSelect')?.addEventListener('change', functi
         if (targetId === 'sut-alim-raporu') {
             populateCariSelect(document.getElementById('sutRaporuTedarikciSecimi'), 'üretici');
             populateCariKategoriSelect(document.getElementById('sutRaporuKategoriSecimi'), "Tümü");
+            // --- GÜNCELLENEN KISIM BAŞLANGICI ---
             const baslangicTarihiInput = document.getElementById('sutRaporuBaslangicTarihi');
             const bitisTarihiInput = document.getElementById('sutRaporuBitisTarihi');
-            if (baslangicTarihiInput && !baslangicTarihiInput.value && bitisTarihiInput && !bitisTarihiInput.value) {
-                const today = new Date();
-                const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-                const formatForInput = (date) => date.toISOString().split('T')[0];
-                baslangicTarihiInput.value = formatForInput(firstDayOfMonth);
-                bitisTarihiInput.value = formatForInput(today);
-            }
+            const now = new Date();
+            const ayinIlkGunu = new Date(now.getFullYear(), now.getMonth(), 1);
+            const ayinSonGunu = new Date(now.getFullYear(), now.getMonth() + 1, 0); // Ayın son gününü bulur
+            const formatForInput = (date) => date.toISOString().split('T')[0];
+            
+            baslangicTarihiInput.value = formatForInput(ayinIlkGunu);
+            bitisTarihiInput.value = formatForInput(ayinSonGunu);
+            // --- GÜNCELLENEN KISIM SONU ---
         }
         
         if (targetId === 'aylik-yem-raporu') {
@@ -1154,27 +1201,20 @@ document.getElementById('moduleSwitchSelect')?.addEventListener('change', functi
         
         if (targetId === 'hareket-dokumu') {
             populateCariSelect(document.getElementById('hd-cari-secimi'), null, "Tüm Cariler");
+             // --- GÜNCELLENEN KISIM BAŞLANGICI ---
             const baslangicInput = document.getElementById('hd-baslangic-tarihi');
             const bitisInput = document.getElementById('hd-bitis-tarihi');
-            if (cachedHareketler.length === 0) {
-                const today = new Date();
-                const ayinIlkGunu = new Date(today.getFullYear(), today.getMonth(), 1);
-                const formatForInput = (date) => date.toISOString().split('T')[0];
-                baslangicInput.value = formatForInput(ayinIlkGunu);
-                bitisInput.value = formatForInput(today);
-                fetchAndDisplayHareketler();
-            } else {
-                displayHareketler(cachedHareketler);
-            }
+            const today = new Date();
+            const ayinIlkGunu = new Date(today.getFullYear(), today.getMonth(), 1);
+            const formatForInput = (date) => date.toISOString().split('T')[0];
+            
+            baslangicInput.value = formatForInput(ayinIlkGunu);
+            bitisInput.value = formatForInput(today);
+            
+            // Raporu otomatik olarak getir
+            fetchAndDisplayHareketler();
+            // --- GÜNCELLENEN KISIM SONU ---
         }
-        
-        if (targetId === 'ayarlar') { 
-    renderCariKategoriListesi(); 
-    getSettings();
-    if (currentUserRole === 'admin') { 
-        renderKullaniciListesi(); 
-    } 
-}
     });
 
     logoutButton.addEventListener('click', handleLogout);
