@@ -18,7 +18,7 @@
             <ul>
 		<li class="quick-entry-link"><a href="hizli-giris.html" target="_blank">⚡ Hızlı Süt Girişi</a></li>
                 <li><a href="#dashboard" class="nav-link">📝 Kontrol Paneli</a></li>
-                <li><a href="#cari-yonetimi" class="nav-link">👥 Cari Yönetimi</a></li>
+                <li><a href="#cari-yonetimi" class="nav-link">🧑🏻‍💼 Cari Yönetimi</a></li>
                 <li><a href="#sut-alimi" class="nav-link">🥛 Günlük Süt Alımı</a></li>
                 <li><a href="#yem-stok-yonetimi" class="nav-link">📦 Stok Yönetimi</a></li>
                 <li><a href="#yem-satisi" class="nav-link">🌾 Yem Satışı</a></li>
@@ -54,7 +54,7 @@
                     <div class="stat-card"><h4>🌙 Bugünkü Akşam Sütü</h4><p><span id="dashAksamSut">0.00</span> Lt</p><small id="aksamSutTarih" style="font-weight: bold;"></small></div>
                     <div class="stat-card"><h4>📈 Bugünkü Toplam Süt</h4><p><span id="dashToplamSut">0.00</span> Lt</p>
 				<small id="toplamSutTarihAraligi" style="display: block; font-weight: bold;"></small><small id="dunKarsilastirma">(Düne göre...)</small></div>
-                    <div class="stat-card"><h4>👥 Aktif Müşteri Sayısı</h4><p><span id="dashAktifMusteri">0</span></p></div>
+                    <div class="stat-card"><h4>🧑🏻‍💼 Aktif Müşteri Sayısı</h4><p><span id="dashAktifMusteri">0</span></p></div>
 	            <div class="stat-card" id="bakiyeDurumKarti"><h4>💰 Toplam Bakiye</h4><p><span id="dashToplamBakiye">0,00</span></p>
 				<small id="bakiyeDurumUyarisi" style="font-weight: bold;"></small></div>
                    <div class="stat-card" style="border-left: 5px solid #3498db; grid-column: span 1;"><h4>Bu Ayki Süt Üretimi</h4><p style="font-size: 2.2em; color: #2980b9;">
@@ -92,7 +92,7 @@
 			
 <section id="cari-yonetimi" class="module-section hidden-section">
     <div class="module-header">
-        <h2>👥 Cari Yönetimi</h2>
+        <h2>🧑🏻‍💼 Cari Yönetimi</h2>
     </div>
     <div class="container">
         <div class="form-section">
@@ -4508,6 +4508,7 @@ async function handleYemPivotRaporu(reportType) {
         raporAlani.innerHTML = `<p style="color:red; font-weight:bold;">RAPOR OLUŞTURULAMADI!<br>Hata Detayı: ${error.message}</p>`;
     }
 }
+
 async function handleHesapOzetiRaporuOlustur() {
     toggleReportButtons('hesapOzeti', false);
     const cariId = document.getElementById('raporCariSecimi').value;
@@ -4516,7 +4517,10 @@ async function handleHesapOzetiRaporuOlustur() {
     const raporDetayAlani = document.getElementById('raporDetayAlani');
     const currentUser = auth.currentUser;
 
-    if (!currentUser || !cariId || !ayYil) { showToast("Lütfen cari ve ay seçimi yapın.", true); return; }
+    if (!currentUser || !cariId || !ayYil) {
+        showToast("Lütfen cari ve ay seçimi yapın.", true);
+        return;
+    }
 
     const cariAdi = document.getElementById('raporCariSecimi').options[document.getElementById('raporCariSecimi').selectedIndex].text;
     const [year, month] = ayYil.split('-');
@@ -4531,11 +4535,8 @@ async function handleHesapOzetiRaporuOlustur() {
         const ayGunSayisi = new Date(intYear, intMonth, 0).getDate();
         const endDate = `${year}-${month}-${String(ayGunSayisi).padStart(2, '0')}`;
         const devirTarihiObj = new Date(intYear, intMonth - 1, 0);
-        const devirYil = devirTarihiObj.getFullYear();
-        const devirAy = String(devirTarihiObj.getMonth() + 1).padStart(2, '0');
-        const devirGun = String(devirTarihiObj.getDate()).padStart(2, '0');
-        const devirTarihiStr = `${devirYil}-${devirAy}-${devirGun}`;
-        
+        const devirTarihiStr = devirTarihiObj.toISOString().split('T')[0];
+
         const createQuery = (collectionName, isDevir) => {
             const constraints = [where('sahipId', '==', sahipId), where('cariId', '==', cariId)];
             if (isDevir) {
@@ -4545,127 +4546,185 @@ async function handleHesapOzetiRaporuOlustur() {
             }
             return getDocs(query(collection(db, collectionName), ...constraints));
         };
-        
-        const yemlerQuery = query(collection(db, 'yemler'), where('sahipId', '==', sahipId));
-        
+
         const [devirSut, devirYemSatis, devirOdeme, aySut, ayYemSatis, ayOdeme, yemlerSnapshot] = await Promise.all([
-            createQuery('sut_alimlari', true),
-            createQuery('yem_satislari', true),
-            createQuery('odemeVeTahsilatlar', true),
-            createQuery('sut_alimlari', false),
-            createQuery('yem_satislari', false),
-            createQuery('odemeVeTahsilatlar', false),
-            getDocs(yemlerQuery)
+            createQuery('sut_alimlari', true), createQuery('yem_satislari', true), createQuery('odemeVeTahsilatlar', true),
+            createQuery('sut_alimlari', false), createQuery('yem_satislari', false), createQuery('odemeVeTahsilatlar', false),
+            getDocs(query(collection(db, 'yemler'), where('sahipId', '==', sahipId)))
         ]);
-        
-        const yemMap = new Map(yemlerSnapshot.docs.map(doc => [doc.id, doc.data()]));
-        
+
         let devredenAlacak = 0, devredenBorc = 0;
-        devirSut.forEach(doc => devredenAlacak += Number(doc.data().toplamTutar || 0));
-        devirYemSatis.forEach(doc => devredenBorc += Number(doc.data().toplamTutar || 0));
+        devirSut.forEach(doc => devredenAlacak += doc.data().toplamTutar || 0);
+        devirYemSatis.forEach(doc => devredenBorc += doc.data().toplamTutar || 0);
         devirOdeme.forEach(doc => {
             const data = doc.data();
-            if (data.islemTuru === 'odeme' || data.islemTuru === 'alacak') devredenAlacak += Number(data.tutar || 0);
-            else if (data.islemTuru === 'tahsilat' || data.islemTuru === 'borc') devredenBorc += Number(data.tutar || 0);
+            if (data.islemTuru === 'odeme' || data.islemTuru === 'alacak') devredenAlacak += data.tutar || 0;
+            else if (data.islemTuru === 'tahsilat' || data.islemTuru === 'borc') devredenBorc += data.tutar || 0;
         });
         const devredenBakiye = devredenAlacak - devredenBorc;
 
-        let toplamSutDegeri = 0, sutDetayHTML = '', toplamSabah = 0, toplamAksam = 0, toplamLitre = 0;
-        if (!aySut.empty) {
+        const devir_row_style = `display: flex; justify-content: space-between; font-weight: bold; padding: 8px; border: 1px solid #ccc; background-color: #f9f9f9; border-radius: 5px;`;
+        const devirHTML = `<div class="report-section-block"><p style="${devir_row_style}"><span>Önceki Dönemden Devir</span><span>${formatCurrency(devredenBakiye)} ${devredenBakiye >= 0 ? '(Cari Alacaklı)' : '(Cari Borçlu)'}</span></p></div>`;
+
+        let ayToplamSut = 0;
+        let sutAlimlariHTML = '<div class="report-section-block"><h5>Cari Ay Süt Alımları</h5>';
+        if (aySut.empty) {
+            sutAlimlariHTML += '<p>Bu ay süt alımı yapılmamış.</p>';
+        } else {
+            const sutGruplari = {};
             aySut.forEach(doc => {
                 const alim = doc.data();
-                toplamSabah += Number(alim.sabah || 0);
-                toplamAksam += Number(alim.aksam || 0);
-                toplamLitre += Number(alim.toplam || 0);
-                toplamSutDegeri += Number(alim.toplamTutar || 0);
+                const fiyatKey = (alim.fiyat || 0).toFixed(2);
+                if (!sutGruplari[fiyatKey]) sutGruplari[fiyatKey] = { aksam: 0, sabah: 0, litre: 0, tutar: 0 };
+                sutGruplari[fiyatKey].aksam += alim.aksam || 0;
+                sutGruplari[fiyatKey].sabah += alim.sabah || 0;
+                sutGruplari[fiyatKey].litre += alim.toplam || 0;
+                sutGruplari[fiyatKey].tutar += alim.toplamTutar || 0;
+                ayToplamSut += alim.toplamTutar || 0;
             });
-            const ortalamaFiyat = toplamLitre > 0 ? (toplamSutDegeri / toplamLitre) : 0;
-            sutDetayHTML = `<table class="summary-table"><thead><tr><th>Toplam Akşam</th><th>Toplam Sabah</th><th>Toplam Litre</th><th>Ort. Fiyat</th><th>Toplam Tutar</th></tr></thead><tbody><tr><td>${toplamAksam.toFixed(2)} Lt</td><td>${toplamSabah.toFixed(2)} Lt</td><td>${toplamLitre.toFixed(2)} Lt</td><td>${formatCurrency(ortalamaFiyat)}</td><td>${formatCurrency(toplamSutDegeri)}</td></tr></tbody></table>`;
+            sutAlimlariHTML += `<table class="report-table"><thead><tr><th>Toplam Akşam</th><th>Toplam Sabah</th><th>Toplam Litre</th><th>Ort. Fiyat</th><th>Toplam Tutar</th></tr></thead><tbody>`;
+            let genelAksam = 0, genelSabah = 0, genelLitre = 0;
+            Object.entries(sutGruplari).forEach(([fiyat, grup]) => {
+                genelAksam += grup.aksam; genelSabah += grup.sabah; genelLitre += grup.litre;
+                sutAlimlariHTML += `<tr><td>${grup.aksam.toFixed(2)} Lt</td><td>${grup.sabah.toFixed(2)} Lt</td><td>${grup.litre.toFixed(2)} Lt</td><td>${formatCurrency(parseFloat(fiyat))}</td><td>${formatCurrency(grup.tutar)}</td></tr>`;
+            });
+            const genelOrtFiyat = genelLitre > 0 ? (ayToplamSut / genelLitre) : 0;
+            sutAlimlariHTML += `<tr class="report-totals-row"><td>${genelAksam.toFixed(2)} Lt</td><td>${genelSabah.toFixed(2)} Lt</td><td>${genelLitre.toFixed(2)} Lt</td><td>${formatCurrency(genelOrtFiyat)}</td><td>${formatCurrency(ayToplamSut)}</td></tr></tbody></table>`;
         }
+        sutAlimlariHTML += '</div>';
 
-        let toplamYemSatisTutari = 0, toplamYemSatisMiktari = 0, yemSatisDetayHTML = '';
-        const yemSatisOzet = {};
-        if (!ayYemSatis.empty) {
+        let ayToplamYem = 0;
+        let yemSatislariHTML = '<div class="report-section-block"><h5>Cari Ay Yem Satışları</h5>';
+        const yemMap = new Map(yemlerSnapshot.docs.map(doc => [doc.id, doc.data()]));
+        if (ayYemSatis.empty) {
+            yemSatislariHTML += '<p>Bu ay yem satışı yapılmamış.</p>';
+        } else {
+            const yemGruplari = {};
             ayYemSatis.forEach(doc => {
                 const satis = doc.data();
-                toplamYemSatisTutari += Number(satis.toplamTutar || 0);
-                toplamYemSatisMiktari += Number(satis.miktar || 0);
-                const yemAdi = yemMap.get(satis.yemId)?.ad || 'Bilinmeyen Yem';
-                if (!yemSatisOzet[yemAdi]) {
-                    yemSatisOzet[yemAdi] = { miktar: 0, tutar: 0 };
-                }
-                yemSatisOzet[yemAdi].miktar += Number(satis.miktar || 0);
-                yemSatisOzet[yemAdi].tutar += Number(satis.toplamTutar || 0);
+                if (!yemGruplari[satis.yemId]) yemGruplari[satis.yemId] = { ad: yemMap.get(satis.yemId)?.ad || 'Bilinmeyen', miktar: 0, tutar: 0 };
+                yemGruplari[satis.yemId].miktar += satis.miktar || 0;
+                yemGruplari[satis.yemId].tutar += satis.toplamTutar || 0;
+                ayToplamYem += satis.toplamTutar || 0;
             });
-            yemSatisDetayHTML = '<table class="summary-table"><thead><tr><th>Yem Adı</th><th>Miktar</th><th>Ort. Birim Fiyat</th><th>Tutar</th></tr></thead><tbody>';
-            for (const yemAdi in yemSatisOzet) {
-                const ozet = yemSatisOzet[yemAdi];
-                const ortalamaBirimFiyat = ozet.miktar > 0 ? (ozet.tutar / ozet.miktar) : 0;
-                yemSatisDetayHTML += `<tr><td>${yemAdi}</td><td>${ozet.miktar}</td><td>${formatCurrency(ortalamaBirimFiyat)}</td><td>${formatCurrency(ozet.tutar)}</td></tr>`;
-            }
-            yemSatisDetayHTML += `</tbody><tfoot><tr class="report-totals-row"><td><strong>TOPLAM</strong></td><td><strong>${toplamYemSatisMiktari}</strong></td><td></td><td><strong>${formatCurrency(toplamYemSatisTutari)}</strong></td></tr></tfoot></table>`;
+            yemSatislariHTML += `<table class="report-table"><thead><tr><th>Yem Adı</th><th>Miktar</th><th>Ort. Birim Fiyat</th><th>Tutar</th></tr></thead><tbody>`;
+            let genelMiktar = 0;
+            Object.values(yemGruplari).forEach(grup => {
+                genelMiktar += grup.miktar;
+                const ortBirimFiyat = grup.miktar > 0 ? (grup.tutar / grup.miktar) : 0;
+                yemSatislariHTML += `<tr><td>${grup.ad}</td><td>${grup.miktar}</td><td>${formatCurrency(ortBirimFiyat)}</td><td>${formatCurrency(grup.tutar)}</td></tr>`;
+            });
+            yemSatislariHTML += `<tr class="report-totals-row"><td>TOPLAM</td><td>${genelMiktar}</td><td></td><td>${formatCurrency(ayToplamYem)}</td></tr></tbody></table>`;
         }
+        yemSatislariHTML += '</div>';
 
-        let toplamOdemeTutari = 0, odemeDetayHTML = '';
-        let toplamTahsilatTutari = 0, tahsilatDetayHTML = '';
-        const odemeDetaylari = [], tahsilatDetaylari = [];
-        if(!ayOdeme.empty) {
-            ayOdeme.docs.sort((a,b) => a.data().tarih.localeCompare(b.data().tarih)).forEach(doc => {
+        let ayToplamTahsilat = 0;
+        let tahsilatlarHTML = '<div class="report-section-block"><h5>Cari Ay Yapılan Tahsilatlar (Müşteriden Gelen)</h5>';
+        const tahsilatIslemleri = ayOdeme.docs.filter(doc => doc.data().islemTuru === 'tahsilat' || doc.data().islemTuru === 'borc');
+        if (tahsilatIslemleri.length === 0) {
+            tahsilatlarHTML += '<p>Bu ay tahsilat yapılmamış.</p>';
+        } else {
+            tahsilatlarHTML += `<table class="report-table"><thead><tr><th>Tarih</th><th>Ödeme Türü</th><th>Açıklama</th><th>Tutar</th></tr></thead><tbody>`;
+            tahsilatIslemleri.forEach(doc => {
                 const islem = doc.data();
-                if (islem.islemTuru === 'odeme') {
-                    toplamOdemeTutari += Number(islem.tutar || 0);
-                    odemeDetaylari.push(islem);
-                } else if (islem.islemTuru === 'tahsilat') {
-                    toplamTahsilatTutari += Number(islem.tutar || 0);
-                    tahsilatDetaylari.push(islem);
-                }
+                ayToplamTahsilat += islem.tutar || 0;
+                tahsilatlarHTML += `<tr><td>${formatDate(islem.tarih)}</td><td>${islem.odemeTuru}</td><td>${islem.aciklama}</td><td>${formatCurrency(islem.tutar)}</td></tr>`;
             });
-            
-            if(odemeDetaylari.length > 0) {
-                odemeDetayHTML = '<table class="summary-table"><thead><tr><th>Tarih</th><th>Ödeme Türü</th><th>Açıklama</th><th>Tutar</th></tr></thead><tbody>';
-                odemeDetaylari.forEach(islem => {
-                    odemeDetayHTML += `<tr><td>${formatDate(islem.tarih)}</td><td>${islem.odemeTuru || '-'}</td><td>${islem.aciklama}</td><td>${formatCurrency(islem.tutar)}</td></tr>`;
-                });
-                odemeDetayHTML += `</tbody><tfoot><tr class="report-totals-row"><td colspan="3"><strong>TOPLAM</strong></td><td><strong>${formatCurrency(toplamOdemeTutari)}</strong></td></tr></tfoot></table>`;
-            }
-            
-            if(tahsilatDetaylari.length > 0) {
-                tahsilatDetayHTML = '<table class="summary-table"><thead><tr><th>Tarih</th><th>Ödeme Türü</th><th>Açıklama</th><th>Tutar</th></tr></thead><tbody>';
-                tahsilatDetaylari.forEach(islem => {
-                    tahsilatDetayHTML += `<tr><td>${formatDate(islem.tarih)}</td><td>${islem.odemeTuru || '-'}</td><td>${islem.aciklama}</td><td>${formatCurrency(islem.tutar)}</td></tr>`;
-                });
-                tahsilatDetayHTML += `</tbody><tfoot><tr class="report-totals-row"><td colspan="3"><strong>TOPLAM</strong></td><td><strong>${formatCurrency(toplamTahsilatTutari)}</strong></td></tr></tfoot></table>`;
-            }
+            tahsilatlarHTML += `<tr class="report-totals-row"><td colspan="3">TOPLAM</td><td>${formatCurrency(ayToplamTahsilat)}</td></tr></tbody></table>`;
         }
+        tahsilatlarHTML += '</div>';
 
-        const araToplamAlacak = toplamSutDegeri + toplamOdemeTutari;
-        const araToplamBorc = toplamYemSatisTutari + toplamTahsilatTutari;
+        let ayToplamOdeme = 0;
+        let odemelerHTML = '<div class="report-section-block"><h5>Cari Ay Yapılan Ödemeler (Müşteriye Giden)</h5>';
+        const odemeIslemleri = ayOdeme.docs.filter(doc => doc.data().islemTuru === 'odeme' || doc.data().islemTuru === 'alacak');
+        if (odemeIslemleri.length === 0) {
+            odemelerHTML += '<p>Bu ay ödeme yapılmamış.</p>';
+        } else {
+            odemelerHTML += `<table class="report-table"><thead><tr><th>Tarih</th><th>Ödeme Türü</th><th>Açıklama</th><th>Tutar</th></tr></thead><tbody>`;
+            odemeIslemleri.forEach(doc => {
+                const islem = doc.data();
+                ayToplamOdeme += islem.tutar || 0;
+                odemelerHTML += `<tr><td>${formatDate(islem.tarih)}</td><td>${islem.odemeTuru}</td><td>${islem.aciklama}</td><td>${formatCurrency(islem.tutar)}</td></tr>`;
+            });
+            odemelerHTML += `<tr class="report-totals-row"><td colspan="3">TOPLAM</td><td>${formatCurrency(ayToplamOdeme)}</td></tr></tbody></table>`;
+        }
+        odemelerHTML += '</div>';
+        
+        const araToplamAlacak = ayToplamSut + ayToplamOdeme;
+        const araToplamBorc = ayToplamYem + ayToplamTahsilat;
         const cariAyBakiye = araToplamAlacak - araToplamBorc;
         const donemSonuBakiye = devredenBakiye + cariAyBakiye;
-
-        let reportHTML = `
-            <div class="report-block"><h5>Önceki Dönemden Devir</h5><p class="block-total"><strong>${formatCurrency(devredenBakiye)} (${devredenBakiye >= 0 ? 'Cari Alacaklı' : 'Cari Borçlu'})</strong></p></div>
-            <div class="report-block"><h5>Cari Ay Süt Alımları</h5>${sutDetayHTML || '<p>Bu ay süt alımı yok.</p>'}</div>
-            <div class="report-block"><h5>Cari Ay Yem Satışları</h5>${yemSatisDetayHTML || '<p>Bu ay yem satışı yok.</p>'}</div>
-            <div class="report-block"><h5>Cari Ay Yapılan Tahsilatlar (Müşteriden Gelen)</h5>${odemeDetayHTML || '<p>Bu ay tahsilat yapılmamış.</p>'}</div>
-            <div class="report-block"><h5>Cari Ay Yapılan Ödemeler (Müşteriye Giden)</h5>${tahsilatDetayHTML || '<p>Bu ay ödeme yapılmamış.</p>'}</div>
-            <div class="report-block final-summary">
-                <h5>DÖNEM SONU HESAPLAMASI</h5>
-                <p><span>Önceki Aydan Devir:</span> <span>${formatCurrency(devredenBakiye)} (${devredenBakiye >= 0 ? 'Cari Alacaklı' : 'Cari Borçlu'})</span></p>
-                <hr style="border-style: dashed; margin: 10px 0;">
-                <p><span>+ Cari Ay Süt Alımları:</span> <span style="color:green;">+ ${formatCurrency(toplamSutDegeri)}</span></p>
-                <p><span>+ Cari Ay Yapılan Tahsilatlar:</span> <span style="color:green;">+ ${formatCurrency(toplamOdemeTutari)}</span></p>
-                <p style="border-top: 1px solid #ccc; padding-top: 5px; margin-top:5px;"><strong>Ara Toplam (Alacak):</strong> <strong style="color:green;">${formatCurrency(araToplamAlacak)}</strong></p>
-                <p style="margin-top: 15px;"><span>- Cari Ay Yem Satışları:</span> <span style="color:red;">- ${formatCurrency(toplamYemSatisTutari)}</span></p>
-                <p><span>- Cari Ay Yapılan Ödemeler:</span> <span style="color:red;">- ${formatCurrency(toplamTahsilatTutari)}</span></p>
-                <p style="border-top: 1px solid #ccc; padding-top: 5px; margin-top:5px;"><strong>Ara Toplam (Borç):</strong> <strong style="color:red;">- ${formatCurrency(araToplamBorc)}</strong></p>
-                <hr>
-                <p><strong>CARİ AY BAKİYESİ:</strong> <strong>${formatCurrency(cariAyBakiye)}</strong></p>
-                <p><strong>DÖNEM SONU NET BAKİYE:</strong> <strong>${formatCurrency(donemSonuBakiye)} (${donemSonuBakiye >= 0 ? 'Cari Alacaklı' : 'Cari Borçlu'})</strong></p>
-            </div>
-        `;
-        raporDetayAlani.innerHTML = reportHTML;
+	const cariAyBakiyeRenk = cariAyBakiye >= 0 ? 'green' : 'red';
+	const bakiyeRenk = donemSonuBakiye >= 0 ? 'green' : 'red';
+	const sonDurum = donemSonuBakiye >= 0 ? '(Cari Alacaklı)' : '(Cari Borçlu)';
         
+      // YENİ VE KOMPAKT VERSİYON
+const row_style = `display:flex; justify-content: space-between; margin: 0; padding: 3px 0; border-bottom: 1px dotted #ccc;`;
+const total_row_style = `${row_style} font-weight: bold;`;
+        const final_balance_container_style = `margin-top: 10px; padding-top: 5px; border-top: 2px solid #555;`;
+        const final_balance_row_style = `display:flex; justify-content: space-between; font-weight: bold; margin: 12px 0; font-size: 1.1em;`;
+        
+ // YENİ VE NİHAİ KODU BU ŞEKİLDE YAPIŞTIRIN
+const devredenBakiyeRenk = devredenBakiye >= 0 ? 'green' : 'red';
+
+let hesaplamaHTML = `
+<div class="report-section-block final-calculation">
+    <h5>DÖNEM SONU HESAPLAMASI</h5>
+    <table class="report-table">
+        <tbody>
+            <tr>
+                <td>Önceki Dönemden Devir:</td>
+                <td style="text-align: right; color:${devredenBakiyeRenk};">${formatCurrency(devredenBakiye)}</td>
+            </tr>
+            <tr>
+                <td>+ Cari Ay Süt Alımları:</td>
+                <td style="text-align: right; color:green;">${formatCurrency(ayToplamSut)}</td>
+            </tr>
+            <tr>
+                <td>+ Cari Ay Yapılan Ödemeler:</td>
+                <td style="text-align: right; color:green;">${formatCurrency(ayToplamOdeme)}</td>
+            </tr>
+            <tr class="report-totals-row">
+                <td>Ara Toplam (Alacak):</td>
+                <td style="text-align: right; color:green;">${formatCurrency(araToplamAlacak)}</td>
+            </tr>
+            <tr>
+                <td style="padding: 4px;"></td>
+                <td style="padding: 4px;"></td>
+            </tr>
+            <tr>
+                <td>- Cari Ay Yem Satışları:</td>
+                <td style="text-align: right; color:red;">${formatCurrency(ayToplamYem)}</td>
+            </tr>
+            <tr>
+                <td>- Cari Ay Yapılan Tahsilatlar:</td>
+                <td style="text-align: right; color:red;">${formatCurrency(ayToplamTahsilat)}</td>
+            </tr>
+            <tr class="report-totals-row">
+                <td>Ara Toplam (Borç):</td>
+                <td style="text-align: right; color:red;">${formatCurrency(araToplamBorc)}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="report-section-block final-balance" style="margin-top: 20px;">
+    <table class="report-table">
+        <tbody>
+            <tr style="font-size: 1.1em;">
+                <td style="font-weight: bold;">CARİ AY BAKİYESİ:</td>
+                <td style="text-align: right; font-weight: bold; color:${cariAyBakiyeRenk};">${formatCurrency(cariAyBakiye)}</td>
+            </tr>
+            <tr style="font-size: 1.3em; border-top: 2px solid #555; background-color: #f8f9fa;">
+                <td style="font-weight: bold; padding-top: 10px;">DÖNEM SONU NET BAKİYE:</td>
+                <td style="text-align: right; font-weight: bold; padding-top: 10px; color:${bakiyeRenk};">${formatCurrency(donemSonuBakiye)} ${sonDurum}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>`;
+            
+        const reportHTML = devirHTML + sutAlimlariHTML + yemSatislariHTML + tahsilatlarHTML + odemelerHTML + hesaplamaHTML;
+
+        raporDetayAlani.innerHTML = reportHTML;
         document.getElementById('hesap-ozeti-export-area').innerHTML = reportHTML;
         toggleReportButtons('hesapOzeti', true);
 

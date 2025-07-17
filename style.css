@@ -170,8 +170,8 @@ h4 {
    Modül ve Form Stilleri
    ========================================================================== */
 .module-header {
-    background-color: #fff;
-    color: #2c3e50;
+    background-color: #34495e;
+    color: #FFFFFF;
     padding: 15px 20px;
     margin-bottom: 20px;
     border-radius: 8px;
@@ -634,4 +634,16 @@ tfoot tr,
     td, th { padding: 3px 4px !important; border: 1px solid #ccc !important; font-size: 8.5pt; }
     thead { display: table-header-group; }
     tfoot { display: table-row-group; }
+}
+
+/* Cari Hesap Özeti raporundaki devir bakiyesini aynı satıra almak için */
+.report-summary-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    padding: 8px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
 }
