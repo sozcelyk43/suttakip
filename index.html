@@ -4618,11 +4618,27 @@ async function handleHesapOzetiRaporuOlustur() {
         }
         yemSatislariHTML += '</div>';
 
-        let ayToplamTahsilat = 0;
+       let ayToplamOdeme = 0; // Bizden çıkan para (Müşteriye Ödeme)
+        let odemelerHTML = '<div class="report-section-block"><h5>Cari Ay Yapılan Ödemeler (Müşteriye Giden)</h5>';
+        const odemeIslemleri = ayOdeme.docs.filter(doc => doc.data().islemTuru === 'tahsilat' || doc.data().islemTuru === 'borc'); 
+        if (odemeIslemleri.length === 0) {
+            odemelerHTML += '<p>Bu ay müşteriye ödeme yapılmamış.</p>';
+        } else {
+            odemelerHTML += `<table class="report-table"><thead><tr><th>Tarih</th><th>Ödeme Türü</th><th>Açıklama</th><th>Tutar</th></tr></thead><tbody>`;
+            odemeIslemleri.forEach(doc => {
+                const islem = doc.data();
+                ayToplamOdeme += islem.tutar || 0;
+                odemelerHTML += `<tr><td>${formatDate(islem.tarih)}</td><td>${islem.odemeTuru}</td><td>${islem.aciklama}</td><td>${formatCurrency(islem.tutar)}</td></tr>`;
+            });
+            odemelerHTML += `<tr class="report-totals-row"><td colspan="3">TOPLAM</td><td>${formatCurrency(ayToplamOdeme)}</td></tr></tbody></table>`;
+        }
+        odemelerHTML += '</div>';
+
+        let ayToplamTahsilat = 0; // Bize gelen para (Müşteriden Tahsilat)
         let tahsilatlarHTML = '<div class="report-section-block"><h5>Cari Ay Yapılan Tahsilatlar (Müşteriden Gelen)</h5>';
-        const tahsilatIslemleri = ayOdeme.docs.filter(doc => doc.data().islemTuru === 'tahsilat' || doc.data().islemTuru === 'borc');
+        const tahsilatIslemleri = ayOdeme.docs.filter(doc => doc.data().islemTuru === 'odeme' || doc.data().islemTuru === 'alacak'); // Bize para girdiği için 'odeme'
         if (tahsilatIslemleri.length === 0) {
-            tahsilatlarHTML += '<p>Bu ay tahsilat yapılmamış.</p>';
+            tahsilatlarHTML += '<p>Bu ay müşteriden tahsilat yapılmamış.</p>';
         } else {
             tahsilatlarHTML += `<table class="report-table"><thead><tr><th>Tarih</th><th>Ödeme Türü</th><th>Açıklama</th><th>Tutar</th></tr></thead><tbody>`;
             tahsilatIslemleri.forEach(doc => {
@@ -4634,24 +4650,8 @@ async function handleHesapOzetiRaporuOlustur() {
         }
         tahsilatlarHTML += '</div>';
 
-        let ayToplamOdeme = 0;
-        let odemelerHTML = '<div class="report-section-block"><h5>Cari Ay Yapılan Ödemeler (Müşteriye Giden)</h5>';
-        const odemeIslemleri = ayOdeme.docs.filter(doc => doc.data().islemTuru === 'odeme' || doc.data().islemTuru === 'alacak');
-        if (odemeIslemleri.length === 0) {
-            odemelerHTML += '<p>Bu ay ödeme yapılmamış.</p>';
-        } else {
-            odemelerHTML += `<table class="report-table"><thead><tr><th>Tarih</th><th>Ödeme Türü</th><th>Açıklama</th><th>Tutar</th></tr></thead><tbody>`;
-            odemeIslemleri.forEach(doc => {
-                const islem = doc.data();
-                ayToplamOdeme += islem.tutar || 0;
-                odemelerHTML += `<tr><td>${formatDate(islem.tarih)}</td><td>${islem.odemeTuru}</td><td>${islem.aciklama}</td><td>${formatCurrency(islem.tutar)}</td></tr>`;
-            });
-            odemelerHTML += `<tr class="report-totals-row"><td colspan="3">TOPLAM</td><td>${formatCurrency(ayToplamOdeme)}</td></tr></tbody></table>`;
-        }
-        odemelerHTML += '</div>';
-        
-        const araToplamAlacak = ayToplamSut + ayToplamOdeme;
-        const araToplamBorc = ayToplamYem + ayToplamTahsilat;
+        const araToplamAlacak = ayToplamSut + ayToplamTahsilat; 
+        const araToplamBorc = ayToplamYem + ayToplamOdeme; 
         const cariAyBakiye = araToplamAlacak - araToplamBorc;
         const donemSonuBakiye = devredenBakiye + cariAyBakiye;
 	const cariAyBakiyeRenk = cariAyBakiye >= 0 ? 'green' : 'red';
