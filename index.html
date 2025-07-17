@@ -17,7 +17,6 @@
         <nav id="sidebarNav">
             <ul>
 		<li class="quick-entry-link"><a href="hizli-giris.html" target="_blank">⚡ Hızlı Süt Girişi</a></li>
-		<li class="special-module-link"><a href="mustahsil.html">💼 Mali Müşavir</a></li>
                 <li><a href="#dashboard" class="nav-link">📝 Kontrol Paneli</a></li>
                 <li><a href="#cari-yonetimi" class="nav-link">👥 Cari Yönetimi</a></li>
                 <li><a href="#sut-alimi" class="nav-link">🥛 Günlük Süt Alımı</a></li>
@@ -5114,6 +5113,48 @@ function handleYazdir(elementId, orientation = 'portrait') {
 
 <div id="toast-message" class="toast-message"></div>
 
+<div id="custom-confirm-overlay" class="custom-modal-overlay">
+    <div class="custom-modal-box">
+        <h3 id="custom-confirm-title">İşlem Onayı</h3>
+        <p id="custom-confirm-message">Bu işlemi yapmak istediğinizden emin misiniz?</p>
+        <div class="custom-modal-buttons">
+            <button id="custom-confirm-cancel" class="btn">Hayır</button>
+            <button id="custom-confirm-yes" class="btn btn-danger">Evet</button>
+        </div>
+    </div>
+</div>
+
+<div id="custom-prompt-overlay" class="custom-modal-overlay">
+    <div class="custom-modal-box">
+        <h3 id="custom-prompt-title">Onay Gerekiyor</h3>
+        <p id="custom-prompt-message">Lütfen onay metnini girin.</p>
+        <input type="text" id="custom-prompt-input" class="form-control" style="margin-top: 10px;">
+        <div class="custom-modal-buttons">
+            <button id="custom-prompt-cancel" class="btn">İptal</button>
+            <button id="custom-prompt-ok" class="btn btn-primary">Onayla</button>
+        </div>
+    </div>
+</div>
+<div id="makbuz-onay-modal-overlay" class="custom-modal-overlay">
+    <div class="custom-modal-box" style="max-width: 500px;">
+        <h3 id="makbuz-onay-title">Makbuz Önizleme ve Onay</h3>
+        <div id="makbuz-onay-icerik" style="line-height: 1.8;">
+            <p><strong>Müstahsil (Satıcı):</strong> <span id="onay-cari-adi"></span></p>
+            <hr>
+            <p>Brüt Süt Tutarı: <strong style="float:right;" id="onay-brut-tutar"></strong></p>
+            <p style="color:#d9534f;">Gelir Vergisi Tevkifatı (%2): <strong style="float:right;" id="onay-gv"></strong></p>
+            <p style="color:#d9534f;">SGK Tevkifatı (%2): <strong style="float:right;" id="onay-sgk"></strong></p>
+            <p style="color:#d9534f;">Borsa Tescil Ücreti (%0.2): <strong style="float:right;" id="onay-borsa"></strong></p>
+            <hr>
+            <p style="font-size: 1.2em;"><strong>ÖDENECEK NET TUTAR:</strong> <strong style="float:right; font-size: 1.3em;" id="onay-net-tutar"></strong></p>
+        </div>
+        <div class="custom-modal-buttons">
+            <button id="makbuz-onay-cancel" class="btn">İptal</button>
+            <button id="makbuz-onay-confirm" class="btn btn-danger">Onayla ve Makbuzu Oluştur</button>
+        </div>
+    </div>
+</div>
+
 <div id="secim-modal-overlay" class="custom-modal-overlay">
     <div class="custom-modal-box" style="text-align: center;">
         <img src="logo.png" alt="Logo" style="width: 100px; margin-bottom: 20px;">
@@ -5125,7 +5166,6 @@ function handleYazdir(elementId, orientation = 'portrait') {
         </div>
     </div>
 </div>
-
 
 </body>
 </html>

@@ -401,8 +401,29 @@ tfoot tr,
     align-items: center;    /* Dikeyde Mükemmel Ortalama */
     padding: 15px; /* Kenarlardan boşluk bırakır */
     box-sizing: border-box;
+}/* ==========================================================================
+   Genel Onay ve Bilgi Pencereleri (Modal) Stilleri
+   ========================================================================== */
+
+.custom-modal-overlay {
+    position: fixed;
+    inset: 0; /* Bu top, bottom, left, right: 0; demektir */
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 15px;
+    z-index: 10000; /* Diğer her şeyin üstünde görünmesi için */
+
+    /* Varsayılan olarak gizli olmasını sağlar */
+    display: none; 
+
+    /* İçeriği ortalamak için */
+    justify-content: center;
+    align-items: center;
 }
 
+/* JavaScript ile bu sınıf eklendiğinde pencere görünür hale gelir */
+.custom-modal-overlay.show {
+    display: flex;
+}
 /* İçerik kutusunun mobil uyumlu ve düzgün görünmesini sağlar */
 .custom-modal-box {
     background: white;
