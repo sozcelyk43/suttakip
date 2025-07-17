@@ -9,44 +9,7 @@
     <meta name="theme-color" content="#2c3e50">
     <link rel="manifest" href="/suttakip/manifest.json">
     <link rel="icon" href="https://raw.githubusercontent.com/sozcelyk43/suttakip/refs/heads/main/favicon.ico" type="image/x-icon" />
-	<style>
-  /* Sayfa yüklenirken içeriğin anlık görünmesini engeller */
-  .sidebar, .main-content {
-    visibility: hidden;
-  }
-
-  /* Dış katmanı tüm ekranı kaplayacak ve ortalayacak şekilde ayarlar */
-  #secim-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw; /* Ekran genişliğinin tamamı */
-    height: 100vh; /* Ekran yüksekliğinin tamamı */
-    background-color: rgba(44, 62, 80, 0.95);
-    z-index: 99999; /* Her şeyin üstünde olmasını garantiler */
-    
-    display: flex;
-    justify-content: center; /* Yatayda Mükemmel Ortalama */
-    align-items: center;    /* Dikeyde Mükemmel Ortalama */
-    
-    padding: 15px; /* Kenarlardan boşluk bırakır */
-    box-sizing: border-box;
-  }
-
-  /* İçerik kutusunun mobil uyumlu ve düzgün görünmesini sağlar */
-  .custom-modal-box {
-    background: white;
-    padding: 25px;
-    border-radius: 8px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-    
-    width: 100%;
-    max-width: 450px; /* Genişliğini sınırlar */
-    
-    text-align: center;
-    box-sizing: border-box;
-  }
-</style>
+	
 </head>
 <body>
 <div class="sidebar">
@@ -5150,48 +5113,6 @@ function handleYazdir(elementId, orientation = 'portrait') {
 </script>
 
 <div id="toast-message" class="toast-message"></div>
-
-<div id="custom-confirm-overlay" class="custom-modal-overlay">
-    <div class="custom-modal-box">
-        <h3 id="custom-confirm-title">İşlem Onayı</h3>
-        <p id="custom-confirm-message">Bu işlemi yapmak istediğinizden emin misiniz?</p>
-        <div class="custom-modal-buttons">
-            <button id="custom-confirm-cancel" class="btn">Hayır</button>
-            <button id="custom-confirm-yes" class="btn btn-danger">Evet</button>
-        </div>
-    </div>
-</div>
-
-<div id="custom-prompt-overlay" class="custom-modal-overlay">
-    <div class="custom-modal-box">
-        <h3 id="custom-prompt-title">Onay Gerekiyor</h3>
-        <p id="custom-prompt-message">Lütfen onay metnini girin.</p>
-        <input type="text" id="custom-prompt-input" class="form-control" style="margin-top: 10px;">
-        <div class="custom-modal-buttons">
-            <button id="custom-prompt-cancel" class="btn">İptal</button>
-            <button id="custom-prompt-ok" class="btn btn-primary">Onayla</button>
-        </div>
-    </div>
-</div>
-<div id="makbuz-onay-modal-overlay" class="custom-modal-overlay">
-    <div class="custom-modal-box" style="max-width: 500px;">
-        <h3 id="makbuz-onay-title">Makbuz Önizleme ve Onay</h3>
-        <div id="makbuz-onay-icerik" style="line-height: 1.8;">
-            <p><strong>Müstahsil (Satıcı):</strong> <span id="onay-cari-adi"></span></p>
-            <hr>
-            <p>Brüt Süt Tutarı: <strong style="float:right;" id="onay-brut-tutar"></strong></p>
-            <p style="color:#d9534f;">Gelir Vergisi Tevkifatı (%2): <strong style="float:right;" id="onay-gv"></strong></p>
-            <p style="color:#d9534f;">SGK Tevkifatı (%2): <strong style="float:right;" id="onay-sgk"></strong></p>
-            <p style="color:#d9534f;">Borsa Tescil Ücreti (%0.2): <strong style="float:right;" id="onay-borsa"></strong></p>
-            <hr>
-            <p style="font-size: 1.2em;"><strong>ÖDENECEK NET TUTAR:</strong> <strong style="float:right; font-size: 1.3em;" id="onay-net-tutar"></strong></p>
-        </div>
-        <div class="custom-modal-buttons">
-            <button id="makbuz-onay-cancel" class="btn">İptal</button>
-            <button id="makbuz-onay-confirm" class="btn btn-danger">Onayla ve Makbuzu Oluştur</button>
-        </div>
-    </div>
-</div>
 
 <div id="secim-modal-overlay" class="custom-modal-overlay">
     <div class="custom-modal-box" style="text-align: center;">
