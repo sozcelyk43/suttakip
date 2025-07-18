@@ -4589,7 +4589,7 @@ async function handleHesapOzetiRaporuOlustur() {
                 sutAlimlariHTML += `<tr><td>${grup.aksam.toFixed(2)} Lt</td><td>${grup.sabah.toFixed(2)} Lt</td><td>${grup.litre.toFixed(2)} Lt</td><td>${formatCurrency(parseFloat(fiyat))}</td><td>${formatCurrency(grup.tutar)}</td></tr>`;
             });
             const genelOrtFiyat = genelLitre > 0 ? (ayToplamSut / genelLitre) : 0;
-            sutAlimlariHTML += `<tr class="report-totals-row"><td>${genelAksam.toFixed(2)} Lt</td><td>${genelSabah.toFixed(2)} Lt</td><td>${genelLitre.toFixed(2)} Lt</td><td>${formatCurrency(genelOrtFiyat)}</td><td>${formatCurrency(ayToplamSut)}</td></tr></tbody></table>`;
+            sutAlimlariHTML += `<tr class="report-totals-row"><td><strong>${genelAksam.toFixed(2)} Lt</strong></td><td><strong>${genelSabah.toFixed(2)} Lt</strong></td><td><strong>${genelLitre.toFixed(2)} Lt</strong></td><td><strong>${formatCurrency(genelOrtFiyat)}</strong></td><td><strong>${formatCurrency(ayToplamSut)}</strong></td></tr></tbody></table>`;
         }
         sutAlimlariHTML += '</div>';
 
@@ -4618,7 +4618,7 @@ async function handleHesapOzetiRaporuOlustur() {
         }
         yemSatislariHTML += '</div>';
 
-       let ayToplamOdeme = 0; // Bizden çıkan para (Müşteriye Ödeme)
+        let ayToplamOdeme = 0; // Bizden çıkan para (Müşteriye Ödeme)
         let odemelerHTML = '<div class="report-section-block"><h5>Cari Ay Yapılan Ödemeler (Müşteriye Giden)</h5>';
         const odemeIslemleri = ayOdeme.docs.filter(doc => doc.data().islemTuru === 'tahsilat' || doc.data().islemTuru === 'borc'); 
         if (odemeIslemleri.length === 0) {
@@ -4650,24 +4650,16 @@ async function handleHesapOzetiRaporuOlustur() {
         }
         tahsilatlarHTML += '</div>';
 
-        const araToplamAlacak = ayToplamSut + ayToplamTahsilat; 
-        const araToplamBorc = ayToplamYem + ayToplamOdeme; 
+       const araToplamAlacak = ayToplamSut + ayToplamTahsilat;
+        const araToplamBorc = ayToplamYem + ayToplamOdeme;
         const cariAyBakiye = araToplamAlacak - araToplamBorc;
         const donemSonuBakiye = devredenBakiye + cariAyBakiye;
-	const cariAyBakiyeRenk = cariAyBakiye >= 0 ? 'green' : 'red';
-	const bakiyeRenk = donemSonuBakiye >= 0 ? 'green' : 'red';
-	const sonDurum = donemSonuBakiye >= 0 ? '(Cari Alacaklı)' : '(Cari Borçlu)';
-        
-      // YENİ VE KOMPAKT VERSİYON
-const row_style = `display:flex; justify-content: space-between; margin: 0; padding: 3px 0; border-bottom: 1px dotted #ccc;`;
-const total_row_style = `${row_style} font-weight: bold;`;
-        const final_balance_container_style = `margin-top: 10px; padding-top: 5px; border-top: 2px solid #555;`;
-        const final_balance_row_style = `display:flex; justify-content: space-between; font-weight: bold; margin: 12px 0; font-size: 1.1em;`;
-        
- // YENİ VE NİHAİ KODU BU ŞEKİLDE YAPIŞTIRIN
-const devredenBakiyeRenk = devredenBakiye >= 0 ? 'green' : 'red';
+        const cariAyBakiyeRenk = cariAyBakiye >= 0 ? 'green' : 'red';
+        const bakiyeRenk = donemSonuBakiye >= 0 ? 'green' : 'red';
+        const sonDurum = donemSonuBakiye >= 0 ? '(Cari Alacaklı)' : '(Cari Borçlu)';
+        const devredenBakiyeRenk = devredenBakiye >= 0 ? 'green' : 'red';
 
-let hesaplamaHTML = `
+        let hesaplamaHTML = `
 <div class="report-section-block final-calculation">
     <h5>DÖNEM SONU HESAPLAMASI</h5>
     <table class="report-table">
@@ -4681,8 +4673,8 @@ let hesaplamaHTML = `
                 <td style="text-align: right; color:green;">${formatCurrency(ayToplamSut)}</td>
             </tr>
             <tr>
-                <td>+ Cari Ay Yapılan Ödemeler:</td>
-                <td style="text-align: right; color:green;">${formatCurrency(ayToplamOdeme)}</td>
+                <td>+ Cari Ay Yapılan Tahsilatlar:</td>
+                <td style="text-align: right; color:green;">${formatCurrency(ayToplamTahsilat)}</td>
             </tr>
             <tr class="report-totals-row">
                 <td>Ara Toplam (Alacak):</td>
@@ -4697,8 +4689,8 @@ let hesaplamaHTML = `
                 <td style="text-align: right; color:red;">${formatCurrency(ayToplamYem)}</td>
             </tr>
             <tr>
-                <td>- Cari Ay Yapılan Tahsilatlar:</td>
-                <td style="text-align: right; color:red;">${formatCurrency(ayToplamTahsilat)}</td>
+                <td>- Cari Ay Yapılan Ödemeler:</td>
+                <td style="text-align: right; color:red;">${formatCurrency(ayToplamOdeme)}</td>
             </tr>
             <tr class="report-totals-row">
                 <td>Ara Toplam (Borç):</td>
