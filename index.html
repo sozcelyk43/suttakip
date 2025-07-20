@@ -857,6 +857,14 @@
     let isAppInitialized = false;
     const globalCache = new Map();
     const CACHE_TTL_SECONDS = 300;
+const transactionCache = {
+    sut_alimlari: [],
+    yem_alimlari: [],
+    yem_satislari: [],
+    odemeVeTahsilatlar: [],
+    stok_sayim_hareketleri: []
+};
+let isInitialDataLoaded = false;
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -907,19 +915,73 @@ document.getElementById('secim-mustahsil-merkezi-btn')?.addEventListener('click'
     window.location.href = 'mustahsil.html';
 });
 
+
+// Bu yeni fonksiyonu uygulamayiBaslat fonksiyonunun üzerine ekleyin
+
+async function loadAllDataIntoCache() {
+    if (isInitialDataLoaded) {
+        console.log("Veriler zaten belleğe yüklenmiş.");
+        return;
+    }
+
+    console.log("Tüm başlangıç verileri belleğe yükleniyor...");
+    // Kullanıcıya yükleme animasyonu göster (opsiyonel ama önerilir)
+    document.body.insertAdjacentHTML('beforeend', '<div id="loading-overlay" class="loading-overlay show"><div class="loader-spinner"></div><p>Veriler Yükleniyor...</p></div>');
+
+    try {
+        const collectionsToFetch = [
+            'sut_alimlari',
+            'yem_alimlari',
+            'yem_satislari',
+            'odemeVeTahsilatlar',
+            'stok_sayim_hareketleri',
+            'cariler',
+            'yemler'
+        ];
+
+        const promises = collectionsToFetch.map(colName => 
+            getDocs(query(collection(db, colName), where("sahipId", "==", sahipId)))
+        );
+
+        const snapshots = await Promise.all(promises);
+
+        // Global Map'leri doldur
+        window.cariDataMap = new Map();
+        snapshots[5].forEach(doc => window.cariDataMap.set(doc.id, doc.data()));
+
+        window.yemDataMap = new Map();
+        snapshots[6].forEach(doc => window.yemDataMap.set(doc.id, doc.data()));
+
+        // transactionCache'i doldur
+        transactionCache.sut_alimlari = snapshots[0].docs.map(doc => ({ id: doc.id, data: doc.data() }));
+        transactionCache.yem_alimlari = snapshots[1].docs.map(doc => ({ id: doc.id, data: doc.data() }));
+        transactionCache.yem_satislari = snapshots[2].docs.map(doc => ({ id: doc.id, data: doc.data() }));
+        transactionCache.odemeVeTahsilatlar = snapshots[3].docs.map(doc => ({ id: doc.id, data: doc.data() }));
+        transactionCache.stok_sayim_hareketleri = snapshots[4].docs.map(doc => ({ id: doc.id, data: doc.data() }));
+
+        isInitialDataLoaded = true;
+        console.log("Tüm veriler başarıyla belleğe yüklendi.");
+
+    } catch (error) {
+        console.error("Başlangıç verileri yüklenirken kritik hata:", error);
+        showToast("Uygulama başlatılamadı: Gerekli veriler yüklenemedi.", true);
+    } finally {
+        // Yükleme animasyonunu kaldır
+        document.getElementById('loading-overlay')?.remove();
+    }
+}
+
+
 async function uygulamayiBaslat() {
-    // --- GÜNCELLENMİŞ KOD BAŞLANGICI ---
-    // Modal seçim ekranını gizle ve ana arayüzü görünür yap
     document.getElementById('secim-modal-overlay').style.display = 'none';
     document.querySelector('.sidebar').style.visibility = 'visible';
     document.querySelector('.main-content').style.visibility = 'visible';
-    // --- GÜNCELLENMİŞ KOD SONU ---
 
     if (window.isAppInitialized) { return; }
     window.isAppInitialized = true;
     
     await getSettings();
-    await loadInitialData();
+    await loadAllDataIntoCache();
 
     const sidebarNav = document.getElementById('sidebarNav');
 document.getElementById('moduleSwitchSelect')?.addEventListener('change', function() {
@@ -1052,8 +1114,7 @@ document.getElementById('moduleSwitchSelect')?.addEventListener('change', functi
     }
 
     applyRolePermissions();
-    loadAndRenderAllData();
-    updateMonthlyStats();
+     updateMonthlyStats();
 
     sidebarNav.addEventListener('click', async function (event) {
         const link = event.target.closest('a.nav-link');
@@ -1301,28 +1362,6 @@ document.getElementById('moduleSwitchSelect')?.addEventListener('change', functi
     const dashboardLink = document.querySelector('#sidebarNav a[href="#dashboard"]');
     if (dashboardLink && !dashboardLink.classList.contains('active')) {dashboardLink.click();}}
 
-async function loadInitialData() {
-    try {
-        const carilerQuery = query(collection(db, 'cariler'), where("sahipId", "==", sahipId));
-        const yemlerQuery = query(collection(db, 'yemler'), where("sahipId", "==", sahipId));
-        const [carilerSnapshot, yemlerSnapshot] = await Promise.all([
-            getDocs(carilerQuery),
-            getDocs(yemlerQuery)
-        ]);
-        window.cariDataMap = new Map();
-        carilerSnapshot.forEach(doc => {
-            window.cariDataMap.set(doc.id, doc.data());
-        });
-        window.yemDataMap = new Map();
-        yemlerSnapshot.forEach(doc => {
-            window.yemDataMap.set(doc.id, doc.data());
-        });
-
-    } catch (error) {
-        console.error("Başlangıç verileri yüklenirken kritik hata:", error);
-        showToast("Uygulama başlatılamadı: Gerekli veriler yüklenemedi.", true);
-    }
-}
 
 async function loadAndRenderAllData() {
         try { await renderCariListesi(); } catch (e) { console.warn("Cari listesi yüklenemedi.", e); }
@@ -2020,51 +2059,42 @@ async function renderCariListesi() {
             limit(200)
         );
 
-        const hareketConstraints = [ where('sahipId','==',sahipId) ];
-        if (tarihFiltresi) hareketConstraints.push(where('tarih','<=',tarihFiltresi));
+        // VERİTABANI YERİNE DOĞRUDAN BELLEKTEN OKUMA
+        const allCariler = Array.from(window.cariDataMap.entries());
+        const allSut = transactionCache.sut_alimlari;
+        const allYemSatis = transactionCache.yem_satislari;
+        const allOdeme = transactionCache.odemeVeTahsilatlar;
+        const allYemAlim = transactionCache.yem_alimlari;
 
-        const sutQuery      = query(collection(db,'sut_alimlari'),       ...hareketConstraints);
-        const yemSatisQuery = query(collection(db,'yem_satislari'),      ...hareketConstraints);
-        const odemeQuery    = query(collection(db,'odemeVeTahsilatlar'), ...hareketConstraints);
-        const yemAlimQuery  = query(collection(db,'yem_alimlari'),       ...hareketConstraints);
-
-        const [
-            carilerSnapshot,
-            sutSnapshot,
-            yemSatisSnapshot,
-            odemeSnapshot,
-            yemAlimSnapshot
-        ] = await Promise.all([
-            getDocs(carilerQuery),
-            getDocs(sutQuery),
-            getDocs(yemSatisQuery),
-            getDocs(odemeQuery),
-            getDocs(yemAlimQuery)
-        ]);
-
+        // Tarih filtresini bellekteki verilere uygula
+        const sutSnapshot = tarihFiltresi ? allSut.filter(item => item.data.tarih <= tarihFiltresi) : allSut;
+        const yemSatisSnapshot = tarihFiltresi ? allYemSatis.filter(item => item.data.tarih <= tarihFiltresi) : allYemSatis;
+        const odemeSnapshot = tarihFiltresi ? allOdeme.filter(item => item.data.tarih <= tarihFiltresi) : allOdeme;
+        const yemAlimSnapshot = tarihFiltresi ? allYemAlim.filter(item => item.data.tarih <= tarihFiltresi) : allYemAlim;
+        
         const bakiyeMap = new Map();
-        carilerSnapshot.forEach(docSnap => {
-            bakiyeMap.set(docSnap.id, { data: docSnap.data(), borc: 0, alacak: 0 });
+        allCariler.forEach(([id, data]) => {
+            bakiyeMap.set(id, { data: data, borc: 0, alacak: 0 });
         });
 
-        sutSnapshot.forEach(d => {
-            const v = d.data();
+        sutSnapshot.forEach(item => {
+            const v = item.data;
             if (bakiyeMap.has(v.cariId)) bakiyeMap.get(v.cariId).alacak += v.toplamTutar || 0;
         });
-        yemAlimSnapshot.forEach(d => {
-            const v = d.data();
+        yemAlimSnapshot.forEach(item => {
+            const v = item.data;
             if (bakiyeMap.has(v.cariId)) bakiyeMap.get(v.cariId).alacak += v.toplamTutar || 0;
         });
-        yemSatisSnapshot.forEach(d => {
-            const v = d.data();
+        yemSatisSnapshot.forEach(item => {
+            const v = item.data;
             if (bakiyeMap.has(v.cariId)) bakiyeMap.get(v.cariId).borc += v.toplamTutar || 0;
         });
-        odemeSnapshot.forEach(d => {
-            const v = d.data();
+        odemeSnapshot.forEach(item => {
+            const v = item.data;
             if (bakiyeMap.has(v.cariId)) {
                 const entry = bakiyeMap.get(v.cariId);
-                if (v.islemTuru === 'odeme' || v.islemTuru === 'alacak') entry.alacak += v.tutar || 0;
-                else if (v.islemTuru === 'tahsilat' || v.islemTuru === 'borc') entry.borc += v.tutar || 0;
+                if (v.islemTuru === 'tahsilat' || v.islemTuru === 'alacak') entry.alacak += v.tutar || 0;
+                else if (v.islemTuru === 'odeme' || v.islemTuru === 'borc') entry.borc += v.tutar || 0;
             }
         });
 
@@ -3599,32 +3629,41 @@ async function generateNextCariKodu() {
         document.getElementById('cariKodu').value = '';
     }
 }
+
+// Mevcut deleteYemSatisi fonksiyonunu silip yerine bunu yapıştırın
+
 async function deleteYemSatisi(id) {
     showCustomConfirm("Bu yem satışını silmek istediğinizden emin misiniz? Bu işlem, satılan yemi stoğa geri ekleyecektir.", async () => {
-        const currentUser = auth.currentUser;
-        if (!currentUser) {
-            showToast("İşlem için lütfen giriş yapın.", true);
-            return;
-        }
-
         const satisRef = doc(db, 'yem_satislari', id);
-
         try {
-            const satisDoc = await getDoc(satisRef);
-            if (!satisDoc.exists()) {
-                throw new Error("Silinecek satış kaydı bulunamadı.");
-            }
-            const satisData = satisDoc.data();
+            // Önce bellekteki veriyi bul
+            const satisIndex = transactionCache.yem_satislari.findIndex(s => s.id === id);
+            if (satisIndex === -1) throw new Error("Silinecek satış kaydı bellekte bulunamadı.");
+            const satisData = transactionCache.yem_satislari[satisIndex].data;
+
             const yemRef = doc(db, 'yemler', satisData.yemId);
+            
+            // Veritabanı işlemlerini yap
             const batch = writeBatch(db);
             batch.delete(satisRef);
-            batch.update(yemRef, { 
-                stokMiktari: increment(satisData.miktar) 
-            });
+            batch.update(yemRef, { stokMiktari: increment(satisData.miktar) });
             await batch.commit();
+
+            // --- BELLEĞİ GÜNCELLEME ---
+            // 1. İşlemi bellekten sil
+            transactionCache.yem_satislari.splice(satisIndex, 1);
+            // 2. İlgili yemin stoğunu bellekte güncelle
+            if(window.yemDataMap.has(satisData.yemId)){
+                window.yemDataMap.get(satisData.yemId).stokMiktari += satisData.miktar;
+            }
+            // --- GÜNCELLEME SONU ---
+
             showToast("Yem satışı silindi ve stok güncellendi.");
+            
+            // Listeleri yeniden çiz (artık veritabanına gitmeyecek, bellekten anında çizecek)
             await renderYemSatisListesi();
             await renderYemStokListesi();
+
         } catch (error) { 
             console.error("Yem satışı silinirken hata:", error); 
             showToast("Hata: " + error.message, true); 
@@ -3633,7 +3672,8 @@ async function deleteYemSatisi(id) {
 }
 
         
-async function renderTopluSutGirisFormu() {
+async function renderTopluSutGirisFormu() 
+{
     const tarih = document.getElementById('topluGirisTarih').value;
     const kategori = document.getElementById('topluGirisKategori').value;
     const container = document.getElementById('topluSutGirisTablosuAlani');
@@ -3693,7 +3733,8 @@ async function renderTopluSutGirisFormu() {
     });
 }
 
-function sutMiktarGuncelle(cariId) {
+function sutMiktarGuncelle(cariId) 
+{
     const sabah = parseFloat(document.getElementById(`sabah-${cariId}`).value) || 0;
     const aksam = parseFloat(document.getElementById(`aksam-${cariId}`).value) || 0;
     const fiyat = parseFloat(document.getElementById(`fiyat-${cariId}`).value) || 0;
@@ -3702,7 +3743,8 @@ function sutMiktarGuncelle(cariId) {
     document.getElementById(`toplam-lt-${cariId}`).textContent = toplamLt.toFixed(2);
     document.getElementById(`toplam-tutar-${cariId}`).textContent = formatCurrency(toplamTutar);
 }
-async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
+async function handleTopluSutKaydet(cariId, cariAdi, tarih) 
+{
     const sabahInput = document.getElementById(`sabah-${cariId}`);
     const aksamInput = document.getElementById(`aksam-${cariId}`);
     const fiyatInput = document.getElementById(`fiyat-${cariId}`);
@@ -3777,7 +3819,8 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih) {
 }
 
 
-function calculateKarneTotals() {
+function calculateKarneTotals() 
+{
     let aksamGenelToplam = 0, sabahGenelToplam = 0;
     document.querySelectorAll('#sut-rapor-tablosu input.aksam').forEach(input => aksamGenelToplam += Number(input.value) || 0);
     document.querySelectorAll('#sut-rapor-tablosu input.sabah').forEach(input => sabahGenelToplam += Number(input.value) || 0);
@@ -3789,7 +3832,8 @@ function calculateKarneTotals() {
     if(genelToplamEl) genelToplamEl.textContent = (aksamGenelToplam + sabahGenelToplam).toFixed(2);
 }
 
-function hesaplaToplamTutar(miktarInputId, fiyatInputId, toplamInputId) {
+function hesaplaToplamTutar(miktarInputId, fiyatInputId, toplamInputId) 
+{
     const miktarInput = document.getElementById(miktarInputId);
     const fiyatInput = document.getElementById(fiyatInputId);
     const toplamInput = document.getElementById(toplamInputId);
@@ -3798,7 +3842,8 @@ function hesaplaToplamTutar(miktarInputId, fiyatInputId, toplamInputId) {
     toplamInput.value = formatCurrency(miktar * fiyat);
 }
 
-async function renderSutAlimGecmisi() {
+async function renderSutAlimGecmisi() 
+{
     const tarih = document.getElementById('topluGirisTarih').value;
     const gecmisTarihSpan = document.getElementById('gecmisTarihSpan');
     const header = document.getElementById('sutAlimGecmisiHeader');
@@ -3900,7 +3945,8 @@ async function renderSutAlimGecmisi() {
     });
 }
  
-async function deleteYemAlisi(id) {
+async function deleteYemAlisi(id) 
+{
     const currentUser = auth.currentUser;
     if (!currentUser) {
         showToast("Lütfen giriş yapın.", true);
@@ -3931,7 +3977,8 @@ async function deleteYemAlisi(id) {
     });
 }
 
-async function handleSutAlimRaporuOlustur(options) {
+async function handleSutAlimRaporuOlustur(options) 
+{
     toggleReportButtons('sutRaporu', false);
     
     const cariId = document.getElementById('sutRaporuTedarikciSecimi').value;
@@ -4092,7 +4139,8 @@ async function handleSutAlimRaporuOlustur(options) {
     }
 }
 
-async function exportSutRaporuToExcel() {
+async function exportSutRaporuToExcel() 
+{
     console.log("Özel Aylık Süt Raporu Excel dışa aktarma işlemi başlatıldı.");
     const ayYil = document.getElementById('sutRaporuAySecimi').value;
     const cariId = document.getElementById('sutRaporuTedarikciSecimi').value;
@@ -4165,7 +4213,8 @@ async function exportSutRaporuToExcel() {
         showToast("Excel dosyası oluşturulurken bir hata oluştu.", true);
     }
 }
-async function handleDinamikSutRaporu() {
+async function handleDinamikSutRaporu() 
+{
     const periodValue = document.getElementById('karneRaporuPeriyotSecimi').value;
     const kategori = document.getElementById('karneRaporuKategoriSecimi').value;
     const container = document.getElementById('dinamikRaporContainer');
@@ -4320,7 +4369,8 @@ async function handleDinamikSutRaporu() {
     }
 }
 
-async function handleYemPivotRaporu(reportType) {
+async function handleYemPivotRaporu(reportType) 
+{
     const raporAlani = document.getElementById('yemRaporuAlani');
     toggleReportButtons('yemRaporu', false);
     const ayYil = document.getElementById('yemRaporuAySecimi').value;
@@ -4509,11 +4559,9 @@ async function handleYemPivotRaporu(reportType) {
     }
 }
 
-// handleHesapOzetiRaporuOlustur fonksiyonunu bu blok ile tamamen değiştirin
 
-// Bu fonksiyonu bulun ve aşağıdaki blok ile tamamen değiştirin
-
-async function handleHesapOzetiRaporuOlustur() {
+async function handleHesapOzetiRaporuOlustur() 
+{
     toggleReportButtons('hesapOzeti', false);
     const cariId = document.getElementById('raporCariSecimi').value;
     const ayYil = document.getElementById('raporTarihAraligi').value;
@@ -4706,7 +4754,6 @@ async function handleHesapOzetiRaporuOlustur() {
         const bakiyeRenk = donemSonuBakiye >= 0 ? 'green' : 'red';
         const sonDurum = donemSonuBakiye >= 0 ? '(Cari Alacaklı)' : '(Cari Borçlu)';
 
-        // --- 3. GÖRÜNÜM DÜZELTMESİ: Renkli ve Detaylı Final Hesaplama Tablosu ---
         let hesaplamaHTML = `
         <div class="report-section-block final-calculation" style="margin-top:20px;">
             <h5>DÖNEM SONU HESAPLAMASI</h5>
@@ -4748,7 +4795,8 @@ async function handleHesapOzetiRaporuOlustur() {
     }
 }
 
-function toggleReportButtons(reportPrefix, show) {
+function toggleReportButtons(reportPrefix, show) 
+{
     const displayStyle = show ? 'inline-block' : 'none';
     const pdfBtn = document.getElementById(`${reportPrefix}PdfBtn`);
     const xlsxBtn = document.getElementById(`${reportPrefix}XlsxBtn`);
@@ -4759,7 +4807,8 @@ function toggleReportButtons(reportPrefix, show) {
     if (printBtn) printBtn.style.display = displayStyle;
 }
 
-async function addYemSatisRow() {
+async function addYemSatisRow() 
+{
     const container = document.getElementById('yemSatisSatirlari');
     const satirId = `satir-${Date.now()}`;
     const satirDiv = document.createElement('div');
@@ -4796,12 +4845,14 @@ async function addYemSatisRow() {
     return satirDiv;
 }
 
-function removeYemSatisRow(satirId) {
+function removeYemSatisRow(satirId) 
+{
     document.getElementById(satirId)?.remove();
     updateGenelToplam();
 }
 
-function updateSatisSatiri(element) {
+function updateSatisSatiri(element) 
+{
     const satir = element.closest('.yem-satis-satiri');
     const yemSelect = satir.querySelector('.yem-secimi');
     const miktarInput = satir.querySelector('.yem-miktari');
@@ -4819,7 +4870,8 @@ function updateSatisSatiri(element) {
     updateGenelToplam();
 }
 
-function updateGenelToplam() {
+function updateGenelToplam() 
+{
     let genelToplam = 0;
     document.querySelectorAll('.yem-satis-satiri .ara-toplam').forEach(input => {
         const value = parseFloat(input.value.replace(/[^0-9,-]+/g, "").replace(",", ".")) || 0;
@@ -4828,7 +4880,8 @@ function updateGenelToplam() {
     document.getElementById('genelToplamTutar').textContent = formatCurrency(genelToplam);
 }
 
-async function renderYemSatisListesi() {
+async function renderYemSatisListesi() 
+{
     const listBody = document.getElementById('yemSatisListesiBody');
     const currentUser = auth.currentUser;
     if (!currentUser) return;
@@ -4895,7 +4948,8 @@ async function renderYemSatisListesi() {
         listBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Liste yüklenirken bir hata oluştu.</td></tr>`;
     }
 }
-async function editYemSatisi(id) {
+async function editYemSatisi(id) 
+{
     try {
         const docRef = doc(db, 'yem_satislari', id);
         const docSnap = await getDoc(docRef);
@@ -4945,7 +4999,8 @@ async function editYemSatisi(id) {
     }
 }
 
-async function handleTopluYemSatisKaydet() {
+async function handleTopluYemSatisKaydet() 
+{
     const tarihInput = document.getElementById('topluSatisTarih');
     const cariInput = document.getElementById('topluSatisCari');
     const formTarih = tarihInput.value;
@@ -5032,7 +5087,8 @@ async function handleTopluYemSatisKaydet() {
     }
 }
 
-function resetTopluSatisFormu() {
+function resetTopluSatisFormu() 
+{
     editingYemSatisId = null; 
     document.getElementById('topluSatisCari').disabled = false;
     document.getElementById('topluSatisTarih').disabled = false;
@@ -5048,7 +5104,8 @@ function resetTopluSatisFormu() {
     if (iptalBtn) iptalBtn.style.display = 'none';
 }
 
-function exportTableToExcel(containerId, fileName = 'rapor') {
+function exportTableToExcel(containerId, fileName = 'rapor') 
+{
     const container = document.getElementById(containerId);
     if (!container) return showToast('Dışa aktarılacak alan bulunamadı.', true); 
     const table = container.querySelector('table');
@@ -5063,7 +5120,8 @@ function exportTableToExcel(containerId, fileName = 'rapor') {
     }
 }
 
-async function exportTableToPdf(containerId, fileName = 'rapor', buttonId) {
+async function exportTableToPdf(containerId, fileName = 'rapor', buttonId) 
+{
     const container = document.getElementById(containerId);
     if (!container || container.innerHTML.trim().length < 20) {
         return showToast('PDF oluşturmak için önce bir rapor oluşturun.', true);
@@ -5130,7 +5188,8 @@ async function exportTableToPdf(containerId, fileName = 'rapor', buttonId) {
     }
 }
 
-function handleYazdir(elementId, orientation = 'portrait') {
+function handleYazdir(elementId, orientation = 'portrait') 
+{
     const printElement = document.getElementById(elementId);
     if (!printElement) {
         console.error("Yazdırılacak alan bulunamadı:", elementId);
@@ -5181,6 +5240,7 @@ function handleYazdir(elementId, orientation = 'portrait') {
         setTimeout(() => { document.body.removeChild(iframe); }, 1000);
     }
 }
+
 
 </script>
 
