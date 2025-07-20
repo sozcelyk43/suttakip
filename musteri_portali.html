@@ -545,30 +545,53 @@
 
     async function handleHayvanKayitSubmit(event) {
         event.preventDefault();
-        const kupeNo = document.getElementById('yeni-hayvan-kupe').value;
+        const kupeNo = document.getElementById('yeni-hayvan-kupe').value.trim(); // .trim() ile boşlukları temizle
         const dogumTarihi = document.getElementById('yeni-hayvan-dogum-tarihi').value;
+        
         if (!kupeNo || !dogumTarihi) {
             showPortalMessage("Küpe Numarası ve Doğum Tarihi zorunludur.", "error");
             return;
         }
 
+        // --- YENİ EKLENEN KONTROL MEKANİZMASI BAŞLANGICI ---
         try {
             const hayvanlarRef = collection(db, 'hayvanlar');
+            
+            // Bu sahip için bu küpe numarasının zaten var olup olmadığını kontrol et
+            const q = query(hayvanlarRef, 
+                            where('kupeNo', '==', kupeNo), 
+                            where('sahipId', '==', userSahipId), 
+                            limit(1));
+            
+            const querySnapshot = await getDocs(q);
+
+            // Eğer querySnapshot boş değilse, yani kayıt varsa, hata ver ve dur.
+            if (!querySnapshot.empty) {
+                showPortalMessage(`'${kupeNo}' küpe numarası zaten sistemde kayıtlı. Lütfen kontrol ediniz.`, "error");
+                return; // Fonksiyonu burada sonlandır, kaydetme.
+            }
+            // --- YENİ EKLENEN KONTROL MEKANİZMASI SONU ---
+
+
+            // Kontrolden geçtiyse, yani bu küpe numarası mevcut değilse, hayvanı kaydet
             await addDoc(hayvanlarRef, {
-    kupeNo: kupeNo,
-    irk: document.getElementById('yeni-hayvan-irk').value,
-    cinsiyet: document.getElementById('yeni-hayvan-cinsiyet').value,
-    rumuz: document.getElementById('yeni-hayvan-rumuz').value || null, // EKLENDİ
-    dogumTarihi: dogumTarihi,
-    gebəlikDurumu: document.getElementById('yeni-hayvan-gebelik-durumu').value,
-    sahipId: userSahipId,
-    cariId: userCariId
-});
+                kupeNo: kupeNo,
+                irk: document.getElementById('yeni-hayvan-irk').value,
+                cinsiyet: document.getElementById('yeni-hayvan-cinsiyet').value,
+                rumuz: document.getElementById('yeni-hayvan-rumuz').value || null,
+                dogumTarihi: dogumTarihi,
+                gebəlikDurumu: document.getElementById('yeni-hayvan-gebelik-durumu').value,
+                sahipId: userSahipId,
+                cariId: userCariId
+            });
+            
             showPortalMessage("Hayvan başarıyla kaydedildi.", "success");
             event.target.reset();
             refreshAllData();
+
         } catch (error) {
-            showPortalMessage("Hayvan kaydedilirken hata oluştu.", "error");
+            console.error("Hayvan kaydedilirken hata:", error);
+            showPortalMessage("Hayvan kaydedilirken bir hata oluştu.", "error");
         }
     }
 
