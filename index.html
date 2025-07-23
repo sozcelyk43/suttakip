@@ -939,9 +939,19 @@ async function loadAllDataIntoCache() {
             'yemler'
         ];
 
-        const promises = collectionsToFetch.map(colName => 
-            getDocs(query(collection(db, colName), where("sahipId", "==", sahipId)))
-        );
+       const now = new Date();
+        const sixMonthsAgo = new Date(now.setMonth(now.getMonth() - 6));
+        const sixMonthsAgoStr = `${sixMonthsAgo.getFullYear()}-${String(sixMonthsAgo.getMonth() + 1).padStart(2, '0')}-01`;
+
+        const promises = collectionsToFetch.map(colName => {
+            const baseQuery = query(collection(db, colName), where("sahipId", "==", sahipId));
+            // Sadece işlem koleksiyonlarına tarih filtresi uygula
+            if (['sut_alimlari', 'yem_alimlari', 'yem_satislari', 'odemeVeTahsilatlar', 'stok_sayim_hareketleri'].includes(colName)) {
+                return getDocs(query(baseQuery, where('tarih', '>=', sixMonthsAgoStr)));
+            }
+            // cariler ve yemler için tümünü getir
+            return getDocs(baseQuery);
+        });
 
         const snapshots = await Promise.all(promises);
 
@@ -2064,38 +2074,42 @@ async function renderCariListesi() {
             limit(200)
         );
 
-        // VERİTABANI YERİNE DOĞRUDAN BELLEKTEN OKUMA
-        const allCariler = Array.from(window.cariDataMap.entries());
-        const allSut = transactionCache.sut_alimlari;
-        const allYemSatis = transactionCache.yem_satislari;
-        const allOdeme = transactionCache.odemeVeTahsilatlar;
-        const allYemAlim = transactionCache.yem_alimlari;
+const cariConstraints = [ where('sahipId', '==', sahipId) ];
+        if (kategori) cariConstraints.push(where('kategori','==',kategori));
+        if (durum)    cariConstraints.push(where('durum','==',durum));
+        if (grup)     cariConstraints.push(where('cariGrup','array-contains',grup));
+        const carilerQuery = query(collection(db, 'cariler'), ...cariConstraints, orderBy('rotaSirasi','asc'), limit(200));
 
-        // Tarih filtresini bellekteki verilere uygula
-        const sutSnapshot = tarihFiltresi ? allSut.filter(item => item.data.tarih <= tarihFiltresi) : allSut;
-        const yemSatisSnapshot = tarihFiltresi ? allYemSatis.filter(item => item.data.tarih <= tarihFiltresi) : allYemSatis;
-        const odemeSnapshot = tarihFiltresi ? allOdeme.filter(item => item.data.tarih <= tarihFiltresi) : allOdeme;
-        const yemAlimSnapshot = tarihFiltresi ? allYemAlim.filter(item => item.data.tarih <= tarihFiltresi) : allYemAlim;
-        
+        const hareketConstraints = [ where('sahipId','==',sahipId) ];
+        if (tarihFiltresi) hareketConstraints.push(where('tarih','<=',tarihFiltresi));
+        const sutQuery      = query(collection(db,'sut_alimlari'),       ...hareketConstraints);
+        const yemSatisQuery = query(collection(db,'yem_satislari'),      ...hareketConstraints);
+        const odemeQuery    = query(collection(db,'odemeVeTahsilatlar'), ...hareketConstraints);
+        const yemAlimQuery  = query(collection(db,'yem_alimlari'),       ...hareketConstraints);
+
+        const [ carilerSnapshot, sutSnapshot, yemSatisSnapshot, odemeSnapshot, yemAlimSnapshot ] = await Promise.all([
+            getDocs(carilerQuery), getDocs(sutQuery), getDocs(yemSatisQuery), getDocs(odemeQuery), getDocs(yemAlimQuery)
+        ]);
+
         const bakiyeMap = new Map();
-        allCariler.forEach(([id, data]) => {
-            bakiyeMap.set(id, { data: data, borc: 0, alacak: 0 });
+        carilerSnapshot.forEach(docSnap => {
+            bakiyeMap.set(docSnap.id, { data: docSnap.data(), borc: 0, alacak: 0 });
         });
 
-        sutSnapshot.forEach(item => {
-            const v = item.data;
+        sutSnapshot.forEach(d => {
+            const v = d.data();
             if (bakiyeMap.has(v.cariId)) bakiyeMap.get(v.cariId).alacak += v.toplamTutar || 0;
         });
-        yemAlimSnapshot.forEach(item => {
-            const v = item.data;
+        yemAlimSnapshot.forEach(d => {
+            const v = d.data();
             if (bakiyeMap.has(v.cariId)) bakiyeMap.get(v.cariId).alacak += v.toplamTutar || 0;
         });
-        yemSatisSnapshot.forEach(item => {
-            const v = item.data;
+        yemSatisSnapshot.forEach(d => {
+            const v = d.data();
             if (bakiyeMap.has(v.cariId)) bakiyeMap.get(v.cariId).borc += v.toplamTutar || 0;
         });
-        odemeSnapshot.forEach(item => {
-            const v = item.data;
+        odemeSnapshot.forEach(d => {
+            const v = d.data();
             if (bakiyeMap.has(v.cariId)) {
                 const entry = bakiyeMap.get(v.cariId);
                 if (v.islemTuru === 'tahsilat' || v.islemTuru === 'alacak') entry.alacak += v.tutar || 0;
