@@ -2066,19 +2066,7 @@ async function renderCariListesi() {
         if (kategori) cariConstraints.push(where('kategori','==',kategori));
         if (durum)    cariConstraints.push(where('durum','==',durum));
         if (grup)     cariConstraints.push(where('cariGrup','array-contains',grup));
-
-        const carilerQuery = query(
-            collection(db, 'cariler'),
-            ...cariConstraints,
-            orderBy('rotaSirasi','asc'),
-            limit(200)
-        );
-
-const cariConstraints = [ where('sahipId', '==', sahipId) ];
-        if (kategori) cariConstraints.push(where('kategori','==',kategori));
-        if (durum)    cariConstraints.push(where('durum','==',durum));
-        if (grup)     cariConstraints.push(where('cariGrup','array-contains',grup));
-        const carilerQuery = query(collection(db, 'cariler'), ...cariConstraints, orderBy('rotaSirasi','asc'), limit(200));
+        const carilerQuery = query(collection(db, 'cariler'),...cariConstraints,orderBy('rotaSirasi','asc'),limit(200));
 
         const hareketConstraints = [ where('sahipId','==',sahipId) ];
         if (tarihFiltresi) hareketConstraints.push(where('tarih','<=',tarihFiltresi));
