@@ -1194,20 +1194,25 @@ document.getElementById('moduleSwitchSelect')?.addEventListener('change', functi
             }
         }
         
-        if (targetId === 'sut-alim-raporu') {
+      if (targetId === 'sut-alim-raporu') {
             populateCariSelect(document.getElementById('sutRaporuTedarikciSecimi'), 'üretici');
             populateCariKategoriSelect(document.getElementById('sutRaporuKategoriSecimi'), "Tümü");
-            // --- GÜNCELLENEN KISIM BAŞLANGICI ---
             const baslangicTarihiInput = document.getElementById('sutRaporuBaslangicTarihi');
             const bitisTarihiInput = document.getElementById('sutRaporuBitisTarihi');
+            
+            // Timezone sorununu çözmek için YYYY-MM-DD formatını yerel saate göre manuel oluşturan fonksiyon
+            const formatForInput = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+
             const now = new Date();
             const ayinIlkGunu = new Date(now.getFullYear(), now.getMonth(), 1);
-            const ayinSonGunu = new Date(now.getFullYear(), now.getMonth() + 1, 0); // Ayın son gününü bulur
-            const formatForInput = (date) => date.toISOString().split('T')[0];
             
             baslangicTarihiInput.value = formatForInput(ayinIlkGunu);
-            bitisTarihiInput.value = formatForInput(ayinSonGunu);
-            // --- GÜNCELLENEN KISIM SONU ---
+            bitisTarihiInput.value = formatForInput(now); // Bitiş tarihi olarak "bugün" ayarlandı
         }
         
         if (targetId === 'aylik-yem-raporu') {
@@ -4601,12 +4606,11 @@ async function handleHesapOzetiRaporuOlustur()
             const devirTarihiObj = new Date(intYear, intMonth - 1, 0);
             const devirTarihiStr = `${devirTarihiObj.getFullYear()}-${String(devirTarihiObj.getMonth() + 1).padStart(2, '0')}-${String(devirTarihiObj.getDate()).padStart(2, '0')}`;
             const devirQuery = (collectionName) => getDocs(query(collection(db, collectionName), where('sahipId', '==', sahipId), where('cariId', '==', cariId), where('tarih', '<=', devirTarihiStr)));
-            const [devirSut, devirYemSatis, devirOdeme, devirYemAlis] = await Promise.all([
-                devirQuery('sut_alimlari'), devirQuery('yem_satislari'), devirQuery('odemeVeTahsilatlar'), devirQuery('yem_alimlari')
+            const [devirSut, devirYemSatis, devirOdeme] = await Promise.all([
+                devirQuery('sut_alimlari'), devirQuery('yem_satislari'), devirQuery('odemeVeTahsilatlar')
             ]);
             let devredenAlacak = 0, devredenBorc = 0;
             devirSut.forEach(d => devredenAlacak += d.data().toplamTutar || 0);
-            devirYemAlis.forEach(d => devredenAlacak += d.data().toplamTutar || 0);
             devirYemSatis.forEach(d => devredenBorc += d.data().toplamTutar || 0);
             devirOdeme.forEach(d => {
                 const data = d.data();
@@ -4617,11 +4621,11 @@ async function handleHesapOzetiRaporuOlustur()
         }
         
         const devir_row_style = `display: flex; justify-content: space-between; font-weight: bold; padding: 8px; border: 1px solid #ccc; background-color: #f9f9f9; border-radius: 5px;`;
-        const devirHTML = `<div class="report-section-block"><p style="${devir_row_style}"><span>Önceki Dönemden Devir</span><span>${formatCurrency(devredenBakiye)} ${devredenBakiye >= 0 ? '(Cari Alacaklı)' : '(Cari Borçlu)'}</span></p></div>`;
+        const devirHTML = `<div class="report-section-block"><p style="${devir_row_style}"><span>Önceki Aydan Devir</span><span>${formatCurrency(devredenBakiye)} ${devredenBakiye >= 0 ? '(Cari Alacaklı)' : '(Cari Borçlu)'}</span></p></div>`;
 
         const ayIciQuery = (collectionName) => getDocs(query(collection(db, collectionName), where('sahipId', '==', sahipId), where('cariId', '==', cariId), where('tarih', '>=', startDate), where('tarih', '<=', endDate)));
-        const [aySut, ayYemSatis, ayOdeme, ayYemAlis, yemlerSnapshot] = await Promise.all([
-            ayIciQuery('sut_alimlari'), ayIciQuery('yem_satislari'), ayIciQuery('odemeVeTahsilatlar'), ayIciQuery('yem_alimlari'),
+        const [aySut, ayYemSatis, ayOdeme, yemlerSnapshot] = await Promise.all([
+            ayIciQuery('sut_alimlari'), ayIciQuery('yem_satislari'), ayIciQuery('odemeVeTahsilatlar'),
             getDocs(query(collection(db, 'yemler'), where('sahipId', '==', sahipId)))
         ]);
         
@@ -4657,32 +4661,6 @@ async function handleHesapOzetiRaporuOlustur()
         }
         sutAlimlariHTML += '</div>';
 
-        // --- 2. GÖRÜNÜM DÜZELTMESİ: Yem Alışları için Toplam Miktar ---
-        let ayToplamYemAlis = 0;
-        let yemAlimlariHTML = '<div class="report-section-block"><h5>Cari Ay Yem Alışları (Müşteriden)</h5>';
-        if (ayYemAlis.empty) {
-            yemAlimlariHTML += '<p>Bu ay müşteriden yem alışı yapılmamış.</p>';
-        } else {
-            yemAlimlariHTML += `<table class="report-table"><thead><tr><th>Yem Adı</th><th>Miktar</th><th>Ort. Birim Fiyat</th><th>Tutar</th></tr></thead><tbody>`;
-            const yemAlisGruplari = {};
-            let toplamMiktarAlis = 0;
-            ayYemAlis.forEach(doc => {
-                const alim = doc.data();
-                if (!yemAlisGruplari[alim.yemId]) yemAlisGruplari[alim.yemId] = { ad: yemMap.get(alim.yemId)?.ad || 'Bilinmeyen', miktar: 0, tutar: 0 };
-                yemAlisGruplari[alim.yemId].miktar += alim.miktar || 0;
-                yemAlisGruplari[alim.yemId].tutar += alim.toplamTutar || 0;
-                ayToplamYemAlis += alim.toplamTutar || 0;
-            });
-            Object.values(yemAlisGruplari).forEach(grup => {
-                toplamMiktarAlis += grup.miktar;
-                const ortBirimFiyat = grup.miktar > 0 ? (grup.tutar / grup.miktar) : 0;
-                yemAlimlariHTML += `<tr><td>${grup.ad}</td><td>${grup.miktar}</td><td>${formatCurrency(ortBirimFiyat)}</td><td>${formatCurrency(grup.tutar)}</td></tr>`;
-            });
-            yemAlimlariHTML += `<tr class="report-totals-row"><td><strong>TOPLAM</strong></td><td><strong>${toplamMiktarAlis}</strong></td><td></td><td><strong>${formatCurrency(ayToplamYemAlis)}</strong></td></tr></tbody></table>`;
-        }
-        yemAlimlariHTML += '</div>';
-
-        // --- 2. GÖRÜNÜM DÜZELTMESİ: Yem Satışları için Toplam Miktar ---
         let ayToplamYem = 0;
         let yemSatislariHTML = '<div class="report-section-block"><h5>Cari Ay Yem Satışları</h5>';
         if (ayYemSatis.empty) {
@@ -4739,7 +4717,7 @@ async function handleHesapOzetiRaporuOlustur()
         }
         tahsilatlarHTML += '</div>';
         
-        const cariAyAlacaklar = ayToplamSut + ayToplamYemAlis + ayToplamTahsilat;
+	const cariAyAlacaklar = ayToplamSut + ayToplamTahsilat;        
         const cariAyBorclar = ayToplamYem + ayToplamOdeme;
         const cariAyBakiye = cariAyAlacaklar - cariAyBorclar;
         const donemSonuBakiye = devredenBakiye + cariAyBakiye;
@@ -4759,7 +4737,7 @@ async function handleHesapOzetiRaporuOlustur()
             <h5>DÖNEM SONU HESAPLAMASI</h5>
             <table class="report-table">
                 <tbody>
-                    <tr><td>Önceki Dönemden Devir:</td><td style="text-align: right;">${formatCurrency(devredenBakiye)}</td></tr>
+                    <tr><td>Önceki Aydan Devir:</td><td style="text-align: right;">${formatCurrency(devredenBakiye)}</td></tr>
                     <tr><td colspan="2" style="padding:4px;"></td></tr>
 
                     <tr style="color:green;"><td>+ Cari Ay Süt Alımları:</td><td style="text-align: right;">${formatCurrency(ayToplamSut)}</td></tr>
@@ -4783,7 +4761,7 @@ async function handleHesapOzetiRaporuOlustur()
             </table>
         </div>`;
             
-        const reportHTML = devirHTML + sutAlimlariHTML + yemAlimlariHTML + yemSatislariHTML + odemelerHTML + tahsilatlarHTML + hesaplamaHTML;
+        const reportHTML = devirHTML + sutAlimlariHTML + yemSatislariHTML + odemelerHTML + tahsilatlarHTML + hesaplamaHTML;
 
         raporDetayAlani.innerHTML = reportHTML;
         document.getElementById('hesap-ozeti-export-area').innerHTML = reportHTML;
