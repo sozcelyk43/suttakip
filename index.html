@@ -857,6 +857,7 @@
     let isAppInitialized = false;
     const globalCache = new Map();
     const CACHE_TTL_SECONDS = 300;
+
 const transactionCache = {
     sut_alimlari: [],
     yem_alimlari: [],
@@ -864,6 +865,7 @@ const transactionCache = {
     odemeVeTahsilatlar: [],
     stok_sayim_hareketleri: []
 };
+let fullHistoryPromise = null; // Arka plan yüklemesini takip etmek için
 let isInitialDataLoaded = false;
 
     if ('serviceWorker' in navigator) {
@@ -916,68 +918,62 @@ document.getElementById('secim-mustahsil-merkezi-btn')?.addEventListener('click'
 });
 
 
-// Bu yeni fonksiyonu uygulamayiBaslat fonksiyonunun üzerine ekleyin
+// Bu iki yeni fonksiyonu eskisinin yerine yapıştırın
 
-async function loadAllDataIntoCache() {
-    if (isInitialDataLoaded) {
-        console.log("Veriler zaten belleğe yüklenmiş.");
-        return;
-    }
+// 1. Sadece hızlı ve temel verileri yükleyen fonksiyon
+async function loadInitialEssentialData() {
+    if (isInitialDataLoaded) return;
+    showToast("Önemli veriler yükleniyor...");
 
-    console.log("Tüm başlangıç verileri belleğe yükleniyor...");
-    // Kullanıcıya yükleme animasyonu göster (opsiyonel ama önerilir)
-    document.body.insertAdjacentHTML('beforeend', '<div id="loading-overlay" class="loading-overlay show"><div class="loader-spinner"></div><p>Veriler Yükleniyor...</p></div>');
+    console.log("Aşama 1: Hızlı başlangıç verileri yükleniyor...");
+    const now = new Date();
+    const sixMonthsAgo = new Date(now.setMonth(now.getMonth() - 6));
+    const sixMonthsAgoStr = `${sixMonthsAgo.getFullYear()}-${String(sixMonthsAgo.getMonth() + 1).padStart(2, '0')}-01`;
 
-    try {
-        const collectionsToFetch = [
-            'sut_alimlari',
-            'yem_alimlari',
-            'yem_satislari',
-            'odemeVeTahsilatlar',
-            'stok_sayim_hareketleri',
-            'cariler',
-            'yemler'
-        ];
-
-       const now = new Date();
-        const sixMonthsAgo = new Date(now.setMonth(now.getMonth() - 6));
-        const sixMonthsAgoStr = `${sixMonthsAgo.getFullYear()}-${String(sixMonthsAgo.getMonth() + 1).padStart(2, '0')}-01`;
-
-        const promises = collectionsToFetch.map(colName => {
-            const baseQuery = query(collection(db, colName), where("sahipId", "==", sahipId));
-            // Sadece işlem koleksiyonlarına tarih filtresi uygula
-            if (['sut_alimlari', 'yem_alimlari', 'yem_satislari', 'odemeVeTahsilatlar', 'stok_sayim_hareketleri'].includes(colName)) {
-                return getDocs(query(baseQuery, where('tarih', '>=', sixMonthsAgoStr)));
-            }
-            // cariler ve yemler için tümünü getir
+    const collectionsToFetch = ['cariler', 'yemler', 'sut_alimlari', 'yem_satislari', 'odemeVeTahsilatlar'];
+    const promises = collectionsToFetch.map(colName => {
+        const baseQuery = query(collection(db, colName), where("sahipId", "==", sahipId));
+        if (['cariler', 'yemler'].includes(colName)) {
             return getDocs(baseQuery);
-        });
+        }
+        return getDocs(query(baseQuery, where('tarih', '>=', sixMonthsAgoStr)));
+    });
 
+    const snapshots = await Promise.all(promises);
+    window.cariDataMap = new Map(snapshots[0].docs.map(doc => [doc.id, doc.data()]));
+    window.yemDataMap = new Map(snapshots[1].docs.map(doc => [doc.id, doc.data()]));
+    transactionCache.sut_alimlari = snapshots[2].docs.map(doc => ({ id: doc.id, data: doc.data() }));
+    transactionCache.yem_satislari = snapshots[3].docs.map(doc => ({ id: doc.id, data: doc.data() }));
+    transactionCache.odemeVeTahsilatlar = snapshots[4].docs.map(doc => ({ id: doc.id, data: doc.data() }));
+    
+    isInitialDataLoaded = true;
+    console.log("Aşama 1 tamamlandı. Uygulama kullanıma hazır.");
+    showToast("Uygulama hazır! Eski veriler arka planda senkronize ediliyor...", false, 5000);
+}
+
+// 2. Geri kalan tüm eski verileri arka planda sessizce yükleyen fonksiyon
+async function loadFullHistoryInBackground() {
+    console.log("Aşama 2: Tüm geçmiş veriler arka planda yükleniyor...");
+    
+    try {
+        const collectionsToFetch = ['sut_alimlari', 'yem_alimlari', 'yem_satislari', 'odemeVeTahsilatlar', 'stok_sayim_hareketleri'];
+        const promises = collectionsToFetch.map(colName => 
+            getDocs(query(collection(db, colName), where("sahipId", "==", sahipId)))
+        );
         const snapshots = await Promise.all(promises);
 
-        // Global Map'leri doldur
-        window.cariDataMap = new Map();
-        snapshots[5].forEach(doc => window.cariDataMap.set(doc.id, doc.data()));
-
-        window.yemDataMap = new Map();
-        snapshots[6].forEach(doc => window.yemDataMap.set(doc.id, doc.data()));
-
-        // transactionCache'i doldur
+        // Gelen verileri bellektekilerle birleştir (daha verimli hale getirilebilir ama bu en basit yöntem)
         transactionCache.sut_alimlari = snapshots[0].docs.map(doc => ({ id: doc.id, data: doc.data() }));
         transactionCache.yem_alimlari = snapshots[1].docs.map(doc => ({ id: doc.id, data: doc.data() }));
         transactionCache.yem_satislari = snapshots[2].docs.map(doc => ({ id: doc.id, data: doc.data() }));
         transactionCache.odemeVeTahsilatlar = snapshots[3].docs.map(doc => ({ id: doc.id, data: doc.data() }));
         transactionCache.stok_sayim_hareketleri = snapshots[4].docs.map(doc => ({ id: doc.id, data: doc.data() }));
 
-        isInitialDataLoaded = true;
-        console.log("Tüm veriler başarıyla belleğe yüklendi.");
-
+        console.log("Aşama 2 tamamlandı. Tüm veriler artık bellekte.");
+        showToast("Tüm veriler senkronize edildi.", false, 3000);
     } catch (error) {
-        console.error("Başlangıç verileri yüklenirken kritik hata:", error);
-        showToast("Uygulama başlatılamadı: Gerekli veriler yüklenemedi.", true);
-    } finally {
-        // Yükleme animasyonunu kaldır
-        document.getElementById('loading-overlay')?.remove();
+        console.error("Tüm geçmiş veriler yüklenirken hata oluştu:", error);
+        showToast("Eski veriler yüklenirken bir hata oluştu.", true);
     }
 }
 
@@ -991,7 +987,9 @@ async function uygulamayiBaslat() {
     window.isAppInitialized = true;
     
     await getSettings();
-    await loadAllDataIntoCache();
+    await loadInitialEssentialData();
+    fullHistoryPromise = loadFullHistoryInBackground();
+
 
     const sidebarNav = document.getElementById('sidebarNav');
 document.getElementById('moduleSwitchSelect')?.addEventListener('change', function() {
@@ -1342,7 +1340,8 @@ document.getElementById('moduleSwitchSelect')?.addEventListener('change', functi
         });
         sutRaporuCariAramaInput.addEventListener('blur', function() { setTimeout(() => { suggestionsBox.style.display = 'none'; }, 200); });
     }
-    
+    document.getElementById('logoutButton').addEventListener('click', handleLogout);
+    document.getElementById('cariForm').addEventListener('submit', handleCariKaydet);
     document.getElementById('raporOlusturBtn')?.addEventListener('click', handleHesapOzetiRaporuOlustur);
     document.getElementById('sutRaporuOlusturBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: false, kategori: false}));
     document.getElementById('sutRaporuTumunuGosterBtn')?.addEventListener('click', () => handleSutAlimRaporuOlustur({tumu: true, kategori: false}));
@@ -2034,6 +2033,14 @@ async function handleCariKaydet(event) {
 
 
 async function renderCariListesi() {
+
+if (fullHistoryPromise) {
+        showToast("Tüm carilerin bakiyeleri hesaplanıyor, lütfen bekleyin...");
+        await fullHistoryPromise;
+        showToast("Hesaplama tamamlandı.", false, 2000);
+    }
+
+
     const cariListesiBody     = document.getElementById('cariListesiBody');
     const cariListesiFooter   = document.getElementById('cariListesiFooter');
     const tarihFiltresiEl     = document.getElementById('cariTarihFiltresi');
