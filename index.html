@@ -1264,6 +1264,7 @@ document.getElementById('moduleSwitchSelect')?.addEventListener('change', functi
     if(kullaniciForm) kullaniciForm.addEventListener('submit', handleKullaniciKaydet);
     sifreDegistirForm.addEventListener('submit', handleSifreDegistir);
     if(sutDuzenleForm) sutDuzenleForm.addEventListener('submit', handleSutAlimiGuncelle);
+    document.getElementById('tumSatislariKaydetBtn')?.addEventListener('click', handleTopluYemSatisKaydet);
     if(cariFormTemizleBtn) cariFormTemizleBtn.addEventListener('click', resetCariForm);
     if(yemTanimFormTemizleBtn) yemTanimFormTemizleBtn.addEventListener('click', resetYemTanimForm);
     if(yemAlisFormTemizleBtn) yemAlisFormTemizleBtn.addEventListener('click', resetYemAlisForm);
