@@ -884,23 +884,34 @@ onAuthStateChanged(auth, async (user) => {
             const userDocRef = doc(db, 'kullanicilar', user.uid);
             const userDocSnap = await getDoc(userDocRef);
 
-            if (userDocSnap.exists()) {
-                const userData = userDocSnap.data();
-                currentUserRole = userData.rol;
-                sahipId = userData.sahipId || user.uid;
+            if (!userDocSnap.exists()) {
+                throw new Error("Kullanıcı profili veritabanında bulunamadı.");
+            }
 
-                if (currentUserRole === 'admin') {
-                    if (sessionStorage.getItem('panelSecildi')) {
-                        uygulamayiBaslat();
-                    } else {
-                        document.getElementById('secim-modal-overlay').classList.add('show');
-                    }
+            const userData = userDocSnap.data();
+            currentUserRole = userData.rol;
+            sahipId = userData.sahipId || user.uid;
+
+            if (!sahipId) {
+                throw new Error("Kritik kullanıcı kimliği (sahipId) alınamadı. Lütfen tekrar giriş yapın.");
+            }
+
+            if (currentUserRole === 'admin') {
+                if (sessionStorage.getItem('panelSecildi')) {
+                    uygulamayiBaslat();
                 } else {
-                    const targetPage = currentUserRole === 'calisan' ? 'hizli-giris.html' : 'musteri_portali.html';
-                    window.location.href = targetPage;
+                    document.getElementById('secim-modal-overlay').classList.add('show');
                 }
-            } else { handleLogout(); }
-        } catch (error) { handleLogout(); }
+            } else {
+                const targetPage = currentUserRole === 'calisan' ? 'hizli-giris.html' : 'musteri_portali.html';
+                window.location.href = targetPage;
+            }
+
+        } catch (error) {
+            console.error("Giriş sırasında kritik hata:", error);
+            showToast(`Giriş başlatılamadı: ${error.message}. Lütfen sayfayı yenileyin veya tekrar giriş yapın.`, true);
+
+        }
     } else {
         window.location.href = 'login.html';
     }
@@ -1265,6 +1276,8 @@ document.getElementById('moduleSwitchSelect')?.addEventListener('change', functi
     sifreDegistirForm.addEventListener('submit', handleSifreDegistir);
     if(sutDuzenleForm) sutDuzenleForm.addEventListener('submit', handleSutAlimiGuncelle);
     document.getElementById('tumSatislariKaydetBtn')?.addEventListener('click', handleTopluYemSatisKaydet);
+
+
     if(cariFormTemizleBtn) cariFormTemizleBtn.addEventListener('click', resetCariForm);
     if(yemTanimFormTemizleBtn) yemTanimFormTemizleBtn.addEventListener('click', resetYemTanimForm);
     if(yemAlisFormTemizleBtn) yemAlisFormTemizleBtn.addEventListener('click', resetYemAlisForm);
