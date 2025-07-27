@@ -226,6 +226,11 @@
                 <option value="Boş" selected>Boş</option>
                 <option value="Gebe">Gebe</option>
             </select>
+         </div>
+
+        <div class="form-group" id="yeni-hayvan-tohumlama-tarihi-container" style="display: none;">
+            <label for="yeni-hayvan-tohumlama-tarihi">Son Tohumlama Tarihi (Gebe ise)</label>
+            <input type="date" id="yeni-hayvan-tohumlama-tarihi" class="form-control">
         </div>
         <button type="submit" class="btn">Hayvanı Kaydet</button>
     </form>
@@ -465,7 +470,14 @@
         document.getElementById('yeniHayvanBtn').addEventListener('click', () => showSection(yeniHayvanSection));
         document.getElementById('yeniTohumlamaBtn').addEventListener('click', () => showSection(yeniTohumlamaSection));
         document.getElementById('yeniDogumBtn').addEventListener('click', () => showSection(yeniDogumSection));
-        
+        document.getElementById('yeni-hayvan-gebelik-durumu').addEventListener('change', function() {
+    const tohumlamaTarihiContainer = document.getElementById('yeni-hayvan-tohumlama-tarihi-container');
+    if (this.value === 'Gebe') {
+        tohumlamaTarihiContainer.style.display = 'block';
+    } else {
+        tohumlamaTarihiContainer.style.display = 'none';
+    }
+});
         document.getElementById('raporGosterBtn').addEventListener('click', () => {
             showSection(raporlarSection);
             const ayYil = `${document.getElementById('yilFiltresi').value}-${document.getElementById('ayFiltresi').value}`;
@@ -544,56 +556,68 @@
     }
 
     async function handleHayvanKayitSubmit(event) {
-        event.preventDefault();
-        const kupeNo = document.getElementById('yeni-hayvan-kupe').value.trim(); // .trim() ile boşlukları temizle
-        const dogumTarihi = document.getElementById('yeni-hayvan-dogum-tarihi').value;
-        
-        if (!kupeNo || !dogumTarihi) {
-            showPortalMessage("Küpe Numarası ve Doğum Tarihi zorunludur.", "error");
+    event.preventDefault();
+    const kupeNo = document.getElementById('yeni-hayvan-kupe').value.trim();
+    const dogumTarihi = document.getElementById('yeni-hayvan-dogum-tarihi').value;
+    const gebelikDurumu = document.getElementById('yeni-hayvan-gebelik-durumu').value;
+
+    if (!kupeNo || !dogumTarihi) {
+        showPortalMessage("Küpe Numarası ve Doğum Tarihi zorunludur.", "error");
+        return;
+    }
+
+    // --- YİNENEN HAYVAN KONTROLÜ ---
+    try {
+        const hayvanlarRef = collection(db, 'hayvanlar');
+        const q = query(hayvanlarRef, where('kupeNo', '==', kupeNo), where('sahipId', '==', userSahipId), limit(1));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            showPortalMessage(`'${kupeNo}' küpe numarası zaten sistemde kayıtlı.`, "error");
             return;
         }
 
-        // --- YENİ EKLENEN KONTROL MEKANİZMASI BAŞLANGICI ---
-        try {
-            const hayvanlarRef = collection(db, 'hayvanlar');
-            
-            // Bu sahip için bu küpe numarasının zaten var olup olmadığını kontrol et
-            const q = query(hayvanlarRef, 
-                            where('kupeNo', '==', kupeNo), 
-                            where('sahipId', '==', userSahipId), 
-                            limit(1));
-            
-            const querySnapshot = await getDocs(q);
+        // --- YENİ HAYVAN VERİSİ OLUŞTURMA ---
+        const yeniHayvanVerisi = {
+            kupeNo: kupeNo,
+            irk: document.getElementById('yeni-hayvan-irk').value,
+            cinsiyet: document.getElementById('yeni-hayvan-cinsiyet').value,
+            rumuz: document.getElementById('yeni-hayvan-rumuz').value || null,
+            dogumTarihi: dogumTarihi,
+            gebəlikDurumu: gebelikDurumu,
+            sahipId: userSahipId,
+            cariId: userCariId
+        };
 
-            // Eğer querySnapshot boş değilse, yani kayıt varsa, hata ver ve dur.
-            if (!querySnapshot.empty) {
-                showPortalMessage(`'${kupeNo}' küpe numarası zaten sistemde kayıtlı. Lütfen kontrol ediniz.`, "error");
-                return; // Fonksiyonu burada sonlandır, kaydetme.
+        // --- GEBE İSE TOHUMLAMA BİLGİLERİNİ EKLEME (İSTEK 2 ÇÖZÜMÜ) ---
+        if (gebelikDurumu === 'Gebe') {
+            const sonTohumlamaTarihi = document.getElementById('yeni-hayvan-tohumlama-tarihi').value;
+            if (sonTohumlamaTarihi) {
+                yeniHayvanVerisi.sonTohumlamaTarihi = sonTohumlamaTarihi;
+                
+                const tohumlamaDate = new Date(sonTohumlamaTarihi);
+                const tahminiDogumDate = new Date(tohumlamaDate.setDate(tohumlamaDate.getDate() + 283));
+                yeniHayvanVerisi.tahminiDogumTarihi = tahminiDogumDate.toISOString().split('T')[0];
             }
-            // --- YENİ EKLENEN KONTROL MEKANİZMASI SONU ---
-
-
-            // Kontrolden geçtiyse, yani bu küpe numarası mevcut değilse, hayvanı kaydet
-            await addDoc(hayvanlarRef, {
-                kupeNo: kupeNo,
-                irk: document.getElementById('yeni-hayvan-irk').value,
-                cinsiyet: document.getElementById('yeni-hayvan-cinsiyet').value,
-                rumuz: document.getElementById('yeni-hayvan-rumuz').value || null,
-                dogumTarihi: dogumTarihi,
-                gebəlikDurumu: document.getElementById('yeni-hayvan-gebelik-durumu').value,
-                sahipId: userSahipId,
-                cariId: userCariId
-            });
-            
-            showPortalMessage("Hayvan başarıyla kaydedildi.", "success");
-            event.target.reset();
-            refreshAllData();
-
-        } catch (error) {
-            console.error("Hayvan kaydedilirken hata:", error);
-            showPortalMessage("Hayvan kaydedilirken bir hata oluştu.", "error");
         }
+
+        // Veriyi veritabanına kaydet
+        await addDoc(hayvanlarRef, yeniHayvanVerisi);
+
+        showPortalMessage("Hayvan başarıyla kaydedildi.", "success");
+        event.target.reset(); // Formu temizle
+        document.getElementById('yeni-hayvan-tohumlama-tarihi-container').style.display = 'none'; // Ek alanı gizle
+
+        // --- OTOMATİK RAPOR GÖSTERME (SORUN 1 ÇÖZÜMÜ) ---
+        await refreshAllData(); // Verileri yenile
+        showSection(raporlarSection); // Raporlar bölümünü göster
+        document.getElementById('hayvanTakipBtn').click(); // Hayvan Takip Raporu sekmesini aktif et
+
+    } catch (error) {
+        console.error("Hayvan kaydedilirken hata:", error);
+        showPortalMessage("Hayvan kaydedilirken bir hata oluştu.", "error");
     }
+}
 
     function handleTableActions(event) {
         const target = event.target;
