@@ -3221,12 +3221,23 @@ async function editOdeme(id) {
 async function deleteOdeme(id) {
     showCustomConfirm("Bu işlem hareketini silmek istediğinizden emin misiniz?", async () => {
         try {
+            // Önce veritabanından sil
             await deleteDoc(doc(db, 'odemeVeTahsilatlar', id));
+            
+            // Sonra bellekten (cache) sil
+            const index = transactionCache.odemeVeTahsilatlar.findIndex(o => o.id === id);
+            if (index > -1) {
+                transactionCache.odemeVeTahsilatlar.splice(index, 1);
+            }
+            
             showToast("İşlem başarıyla silindi.");
+            
+            // Bellekten güncellenmiş listeyi ekrana çiz
             await renderOdemeListesi();
+
         } catch (error) {
             console.error("Ödeme silinirken hata:", error);
-            showToast("İşlem silinirken bir hata oluştu.", true);
+            showToast("İşlem silinirken bir hata oluştu: " + error.message, true);
         }
     });
 }
@@ -3535,40 +3546,45 @@ async function calculateCariBakiyeDetayli(cariId, endDate = null) {
 
 async function handleOdemeKaydet(event) {
     event.preventDefault();
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-        showToast("Lütfen giriş yapın.", true);
-        return;
-    }
-    const editingId = document.getElementById('odemeEditId').value;
-    const tutar = parseFloat(document.getElementById('odemeTutari').value);
-    const cariId = document.getElementById('odemeYapilanTedarikci').value;
-    if (!cariId || isNaN(tutar) || tutar <= 0) {
-        showToast("Lütfen cari ve tutar alanlarını doğru bir şekilde doldurun.", true);
-        return;
-    }
-    const formData = {
-        tarih: document.getElementById('odemeTarih').value,
-        cariId: cariId,
-        islemTuru: document.getElementById('islemTuru').value,
-        odemeTuru: document.getElementById('odemeTuru').value,
-        tutar: tutar,
-        aciklama: document.getElementById('odemeAciklama').value.trim(),
-        sahipId: sahipId
-    };
-    try {
+    const kaydetBtn = document.getElementById('odemeKaydetBtn');
+
+    await runFirestoreOperation(kaydetBtn, async () => {
+        const editingId = document.getElementById('odemeEditId').value;
+        const tutar = parseFloat(document.getElementById('odemeTutari').value);
+        const cariId = document.getElementById('odemeYapilanTedarikci').value;
+
+        if (!cariId || isNaN(tutar) || tutar <= 0) {
+            throw new Error("Lütfen cari ve geçerli bir tutar girin.");
+        }
+
+        const formData = {
+            tarih: document.getElementById('odemeTarih').value,
+            cariId: cariId,
+            islemTuru: document.getElementById('islemTuru').value,
+            odemeTuru: document.getElementById('odemeTuru').value,
+            tutar: tutar,
+            aciklama: document.getElementById('odemeAciklama').value.trim(),
+            sahipId: sahipId
+        };
+
         if (editingId) {
             await setDoc(doc(db, 'odemeVeTahsilatlar', editingId), formData, { merge: true });
+            const index = transactionCache.odemeVeTahsilatlar.findIndex(o => o.id === editingId);
+            if (index > -1) {
+                transactionCache.odemeVeTahsilatlar[index].data = formData;
+            }
+            showToast("Hareket başarıyla güncellendi.");
         } else {
-            await addDoc(collection(db, 'odemeVeTahsilatlar'), formData);
+            const newDocRef = await addDoc(collection(db, 'odemeVeTahsilatlar'), formData);
+            transactionCache.odemeVeTahsilatlar.unshift({ id: newDocRef.id, data: formData });
+            showToast("Hareket başarıyla kaydedildi.");
         }
+
         resetOdemeForm();
         await renderOdemeListesi();
-    } catch (error) {
-        console.error("Ödeme/Tahsilat kaydedilirken hata:", error);
-        showToast("İşlem kaydedilirken bir hata oluştu.");
-    }
+    });
 }
+
 
 function resetOdemeForm() {
     document.getElementById('odemeForm').reset();
@@ -5000,93 +5016,115 @@ async function editYemSatisi(id)
     }
 }
 
-async function handleTopluYemSatisKaydet() 
-{
-    const tarihInput = document.getElementById('topluSatisTarih');
-    const cariInput = document.getElementById('topluSatisCari');
-    const formTarih = tarihInput.value;
-    const formCari = cariInput.value;
-    if (!formTarih || !formCari) return showToast("Lütfen Satış Tarihi ve Cari seçiniz!", true);
+// Mevcut handleTopluYemSatisKaydet fonksiyonunu silip yerine bunu yapıştırın
+async function handleTopluYemSatisKaydet() {
+    const kaydetBtn = document.getElementById('tumSatislariKaydetBtn');
+    
+    // Yeni yardımcı fonksiyonumuzu burada çağırıyoruz
+    await runFirestoreOperation(kaydetBtn, async () => {
+        const tarihInput = document.getElementById('topluSatisTarih');
+        const cariInput = document.getElementById('topluSatisCari');
+        const formTarih = tarihInput.value;
+        const formCari = cariInput.value;
 
-    if (editingYemSatisId) {
-        const satisRef = doc(db, 'yem_satislari', editingYemSatisId);
-        const satir = document.querySelector('#yemSatisSatirlari .yem-satis-satiri');
-        if (!satir) return showToast("Güncellenecek satır bulunamadı.", true);
-        const yeniMiktar = parseInt(satir.querySelector('.yem-miktari').value);
-        const yeniFiyat = parseFloat(satir.querySelector('.yem-fiyati').value);
-        if (isNaN(yeniMiktar) || yeniMiktar <= 0 || isNaN(yeniFiyat)) return showToast("Miktar/Fiyat geçersiz.", true);
+        if (!formTarih || !formCari) {
+            // Hata fırlatmak, runFirestoreOperation tarafından yakalanacak
+            throw new Error("Lütfen Satış Tarihi ve Cari seçiniz!");
+        }
+        
+        // Bu kısım düzenleme (update) mantığını içerir, olduğu gibi kalmalı
+        if (editingYemSatisId) {
+            const satisRef = doc(db, 'yem_satislari', editingYemSatisId);
+            const satir = document.querySelector('#yemSatisSatirlari .yem-satis-satiri');
+            if (!satir) throw new Error("Güncellenecek satır bulunamadı.");
+            const yeniMiktar = parseInt(satir.querySelector('.yem-miktari').value);
+            const yeniFiyat = parseFloat(satir.querySelector('.yem-fiyati').value);
+            if (isNaN(yeniMiktar) || yeniMiktar <= 0 || isNaN(yeniFiyat)) throw new Error("Miktar/Fiyat geçersiz.");
 
-        try {
             await runTransaction(db, async (trx) => {
                 const satisDoc = await trx.get(satisRef);
-                if (!satisDoc.exists()) throw "Kayıt bulunamadı.";
+                if (!satisDoc.exists()) throw new Error("Kayıt bulunamadı.");
                 const eskiMiktar = satisDoc.data().miktar;
                 const yemId = satisDoc.data().yemId;
                 const yemRef = doc(db, 'yemler', yemId);
                 trx.update(yemRef, { stokMiktari: increment(eskiMiktar - yeniMiktar) });
                 trx.update(satisRef, {
-                    tarih: formTarih,
-                    cariId: formCari,
-                    miktar: yeniMiktar,
-                    satisFiyati: yeniFiyat,
-                    toplamTutar: yeniMiktar * yeniFiyat,
-                    kayitZamani: new Date()
+                    tarih: formTarih, cariId: formCari, miktar: yeniMiktar,
+                    satisFiyati: yeniFiyat, toplamTutar: yeniMiktar * yeniFiyat, kayitZamani: new Date()
                 });
             });
+
             showToast("Satış güncellendi.");
             resetTopluSatisFormu();
             await renderYemSatisListesi();
             await renderYemStokListesi();
-        } catch (e) {
-            console.error(e);
-            showToast("Kayıt hatası: " + e, true);
+            return; // Düzenleme işlemi bitti, fonksiyondan çık
         }
-        return;
-    }
 
-    const satirlar = document.querySelectorAll('.yem-satis-satiri');
-    if (satirlar.length === 0) return showToast("En az bir satır ekleyin.", true);
-    const batch = writeBatch(db);
-    const now = new Date();
-    const satislar = [];
-    
-    for (const satir of satirlar) {
-        const yemId = satir.querySelector('.yem-secimi').value;
-        const miktar = parseInt(satir.querySelector('.yem-miktari').value);
-        const satisFiyati = parseFloat(satir.querySelector('.yem-fiyati').value);
-        if (!yemId || isNaN(miktar) || miktar <= 0 || isNaN(satisFiyati)) return showToast("Satır bilgileri eksik.", true);
+        // Bu kısım yeni kayıt (add) mantığını içerir
+        const satirlar = document.querySelectorAll('.yem-satis-satiri');
+        if (satirlar.length === 0) throw new Error("En az bir satış satırı ekleyin.");
+
+        const batch = writeBatch(db);
+        const now = new Date();
+        let satisAdedi = 0;
         
-        const stokVeri = window.yemDataMap.get(yemId);
-        if (!stokVeri || (stokVeri.stokMiktari || 0) < miktar) return showToast(`Yetersiz stok: ${stokVeri?.ad}`, true);
+        for (const satir of satirlar) {
+            const yemId = satir.querySelector('.yem-secimi').value;
+            const miktar = parseInt(satir.querySelector('.yem-miktari').value);
+            const satisFiyati = parseFloat(satir.querySelector('.yem-fiyati').value);
+            if (!yemId || isNaN(miktar) || miktar <= 0 || isNaN(satisFiyati)) throw new Error("Satır bilgileri eksik veya hatalı.");
+            
+            const stokVeri = window.yemDataMap.get(yemId);
+            if (!stokVeri || (stokVeri.stokMiktari || 0) < miktar) throw new Error(`Yetersiz stok: ${stokVeri?.ad}`);
 
-        const yemRef = doc(db, 'yemler', yemId);
-        const satisRef = doc(collection(db, 'yem_satislari'));
+            const yemRef = doc(db, 'yemler', yemId);
+            const satisRef = doc(collection(db, 'yem_satislari'));
 
-        batch.set(satisRef, {
-            sahipId: sahipId,
-            tarih: formTarih,
-            kayitZamani: new Date(`${formTarih}T${now.toTimeString().split(' ')[0]}`),
-            cariId: formCari,
-            yemId: yemId,
-            miktar: miktar,
-            satisFiyati: satisFiyati,
-            toplamTutar: miktar * satisFiyati
-        });
-        batch.update(yemRef, { stokMiktari: increment(-miktar) });
-        satislar.push({}); // Sadece sayım için
-    }
-    
-    try {
+            batch.set(satisRef, {
+                sahipId: sahipId, tarih: formTarih,
+                kayitZamani: new Date(`${formTarih}T${now.toTimeString().split(' ')[0]}`),
+                cariId: formCari, yemId: yemId, miktar: miktar,
+                satisFiyati: satisFiyati, toplamTutar: miktar * satisFiyati
+            });
+            batch.update(yemRef, { stokMiktari: increment(-miktar) });
+            satisAdedi++;
+        }
+        
         await batch.commit();
-        showToast(`${satislar.length} satır kaydedildi.`);
+        showToast(`${satisAdedi} satır başarıyla kaydedildi.`);
         resetTopluSatisFormu();
         await renderYemSatisListesi();
-        await loadAllYemlerToCache();
-    } catch (e) {
-        console.error(e);
-        showToast("Kayıt hatası: " + e, true);
+        await loadAllYemlerToCache(); // Yem stoğunu yeniden önbelleğe al
+    });
+}
+
+// Bu yeni fonksiyonu diğer fonksiyonlarınızın (örn: uygulamayiBaslat) yanına ekleyin
+async function runFirestoreOperation(buttonElement, operationFunction) {
+    if (!buttonElement) return;
+
+    const originalButtonText = buttonElement.textContent;
+    buttonElement.disabled = true;
+    buttonElement.textContent = 'İşleniyor...';
+
+    try {
+        // Asıl veritabanı işlemini (kaydetme, silme vb.) çalıştır
+        await operationFunction();
+        
+        // Başarı durumunda butonu eski haline getir
+        buttonElement.disabled = false;
+        buttonElement.textContent = originalButtonText;
+
+    } catch (error) {
+        console.error("Firestore işlemi sırasında hata:", error);
+        showToast(`Bir hata oluştu: ${error.message}. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.`, true);
+        
+        // Hata durumunda da butonu eski haline getir ki kullanıcı tekrar deneyebilsin
+        buttonElement.disabled = false;
+        buttonElement.textContent = originalButtonText;
     }
 }
+
 
 function resetTopluSatisFormu() 
 {
