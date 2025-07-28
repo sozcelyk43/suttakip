@@ -582,7 +582,8 @@
             dogumTarihi: dogumTarihi,
             gebəlikDurumu: gebelikDurumu,
             sahipId: userSahipId,
-            cariId: userCariId
+            cariId: userCariId,
+            siralamaOnceligi: gebelikDurumu === 'Gebe' ? 1 : 2
         };
 
         if (gebelikDurumu === 'Gebe') {
@@ -674,7 +675,8 @@ rumuz: document.getElementById('edit-hayvan-rumuz').value || null,
             dogumTarihi: document.getElementById('edit-hayvan-dogum-tarihi').value,
             gebəlikDurumu: document.getElementById('edit-hayvan-gebelik-durumu').value,
             sonTohumlamaTarihi: tohumlamaTarihi || deleteField(),
-            tahminiDogumTarihi: tahminiDogumTarihi || deleteField()
+            tahminiDogumTarihi: tahminiDogumTarihi || deleteField(),
+	siralamaOnceligi: gebelikDurumu === 'Gebe' ? 1 : 2
         };
 
         try {
@@ -748,7 +750,8 @@ async function populateHayvanlarSelects() {
             await updateDoc(hayvanRef, {
                 gebəlikDurumu: 'Gebe',
                 sonTohumlamaTarihi: tohumlamaTarihi,
-                tahminiDogumTarihi: tahminiDogumTarihi
+                tahminiDogumTarihi: tahminiDogumTarihi,
+		siralamaOnceligi: 1
             });
             
             const tohumlamaKayitlariRef = collection(db, 'tohumlama_kayitlari');
@@ -796,7 +799,8 @@ async function populateHayvanlarSelects() {
                 transaction.update(anneRef, {
                     gebəlikDurumu: 'Boş',
                     sonTohumlamaTarihi: deleteField(),
-                    tahminiDogumTarihi: deleteField()
+                    tahminiDogumTarihi: deleteField(),
+		siralamaOnceligi: 2
                 });
 
                 for (let i = 1; i <= yavruSayisi; i++) {
@@ -812,7 +816,8 @@ async function populateHayvanlarSelects() {
                         sahipId: userSahipId,
                         cariId: userCariId,
                         gebəlikDurumu: 'Boş',
-                        irk: 'Bilinmiyor'
+                        irk: 'Bilinmiyor',
+		siralamaOnceligi: 2
                     });
 
                     const dogumKaydiRef = doc(collection(db, 'dogum_kayitlari'));
@@ -851,20 +856,25 @@ async function fetchHayvanTakipVerileri(isLoadMore = false) {
         const hayvanlarRef = collection(db, 'hayvanlar');
         let q;
 
-        const siralamaKriteri = orderBy('kupeNo', 'asc');
+        // --- YENİ SIRALAMA MANTIĞI ---
+        // Önce siralamaOnceligi'ne göre, sonra tahminiDogumTarihi'ne göre sırala
+        const siralamaKriterleri = [
+            orderBy('siralamaOnceligi', 'asc'),
+            orderBy('tahminiDogumTarihi', 'asc')
+        ];
 
         if (isLoadMore && lastVisibleDoc) {
             q = query(hayvanlarRef,
                 where('sahipId', '==', userSahipId),
                 where('cariId', '==', userCariId),
-                siralamaKriteri, // Değiştirildi
+                ...siralamaKriterleri, // Değiştirildi
                 startAfter(lastVisibleDoc),
                 limit(PAGE_SIZE));
         } else {
             q = query(hayvanlarRef,
                 where('sahipId', '==', userSahipId),
                 where('cariId', '==', userCariId),
-                siralamaKriteri, // Değiştirildi
+                ...siralamaKriterleri, // Değiştirildi
                 limit(PAGE_SIZE));
         }
 
