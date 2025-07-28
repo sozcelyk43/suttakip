@@ -751,14 +751,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
 <script type="module">
+// 1. ADIM: GEREKLİ TÜM FIREBASE MODÜLLERİNİ EN ÜSTTE BİRLEŞTİR
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut, reauthenticateWithCredential, EmailAuthProvider, updatePassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-import { 
-    getFirestore, collection, doc, getDoc, getDocs, addDoc, setDoc, updateDoc, deleteDoc, 
-    query, where, orderBy, limit, runTransaction, increment, onSnapshot, FieldPath, writeBatch, documentId,
-    enableIndexedDbPersistence
-} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut, reauthenticateWithCredential, EmailAuthProvider, updatePassword, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import { 
+        getFirestore, collection, doc, getDoc, getDocs, addDoc, setDoc, updateDoc, deleteDoc, 
+        query, where, orderBy, limit, runTransaction, increment, onSnapshot, FieldPath, writeBatch, documentId,
+        enableIndexedDbPersistence
+    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
+    // 2. ADIM: FIREBASE KONFİGÜRASYONU VE BAŞLANGIÇ DEĞİŞKENLERİ
     const firebaseConfig = {
         apiKey: "AIzaSyCWG4nFwpXRffr_3MO8-Us9mWK6Wsfn0mY",
         authDomain: "sut-takip-projem.firebaseapp.com",
@@ -769,35 +771,123 @@ import {
         measurementId: "G-LYLT9WFVNK"
     };
 
-      const app = initializeApp(firebaseConfig);
+    const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-import { setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    const db = getFirestore(app);
 
-setPersistence(auth, browserSessionPersistence)
-    .then(() => {
-        console.log("Firebase oturum kalıcılığı 'session' olarak ayarlandı.");
-    })
-    .catch((error) => {
-        console.error("Firebase oturum ayarı yapılamadı:", error);
-    });
+    // 3. ADIM: TÜM GLOBAL DEĞİŞKENLERİ GRUPLANDIR
+    let selectedMmCariId = '';
+    let cachedHareketler = [];
+    let cachedDateRange = '';
+    let currentUserRole = '';
+    let currentUserId = '';
+    let sahipId = '';
+    let globalSettings = { defaultMilkPrice: 15.50 };
+    let editingCariId = null, editingYemTanimId = null, editingYemAlisId = null, editingYemSatisId = null, editingOdemeId = null;
+    let gunlukSutunChartInstance = null;
+    let aylikSutunChartInstance = null;
+    let isGunlukChartRendering = false;
+    let isAylikChartRendering = false;
+    let raporCariSecimiOrjinalSecenekler = [];
+    let sutAlimGecmisiListener = null;
+    let topluGirisListener = null;
+    let hareketDokumuListener = null;
+    let lastVisibleHareket = null;
+    let firstVisibleHareketStack = [];
+    let hareketPageCount = 1;
+    let isAppInitialized = false;
+    const globalCache = new Map();
+    const CACHE_TTL_SECONDS = 300;
+    const transactionCache = {
+        sut_alimlari: [],
+        yem_alimlari: [],
+        yem_satislari: [],
+        odemeVeTahsilatlar: [],
+        stok_sayim_hareketleri: []
+    };
+    let fullHistoryPromise = null;
+    let isInitialDataLoaded = false;
 
-const db = getFirestore(app);
+    // 4. ADIM: UYGULAMAYI BAŞLATAN ANA FONKSİYON OLUŞTUR
+    async function initializeAppSequence() {
+        try {
+            // Çevrimdışı desteği EN BAŞTA ve GÜVENLİ bir şekilde aktif et
+            await enableIndexedDbPersistence(db);
+            console.log("Firebase Çevrimdışı Kalıcılık başarıyla aktif edildi.");
+        } catch (err) {
+            if (err.code == 'failed-precondition') {
+                console.warn("Firebase: Birden fazla sekmede çalıştığı için kalıcılık sağlanamadı.");
+            } else if (err.code == 'unimplemented') {
+                console.warn("Firebase: Tarayıcı bu özelliği desteklemiyor.");
+            }
+        }
+        
+        try {
+            // Oturum kalıcılığını ayarla
+            await setPersistence(auth, browserSessionPersistence);
+            console.log("Firebase oturum kalıcılığı 'session' olarak ayarlandı.");
+        } catch(error) {
+            console.error("Firebase oturum ayarı yapılamadı:", error);
+        }
 
-    // YENİ EKLENECEK KOD BLOĞU BURASI
-    enableIndexedDbPersistence(db)
-      .catch((err) => {
-          if (err.code == 'failed-precondition') {
-              // Bu durum genellikle uygulama birden fazla sekmede açıkken olur.
-              // Uygulamanın çalışmasını engellemez, sadece o sekmeler için çevrimdışı özellik çalışmaz.
-              console.warn("Firebase: Birden fazla sekmede çalıştığı için kalıcılık sağlanamadı.");
-          } else if (err.code == 'unimplemented') {
-              // Tarayıcının çok eski olması gibi nadir bir durum.
-              console.warn("Firebase: Tarayıcı bu özelliği desteklemiyor.");
-          }
-      });
-    // YENİ EKLENECEK KOD BLOĞUNUN SONU
+        // Kullanıcı oturum durumunu dinle ve uygulamayı başlat
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    currentUserId = user.uid;
+                    const userDocRef = doc(db, 'kullanicilar', user.uid);
+                    const userDocSnap = await getDoc(userDocRef);
+
+                    if (!userDocSnap.exists()) {
+                        throw new Error("Veritabanında kullanıcı profili bulunamadı. Lütfen sistem yöneticisi ile iletişime geçin.");
+                    }
+
+                    const userData = userDocSnap.data();
+                    sahipId = userData.sahipId || user.uid;
+                    currentUserRole = userData.rol;
+
+                    if (!sahipId) {
+                        throw new Error("Kritik kullanıcı kimliği (sahipId) alınamadı. Profil veriniz bozuk veya eksik olabilir.");
+                    }
+
+                    // Her şey yolundaysa uygulamayı başlat
+                    uygulamayiBaslat();
+
+                } catch (error) {
+                    console.error("Giriş sırasında kritik hata:", error);
+                    const mainContent = document.querySelector('.main-content');
+                    if (mainContent) {
+                        mainContent.innerHTML = `
+                            <div style="padding: 40px; text-align: center; color: #d9534f;">
+                                <h2>Sistem Başlatılamadı</h2>
+                                <p>Uygulama başlatılırken kritik bir hata oluştu. Lütfen internet bağlantınızı kontrol edip sayfayı yenileyin.</p>
+                                <p><strong>Hata Detayı:</strong> ${error.message}</p>
+                            </div>
+                        `;
+                    }
+                    showToast(`Sistem başlatılamadı: ${error.message}`, true);
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+    }
+
+    // 5. ADIM: ANA BAŞLATMA FONKSİYONUNU ÇAĞIR
+    initializeAppSequence();
 
 
+    // --- YARDIMCI VE DİĞER FONKSİYONLAR ---
+    // (Bu bölümün geri kalanı gönderdiğiniz kodla aynı, herhangi bir değişiklik gerekmiyor)
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(err => console.error('Service Worker registration failed: ', err));
+        });
+    }
+
+    Chart.register(ChartDataLabels);
+    
     function showToast(message, isError = false) {
         const toast = document.getElementById('toast-message');
         if (!toast) return;
@@ -860,135 +950,48 @@ const db = getFirestore(app);
         document.getElementById('custom-prompt-cancel').onclick = cleanup;
         overlay.classList.add('show');
     }
-	
-    let selectedMmCariId = '';
-    let cachedHareketler = [];
-    let cachedDateRange = '';
-    let currentUserRole = '';
-    let currentUserId = '';
-    let sahipId = '';
-    let globalSettings = { defaultMilkPrice: 15.50 };
-    let editingCariId = null, editingYemTanimId = null, editingYemAlisId = null, editingYemSatisId = null, editingOdemeId = null;
-    let gunlukSutunChartInstance = null;
-    let aylikSutunChartInstance = null;
-	let isGunlukChartRendering = false; 	
-	let isAylikChartRendering = false; 
-    let raporCariSecimiOrjinalSecenekler = [];
-    let sutAlimGecmisiListener = null; 
-    let topluGirisListener = null;   
-    let hareketDokumuListener = null; 
-    let lastVisibleHareket = null;
-    let firstVisibleHareketStack = [];
-    let hareketPageCount = 1;
-    let isAppInitialized = false;
-    const globalCache = new Map();
-    const CACHE_TTL_SECONDS = 300;
-
-const transactionCache = {
-    sut_alimlari: [],
-    yem_alimlari: [],
-    yem_satislari: [],
-    odemeVeTahsilatlar: [],
-    stok_sayim_hareketleri: []
-};
-let fullHistoryPromise = null; // Arka plan yüklemesini takip etmek için
-let isInitialDataLoaded = false;
-
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').catch(err => console.error('Service Worker registration failed: ', err));
-        });
-    }
-
-    Chart.register(ChartDataLabels);
-
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        document.getElementById('logoutUserEmail').textContent = user.email;
-        currentUserId = user.uid;
-        try {
-            const userDocRef = doc(db, 'kullanicilar', user.uid);
-            const userDocSnap = await getDoc(userDocRef);
-
-            if (!userDocSnap.exists()) {
-                throw new Error("Kullanıcı profili veritabanında bulunamadı.");
-            }
-
-            const userData = userDocSnap.data();
-            currentUserRole = userData.rol;
-            sahipId = userData.sahipId || user.uid;
-
-            if (!sahipId) {
-                throw new Error("Kritik kullanıcı kimliği (sahipId) alınamadı. Lütfen tekrar giriş yapın.");
-            }
-
-            if (currentUserRole === 'admin') {
-                if (sessionStorage.getItem('panelSecildi')) {
-                    uygulamayiBaslat();
-                } else {
-                    document.getElementById('secim-modal-overlay').classList.add('show');
-                }
-            } else {
-                const targetPage = currentUserRole === 'calisan' ? 'hizli-giris.html' : 'musteri_portali.html';
-                window.location.href = targetPage;
-            }
-
-        } catch (error) {
-            console.error("Giriş sırasında kritik hata:", error);
-            showToast(`Giriş başlatılamadı: ${error.message}. Lütfen sayfayı yenileyin veya tekrar giriş yapın.`, true);
-
-        }
-    } else {
-        window.location.href = 'login.html';
-    }
-});
-
-document.getElementById('secim-sut-takibi-btn')?.addEventListener('click', () => {
-    sessionStorage.setItem('panelSecildi', 'true'); // Seçim yapıldığını kaydet
-    document.getElementById('secim-modal-overlay').classList.remove('show');
-    uygulamayiBaslat(); // Uygulamayı başlat
-});
-
-document.getElementById('secim-mustahsil-merkezi-btn')?.addEventListener('click', () => {
-    sessionStorage.setItem('panelSecildi', 'true'); // Seçim yapıldığını kaydet
-    window.location.href = 'mustahsil.html';
-});
-
-
-// Bu iki yeni fonksiyonu eskisinin yerine yapıştırın
-
-// 1. Sadece hızlı ve temel verileri yükleyen fonksiyon
-async function loadInitialEssentialData() {
-    if (isInitialDataLoaded) return;
-    showToast("Önemli veriler yükleniyor...");
-
-    console.log("Aşama 1: Hızlı başlangıç verileri yükleniyor...");
-    const now = new Date();
-    const sixMonthsAgo = new Date(now.setMonth(now.getMonth() - 6));
-    const sixMonthsAgoStr = `${sixMonthsAgo.getFullYear()}-${String(sixMonthsAgo.getMonth() + 1).padStart(2, '0')}-01`;
-
-    const collectionsToFetch = ['cariler', 'yemler', 'sut_alimlari', 'yem_satislari', 'odemeVeTahsilatlar'];
-    const promises = collectionsToFetch.map(colName => {
-        const baseQuery = query(collection(db, colName), where("sahipId", "==", sahipId));
-        if (['cariler', 'yemler'].includes(colName)) {
-            return getDocs(baseQuery);
-        }
-        return getDocs(query(baseQuery, where('tarih', '>=', sixMonthsAgoStr)));
+    
+    document.getElementById('secim-sut-takibi-btn')?.addEventListener('click', () => {
+        sessionStorage.setItem('panelSecildi', 'true'); // Seçim yapıldığını kaydet
+        document.getElementById('secim-modal-overlay').classList.remove('show');
+        uygulamayiBaslat(); // Uygulamayı başlat
     });
 
-    const snapshots = await Promise.all(promises);
-    window.cariDataMap = new Map(snapshots[0].docs.map(doc => [doc.id, doc.data()]));
-    window.yemDataMap = new Map(snapshots[1].docs.map(doc => [doc.id, doc.data()]));
-    transactionCache.sut_alimlari = snapshots[2].docs.map(doc => ({ id: doc.id, data: doc.data() }));
-    transactionCache.yem_satislari = snapshots[3].docs.map(doc => ({ id: doc.id, data: doc.data() }));
-    transactionCache.odemeVeTahsilatlar = snapshots[4].docs.map(doc => ({ id: doc.id, data: doc.data() }));
-    
-    isInitialDataLoaded = true;
-    console.log("Aşama 1 tamamlandı. Uygulama kullanıma hazır.");
-    showToast("Uygulama hazır! Eski veriler arka planda senkronize ediliyor...", false, 5000);
-}
+    document.getElementById('secim-mustahsil-merkezi-btn')?.addEventListener('click', () => {
+        sessionStorage.setItem('panelSecildi', 'true'); // Seçim yapıldığını kaydet
+        window.location.href = 'mustahsil.html';
+    });
 
-// 2. Geri kalan tüm eski verileri arka planda sessizce yükleyen fonksiyon
+    async function loadInitialEssentialData() {
+        if (isInitialDataLoaded) return;
+        showToast("Önemli veriler yükleniyor...");
+        console.log("Aşama 1: Hızlı başlangıç verileri yükleniyor...");
+        const now = new Date();
+        const sixMonthsAgo = new Date(new Date().setMonth(now.getMonth() - 6)); // Düzeltme
+        const sixMonthsAgoStr = `${sixMonthsAgo.getFullYear()}-${String(sixMonthsAgo.getMonth() + 1).padStart(2, '0')}-01`;
+
+        const collectionsToFetch = ['cariler', 'yemler', 'sut_alimlari', 'yem_satislari', 'odemeVeTahsilatlar'];
+        const promises = collectionsToFetch.map(colName => {
+            const baseQuery = query(collection(db, colName), where("sahipId", "==", sahipId));
+            if (['cariler', 'yemler'].includes(colName)) {
+                return getDocs(baseQuery);
+            }
+            return getDocs(query(baseQuery, where('tarih', '>=', sixMonthsAgoStr)));
+        });
+
+        const snapshots = await Promise.all(promises);
+        window.cariDataMap = new Map(snapshots[0].docs.map(doc => [doc.id, doc.data()]));
+        window.yemDataMap = new Map(snapshots[1].docs.map(doc => [doc.id, doc.data()]));
+        transactionCache.sut_alimlari = snapshots[2].docs.map(doc => ({ id: doc.id, data: doc.data() }));
+        transactionCache.yem_satislari = snapshots[3].docs.map(doc => ({ id: doc.id, data: doc.data() }));
+        transactionCache.odemeVeTahsilatlar = snapshots[4].docs.map(doc => ({ id: doc.id, data: doc.data() }));
+        
+        isInitialDataLoaded = true;
+        console.log("Aşama 1 tamamlandı. Uygulama kullanıma hazır.");
+        showToast("Uygulama hazır! Eski veriler arka planda senkronize ediliyor...", false, 5000);
+    }
+    
+
 async function loadFullHistoryInBackground() {
     console.log("Aşama 2: Tüm geçmiş veriler arka planda yükleniyor...");
     
@@ -998,14 +1001,11 @@ async function loadFullHistoryInBackground() {
             getDocs(query(collection(db, colName), where("sahipId", "==", sahipId)))
         );
         const snapshots = await Promise.all(promises);
-
-        // Gelen verileri bellektekilerle birleştir (daha verimli hale getirilebilir ama bu en basit yöntem)
         transactionCache.sut_alimlari = snapshots[0].docs.map(doc => ({ id: doc.id, data: doc.data() }));
         transactionCache.yem_alimlari = snapshots[1].docs.map(doc => ({ id: doc.id, data: doc.data() }));
         transactionCache.yem_satislari = snapshots[2].docs.map(doc => ({ id: doc.id, data: doc.data() }));
         transactionCache.odemeVeTahsilatlar = snapshots[3].docs.map(doc => ({ id: doc.id, data: doc.data() }));
         transactionCache.stok_sayim_hareketleri = snapshots[4].docs.map(doc => ({ id: doc.id, data: doc.data() }));
-
         console.log("Aşama 2 tamamlandı. Tüm veriler artık bellekte.");
         showToast("Tüm veriler senkronize edildi.", false, 3000);
     } catch (error) {
@@ -3050,6 +3050,7 @@ async function handleYemAlisKaydet(event) {
         const yemId = document.getElementById('yemSecimiAlis').value;
         const cariId = document.getElementById('yemAlisTedarikci').value || '';
         const tarih = document.getElementById('yemAlisTarih').value;
+        const userEmail = auth.currentUser ? auth.currentUser.email : 'bilinmiyor'; // YENİ EKLENDİ
 
         if (!yemId || !tarih || isNaN(miktar) || miktar <= 0 || isNaN(birimFiyat)) {
             throw new Error("Lütfen yem, tarih, miktar ve fiyat alanlarını doğru doldurun.");
@@ -3062,13 +3063,15 @@ async function handleYemAlisKaydet(event) {
             cariId: cariId,
             alisFiyati: birimFiyat,
             toplamTutar: miktar * birimFiyat,
-            sahipId: sahipId
+            sahipId: sahipId,
+            kaydedenEmail: userEmail // YENİ EKLENDİ
         };
         
         const yemRef = doc(db, 'yemler', yemId);
         const degisiklikYapilanAy = tarih.substring(0, 7);
 
         if (editingId) {
+            formData.guncelleyenEmail = userEmail; // YENİ EKLENDİ
             const alisRef = doc(db, 'yem_alimlari', editingId);
             await runTransaction(db, async (transaction) => {
                 const eskiAlisDoc = await transaction.get(alisRef);
@@ -3093,7 +3096,6 @@ async function handleYemAlisKaydet(event) {
             showToast("Yem alışı başarıyla kaydedildi.");
         }
 
-        // ÖNBELLEK TEMİZLEME
         if (cariId) {
             await invalidateMonthlyBalances(cariId, degisiklikYapilanAy);
         }
@@ -3103,6 +3105,8 @@ async function handleYemAlisKaydet(event) {
         await renderYemStokListesi();
     });
 }
+
+
 async function deleteYemTanimi(id) {
     const message = "Bu yem tanımını silmek istediğinizden emin misiniz? Eğer bu yem ile ilgili bir alış veya satış yapıldıysa, silme işlemi engellenecektir.";
     showCustomConfirm(message, async () => {
@@ -3313,16 +3317,19 @@ function displayHareketler(hareketListesi) {
     if (cariIdFiltre && cariIdFiltre !== 'tumu') { filtrelenmisListe = filtrelenmisListe.filter(item => item.cariId === cariIdFiltre); }
     if (islemTuruFiltre && islemTuruFiltre !== 'tumu') { filtrelenmisListe = filtrelenmisListe.filter(item => item.tip === islemTuruFiltre); }
     if (filtrelenmisListe.length === 0) { container.innerHTML = '<p style="text-align: center;">Seçtiğiniz kriterlere uygun hiçbir hareket bulunamadı.</p>'; return; }
-    let tableHTML = `<table class="report-table"><thead><tr><th>Tarih</th><th>Cari Adı</th><th>İşlem Türü</th><th>Açıklama</th><th>Tutar</th></tr></thead><tbody>`;
+    
+    // YENİ SÜTUN EKLENDİ (İşlemi Yapan)
+    let tableHTML = `<table class="report-table"><thead><tr><th>Tarih</th><th>Cari Adı</th><th>İşlem Türü</th><th>İşlemi Yapan</th><th>Açıklama</th><th>Tutar</th></tr></thead><tbody>`;
     let genelToplam = 0;
     filtrelenmisListe.forEach(item => {
         genelToplam += item.tutar || 0;
-        tableHTML += `<tr><td>${formatDate(item.tarih)}</td><td>${item.cariAdi}</td><td>${item.islemTuru}</td><td>${item.aciklama}</td><td style="color: ${item.tutar >= 0 ? 'green' : 'red'}; text-align: right;">${formatCurrency(item.tutar)}</td></tr>`;
+        // YENİ HÜCRE EKLENDİ (item.islemYapan)
+        tableHTML += `<tr><td>${formatDate(item.tarih)}</td><td>${item.cariAdi}</td><td>${item.islemTuru}</td><td>${item.islemYapan || ''}</td><td>${item.aciklama}</td><td style="color: ${item.tutar >= 0 ? 'green' : 'red'}; text-align: right;">${formatCurrency(item.tutar)}</td></tr>`;
     });
-    tableHTML += `</tbody><tfoot><tr class="report-totals-row"><td colspan="4" style="text-align: right; font-weight: bold;">Filtre Toplamı:</td><td style="font-weight: bold; text-align: right;">${formatCurrency(genelToplam)}</td></tr></tfoot></table>`;
+    // COLSPAN DEĞERİ GÜNCELLENDİ (5 OLDU)
+    tableHTML += `</tbody><tfoot><tr class="report-totals-row"><td colspan="5" style="text-align: right; font-weight: bold;">Filtre Toplamı:</td><td style="font-weight: bold; text-align: right;">${formatCurrency(genelToplam)}</td></tr></tfoot></table>`;
     container.innerHTML = tableHTML;
 }
-
 async function fetchAndDisplayHareketler() {
     const container = document.getElementById('hareketDokumuContainer');
     container.innerHTML = '<p style="text-align: center; font-size: 1.2em;">Hareketler yükleniyor, lütfen bekleyin...</p>';
@@ -3347,22 +3354,22 @@ async function fetchAndDisplayHareketler() {
         let birlesikListe = [];
         sutAlimlari.forEach(doc => {
             const data = doc.data();
-            birlesikListe.push({ tarih: data.tarih, cariId: data.cariId, cariAdi: window.cariDataMap.get(data.cariId)?.adiSoyadi || 'Bilinmiyor', islemTuru: 'Süt Alımı', aciklama: `${data.toplam.toFixed(2)} Lt`, tutar: data.toplamTutar, tip: 'sut_alimi' });
+            birlesikListe.push({ tarih: data.tarih, cariId: data.cariId, cariAdi: window.cariDataMap.get(data.cariId)?.adiSoyadi || 'Bilinmiyor', islemTuru: 'Süt Alımı', aciklama: `${data.toplam.toFixed(2)} Lt`, tutar: data.toplamTutar, tip: 'sut_alimi', islemYapan: data.kaydedenEmail || '' }); // GÜNCELLENDİ
         });
         yemSatislari.forEach(doc => {
             const data = doc.data();
-            birlesikListe.push({ tarih: data.tarih, cariId: data.cariId, cariAdi: window.cariDataMap.get(data.cariId)?.adiSoyadi || 'Bilinmiyor', islemTuru: 'Yem Satışı', aciklama: `${data.miktar} Adet - ${window.yemDataMap.get(data.yemId)?.ad || ''}`, tutar: data.toplamTutar, tip: 'yem_satisi' });
+            birlesikListe.push({ tarih: data.tarih, cariId: data.cariId, cariAdi: window.cariDataMap.get(data.cariId)?.adiSoyadi || 'Bilinmiyor', islemTuru: 'Yem Satışı', aciklama: `${data.miktar} Adet - ${window.yemDataMap.get(data.yemId)?.ad || ''}`, tutar: data.toplamTutar, tip: 'yem_satisi', islemYapan: data.kaydedenEmail || '' }); // GÜNCELLENDİ
         });
         yemAlimlari.forEach(doc => {
             const data = doc.data();
-            birlesikListe.push({ tarih: data.tarih, cariId: data.cariId, cariAdi: window.cariDataMap.get(data.cariId)?.adiSoyadi || 'Peşin', islemTuru: 'Yem Alışı', aciklama: `${data.miktar} Adet - ${window.yemDataMap.get(data.yemId)?.ad || ''}`, tutar: -data.toplamTutar, tip: 'yem_alisi' });
+            birlesikListe.push({ tarih: data.tarih, cariId: data.cariId, cariAdi: window.cariDataMap.get(data.cariId)?.adiSoyadi || 'Peşin', islemTuru: 'Yem Alışı', aciklama: `${data.miktar} Adet - ${window.yemDataMap.get(data.yemId)?.ad || ''}`, tutar: -data.toplamTutar, tip: 'yem_alisi', islemYapan: data.kaydedenEmail || '' }); // GÜNCELLENDİ
         });
         odemeler.forEach(doc => {
             const data = doc.data();
             let islem, tutar, tip;
             if (data.islemTuru === 'odeme') { islem = 'Ödeme Alındı'; tutar = data.tutar; tip = 'odeme'; }
             else { islem = 'Tahsilat Yapıldı'; tutar = -data.tutar; tip = 'tahsilat'; }
-            birlesikListe.push({ tarih: data.tarih, cariId: data.cariId, cariAdi: window.cariDataMap.get(data.cariId)?.adiSoyadi || 'Bilinmiyor', islemTuru: islem, aciklama: data.aciklama || data.odemeTuru, tutar: tutar, tip: tip });
+            birlesikListe.push({ tarih: data.tarih, cariId: data.cariId, cariAdi: window.cariDataMap.get(data.cariId)?.adiSoyadi || 'Bilinmiyor', islemTuru: islem, aciklama: data.aciklama || data.odemeTuru, tutar: tutar, tip: tip, islemYapan: data.kaydedenEmail || '' }); // GÜNCELLENDİ
         });
         birlesikListe.sort((a, b) => new Date(b.tarih) - new Date(a.tarih));
         cachedHareketler = birlesikListe;
@@ -3626,6 +3633,7 @@ async function handleOdemeKaydet(event) {
         const editingId = document.getElementById('odemeEditId').value;
         const tutar = parseFloat(document.getElementById('odemeTutari').value);
         const cariId = document.getElementById('odemeYapilanTedarikci').value;
+        const userEmail = auth.currentUser ? auth.currentUser.email : 'bilinmiyor'; // YENİ EKLENDİ
 
         if (!cariId || isNaN(tutar) || tutar <= 0) {
             throw new Error("Lütfen cari ve geçerli bir tutar girin.");
@@ -3638,10 +3646,12 @@ async function handleOdemeKaydet(event) {
             odemeTuru: document.getElementById('odemeTuru').value,
             tutar: tutar,
             aciklama: document.getElementById('odemeAciklama').value.trim(),
-            sahipId: sahipId
+            sahipId: sahipId,
+            kaydedenEmail: userEmail // YENİ EKLENDİ
         };
 
         if (editingId) {
+            formData.guncelleyenEmail = userEmail; // YENİ EKLENDİ: Güncelleyen bilgisi
             await setDoc(doc(db, 'odemeVeTahsilatlar', editingId), formData, { merge: true });
             const index = transactionCache.odemeVeTahsilatlar.findIndex(o => o.id === editingId);
             if (index > -1) {
@@ -3654,14 +3664,14 @@ async function handleOdemeKaydet(event) {
             showToast("Hareket başarıyla kaydedildi.");
         }
 
-
-	const degisiklikYapilanAy = formData.tarih.substring(0, 7); // "2025-03" formatını alır
+        const degisiklikYapilanAy = formData.tarih.substring(0, 7);
         await invalidateMonthlyBalances(cariId, degisiklikYapilanAy);
 
         resetOdemeForm();
         await renderOdemeListesi();
     });
 }
+
 
 function resetOdemeForm() {
     document.getElementById('odemeForm').reset();
@@ -3887,17 +3897,17 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih)
             toplam: bugunkuToplamMiktar,
             fiyat: birimFiyat,
             toplamTutar: bugunkuToplamMiktar * birimFiyat,
-            sahipId: sahipId
+            sahipId: sahipId,
+            kaydedenEmail: userEmail // YENİ EKLENDİ
         };
 
        try {
+            // ... fonksiyonun geri kalanı aynı ...
             const newDocRef = await addDoc(collection(db, "sut_alimlari"), sutAlimData);
             
-            // --- GÜNCELLEME: Özetleri geçersiz kıl ve belleği güncelle ---
             transactionCache.sut_alimlari.push({ id: newDocRef.id, data: sutAlimData });
             const degisiklikYapilanAy = tarih.substring(0, 7);
             await invalidateMonthlyBalances(cariId, degisiklikYapilanAy);
-            // --- GÜNCELLEME SONU ---
 
             if (satir) satir.style.display = 'none';
             await renderSutAlimGecmisi();
@@ -4560,10 +4570,23 @@ async function handleYemPivotRaporu(reportType)
 
         const reportData = new Map();
         const yemlerInReport = new Set();
+        
         satisSnapshot.forEach(doc => {
             const satis = doc.data();
-            const cariInfo = cariMap.get(satis.cariId);
-            if (!cariInfo) return;
+            
+            // --- GÜNCELLEME BAŞLANGICI ---
+            let cariInfo = cariMap.get(satis.cariId); // const yerine let olarak değiştirildi
+
+            // Eğer cari kaydı bulunamazsa, satışı atlamak yerine bir yer tutucu oluştur.
+            // Bu, silinmiş carilerin satışlarının da rapora dahil edilmesini sağlar.
+            if (!cariInfo) {
+                cariInfo = {
+                    adiSoyadi: `Silinmiş Cari (${satis.cariId.substring(0, 5)}...)`,
+                    kategori: 'Bilinmiyor'
+                };
+            }
+            // --- GÜNCELLEME SONU ---
+
             if (secilenKoy && cariInfo.kategori !== secilenKoy) {
                 return;
             }
@@ -4689,8 +4712,6 @@ async function handleYemPivotRaporu(reportType)
         raporAlani.innerHTML = `<p style="color:red; font-weight:bold;">RAPOR OLUŞTURULAMADI!<br>Hata Detayı: ${error.message}</p>`;
     }
 }
-
-
 async function handleHesapOzetiRaporuOlustur() 
 {
     toggleReportButtons('hesapOzeti', false);
@@ -5115,6 +5136,7 @@ async function handleTopluYemSatisKaydet() {
         const cariInput = document.getElementById('topluSatisCari');
         const formTarih = tarihInput.value;
         const formCari = cariInput.value;
+        const userEmail = auth.currentUser ? auth.currentUser.email : 'bilinmiyor'; // YENİ EKLENDİ
 
         if (!formTarih || !formCari) {
             throw new Error("Lütfen Satış Tarihi ve Cari seçiniz!");
@@ -5173,7 +5195,6 @@ async function handleTopluYemSatisKaydet() {
             return; 
         }
 
-        // Yeni Kayıt Modu
         const satirlar = document.querySelectorAll('.yem-satis-satiri');
         if (satirlar.length === 0) throw new Error("En az bir satış satırı ekleyin.");
 
@@ -5198,10 +5219,15 @@ async function handleTopluYemSatisKaydet() {
             const satisRef = doc(collection(db, 'yem_satislari'));
 
             batch.set(satisRef, {
-                sahipId: sahipId, tarih: formTarih,
+                sahipId: sahipId,
+                tarih: formTarih,
                 kayitZamani: new Date(`${formTarih}T${now.toTimeString().split(' ')[0]}`),
-                cariId: formCari, yemId: yemId, miktar: miktar,
-                satisFiyati: satisFiyati, toplamTutar: miktar * satisFiyati
+                cariId: formCari,
+                yemId: yemId,
+                miktar: miktar,
+                satisFiyati: satisFiyati,
+                toplamTutar: miktar * satisFiyati,
+                kaydedenEmail: userEmail // YENİ EKLENDİ
             });
             batch.update(yemRef, { stokMiktari: increment(-miktar) });
             satisAdedi++;
@@ -5213,7 +5239,6 @@ async function handleTopluYemSatisKaydet() {
 
         await batch.commit();
         
-        // ÖNBELLEK TEMİZLEME
         await invalidateMonthlyBalances(formCari, degisiklikYapilanAy);
 
         showToast(`${satisAdedi} satır başarıyla kaydedildi.`);
@@ -5224,7 +5249,6 @@ async function handleTopluYemSatisKaydet() {
 }
 
 
-// Bu yeni fonksiyonu diğer fonksiyonlarınızın (örn: uygulamayiBaslat) yanına ekleyin
 async function runFirestoreOperation(buttonElement, operationFunction) {
     if (!buttonElement) return;
 
@@ -5233,19 +5257,14 @@ async function runFirestoreOperation(buttonElement, operationFunction) {
     buttonElement.textContent = 'İşleniyor...';
 
     try {
-        // Asıl veritabanı işlemini (kaydetme, silme vb.) çalıştır
         await operationFunction();
-        
-        // Başarı durumunda butonu eski haline getir
-        buttonElement.disabled = false;
+	buttonElement.disabled = false;
         buttonElement.textContent = originalButtonText;
 
     } catch (error) {
         console.error("Firestore işlemi sırasında hata:", error);
         showToast(`Bir hata oluştu: ${error.message}. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.`, true);
-        
-        // Hata durumunda da butonu eski haline getir ki kullanıcı tekrar deneyebilsin
-        buttonElement.disabled = false;
+  	buttonElement.disabled = false;
         buttonElement.textContent = originalButtonText;
     }
 }
