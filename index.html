@@ -12,8 +12,14 @@
 	
 </head>
 <body>
-<div class="sidebar">
-        <img src="logo.png" alt="Uygulama Logosu" class="sidebar-logo">
+
+
+<div id="loader-overlay">
+    <div class="spinner"></div>
+    <p id="loader-status-text">Uygulama başlatılıyor...</p>
+</div>
+<div class="sidebar" style="visibility: hidden;">
+    <img src="logo.png" alt="Uygulama Logosu" class="sidebar-logo">
         <nav id="sidebarNav">
             <ul>
 		<li class="quick-entry-link"><a href="hizli-giris.html" target="_blank">⚡ Hızlı Süt Girişi</a></li>
@@ -43,7 +49,8 @@
         </nav>
 </div>
 
-<div class="main-content"><button id="menuToggleBtn" class="menu-toggle-btn dont-print">☰</button>
+<div class="main-content" style="visibility: hidden;">
+<button id="menuToggleBtn" class="menu-toggle-btn dont-print">☰</button>
 <section id="dashboard" class="module-section">
             <div class="module-header"><h2>📝 Kontrol Paneli</h2></div>
             <div class="container">
@@ -878,52 +885,76 @@ const db = initializeFirestore(app, {
         }
         
        
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                try {
-                    currentUserId = user.uid;
-                    const userDocRef = doc(db, 'kullanicilar', user.uid);
-                    const userDocSnap = await getDoc(userDocRef);
+ onAuthStateChanged(auth, async (user) => {
+    if (document.body.dataset.appStarted === 'true') return;
 
-                    if (!userDocSnap.exists()) {
-                        throw new Error("Veritabanında kullanıcı profili bulunamadı. Lütfen sistem yöneticisi ile iletişime geçin.");
-                    }
+    if (user) {
+        try {
+            currentUserId = user.uid;
+            const userDocRef = doc(db, 'kullanicilar', user.uid);
+            const userDocSnap = await getDoc(userDocRef);
 
-                    const userData = userDocSnap.data();
-                    sahipId = userData.sahipId || user.uid;
-                    currentUserRole = userData.rol;
+            if (!userDocSnap.exists()) throw new Error("Veritabanında kullanıcı profili bulunamadı.");
 
-                    if (!sahipId) {
-                        throw new Error("Kritik kullanıcı kimliği (sahipId) alınamadı. Profil veriniz bozuk veya eksik olabilir.");
-                    }
+            const userData = userDocSnap.data();
+            const retrievedSahipId = userData.sahipId || user.uid;
+            currentUserRole = userData.rol;
 
-uygulamayiBaslat();
+            if (!retrievedSahipId) throw new Error("Kritik kullanıcı kimliği (sahipId) alınamadı.");
 
-                } catch (error) {
-                    console.error("Giriş sırasında kritik hata:", error);
-                    const mainContent = document.querySelector('.main-content');
-                    if (mainContent) {
-                        mainContent.innerHTML = `
-                            <div style="padding: 40px; text-align: center; color: #d9534f;">
-                                <h2>Sistem Başlatılamadı</h2>
-                                <p>Uygulama başlatılırken kritik bir hata oluştu. Lütfen internet bağlantınızı kontrol edip sayfayı yenileyin.</p>
-                                <p><strong>Hata Detayı:</strong> ${error.message}</p>
-                            </div>
-                        `;
-                    }
-                    showToast(`Sistem başlatılamadı: ${error.message}`, true);
+            document.body.dataset.appStarted = 'true';
+
+            // --- GÜNCELLEME BURADA ---
+            // Panel seçimi gerekip gerekmediğini KONTROL ET
+            if (currentUserRole === 'admin' && !sessionStorage.getItem('panelSecildi')) {
+
+                // Butonları ve olay dinleyicilerini HAZIRLA
+                const panelButton = document.getElementById('secim-sut-takibi-btn');
+                const mustahsilButton = document.getElementById('secim-mustahsil-merkezi-btn');
+
+                if (panelButton) {
+                    panelButton.addEventListener('click', () => {
+                        sessionStorage.setItem('panelSecildi', 'true');
+                        document.getElementById('secim-modal-overlay').classList.remove('show');
+                        uygulamayiBaslat(retrievedSahipId);
+                    });
                 }
+
+                if (mustahsilButton) {
+                    mustahsilButton.addEventListener('click', () => {
+                         sessionStorage.setItem('panelSecildi', 'true');
+                         window.location.href = 'mustahsil.html';
+                    });
+                }
+
+                // Her şey hazır olduktan SONRA seçim ekranını GÖSTER
+                document.getElementById('secim-modal-overlay').classList.add('show');
+
             } else {
-                window.location.href = 'login.html';
+                // Panel seçimi gerekmiyorsa (çalışan veya daha önce seçim yapmış admin ise)
+                // uygulamayı doğrudan ID ile başlat
+                uygulamayiBaslat(retrievedSahipId);
             }
-        });
+
+        } catch (error) {
+            console.error("Giriş sırasında kritik hata:", error);
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                mainContent.innerHTML = `<div style="padding: 40px; text-align: center; color: #d9534f;"><h2>Sistem Başlatılamadı</h2><p>Lütfen internet bağlantınızı kontrol edip sayfayı yenileyin.</p><p><strong>Hata Detayı:</strong> ${error.message}</p></div>`;
+            }
+            showToast(`Sistem başlatılamadı: ${error.message}`, true);
+        }
+    } else {
+        window.location.href = 'login.html';
+    }
+});
     }
     initializeAppSequence();
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').catch(err => console.error('Service Worker registration failed: ', err));
-        });
-    }
+    //if ('serviceWorker' in navigator) {
+     //   window.addEventListener('load', () => {
+        //    navigator.serviceWorker.register('sw.js').catch(err => console.error('Service Worker registration failed: ', err));
+      //  });
+    //}
 
     Chart.register(ChartDataLabels);
     
@@ -990,11 +1021,7 @@ uygulamayiBaslat();
         overlay.classList.add('show');
     }
     
-    document.getElementById('secim-sut-takibi-btn')?.addEventListener('click', () => {
-        sessionStorage.setItem('panelSecildi', 'true'); // Seçim yapıldığını kaydet
-        document.getElementById('secim-modal-overlay').classList.remove('show');
-        uygulamayiBaslat(); // Uygulamayı başlat
-    });
+
 
     document.getElementById('secim-mustahsil-merkezi-btn')?.addEventListener('click', () => {
         sessionStorage.setItem('panelSecildi', 'true'); // Seçim yapıldığını kaydet
@@ -1054,7 +1081,42 @@ async function loadFullHistoryInBackground() {
 }
 
 
-async function uygulamayiBaslat() {
+async function uygulamayiBaslat(loggedInSahipId) {
+   const loaderOverlay = document.getElementById('loader-overlay');
+    const loaderStatusText = document.getElementById('loader-status-text');
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+
+    const updateLoaderStatus = (message) => {
+        if (loaderStatusText) {
+            loaderStatusText.textContent = message;
+        }
+    };
+
+
+
+    sahipId = loggedInSahipId;
+    if (!sahipId) {
+        updateLoaderStatus("Kritik Hata: Kullanıcı kimliği bulunamadı!");
+        console.error("KRİTİK HATA: sahipId olmadan uygulama başlatılamaz.");
+        return;
+    }
+
+    // --- VERİ YÜKLEME ADIMLARI ---
+
+    updateLoaderStatus("Ayarlar yükleniyor...");
+    await getSettings();
+
+    updateLoaderStatus("Temel veriler hazırlanıyor (Cariler, Yemler, Son 6 Ay)...");
+    await loadInitialEssentialData();
+
+    updateLoaderStatus("Tüm geçmiş veriler arka planda senkronize ediliyor...");
+    fullHistoryPromise = loadFullHistoryInBackground();
+
+    updateLoaderStatus("Arayüz hazırlanıyor...");
+
+
+
     document.getElementById('secim-modal-overlay').style.display = 'none';
     document.querySelector('.sidebar').style.visibility = 'visible';
     document.querySelector('.main-content').style.visibility = 'visible';
@@ -1118,16 +1180,18 @@ async function uygulamayiBaslat() {
 
     if (window.isAppInitialized) { return; }
     window.isAppInitialized = true;
-    
+    const sidebarNav = document.getElementById('sidebarNav');
+    document.getElementById('moduleSwitchSelect')?.addEventListener('change', function() {
+        if (this.value) window.location.href = this.value;
+    });
+
+
     await getSettings();
     await loadInitialEssentialData();
     fullHistoryPromise = loadFullHistoryInBackground();
 
 
-    const sidebarNav = document.getElementById('sidebarNav');
-document.getElementById('moduleSwitchSelect')?.addEventListener('change', function() {
-        if (this.value) window.location.href = this.value;
-    });
+
 
     const moduleSections = document.querySelectorAll('.main-content .module-section');
     const logoutButton = document.getElementById('logoutButton');
@@ -1150,7 +1214,6 @@ document.getElementById('moduleSwitchSelect')?.addEventListener('change', functi
     const sutDuzenleForm = document.getElementById('sutDuzenleForm');
     const odemeCariSecimi = document.getElementById('odemeYapilanTedarikci');
     const menuToggleBtn = document.getElementById('menuToggleBtn');
-    const sidebar = document.querySelector('.sidebar');
     const cariSuggestionBox = document.getElementById('cariSearchSuggestions');
     
     window.editCari = editCari;
@@ -1523,8 +1586,25 @@ if (targetId === 'ayarlar') {
     document.getElementById('yemAlisMiktar').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
     document.getElementById('yemAlisBirimFiyati').addEventListener('input', () => hesaplaToplamTutar('yemAlisMiktar', 'yemAlisBirimFiyati', 'yemAlisToplamTutar'));
     document.getElementById('firmaDuzenleBtn')?.addEventListener('click', () => toggleFirmaBilgileriEdit(true));
+        if (loaderOverlay) {
+        loaderOverlay.style.opacity = '0';
+        setTimeout(() => {
+            loaderOverlay.style.display = 'none';
+        }, 500); // 0.5 saniye sonra tamamen kaldır
+    }
+
+    // Ana arayüzü görünür yap
+    if (sidebar && mainContent) {
+        sidebar.style.visibility = 'visible';
+        mainContent.style.visibility = 'visible';
+    }
+
+    // Varsayılan olarak kontrol panelini aç
     const dashboardLink = document.querySelector('#sidebarNav a[href="#dashboard"]');
-    if (dashboardLink && !dashboardLink.classList.contains('active')) {dashboardLink.click();}}
+    if (dashboardLink && !dashboardLink.classList.contains('active')) {
+        dashboardLink.click();
+    }
+}
 
 
 async function loadAndRenderAllData() {

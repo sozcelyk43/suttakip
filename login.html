@@ -7,21 +7,93 @@
     <meta name="theme-color" content="#2c3e50">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192x192.png">
-    <link rel="icon" href="https://raw.githubusercontent.com/sozcelyk43/suttakip/refs/heads/main/favicon.ico" type="image/x-icon" />
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
-        body {font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;display: flex;justify-content: center;align-items: center;min-height: 100vh;margin: 0;background-color: #f0f2f5;}
-        .login-container {background-color: #ffffff;padding: 40px;border-radius: 12px;box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);width: 100%;max-width: 400px;text-align: center;}
-        h2 {margin-top: 0;margin-bottom: 10px;color: #1c1c1e;font-weight: 600;}
-        .subtitle {margin-bottom: 30px;color: #6a6a6e;font-size: 0.95em;}
-        .input-group {margin-bottom: 20px;text-align: left;}
-        .input-group label {display: block;margin-bottom: 8px;color: #3c3c3e;font-weight: 500;font-size: 0.9em;}
-        .input-group input {width: 100%;padding: 12px 15px;border: 1px solid #dcdce0;border-radius: 8px;box-sizing: border-box;font-size: 1em;transition: border-color 0.2s, box-shadow 0.2s;}
-        .input-group input:focus {outline: none;border-color: #007bff;box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);}
-        button {width: 100%;padding: 12px;background-color: #007bff;color: white;border: none;border-radius: 8px;cursor: pointer;font-size: 1.05em;font-weight: 500;transition: background-color 0.2s;}
-        button:hover {background-color: #0056b3;}
-        .error-message {color: #dc3545;margin-top: 15px;height: 20px;font-size: 0.9em;}
+        body {
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5; /* Açık gri arkaplan */
+        }
+
+        .login-container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); /* Daha belirgin gölge */
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #1c1c1e; /* Koyu renk başlık */
+            font-weight: 600;
+        }
+
+        .subtitle {
+            margin-bottom: 30px;
+            color: #6a6a6e; /* Gri tonlu alt başlık */
+            font-size: 0.95em;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #3c3c3e;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #dcdce0;
+            border-radius: 8px;
+            box-sizing: border-box; /* Padding ve border'ı genişliğe dahil et */
+            font-size: 1em;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #007bff; /* Mavi çerçeve */
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2); /* Mavi odaklanma gölgesi */
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff; /* Ana Mavi Buton */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.05em;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #0056b3; /* Koyu mavi */
+        }
+
+        .error-message {
+            color: #dc3545; /* Kırmızı hata rengi */
+            margin-top: 15px;
+            height: 20px;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
@@ -44,76 +116,102 @@
     </p>
 </form>
     </div>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyCWG4nFwpXRffr_3MO8-Us9mWK6Wsfn0mY",
-        authDomain: "sut-takip-projem.firebaseapp.com",
-        projectId: "sut-takip-projem",
-        storageBucket: "sut-takip-projem.appspot.com",
-        messagingSenderId: "512756958486",
-        appId: "1:512756958486:web:13cceb6835e2c575e9fc37",
-        measurementId: "G-LYLT9WFVNK"
-    };
+    <script>
+        // Firebase konfigürasyon bilgileriniz
+        const firebaseConfig = {
+            apiKey: "AIzaSyCWG4nFwpXRffr_3MO8-Us9mWK6Wsfn0mY",
+            authDomain: "sut-takip-projem.firebaseapp.com",
+            projectId: "sut-takip-projem",
+            storageBucket: "sut-takip-projem.appspot.com",
+            messagingSenderId: "512756958486",
+            appId: "1:512756958486:web:13cceb6835e2c575e9fc37",
+            measurementId: "G-LYLT9WFVNK"
+        };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    auth.onAuthStateChanged(function(user) {
-        if (user) {yonlendir(user.uid);}
-    });
-    const loginForm = document.getElementById('loginForm');
-    const errorMessage = document.getElementById('errorMessage');
+        // Firebase'i başlat
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-async function yonlendir(uid) {
-        try {
-            const userDoc = await db.collection('kullanicilar').doc(uid).get();
-            if (userDoc.exists) {
-                const userRole = userDoc.data().rol;
+        // Sayfa Yüklendiğinde Oturum Kontrolü
+        auth.onAuthStateChanged(function(user) {
+            if (user) {
+                // Eğer kullanıcı zaten giriş yapmışsa, beklemeden ilgili sayfaya yönlendir.
+                yonlendir(user.uid);
+            }
+        });
 
-                if (userRole === 'calisan') {
-                    window.location.href = 'hizli-giris.html';
-                } else if (userRole === 'uretici') {
-                    window.location.href = 'musteri_portali.html';
-                } else if (userRole === 'admin') {
-                    window.location.href = 'index.html'; // Admin index'e gitsin
+        // HTML Elementlerini Seçme
+        const loginForm = document.getElementById('loginForm');
+        const loginButton = loginForm.querySelector('button[type="submit"]');
+        const errorMessageElement = document.getElementById('errorMessage');
+
+        // Rol Kontrolü ve Yönlendirme Fonksiyonu
+        async function yonlendir(uid) {
+            try {
+                const userDoc = await db.collection('kullanicilar').doc(uid).get();
+                if (userDoc.exists) {
+                    const userRole = userDoc.data().rol;
+
+                    if (userRole === 'calisan') {
+                        window.location.href = 'hizli-giris.html';
+                    } else if (userRole === 'uretici') {
+                        window.location.href = 'musteri_portali.html';
+                    } else if (userRole === 'admin') {
+                        window.location.href = 'index.html';
+                    } else {
+                        errorMessageElement.textContent = 'Kullanıcı rolü geçersiz. Yöneticiye bildirin.';
+                        auth.signOut();
+                    }
                 } else {
-                    errorMessage.textContent = 'Kullanıcı rolü geçersiz. Yöneticiye bildirin.';
+                    errorMessageElement.textContent = 'Profil veritabanında bulunamadı.';
                     auth.signOut();
                 }
-            } else {
-                errorMessage.textContent = 'Profil veritabanında bulunamadı.';
+            } catch (error) {
+                errorMessageElement.textContent = 'Veritabanı hatası. Lütfen tekrar deneyin.';
+                console.error("Yönlendirme hatası:", error);
                 auth.signOut();
             }
-        } catch (error) {
-            errorMessage.textContent = 'Veritabanı hatası. Lütfen tekrar deneyin.';
-            console.error("Yönlendirme hatası:", error);
-            auth.signOut();
         }
-    }
 
-    loginForm.addEventListener('submit', async function(event) {
-        event.preventDefault();
-        const email = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        errorMessage.textContent = ''; // Hata mesajını temizle
+        // Form Gönderme Olayı
+        loginForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
 
-        try {
-            const userCredential = await auth.signInWithEmailAndPassword(email, password);
-            await yonlendir(userCredential.user.uid);
-        } catch (error) {
-            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                 errorMessage.textContent = "E-posta veya şifre hatalı!";
-            } else {
-                 errorMessage.textContent = "Bir hata oluştu. Lütfen tekrar deneyin.";
+            loginButton.disabled = true;
+            loginButton.textContent = 'Giriş Yapılıyor...';
+            errorMessageElement.textContent = '';
+
+            const email = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                await yonlendir(userCredential.user.uid);
+            } catch (error) {
+                // GÜNCELLEME: Hatayı daha detaylı yazdırmak için bu iki satır değiştirildi.
+                console.error("Firebase Giriş Hatası Kodu:", error.code);
+                console.error("Firebase Giriş Hatası Mesajı:", error.message);
+
+                // Kullanıcıya anlaşılır bir hata mesajı göster
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                     errorMessageElement.textContent = "E-posta veya şifre hatalı!";
+                } else if (error.code === 'auth/network-request-failed') {
+                     errorMessageElement.textContent = "İnternet bağlantısı sorunu. Lütfen tekrar deneyin.";
+                } else {
+                     errorMessageElement.textContent = "Bilinmeyen bir hata oluştu. Lütfen tekrar deneyin.";
+                }
+
+                // Hata durumunda butonu tekrar aktif et
+                loginButton.disabled = false;
+                loginButton.textContent = 'Giriş Yap';
             }
-            console.error("Giriş Hatası:", error);
-        }
-    });
-</script>
+        });
+    </script>
 
 </body>
 </html>
