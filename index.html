@@ -1439,29 +1439,59 @@ async function uygulamayiBaslat(loggedInSahipId) {
             populateCariKategoriSelect(document.getElementById('karneRaporuKategoriSecimi'), "Tüm Kategoriler");
         }
         
-        if (targetId === 'hareket-dokumu') {
+    if (targetId === 'hareket-dokumu') {
             populateCariSelect(document.getElementById('hd-cari-secimi'), null, "Tüm Cariler");
-
-
-
-if (targetId === 'ayarlar') {
-                renderCariKategoriListesi();
-            }
-             // --- GÜNCELLENEN KISIM BAŞLANGICI ---
+            
             const baslangicInput = document.getElementById('hd-baslangic-tarihi');
             const bitisInput = document.getElementById('hd-bitis-tarihi');
             const today = new Date();
             const ayinIlkGunu = new Date(today.getFullYear(), today.getMonth(), 1);
-            const formatForInput = (date) => date.toISOString().split('T')[0];
+
+            const formatForInput = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
             
-            baslangicInput.value = formatForInput(ayinIlkGunu);
-            bitisInput.value = formatForInput(today);
+            const baslangicStr = formatForInput(ayinIlkGunu);
+            const bitisStr = formatForInput(today);
             
-            // Raporu otomatik olarak getir
-            fetchAndDisplayHareketler();
-            // --- GÜNCELLENEN KISIM SONU ---
+            // --- GÜNCELLEME BURADA BAŞLIYOR ---
+            // WebView'ın otomatik form doldurma işleminden sonra çalışmasını garanti etmek için
+            // kodumuzu küçük bir gecikmeyle (0 milisaniye yeterli) çalıştırıyoruz.
+            setTimeout(() => {
+                baslangicInput.value = baslangicStr;
+                bitisInput.value = bitisStr;
+                
+                // Raporu, tarihler ayarlandıktan SONRA getirdiğimizden emin oluyoruz.
+                fetchAndDisplayHareketler(); 
+
+                console.log(`setTimeout sonrası atanan tarih: ${baslangicInput.value}`);
+            }, 0);
+            // --- GÜNCELLEME SONU ---
         }
-    });
+
+
+
+	if (targetId === 'ayarlar') {
+            renderCariKategoriListesi();
+        }
+         // --- GÜNCELLENEN KISIM BAŞLANGICI ---
+        const baslangicInput = document.getElementById('hd-baslangic-tarihi');
+        const bitisInput = document.getElementById('hd-bitis-tarihi');
+        const today = new Date();
+        const ayinIlkGunu = new Date(today.getFullYear(), today.getMonth(), 1);
+        const formatForInput = (date) => date.toISOString().split('T')[0];
+        
+        baslangicInput.value = formatForInput(ayinIlkGunu);
+        bitisInput.value = formatForInput(today);
+        
+        // Raporu otomatik olarak getir
+        fetchAndDisplayHareketler();
+        // --- GÜNCELLENEN KISIM SONU ---
+      }
+    );
 
     logoutButton.addEventListener('click', handleLogout);
     cariForm.addEventListener('submit', handleCariKaydet);
