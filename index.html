@@ -452,7 +452,59 @@
 </form>
 
 </div>
-                 <div class="list-section"><h3>İşlem Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Cari</th><th>İşlem Türü</th><th>Tutar</th><th>Açıklama</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="odemeListesiBody"></tbody></table></div>
+                 <div class="list-section">
+
+<div class="form-section dont-print" style="border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin-bottom: 20px; background-color: #f9f9f9;">
+    <h4>Filtreler</h4>
+    <div class="form-grid" style="grid-template-columns: 1fr 1fr 2fr; gap: 10px; align-items: end;">
+    <div class="form-group">
+        <label for="odemeListesiBaslangicTarihi">Başlangıç Tarihi:</label>
+        <input type="date" id="odemeListesiBaslangicTarihi" class="form-control">
+    </div>
+    <div class="form-group">
+        <label for="odemeListesiBitisTarihi">Bitiş Tarihi:</label>
+        <input type="date" id="odemeListesiBitisTarihi" class="form-control">
+    </div>
+    
+    <div class="form-group" style="position: relative;">
+        <label for="odemeFiltreCariAramaInput">Cari Ara:</label>
+        <input type="text" id="odemeFiltreCariAramaInput" class="form-control" placeholder="Aramak için yazın..." autocomplete="off">
+        <input type="hidden" id="odemeFiltreCariId">
+        <div id="odemeFiltreCariSuggestions" class="autocomplete-box"></div>
+    </div>
+    
+    <div class="form-group">
+        <label for="odemeListesiIslemTuruFiltre">İşlem Türü:</label>
+        <select id="odemeListesiIslemTuruFiltre" class="form-control">
+            <option value="">Tümü</option>
+            <option value="odeme">Tahsilat (Gelen Para)</option>
+            <option value="tahsilat">Ödeme (Giden Para)</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="odemeListesiOdemeTuruFiltre">Ödeme Türü:</label>
+        <select id="odemeListesiOdemeTuruFiltre" class="form-control">
+            <option value="">Tümü</option>
+            <option value="Kasa">Kasa</option>
+            <option value="Banka">Banka</option>
+            <option value="Pos">Pos</option>
+            <option value="Çek">Çek</option>
+            <option value="Senet">Senet</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="odemeListesiAciklamaFiltre">Açıklamada Ara:</label>
+        <input type="text" id="odemeListesiAciklamaFiltre" class="form-control" placeholder="Aramak için yazın...">
+    </div>
+</div>
+<div style="margin-top: 15px;">
+        <button type="button" class="btn btn-primary" id="odemeListesiFiltreleBtn">Filtrele</button>
+        <button type="button" class="btn" id="odemeListesiTemizleBtn">Filtreyi Temizle</button>
+    </div>
+
+
+
+<h3>İşlem Hareketleri</h3><table><thead><tr><th>Tarih</th><th>Cari</th><th>İşlem Türü</th><th>Tutar</th><th>Açıklama</th><th class="dont-print">İşlemler</th></tr></thead><tbody id="odemeListesiBody"></tbody></table></div>
             </div>
         </section>
         
@@ -755,10 +807,11 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut, reauthenticateWithCredential, EmailAuthProvider, updatePassword, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
     import { 
-        getFirestore, collection, doc, getDoc, getDocs, addDoc, setDoc, updateDoc, deleteDoc, 
-        query, where, orderBy, limit, runTransaction, increment, onSnapshot, FieldPath, writeBatch, documentId,
-        enableIndexedDbPersistence
-    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    getFirestore, collection, doc, getDoc, getDocs, addDoc, setDoc, updateDoc, deleteDoc, 
+    query, where, orderBy, limit, runTransaction, increment, onSnapshot, FieldPath, writeBatch, documentId,
+    initializeFirestore, persistentLocalCache, persistentMultipleTabManager // YENİ EKLENDİ
+} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
 
     // 2. ADIM: FIREBASE KONFİGÜRASYONU VE BAŞLANGIÇ DEĞİŞKENLERİ
     const firebaseConfig = {
@@ -773,7 +826,9 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
+const db = initializeFirestore(app, {
+    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+});
 
     // 3. ADIM: TÜM GLOBAL DEĞİŞKENLERİ GRUPLANDIR
     let selectedMmCariId = '';
@@ -808,7 +863,7 @@
     let fullHistoryPromise = null;
     let isInitialDataLoaded = false;
 
-    // 4. ADIM: UYGULAMAYI BAŞLATAN ANA FONKSİYON OLUŞTUR
+
     async function initializeAppSequence() {
         try {
             // Çevrimdışı desteği EN BAŞTA ve GÜVENLİ bir şekilde aktif et
@@ -822,15 +877,7 @@
             }
         }
         
-        try {
-            // Oturum kalıcılığını ayarla
-            await setPersistence(auth, browserSessionPersistence);
-            console.log("Firebase oturum kalıcılığı 'session' olarak ayarlandı.");
-        } catch(error) {
-            console.error("Firebase oturum ayarı yapılamadı:", error);
-        }
-
-        // Kullanıcı oturum durumunu dinle ve uygulamayı başlat
+       
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 try {
@@ -850,8 +897,7 @@
                         throw new Error("Kritik kullanıcı kimliği (sahipId) alınamadı. Profil veriniz bozuk veya eksik olabilir.");
                     }
 
-                    // Her şey yolundaysa uygulamayı başlat
-                    uygulamayiBaslat();
+uygulamayiBaslat();
 
                 } catch (error) {
                     console.error("Giriş sırasında kritik hata:", error);
@@ -872,14 +918,7 @@
             }
         });
     }
-
-    // 5. ADIM: ANA BAŞLATMA FONKSİYONUNU ÇAĞIR
     initializeAppSequence();
-
-
-    // --- YARDIMCI VE DİĞER FONKSİYONLAR ---
-    // (Bu bölümün geri kalanı gönderdiğiniz kodla aynı, herhangi bir değişiklik gerekmiyor)
-
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('sw.js').catch(err => console.error('Service Worker registration failed: ', err));
@@ -1019,6 +1058,63 @@ async function uygulamayiBaslat() {
     document.getElementById('secim-modal-overlay').style.display = 'none';
     document.querySelector('.sidebar').style.visibility = 'visible';
     document.querySelector('.main-content').style.visibility = 'visible';
+
+// Tahsilat/Ödeme Filtresi için Dinamik Cari Arama
+    const odemeFiltreInput = document.getElementById('odemeFiltreCariAramaInput');
+    const odemeFiltreSuggestions = document.getElementById('odemeFiltreCariSuggestions');
+    const odemeFiltreHiddenId = document.getElementById('odemeFiltreCariId');
+
+    if (odemeFiltreInput) {
+        odemeFiltreInput.addEventListener('input', function() {
+            const queryText = this.value.toLowerCase();
+            odemeFiltreSuggestions.innerHTML = '';
+            odemeFiltreSuggestions.style.display = 'none';
+            odemeFiltreHiddenId.value = ''; // Arama yaparken seçimi temizle
+
+            if (queryText.length < 2) return;
+
+            const matches = [];
+            window.cariDataMap.forEach((cari, id) => {
+                if (cari.adiSoyadi && cari.adiSoyadi.toLowerCase().includes(queryText)) {
+                    matches.push({ id: id, adi: cari.adiSoyadi });
+                }
+            });
+
+            if (matches.length > 0) {
+                odemeFiltreSuggestions.style.display = 'block';
+                matches.slice(0, 10).forEach(match => {
+                    const div = document.createElement('div');
+                    div.textContent = match.adi;
+                    div.addEventListener('click', () => {
+                        odemeFiltreInput.value = match.adi;
+                        odemeFiltreHiddenId.value = match.id;
+                        odemeFiltreSuggestions.style.display = 'none';
+                    });
+                    odemeFiltreSuggestions.appendChild(div);
+                });
+            }
+        });
+
+        odemeFiltreInput.addEventListener('blur', function() {
+            setTimeout(() => { odemeFiltreSuggestions.style.display = 'none'; }, 200);
+        });
+    }
+    document.getElementById('odemeListesiFiltreleBtn')?.addEventListener('click', renderOdemeListesi);
+
+       document.getElementById('odemeListesiTemizleBtn')?.addEventListener('click', () => {
+        document.getElementById('odemeListesiBaslangicTarihi').value = '';
+        document.getElementById('odemeListesiBitisTarihi').value = '';
+        document.getElementById('odemeFiltreCariAramaInput').value = ''; // GÜNCELLENDİ
+        document.getElementById('odemeFiltreCariId').value = ''; // GÜNCELLENDİ
+        document.getElementById('odemeListesiIslemTuruFiltre').value = '';
+        document.getElementById('odemeListesiOdemeTuruFiltre').value = '';
+        document.getElementById('odemeListesiAciklamaFiltre').value = '';
+        renderOdemeListesi();
+    });
+
+
+
+
 
     if (window.isAppInitialized) { return; }
     window.isAppInitialized = true;
@@ -1229,6 +1325,7 @@ document.getElementById('moduleSwitchSelect')?.addEventListener('change', functi
     
         if (targetId === 'tahsilat-ve-odemeler') {
             populateCariSelect(document.getElementById('odemeYapilanTedarikci'));
+            // ESKİ SATIRI SİL: populateCariSelect(document.getElementById('odemeListesiCariFiltre'), null, "Tüm Cariler");
             renderOdemeListesi();
         }
         
@@ -1281,6 +1378,12 @@ document.getElementById('moduleSwitchSelect')?.addEventListener('change', functi
         
         if (targetId === 'hareket-dokumu') {
             populateCariSelect(document.getElementById('hd-cari-secimi'), null, "Tüm Cariler");
+
+
+
+if (targetId === 'ayarlar') {
+                renderCariKategoriListesi();
+            }
              // --- GÜNCELLENEN KISIM BAŞLANGICI ---
             const baslangicInput = document.getElementById('hd-baslangic-tarihi');
             const bitisInput = document.getElementById('hd-bitis-tarihi');
@@ -1449,8 +1552,18 @@ async function loadAndRenderAllData() {
     }
 
     function formatDate(dateString) { if (!dateString) return ''; const date = new Date(dateString); const userTimezoneOffset = date.getTimezoneOffset() * 60000; return new Date(date.getTime() + userTimezoneOffset).toLocaleDateString('tr-TR'); }
-    function getTodayForInput() { return new Date().toISOString().split('T')[0]; }
-    function formatMonthYear(ayYil) { if (!ayYil) return ''; const [year, month] = ayYil.split('-'); const date = new Date(year, month - 1); return date.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' });}
+    function getTodayForInput() { 
+        // ESKİ KOD: return new Date().toISOString().split('T')[0];
+        // YENİ VE DOĞRU KOD:
+        const date = new Date();
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+
+function formatMonthYear(ayYil) { if (!ayYil) return ''; const [year, month] = ayYil.split('-'); const date = new Date(year, month - 1); return date.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' });}
     function getMonthYearForInput() { const d = new Date(); return `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}`;}
     function formatCurrency(number) { return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(number); }
     function setEditingMode(formBaslikEl, kaydetBtnEl, temizleBtnEl, editIdVar, formType) { if(!formBaslikEl || !kaydetBtnEl) return; formBaslikEl.textContent = editIdVar ? `${formType} Bilgilerini Düzenle` : `Yeni ${formType} Kaydı`; kaydetBtnEl.textContent = editIdVar ? 'Güncelle' : 'Kaydet'; if (temizleBtnEl) temizleBtnEl.style.display = editIdVar ? 'inline-block' : 'none'; }
@@ -1875,12 +1988,17 @@ async function updateDashboardStats() {
         const today = new Date();
         const yesterday = new Date();
         yesterday.setDate(today.getDate() - 1);
-        const formatForDB = (date) => {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        };
+
+
+
+       const formatForDB = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+
+
         const todayStr = formatForDB(today);
         const yesterdayStr = formatForDB(yesterday);
         const formatForDisplay = (date) => {
@@ -3682,30 +3800,50 @@ function resetOdemeForm() {
 
 async function renderOdemeListesi() {
     const listBody = document.getElementById('odemeListesiBody');
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
+    const listFooter = listBody.parentElement.querySelector('tfoot') || document.createElement('tfoot'); // Footer ekle
+    listBody.parentElement.appendChild(listFooter);
 
-    const thead = listBody.parentElement.querySelector('thead');
-    if (thead) {
-        thead.innerHTML = `
-            <tr>
-                <th>Tarih</th><th>Cari</th><th>İşlem Türü</th><th>Ödeme Türü</th><th>Tutar</th><th>Açıklama</th><th class="dont-print">İşlemler</th></tr>`;
-    }
+    if (!auth.currentUser) return;
+
+    listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Filtreleniyor...</td></tr>';
+    listFooter.innerHTML = ''; // Footer'ı temizle
+
     try {
-        const q = query(
-            collection(db, 'odemeVeTahsilatlar'),
-            where('sahipId', '==', sahipId),
-            orderBy('tarih', 'desc')
-        );
-        const snapshot = await getDocs(q);
+        // 1. Filtre değerlerini oku
+        const startDate = document.getElementById('odemeListesiBaslangicTarihi').value;
+        const endDate = document.getElementById('odemeListesiBitisTarihi').value;
+	const cariId = document.getElementById('odemeFiltreCariId').value;
+        const islemTuru = document.getElementById('odemeListesiIslemTuruFiltre').value;
+        const odemeTuru = document.getElementById('odemeListesiOdemeTuruFiltre').value;
+        const searchTerm = document.getElementById('odemeListesiAciklamaFiltre').value.toLowerCase();
+
+        // 2. Veritabanı sorgusu için koşulları oluştur
+        const constraints = [where('sahipId', '==', sahipId)];
+        if (startDate) constraints.push(where('tarih', '>=', startDate));
+        if (endDate) constraints.push(where('tarih', '<=', endDate));
+        if (cariId) constraints.push(where('cariId', '==', cariId));
+        if (islemTuru) constraints.push(where('islemTuru', '==', islemTuru));
+        if (odemeTuru) constraints.push(where('odemeTuru', '==', odemeTuru));
         
-        if(snapshot.empty){
-            listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">İşlem hareketi bulunmuyor.</td></tr>';
+        const q = query(collection(db, 'odemeVeTahsilatlar'), ...constraints, orderBy('tarih', 'desc'));
+        const snapshot = await getDocs(q);
+
+        // 3. Açıklama için istemci taraflı filtreleme yap (Firestore direkt desteklemez)
+        let filteredDocs = snapshot.docs;
+        if (searchTerm) {
+            filteredDocs = snapshot.docs.filter(doc => 
+                doc.data().aciklama && doc.data().aciklama.toLowerCase().includes(searchTerm)
+            );
+        }
+
+        if (filteredDocs.length === 0) {
+            listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Filtreye uygun işlem hareketi bulunmuyor.</td></tr>';
             return;
         }
     
         let rows = '';
-        snapshot.forEach(doc => {
+        let toplamTutar = 0;
+        filteredDocs.forEach(doc => {
             const islem = doc.data();
             const cariAdi = window.cariDataMap.get(islem.cariId)?.adiSoyadi || 'Bilinmiyor';
             
@@ -3714,6 +3852,13 @@ async function renderOdemeListesi() {
             if(islem.islemTuru === 'tahsilat') islemTuruText = 'Ödeme'; 
             if(islem.islemTuru === 'borc') islemTuruText = 'Açılış Borcu';
             if(islem.islemTuru === 'alacak') islemTuruText = 'Açılış Alacağı';
+
+            // Toplam tutarı hesapla
+            if(islem.islemTuru === 'odeme' || islem.islemTuru === 'alacak') {
+                toplamTutar += islem.tutar;
+            } else if (islem.islemTuru === 'tahsilat' || islem.islemTuru === 'borc') {
+                toplamTutar -= islem.tutar;
+            }
 
             rows += `<tr>
                 <td>${formatDate(islem.tarih)}</td>
@@ -3730,12 +3875,19 @@ async function renderOdemeListesi() {
         });
         listBody.innerHTML = rows;
 
+        // 4. Filtrelenmiş sonuçların toplamını göster
+        listFooter.innerHTML = `
+            <tr style="background-color: #f0f0f0; font-weight: bold;">
+                <td colspan="4" style="text-align: right;">FİLTRE TOPLAMI (Gelen - Giden):</td>
+                <td colspan="3"><strong>${formatCurrency(toplamTutar)}</strong></td>
+            </tr>
+        `;
+
     } catch (e) { 
         console.error("Ödeme listesi yüklenirken hata:", e);
-        listBody.innerHTML = '<tr><td colspan="7" style="color: red; text-align:center;">Ödeme listesi yüklenirken bir hata oluştu.</td></tr>';
+        listBody.innerHTML = '<tr><td colspan="7" style="color: red; text-align:center;">Liste yüklenirken bir hata oluştu.</td></tr>';
     }
 }
-
 async function generateNextCariKodu() {
     try {
         const q = query(collection(db, 'cariler'), where('sahipId', '==', sahipId));
@@ -4528,8 +4680,20 @@ async function handleYemPivotRaporu(reportType)
     try {
         const [year, month] = ayYil.split('-');
         const startDateStr = `${year}-${month}-01`;
-        const endDate = new Date(year, month, 0);
-        const endDateStr = endDate.toISOString().split('T')[0];
+
+        // --- GÜNCELLEME BAŞLANGICI ---
+        // Hatalı tarih hesaplama yöntemi kaldırıldı ve yerine güvenli yöntem eklendi.
+        // ESKİ KOD:
+        // const endDate = new Date(year, month, 0);
+        // const endDateStr = endDate.toISOString().split('T')[0];
+        
+        // YENİ ve DOĞRU KOD:
+        const endDate = new Date(year, parseInt(month, 10), 0); // Ayın son gününü güvenli al
+        const endYear = endDate.getFullYear();
+        const endMonth = String(endDate.getMonth() + 1).padStart(2, '0');
+        const endDay = String(endDate.getDate()).padStart(2, '0');
+        const endDateStr = `${endYear}-${endMonth}-${endDay}`; // 'YYYY-AA-GG' formatını manuel oluştur
+        // --- GÜNCELLEME SONU ---
 
         const satisQuery = query(collection(db, 'yem_satislari'), where('sahipId', '==', sahipId), where('tarih', '>=', startDateStr), where('tarih', '<=', endDateStr));
         const yemlerQuery = query(collection(db, 'yemler'), where('sahipId', '==', sahipId));
@@ -4574,22 +4738,19 @@ async function handleYemPivotRaporu(reportType)
         satisSnapshot.forEach(doc => {
             const satis = doc.data();
             
-            // --- GÜNCELLEME BAŞLANGICI ---
-            let cariInfo = cariMap.get(satis.cariId); // const yerine let olarak değiştirildi
+            let cariInfo = cariMap.get(satis.cariId);
 
-            // Eğer cari kaydı bulunamazsa, satışı atlamak yerine bir yer tutucu oluştur.
-            // Bu, silinmiş carilerin satışlarının da rapora dahil edilmesini sağlar.
             if (!cariInfo) {
                 cariInfo = {
                     adiSoyadi: `Silinmiş Cari (${satis.cariId.substring(0, 5)}...)`,
                     kategori: 'Bilinmiyor'
                 };
             }
-            // --- GÜNCELLEME SONU ---
-
-            if (secilenKoy && cariInfo.kategori !== secilenKoy) {
+            
+            if (secilenKoy && (!cariInfo.kategori || cariInfo.kategori.trim() !== secilenKoy)) {
                 return;
             }
+
             yemlerInReport.add(satis.yemId);
 
             if (!reportData.has(satis.cariId)) {
@@ -4621,7 +4782,8 @@ async function handleYemPivotRaporu(reportType)
             cariData.musteriToplamKar += satisKar;
             cariData.musteriToplamAdet += satis.miktar;
         });
-
+        
+        // ... (Fonksiyonun geri kalan tablo oluşturma kısmı aynı) ...
         const sortedYemList = Array.from(yemlerInReport).sort((a, b) => (yemMap.get(a)?.ad || '').localeCompare(yemMap.get(b)?.ad || ''));
         
         let reportTitle = '';
@@ -4712,6 +4874,7 @@ async function handleYemPivotRaporu(reportType)
         raporAlani.innerHTML = `<p style="color:red; font-weight:bold;">RAPOR OLUŞTURULAMADI!<br>Hata Detayı: ${error.message}</p>`;
     }
 }
+
 async function handleHesapOzetiRaporuOlustur() 
 {
     toggleReportButtons('hesapOzeti', false);
