@@ -3909,25 +3909,42 @@ function resetOdemeForm() {
 }
 
 async function renderOdemeListesi() {
+    const listTable = document.getElementById('odemeListesiBody').parentElement;
     const listBody = document.getElementById('odemeListesiBody');
-    const listFooter = listBody.parentElement.querySelector('tfoot') || document.createElement('tfoot'); // Footer ekle
-    listBody.parentElement.appendChild(listFooter);
+    const listFooter = listTable.querySelector('tfoot') || document.createElement('tfoot');
+    listTable.appendChild(listFooter);
+
+    // --- GÜNCELLEME 1: Doğru ve tam sütun başlıklarını oluştur ---
+    const tableHeader = listTable.querySelector('thead');
+    if (tableHeader) {
+        tableHeader.innerHTML = `
+            <tr>
+                <th>Tarih</th>
+                <th>Cari</th>
+                <th>İşlem Türü</th>
+                <th>Ödeme Türü</th>
+                <th>Açıklama</th>
+                <th>Tutar</th>
+                <th class="dont-print">İşlemler</th>
+            </tr>
+        `;
+    }
+    // --- GÜNCELLEME SONU ---
 
     if (!auth.currentUser) return;
 
     listBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Filtreleniyor...</td></tr>';
-    listFooter.innerHTML = ''; // Footer'ı temizle
+    listFooter.innerHTML = '';
 
     try {
-        // 1. Filtre değerlerini oku
+        // Filtre değerlerini okuma ve sorgu oluşturma bölümü aynı kalıyor...
         const startDate = document.getElementById('odemeListesiBaslangicTarihi').value;
         const endDate = document.getElementById('odemeListesiBitisTarihi').value;
-	const cariId = document.getElementById('odemeFiltreCariId').value;
+        const cariId = document.getElementById('odemeFiltreCariId').value;
         const islemTuru = document.getElementById('odemeListesiIslemTuruFiltre').value;
         const odemeTuru = document.getElementById('odemeListesiOdemeTuruFiltre').value;
         const searchTerm = document.getElementById('odemeListesiAciklamaFiltre').value.toLowerCase();
 
-        // 2. Veritabanı sorgusu için koşulları oluştur
         const constraints = [where('sahipId', '==', sahipId)];
         if (startDate) constraints.push(where('tarih', '>=', startDate));
         if (endDate) constraints.push(where('tarih', '<=', endDate));
@@ -3938,7 +3955,6 @@ async function renderOdemeListesi() {
         const q = query(collection(db, 'odemeVeTahsilatlar'), ...constraints, orderBy('tarih', 'desc'));
         const snapshot = await getDocs(q);
 
-        // 3. Açıklama için istemci taraflı filtreleme yap (Firestore direkt desteklemez)
         let filteredDocs = snapshot.docs;
         if (searchTerm) {
             filteredDocs = snapshot.docs.filter(doc => 
@@ -3957,39 +3973,44 @@ async function renderOdemeListesi() {
             const islem = doc.data();
             const cariAdi = window.cariDataMap.get(islem.cariId)?.adiSoyadi || 'Bilinmiyor';
             
-            let islemTuruText = islem.islemTuru;
-            if(islem.islemTuru === 'odeme') islemTuruText = 'Tahsilat';
-            if(islem.islemTuru === 'tahsilat') islemTuruText = 'Ödeme'; 
-            if(islem.islemTuru === 'borc') islemTuruText = 'Açılış Borcu';
-            if(islem.islemTuru === 'alacak') islemTuruText = 'Açılış Alacağı';
-
-            // Toplam tutarı hesapla
-            if(islem.islemTuru === 'odeme' || islem.islemTuru === 'alacak') {
+            let islemTuruText;
+            if(islem.islemTuru === 'tahsilat') {
+                islemTuruText = 'Tahsilat (Bize Gelen)';
                 toplamTutar += islem.tutar;
-            } else if (islem.islemTuru === 'tahsilat' || islem.islemTuru === 'borc') {
+            } else if (islem.islemTuru === 'odeme') {
+                islemTuruText = 'Ödeme (Bizden Çıkan)';
                 toplamTutar -= islem.tutar;
+            } else if(islem.islemTuru === 'borc') {
+                islemTuruText = 'Açılış Borcu';
+                toplamTutar -= islem.tutar;
+            } else if(islem.islemTuru === 'alacak') {
+                islemTuruText = 'Açılış Alacağı';
+                toplamTutar += islem.tutar;
+            } else {
+                islemTuruText = islem.islemTuru;
             }
 
+            // --- GÜNCELLEME 2: Verileri doğru sütun sırasına göre yerleştir ---
             rows += `<tr>
                 <td>${formatDate(islem.tarih)}</td>
                 <td>${cariAdi}</td>
                 <td>${islemTuruText}</td>
                 <td>${islem.odemeTuru || '-'}</td>
+                <td>${islem.aciklama || ''}</td>
                 <td>${formatCurrency(islem.tutar)}</td>
-                <td>${islem.aciklama}</td>
                 <td class="dont-print">
                     <button class="btn btn-edit btn-sm" onclick="editOdeme('${doc.id}')">Düzenle</button>
                     <button class="btn btn-delete btn-sm" onclick="deleteOdeme('${doc.id}')">Sil</button>
                 </td>
             </tr>`;
+            // --- GÜNCELLEME SONU ---
         });
         listBody.innerHTML = rows;
 
-        // 4. Filtrelenmiş sonuçların toplamını göster
         listFooter.innerHTML = `
             <tr style="background-color: #f0f0f0; font-weight: bold;">
-                <td colspan="4" style="text-align: right;">FİLTRE TOPLAMI (Gelen - Giden):</td>
-                <td colspan="3"><strong>${formatCurrency(toplamTutar)}</strong></td>
+                <td colspan="5" style="text-align: right;">FİLTRE TOPLAMI (Gelen - Giden):</td>
+                <td colspan="2"><strong>${formatCurrency(toplamTutar)}</strong></td>
             </tr>
         `;
 
@@ -3998,6 +4019,8 @@ async function renderOdemeListesi() {
         listBody.innerHTML = '<tr><td colspan="7" style="color: red; text-align:center;">Liste yüklenirken bir hata oluştu.</td></tr>';
     }
 }
+
+
 async function generateNextCariKodu() {
     try {
         const q = query(collection(db, 'cariler'), where('sahipId', '==', sahipId));
