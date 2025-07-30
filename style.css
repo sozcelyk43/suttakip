@@ -680,3 +680,12 @@ tfoot tr,
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
+
+.filter-box {
+    border: 1px solid #dee2e6;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    background-color: #f8f9fa;
+}
+
