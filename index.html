@@ -3278,7 +3278,7 @@ async function handleYemAlisKaydet(event) {
         const yemId = document.getElementById('yemSecimiAlis').value;
         const cariId = document.getElementById('yemAlisTedarikci').value || '';
         const tarih = document.getElementById('yemAlisTarih').value;
-        const userEmail = auth.currentUser ? auth.currentUser.email : 'bilinmiyor'; // YENİ EKLENDİ
+        const userEmail = auth.currentUser ? auth.currentUser.email : 'bilinmiyor';
 
         if (!yemId || !tarih || isNaN(miktar) || miktar <= 0 || isNaN(birimFiyat)) {
             throw new Error("Lütfen yem, tarih, miktar ve fiyat alanlarını doğru doldurun.");
@@ -3292,14 +3292,14 @@ async function handleYemAlisKaydet(event) {
             alisFiyati: birimFiyat,
             toplamTutar: miktar * birimFiyat,
             sahipId: sahipId,
-            kaydedenEmail: userEmail // YENİ EKLENDİ
+            kaydedenEmail: userEmail
         };
         
         const yemRef = doc(db, 'yemler', yemId);
         const degisiklikYapilanAy = tarih.substring(0, 7);
 
         if (editingId) {
-            formData.guncelleyenEmail = userEmail; // YENİ EKLENDİ
+            formData.guncelleyenEmail = userEmail;
             const alisRef = doc(db, 'yem_alimlari', editingId);
             await runTransaction(db, async (transaction) => {
                 const eskiAlisDoc = await transaction.get(alisRef);
@@ -3333,8 +3333,6 @@ async function handleYemAlisKaydet(event) {
         await renderYemStokListesi();
     });
 }
-
-
 async function deleteYemTanimi(id) {
     const message = "Bu yem tanımını silmek istediğinizden emin misiniz? Eğer bu yem ile ilgili bir alış veya satış yapıldıysa, silme işlemi engellenecektir.";
     showCustomConfirm(message, async () => {
@@ -3546,18 +3544,17 @@ function displayHareketler(hareketListesi) {
     if (islemTuruFiltre && islemTuruFiltre !== 'tumu') { filtrelenmisListe = filtrelenmisListe.filter(item => item.tip === islemTuruFiltre); }
     if (filtrelenmisListe.length === 0) { container.innerHTML = '<p style="text-align: center;">Seçtiğiniz kriterlere uygun hiçbir hareket bulunamadı.</p>'; return; }
     
-    // YENİ SÜTUN EKLENDİ (İşlemi Yapan)
     let tableHTML = `<table class="report-table"><thead><tr><th>Tarih</th><th>Cari Adı</th><th>İşlem Türü</th><th>İşlemi Yapan</th><th>Açıklama</th><th>Tutar</th></tr></thead><tbody>`;
     let genelToplam = 0;
     filtrelenmisListe.forEach(item => {
         genelToplam += item.tutar || 0;
-        // YENİ HÜCRE EKLENDİ (item.islemYapan)
         tableHTML += `<tr><td>${formatDate(item.tarih)}</td><td>${item.cariAdi}</td><td>${item.islemTuru}</td><td>${item.islemYapan || ''}</td><td>${item.aciklama}</td><td style="color: ${item.tutar >= 0 ? 'green' : 'red'}; text-align: right;">${formatCurrency(item.tutar)}</td></tr>`;
     });
-    // COLSPAN DEĞERİ GÜNCELLENDİ (5 OLDU)
     tableHTML += `</tbody><tfoot><tr class="report-totals-row"><td colspan="5" style="text-align: right; font-weight: bold;">Filtre Toplamı:</td><td style="font-weight: bold; text-align: right;">${formatCurrency(genelToplam)}</td></tr></tfoot></table>`;
     container.innerHTML = tableHTML;
 }
+
+
 async function fetchAndDisplayHareketler() {
     const container = document.getElementById('hareketDokumuContainer');
     container.innerHTML = '<p style="text-align: center; font-size: 1.2em;">Hareketler yükleniyor, lütfen bekleyin...</p>';
@@ -3582,22 +3579,26 @@ async function fetchAndDisplayHareketler() {
         let birlesikListe = [];
         sutAlimlari.forEach(doc => {
             const data = doc.data();
-            birlesikListe.push({ tarih: data.tarih, cariId: data.cariId, cariAdi: window.cariDataMap.get(data.cariId)?.adiSoyadi || 'Bilinmiyor', islemTuru: 'Süt Alımı', aciklama: `${data.toplam.toFixed(2)} Lt`, tutar: data.toplamTutar, tip: 'sut_alimi', islemYapan: data.kaydedenEmail || '' }); // GÜNCELLENDİ
+            birlesikListe.push({ tarih: data.tarih, cariId: data.cariId, cariAdi: window.cariDataMap.get(data.cariId)?.adiSoyadi || 'Bilinmiyor', islemTuru: 'Süt Alımı', aciklama: `${(data.toplam || 0).toFixed(2)} Lt`, tutar: data.toplamTutar, tip: 'sut_alimi', islemYapan: data.kaydedenEmail || '' });
         });
         yemSatislari.forEach(doc => {
             const data = doc.data();
-            birlesikListe.push({ tarih: data.tarih, cariId: data.cariId, cariAdi: window.cariDataMap.get(data.cariId)?.adiSoyadi || 'Bilinmiyor', islemTuru: 'Yem Satışı', aciklama: `${data.miktar} Adet - ${window.yemDataMap.get(data.yemId)?.ad || ''}`, tutar: data.toplamTutar, tip: 'yem_satisi', islemYapan: data.kaydedenEmail || '' }); // GÜNCELLENDİ
+            birlesikListe.push({ tarih: data.tarih, cariId: data.cariId, cariAdi: window.cariDataMap.get(data.cariId)?.adiSoyadi || 'Bilinmiyor', islemTuru: 'Yem Satışı', aciklama: `${data.miktar} Adet - ${window.yemDataMap.get(data.yemId)?.ad || ''}`, tutar: data.toplamTutar, tip: 'yem_satisi', islemYapan: data.kaydedenEmail || data.guncelleyenEmail || '' });
         });
         yemAlimlari.forEach(doc => {
             const data = doc.data();
-            birlesikListe.push({ tarih: data.tarih, cariId: data.cariId, cariAdi: window.cariDataMap.get(data.cariId)?.adiSoyadi || 'Peşin', islemTuru: 'Yem Alışı', aciklama: `${data.miktar} Adet - ${window.yemDataMap.get(data.yemId)?.ad || ''}`, tutar: -data.toplamTutar, tip: 'yem_alisi', islemYapan: data.kaydedenEmail || '' }); // GÜNCELLENDİ
+            birlesikListe.push({ tarih: data.tarih, cariId: data.cariId, cariAdi: window.cariDataMap.get(data.cariId)?.adiSoyadi || 'Peşin', islemTuru: 'Yem Alışı', aciklama: `${data.miktar} Adet - ${window.yemDataMap.get(data.yemId)?.ad || ''}`, tutar: -data.toplamTutar, tip: 'yem_alisi', islemYapan: data.kaydedenEmail || data.guncelleyenEmail || '' });
         });
         odemeler.forEach(doc => {
             const data = doc.data();
             let islem, tutar, tip;
-            if (data.islemTuru === 'odeme') { islem = 'Ödeme Alındı'; tutar = data.tutar; tip = 'odeme'; }
-            else { islem = 'Tahsilat Yapıldı'; tutar = -data.tutar; tip = 'tahsilat'; }
-            birlesikListe.push({ tarih: data.tarih, cariId: data.cariId, cariAdi: window.cariDataMap.get(data.cariId)?.adiSoyadi || 'Bilinmiyor', islemTuru: islem, aciklama: data.aciklama || data.odemeTuru, tutar: tutar, tip: tip, islemYapan: data.kaydedenEmail || '' }); // GÜNCELLENDİ
+            if (data.islemTuru === 'odeme') { islem = 'Tahsilat (Bize Gelen)'; tutar = data.tutar; tip = 'tahsilat'; } // Mantık ters, düzeltildi
+            else { islem = 'Ödeme (Bizden Çıkan)'; tutar = -data.tutar; tip = 'odeme'; } // Mantık ters, düzeltildi
+            
+            // Açılış bakiyelerini hariç tutmak için ek kontrol
+            if (data.aciklama === "Açılış Bakiyesi") return;
+
+            birlesikListe.push({ tarih: data.tarih, cariId: data.cariId, cariAdi: window.cariDataMap.get(data.cariId)?.adiSoyadi || 'Bilinmiyor', islemTuru: islem, aciklama: data.aciklama || data.odemeTuru, tutar: tutar, tip: tip, islemYapan: data.kaydedenEmail || data.guncelleyenEmail || '' });
         });
         birlesikListe.sort((a, b) => new Date(b.tarih) - new Date(a.tarih));
         cachedHareketler = birlesikListe;
@@ -3608,6 +3609,8 @@ async function fetchAndDisplayHareketler() {
         console.error("Detaylı hareket dökümü alınırken KRİTİK HATA:", error);
     }
 }
+
+
 
 async function deleteSutAlimi(id) {
     showCustomConfirm("Bu süt alım kaydını kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!", async () => {
@@ -3861,7 +3864,7 @@ async function handleOdemeKaydet(event) {
         const editingId = document.getElementById('odemeEditId').value;
         const tutar = parseFloat(document.getElementById('odemeTutari').value);
         const cariId = document.getElementById('odemeYapilanTedarikci').value;
-        const userEmail = auth.currentUser ? auth.currentUser.email : 'bilinmiyor'; // YENİ EKLENDİ
+        const userEmail = auth.currentUser ? auth.currentUser.email : 'bilinmiyor';
 
         if (!cariId || isNaN(tutar) || tutar <= 0) {
             throw new Error("Lütfen cari ve geçerli bir tutar girin.");
@@ -3875,11 +3878,11 @@ async function handleOdemeKaydet(event) {
             tutar: tutar,
             aciklama: document.getElementById('odemeAciklama').value.trim(),
             sahipId: sahipId,
-            kaydedenEmail: userEmail // YENİ EKLENDİ
+            kaydedenEmail: userEmail
         };
 
         if (editingId) {
-            formData.guncelleyenEmail = userEmail; // YENİ EKLENDİ: Güncelleyen bilgisi
+            formData.guncelleyenEmail = userEmail;
             await setDoc(doc(db, 'odemeVeTahsilatlar', editingId), formData, { merge: true });
             const index = transactionCache.odemeVeTahsilatlar.findIndex(o => o.id === editingId);
             if (index > -1) {
@@ -3899,7 +3902,6 @@ async function handleOdemeKaydet(event) {
         await renderOdemeListesi();
     });
 }
-
 
 function resetOdemeForm() {
     document.getElementById('odemeForm').reset();
@@ -4164,6 +4166,7 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih)
     const sabahMiktar = parseFloat(String(sabahInput.value).replace(',', '.')) || 0;
     const aksamMiktar = parseFloat(String(aksamInput.value).replace(',', '.')) || 0;
     const birimFiyat = parseFloat(String(fiyatInput.value).replace(',', '.')) || globalSettings.defaultMilkPrice || 0;
+    const userEmail = auth.currentUser ? auth.currentUser.email : 'bilinmiyor';
 
     const bugunkuToplamMiktar = sabahMiktar + aksamMiktar;
     if (bugunkuToplamMiktar <= 0) {
@@ -4183,11 +4186,10 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih)
             fiyat: birimFiyat,
             toplamTutar: bugunkuToplamMiktar * birimFiyat,
             sahipId: sahipId,
-            kaydedenEmail: userEmail // YENİ EKLENDİ
+            kaydedenEmail: userEmail
         };
 
        try {
-            // ... fonksiyonun geri kalanı aynı ...
             const newDocRef = await addDoc(collection(db, "sut_alimlari"), sutAlimData);
             
             transactionCache.sut_alimlari.push({ id: newDocRef.id, data: sutAlimData });
@@ -4237,6 +4239,10 @@ async function handleTopluSutKaydet(cariId, cariAdi, tarih)
         await proceedWithSave();
     }
 }
+
+
+
+
 
 function calculateKarneTotals() 
 {
@@ -5432,7 +5438,7 @@ async function handleTopluYemSatisKaydet() {
         const cariInput = document.getElementById('topluSatisCari');
         const formTarih = tarihInput.value;
         const formCari = cariInput.value;
-        const userEmail = auth.currentUser ? auth.currentUser.email : 'bilinmiyor'; // YENİ EKLENDİ
+        const userEmail = auth.currentUser ? auth.currentUser.email : 'bilinmiyor';
 
         if (!formTarih || !formCari) {
             throw new Error("Lütfen Satış Tarihi ve Cari seçiniz!");
@@ -5476,13 +5482,13 @@ async function handleTopluYemSatisKaydet() {
                 trx.update(satisRef, {
                     tarih: formTarih, cariId: formCari, miktar: yeniMiktar,
                     satisFiyati: yeniFiyat, toplamTutar: yeniMiktar * yeniFiyat, 
-                    yemId: yeniYemId, kayitZamani: new Date()
+                    yemId: yeniYemId, kayitZamani: new Date(),
+                    guncelleyenEmail: userEmail
                 });
             });
 
             showToast("Satış başarıyla güncellendi.");
             
-            // ÖNBELLEK TEMİZLEME
             await invalidateMonthlyBalances(formCari, degisiklikYapilanAy);
             
             resetTopluSatisFormu();
@@ -5523,7 +5529,7 @@ async function handleTopluYemSatisKaydet() {
                 miktar: miktar,
                 satisFiyati: satisFiyati,
                 toplamTutar: miktar * satisFiyati,
-                kaydedenEmail: userEmail // YENİ EKLENDİ
+                kaydedenEmail: userEmail
             });
             batch.update(yemRef, { stokMiktari: increment(-miktar) });
             satisAdedi++;
@@ -5543,6 +5549,7 @@ async function handleTopluYemSatisKaydet() {
         await loadAllYemlerToCache();
     });
 }
+
 
 
 async function runFirestoreOperation(buttonElement, operationFunction) {
