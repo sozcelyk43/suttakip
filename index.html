@@ -5044,7 +5044,7 @@ async function handleHesapOzetiRaporuOlustur()
         let devredenBakiye = 0;
         const oncekiAyDate = new Date(intYear, intMonth - 2, 1);
         const oncekiAyYil = `${oncekiAyDate.getFullYear()}-${String(oncekiAyDate.getMonth() + 1).padStart(2, '0')}`;
-        const bakiyeKayitId = `${sahipId}_${cariId}_${oncekiAyYil}`; // Daha eşsiz bir ID
+        const bakiyeKayitId = `${sahipId}_${cariId}_${oncekiAyYil}`;
         const bakiyeRef = doc(db, 'aylik_bakiyeler', bakiyeKayitId);
         
         const bakiyeSnap = await getDoc(bakiyeRef);
@@ -5063,13 +5063,12 @@ async function handleHesapOzetiRaporuOlustur()
             devirYemSatis.forEach(d => devredenBorc += d.data().toplamTutar || 0);
             devirOdeme.forEach(d => {
                 const data = d.data();
-                if (data.islemTuru === 'tahsilat' || data.islemTuru === 'alacak' || data.islemTuru === 'odeme') devredenAlacak += data.tutar || 0;
-                else if (data.islemTuru === 'borc') devredenBorc += data.tutar || 0;
+                if (data.islemTuru === 'tahsilat' || data.islemTuru === 'alacak') devredenAlacak += data.tutar || 0;
+                else if (data.islemTuru === 'odeme' || data.islemTuru === 'borc') devredenBorc += data.tutar || 0;
             });
             devredenBakiye = devredenAlacak - devredenBorc;
         }
 
-        
         const devir_row_style = `display: flex; justify-content: space-between; font-weight: bold; padding: 8px; border: 1px solid #ccc; background-color: #f9f9f9; border-radius: 5px;`;
         const devirHTML = `<div class="report-section-block"><p style="${devir_row_style}"><span>Önceki Aydan Devir</span><span>${formatCurrency(devredenBakiye)} ${devredenBakiye >= 0 ? '(Cari Alacaklı)' : '(Cari Borçlu)'}</span></p></div>`;
 
@@ -5081,7 +5080,7 @@ async function handleHesapOzetiRaporuOlustur()
         
         const yemMap = new Map(yemlerSnapshot.docs.map(doc => [doc.id, doc.data()]));
         let ayToplamSut = 0;
-        let sutAlimlariHTML = '<div class="report-section-block"><h5>Cari Ay Süt Alımları</h5>';
+        let sutAlimlariHTML = '<div class="report-section-block"><h5>Cari Ay Süt Alımları (Cari Alacağı)</h5>';
         if (aySut.empty) {
             sutAlimlariHTML += '<p>Bu ay süt alımı yapılmamış.</p>';
         } else {
@@ -5110,7 +5109,7 @@ async function handleHesapOzetiRaporuOlustur()
         sutAlimlariHTML += '</div>';
 
         let ayToplamYem = 0;
-        let yemSatislariHTML = '<div class="report-section-block"><h5>Cari Ay Yem Satışları</h5>';
+        let yemSatislariHTML = '<div class="report-section-block"><h5>Cari Ay Yem Satışları (Cari Borcu)</h5>';
         if (ayYemSatis.empty) {
             yemSatislariHTML += '<p>Bu ay yem satışı yapılmamış.</p>';
         } else {
@@ -5134,8 +5133,9 @@ async function handleHesapOzetiRaporuOlustur()
         yemSatislariHTML += '</div>';
 
         let ayToplamOdeme = 0;
-        let odemelerHTML = '<div class="report-section-block"><h5>Cari Ay Yapılan Ödemeler (Müşteriye Giden)</h5>';
-        const odemeIslemleri = ayOdeme.docs.filter(doc => doc.data().islemTuru === 'tahsilat');
+        let odemelerHTML = '<div class="report-section-block"><h5>Cari Ay Yapılan Ödemeler / Müşteriye Giden (Cari Borcu)</h5>';
+        // DÜZELTME 1: Filtre 'odeme' olarak değiştirildi.
+        const odemeIslemleri = ayOdeme.docs.filter(doc => doc.data().islemTuru === 'odeme');
         if (odemeIslemleri.length === 0) {
             odemelerHTML += '<p>Bu ay müşteriye ödeme yapılmamış.</p>';
         } else {
@@ -5150,8 +5150,9 @@ async function handleHesapOzetiRaporuOlustur()
         odemelerHTML += '</div>';
 
         let ayToplamTahsilat = 0;
-        let tahsilatlarHTML = '<div class="report-section-block"><h5>Cari Ay Yapılan Tahsilatlar (Müşteriden Gelen)</h5>';
-        const tahsilatIslemleri = ayOdeme.docs.filter(doc => doc.data().islemTuru === 'odeme');
+        let tahsilatlarHTML = '<div class="report-section-block"><h5>Cari Ay Yapılan Tahsilatlar / Müşteriden Gelen (Cari Alacağı)</h5>';
+        // DÜZELTME 2: Filtre 'tahsilat' olarak değiştirildi.
+        const tahsilatIslemleri = ayOdeme.docs.filter(doc => doc.data().islemTuru === 'tahsilat');
         if (tahsilatIslemleri.length === 0) {
             tahsilatlarHTML += '<p>Bu ay müşteriden tahsilat yapılmamış.</p>';
         } else {
@@ -5165,6 +5166,7 @@ async function handleHesapOzetiRaporuOlustur()
         }
         tahsilatlarHTML += '</div>';
         
+        // DÜZELTME 3: Nihai hesaplama mantığı düzeltildi.
         const cariAyAlacaklar = ayToplamSut + ayToplamTahsilat;        
         const cariAyBorclar = ayToplamYem + ayToplamOdeme;
         const cariAyBakiye = cariAyAlacaklar - cariAyBorclar;
@@ -5173,11 +5175,10 @@ async function handleHesapOzetiRaporuOlustur()
         const guncelBakiyeKayitId = `${sahipId}_${cariId}_${ayYil}`;
         const guncelBakiyeRef = doc(db, 'aylik_bakiyeler', guncelBakiyeKayitId);
         
-        // DÜZELTİLMİŞ KAYDETME BÖLÜMÜ
         await setDoc(guncelBakiyeRef, {
             sahipId: sahipId,
             cariId: cariId,
-            donem: ayYil, // En Önemli Eklenti!
+            donem: ayYil,
             donemSonuBakiye: donemSonuBakiye,
             guncellemeZamani: new Date()
         }, { merge: true });
@@ -5205,7 +5206,7 @@ async function handleHesapOzetiRaporuOlustur()
 
                     <tr><td colspan="2" style="padding:4px;"></td></tr>
 
-                    <tr style="font-weight: bold; border-top: 1px solid #ccc;"><td>CARİ AY BAKİYESİ:</td><td style="text-align: right;">${formatCurrency(cariAyBakiye)}</td></tr>
+                    <tr style="font-weight: bold; border-top: 1px solid #ccc;"><td>CARİ AY BAKİYESİ (Alacak - Borç):</td><td style="text-align: right;">${formatCurrency(cariAyBakiye)}</td></tr>
                     <tr style="font-size: 1.3em; font-weight: bold; border-top: 2px solid #555; background-color: #f8f9fa;">
                         <td>DÖNEM SONU NET BAKİYE:</td>
                         <td style="text-align: right; color:${bakiyeRenk};">${formatCurrency(donemSonuBakiye)} ${sonDurum}</td>
@@ -5225,6 +5226,7 @@ async function handleHesapOzetiRaporuOlustur()
         raporDetayAlani.innerHTML = `<p style="color:red; font-weight:bold;">RAPOR OLUŞTURULAMADI!<br>Hata Detayı: ${error.message}.</p>`;
     }
 }
+
 
 function toggleReportButtons(reportPrefix, show) 
 {
