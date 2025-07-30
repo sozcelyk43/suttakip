@@ -500,71 +500,75 @@
     }
 
     async function saveMilkEntry(quantity, notes) {
-        const unitPrice = parseFloat(String(unitPriceInput.value).replace(',', '.')) || 0;
-        const alimTarihi = collectionDateInput.value;
-        const zamanDilimi = document.querySelector('input[name="time"]:checked').value;
-        const currentProducer = routeProducers[currentProducerIndex];
+    const unitPrice = parseFloat(String(unitPriceInput.value).replace(',', '.')) || 0;
+    const alimTarihi = collectionDateInput.value;
+    const zamanDilimi = document.querySelector('input[name="time"]:checked').value;
+    const currentProducer = routeProducers[currentProducerIndex];
+    // YENİ EKLENDİ: İşlemi yapan kullanıcının e-posta adresini al
+    const userEmail = auth.currentUser ? auth.currentUser.email : 'bilinmiyor';
 
-        if (!currentProducer) {
-            showToast("Hata: İşlem yapılacak geçerli bir üretici bulunamadı.", true);
-            return;
-        }
-        if (isNaN(unitPrice) || !alimTarihi) {
-            showToast('Lütfen Fiyat ve Tarih seçimlerini doğru yapın.', true);
-            return;
-        }
-        saveBtn.disabled = true;
-        skipBtn.disabled = true;
-
-        try {
-            const sutAlimQuery = query(collection(db, 'sut_alimlari'),
-                where('sahipId', '==', sahipId),
-                where('cariId', '==', currentProducer.id),
-                    where('tarih', '==', alimTarihi)
-                );
-            const existingSutAlimSnapshot = await getDocs(sutAlimQuery);
-            const batch = writeBatch(db);
-
-            if (existingSutAlimSnapshot.empty) {
-                const sutAlimRef = doc(collection(db, "sut_alimlari"));
-                let newData = {
-                    tarih: alimTarihi, cariId: currentProducer.id, cariAdi: currentProducer.adiSoyadi,
-                    fiyat: unitPrice, sahipId: sahipId, aciklama: `Hızlı giriş ile eklendi. Not: ${notes || ''}`
-                };
-                newData[zamanDilimi] = quantity;
-                newData.toplam = quantity;
-                newData.toplamTutar = quantity * unitPrice;
-                batch.set(sutAlimRef, newData);
-            } else {
-                const sutAlimDoc = existingSutAlimSnapshot.docs[0];
-                const sutAlimRef = sutAlimDoc.ref; 
-                const existingData = sutAlimDoc.data() || {};
-                const updatePayload = {
-                    fiyat: unitPrice,
-                    aciklama: `Hızlı giriş ile güncellendi. Not: ${notes || ''}`
-                };
-                updatePayload[zamanDilimi] = quantity;
-                const sabahMiktari = (zamanDilimi === 'sabah') ? quantity : (existingData.sabah || 0);
-                const aksamMiktari = (zamanDilimi === 'aksam') ? quantity : (existingData.aksam || 0);
-                updatePayload.toplam = sabahMiktari + aksamMiktari;
-                updatePayload.toplamTutar = updatePayload.toplam * unitPrice;
-                batch.update(sutAlimRef, updatePayload);
-            }
-            
-            await batch.commit();
-            await fetchAndRenderHistory(alimTarihi);
-            await showDailyGrandTotal();
-            showToast(`✅ ${currentProducer.adiSoyadi} için ${quantity} Lt kaydedildi.`);
-            advanceToNextProducer();
-            
-        } catch (error) {
-            console.error("Kayıt Hatası:", error);
-            showToast("Veri kaydedilirken bir hata oluştu: " + error.message, true);
-        } finally {
-            saveBtn.disabled = false;
-            skipBtn.disabled = false;
-        }
+    if (!currentProducer) {
+        showToast("Hata: İşlem yapılacak geçerli bir üretici bulunamadı.", true);
+        return;
     }
+    if (isNaN(unitPrice) || !alimTarihi) {
+        showToast('Lütfen Fiyat ve Tarih seçimlerini doğru yapın.', true);
+        return;
+    }
+    saveBtn.disabled = true;
+    skipBtn.disabled = true;
+
+    try {
+        const sutAlimQuery = query(collection(db, 'sut_alimlari'),
+            where('sahipId', '==', sahipId),
+            where('cariId', '==', currentProducer.id),
+                where('tarih', '==', alimTarihi)
+            );
+        const existingSutAlimSnapshot = await getDocs(sutAlimQuery);
+        const batch = writeBatch(db);
+
+        if (existingSutAlimSnapshot.empty) {
+            const sutAlimRef = doc(collection(db, "sut_alimlari"));
+            let newData = {
+                tarih: alimTarihi, cariId: currentProducer.id, cariAdi: currentProducer.adiSoyadi,
+                fiyat: unitPrice, sahipId: sahipId, aciklama: `Hızlı giriş ile eklendi. Not: ${notes || ''}`,
+                kaydedenEmail: userEmail // YENİ EKLENDİ
+            };
+            newData[zamanDilimi] = quantity;
+            newData.toplam = quantity;
+            newData.toplamTutar = quantity * unitPrice;
+            batch.set(sutAlimRef, newData);
+        } else {
+            const sutAlimDoc = existingSutAlimSnapshot.docs[0];
+            const sutAlimRef = sutAlimDoc.ref; 
+            const existingData = sutAlimDoc.data() || {};
+            const updatePayload = {
+                fiyat: unitPrice,
+                aciklama: `Hızlı giriş ile güncellendi. Not: ${notes || ''}`,
+                guncelleyenEmail: userEmail // YENİ EKLENDİ
+            };
+            updatePayload[zamanDilimi] = quantity;
+            const sabahMiktari = (zamanDilimi === 'sabah') ? quantity : (existingData.sabah || 0);
+            const aksamMiktari = (zamanDilimi === 'aksam') ? quantity : (existingData.aksam || 0);
+            updatePayload.toplam = sabahMiktari + aksamMiktari;
+            updatePayload.toplamTutar = updatePayload.toplam * unitPrice;
+            batch.update(sutAlimRef, updatePayload);
+        }
+        
+        await batch.commit();
+        await fetchAndRenderHistory(alimTarihi);
+        await showDailyGrandTotal();
+        showToast(`✅ ${currentProducer.adiSoyadi} için ${quantity} Lt kaydedildi.`);
+        advanceToNextProducer();
+        
+    } catch (error) {
+        console.error("Kayıt Hatası:", error);
+        showToast("Veri kaydedilirken bir hata oluştu: " + error.message, true);
+    } finally {
+        saveBtn.disabled = false;
+        skipBtn.disabled = false;
+    }
+}
 
     async function fetchAndRenderHistory(date) {
         if (!date) return;
