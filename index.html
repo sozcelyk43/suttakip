@@ -1631,6 +1631,14 @@ sidebarNav.addEventListener('click', async function (event) {
         });
         sutRaporuCariAramaInput.addEventListener('blur', function() { setTimeout(() => { suggestionsBox.style.display = 'none'; }, 200); });
     }
+
+let cariSearchDebounce;
+    document.getElementById('cariSearchInput')?.addEventListener('input', () => {
+        clearTimeout(cariSearchDebounce);
+        cariSearchDebounce = setTimeout(() => {
+            renderCariListesi();
+        }, 400); // Yazmayı bıraktıktan 400ms sonra arama yapar, bu performansı artırır.
+    });
     document.getElementById('logoutButton').addEventListener('click', handleLogout);
     document.getElementById('cariForm').addEventListener('submit', handleCariKaydet);
     document.getElementById('raporOlusturBtn')?.addEventListener('click', handleHesapOzetiRaporuOlustur);
