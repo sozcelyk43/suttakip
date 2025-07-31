@@ -845,7 +845,7 @@
     import { 
     getFirestore, collection, doc, getDoc, getDocs, addDoc, setDoc, updateDoc, deleteDoc, 
     query, where, orderBy, limit, runTransaction, increment, onSnapshot, FieldPath, writeBatch, documentId,
-    initializeFirestore, persistentLocalCache, persistentMultipleTabManager  
+    initializeFirestore, persistentLocalCache, persistentMultipleTabManager
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -2273,86 +2273,116 @@ async function handleCariKaydet(event) {
     if (document.getElementById('grupUretici').checked) secilenGruplar.push('üretici');
     if (document.getElementById('grupTedarikci').checked) secilenGruplar.push('tedarikçi');
     if (document.getElementById('grupSutAlici').checked) secilenGruplar.push('süt alıcı');
+    
     const rotaSirasiInput = document.getElementById('cariRotaSirasi').value;
-    const yeniRotaSirasi = rotaSirasiInput ? parseInt(rotaSirasiInput, 10) : null;
+    // Rota sırası boşsa veya 0 ise null olarak kabul et
+    const yeniRotaSirasi = rotaSirasiInput && parseInt(rotaSirasiInput, 10) > 0 ? parseInt(rotaSirasiInput, 10) : null;
 
     const formData = {
-    kodu: document.getElementById('cariKodu').value,
-    rotaSirasi: yeniRotaSirasi,
-    adiSoyadi: document.getElementById('cariAdiSoyadi').value,
-    kategori: document.getElementById('cariKategori').value,
-    durum: document.getElementById('cariDurum').value,
-    cariTipi: document.getElementById('cariTipi').value,
-    cariGrup: secilenGruplar,
-    telefon: document.getElementById('cariTelefon').value,
-    eposta: document.getElementById('cariEposta').value,
-    adres: document.getElementById('cariAdres').value,
-    bankaAdi: document.getElementById('cariBankaAdi').value,
-    iban: document.getElementById('cariIban').value,
-    vergiDairesi: document.getElementById('cariVergiDairesi').value,
-    vergiNo: document.getElementById('cariVergiNo').value,
-    notlar: document.getElementById('cariNotlar').value,
-    sahipId: sahipId,
-    eMustahsilParams: {
-        borsaTesciliVar: document.getElementById('paramBorsaTescili').checked,
-        sgkKesintisiUygula: document.getElementById('paramSgkKesintisi').checked,
-        stopajOrani: parseFloat(document.getElementById('paramStopajOrani').value) || 0,
-        borsaTescilOrani: parseFloat(document.getElementById('paramBorsaTescilOrani').value) || 0
-    }
-};
+        kodu: document.getElementById('cariKodu').value,
+        rotaSirasi: yeniRotaSirasi,
+        adiSoyadi: document.getElementById('cariAdiSoyadi').value,
+        kategori: document.getElementById('cariKategori').value,
+        durum: document.getElementById('cariDurum').value,
+        cariTipi: document.getElementById('cariTipi').value,
+        cariGrup: secilenGruplar,
+        telefon: document.getElementById('cariTelefon').value,
+        eposta: document.getElementById('cariEposta').value,
+        adres: document.getElementById('cariAdres').value,
+        bankaAdi: document.getElementById('cariBankaAdi').value,
+        iban: document.getElementById('cariIban').value,
+        vergiDairesi: document.getElementById('cariVergiDairesi').value,
+        vergiNo: document.getElementById('cariVergiNo').value,
+        notlar: document.getElementById('cariNotlar').value,
+        sahipId: sahipId,
+        eMustahsilParams: {
+            borsaTesciliVar: document.getElementById('paramBorsaTescili').checked,
+            sgkKesintisiUygula: document.getElementById('paramSgkKesintisi').checked,
+            stopajOrani: parseFloat(document.getElementById('paramStopajOrani').value) || 0,
+            borsaTescilOrani: parseFloat(document.getElementById('paramBorsaTescilOrani').value) || 0
+        }
+    };
 
     try {
-            const batch = writeBatch(db);
-            let eskiRotaSirasi = null;
+        await runTransaction(db, async (transaction) => {
+            // Açılış Bakiyesi Mantığı (değişmedi)
+            const acilisBakiye = parseFloat(document.getElementById('cariAcilisBakiye').value) || 0;
+            const bakiyeTuru = document.getElementById('cariAcilisBakiyeTuru').value;
+            let cariIdForBakiye = editingId;
+
+            // ---- YENİ ROTA SIRALAMA MANTIĞI ----
             if (editingId) {
                 const cariRef = doc(db, 'cariler', editingId);
-                const cariDoc = await getDoc(cariRef);
-                if (cariDoc.exists()) eskiRotaSirasi = cariDoc.data().rotaSirasi;
+                const cariDoc = await transaction.get(cariRef);
+                if (!cariDoc.exists()) throw new Error("Güncellenecek cari bulunamadı.");
+
+                const eskiRotaSirasi = cariDoc.data().rotaSirasi || null;
+
+                // Sadece rota sırası gerçekten değiştiyse sıralamayı kaydır
+                if (yeniRotaSirasi && yeniRotaSirasi !== eskiRotaSirasi) {
+                    
+                    // ÖRNEK: 15. sıradakini 11 yapma (Yukarı Taşıma)
+                    if (yeniRotaSirasi < eskiRotaSirasi) {
+                        const carilerToShiftQuery = query(collection(db, 'cariler'), 
+                            where('sahipId', '==', sahipId), 
+                            where('rotaSirasi', '>=', yeniRotaSirasi), 
+                            where('rotaSirasi', '<', eskiRotaSirasi)
+                        );
+                        const snapshot = await getDocs(carilerToShiftQuery);
+                        snapshot.forEach(docToShift => {
+                            transaction.update(docToShift.ref, { rotaSirasi: increment(1) });
+                        });
+                    }
+                    // ÖRNEK: 11. sıradakini 15 yapma (Aşağı Taşıma)
+                    else { // yeniRotaSirasi > eskiRotaSirasi
+                        const carilerToShiftQuery = query(collection(db, 'cariler'),
+                            where('sahipId', '==', sahipId),
+                            where('rotaSirasi', '>', eskiRotaSirasi),
+                            where('rotaSirasi', '<=', yeniRotaSirasi)
+                        );
+                        const snapshot = await getDocs(carilerToShiftQuery);
+                        snapshot.forEach(docToShift => {
+                            transaction.update(docToShift.ref, { rotaSirasi: increment(-1) });
+                        });
+                    }
+                }
+                // Ana carinin tüm bilgilerini (yeni rota sırası dahil) güncelle
+                transaction.update(cariRef, formData);
+
+            } else { // Yeni cari ekleniyorsa
+                const newCariRef = doc(collection(db, 'cariler'));
+                transaction.set(newCariRef, formData);
+                cariIdForBakiye = newCariRef.id;
             }
-            await batch.commit();
+            // --- ROTA SIRALAMA MANTIĞI SONU ---
 
-            await runTransaction(db, async (transaction) => {
-                let cariIdForBakiye;
-                if (editingId) {
-                    cariIdForBakiye = editingId;
-                    const cariRef = doc(db, 'cariler', editingId);
-                    transaction.update(cariRef, formData);
-                    const acilisBakiyeQuery = query(collection(db, 'odemeVeTahsilatlar'), where('cariId', '==', editingId), where('aciklama', '==', 'Açılış Bakiyesi'));
-                    const acilisBakiyeSnapshot = await getDocs(acilisBakiyeQuery);
-                    acilisBakiyeSnapshot.forEach(docToDelete => transaction.delete(docToDelete.ref));
-                } else {
-                    const newCariRef = doc(collection(db, 'cariler'));
-                    transaction.set(newCariRef, formData);
-                    cariIdForBakiye = newCariRef.id;
-                }
+            // Açılış bakiyesini işle
+            if (acilisBakiye > 0 && bakiyeTuru !== 'yok') {
+                const acilisBakiyeQuery = query(collection(db, 'odemeVeTahsilatlar'), where('cariId', '==', cariIdForBakiye), where('aciklama', '==', 'Açılış Bakiyesi'));
+                const acilisBakiyeSnapshot = await getDocs(acilisBakiyeQuery);
+                acilisBakiyeSnapshot.forEach(docToDelete => transaction.delete(docToDelete.ref));
 
-                const acilisBakiye = parseFloat(document.getElementById('cariAcilisBakiye').value) || 0;
-                const bakiyeTuru = document.getElementById('cariAcilisBakiyeTuru').value;
-                if (acilisBakiye > 0 && bakiyeTuru !== 'yok') {
-                    const bakiyeData = {
-                        aciklama: "Açılış Bakiyesi", cariId: cariIdForBakiye, islemTuru: bakiyeTuru,
-                        sahipId: sahipId, tarih: new Date(1990, 0, 1).toISOString().split('T')[0],
-                        tutar: acilisBakiye, odemeTuru: 'Sistem'
-                    };
-                    const odemeRef = doc(collection(db, 'odemeVeTahsilatlar'));
-                    transaction.set(odemeRef, bakiyeData);
-                }
-                
+                const bakiyeData = {
+                    aciklama: "Açılış Bakiyesi", cariId: cariIdForBakiye, islemTuru: bakiyeTuru,
+                    sahipId: sahipId, tarih: new Date(1990, 0, 1).toISOString().split('T')[0],
+                    tutar: acilisBakiye, odemeTuru: 'Sistem'
+                };
+                const odemeRef = doc(collection(db, 'odemeVeTahsilatlar'));
+                transaction.set(odemeRef, bakiyeData);
                 await invalidateMonthlyBalances(cariIdForBakiye, "1990-01");
-            });
-            
-            resetCariForm();
-            // DÜZELTME: Var olmayan fonksiyon yerine doğru fonksiyon çağrıldı.
-            await loadAllCarilerToCache(); 
-            await renderCariListesi();
-            showToast('Cari başarıyla kaydedildi!');
+            }
+        });
+        
+        resetCariForm();
+        await loadAllCarilerToCache(); 
+        await renderCariListesi();
+        showToast('Cari başarıyla kaydedildi!');
 
-        } catch (error) {
-            console.error("Cari kaydedilirken hata: ", error);
-            showToast("Cari kaydedilirken bir hata oluştu: " + error.message, true);
-        }
+    } catch (error) {
+        console.error("Cari kaydedilirken hata: ", error);
+        showToast("Cari kaydedilirken bir hata oluştu: " + error.message, true);
+    }
 }
-
 
 async function renderCariListesi() {
 
