@@ -105,70 +105,70 @@
         <div class="form-section">
             <h3><span id="cariFormBaslik">Yeni Cari Kart</span></h3>
             <form id="cariForm" action="#">
-    <input type="hidden" id="cariEditId">
-    
-    <div class="form-layout-columns">
-        <div class="form-column">
-            <fieldset>
-                <legend>Temel Cari Bilgileri</legend>
-                <div class="form-grid">
-                    <div class="form-group"><label for="cariKodu">Cari Kodu:</label><input type="text" id="cariKodu" placeholder="Örn: C001"></div>
-                    <div class="form-group"><label for="cariAdiSoyadi">Adı Soyadı / Firma Adı:</label><input type="text" id="cariAdiSoyadi"></div>
-                    <div class="form-group"><label for="cariKategori">Kategori/Köy:</label><select id="cariKategori"><option value="">Seçiniz...</option></select></div>
-                    <div class="form-group"><label for="cariRotaSirasi">Rota Sırası:</label><input type="number" id="cariRotaSirasi" placeholder="Sıralama için sayı"></div>
-                    <div class="form-group"><label for="cariDurum">Durum:</label><select id="cariDurum"><option value="aktif">Aktif</option><option value="pasif">Pasif</option></select></div>
-                    <div class="form-group"><label for="cariTipi">Cari Tipi:</label><select id="cariTipi"><option value="sut_ve_yem">Süt ve Yem</option><option value="sadece_sut">Sadece Süt</option><option value="sadece_yem">Sadece Yem</option></select></div>
-                    <div class="form-group" style="grid-column: span 2;"><label>Cari Grubu:</label><div class="checkbox-group" style="padding-top:10px;"><label for="grupUretici"><input type="checkbox" id="grupUretici" value="üretici"> Üretici</label><label for="grupTedarikci"><input type="checkbox" id="grupTedarikci" value="tedarikçi"> Tedarikçi</label><label for="grupSutAlici"><input type="checkbox" id="grupSutAlici" value="süt alıcı"> Süt Alıcı</label></div></div>
-                </div>
-            </fieldset>
+                <input type="hidden" id="cariEditId">
+                
+                <div class="form-layout-columns">
+                    <div class="form-column">
+                        <fieldset>
+                            <legend>Temel Cari Bilgileri</legend>
+                            <div class="form-grid">
+                                <div class="form-group"><label for="cariKodu">Cari Kodu:</label><input type="text" id="cariKodu" placeholder="Örn: C001"></div>
+                                <div class="form-group"><label for="cariAdiSoyadi">Adı Soyadı / Firma Adı:</label><input type="text" id="cariAdiSoyadi"></div>
+                                <div class="form-group"><label for="cariKategori">Kategori/Köy:</label><select id="cariKategori"><option value="">Seçiniz...</option></select></div>
+                                <div class="form-group"><label for="cariRotaSirasi">Rota Sırası:</label><input type="number" id="cariRotaSirasi" placeholder="Sıralama için sayı"></div>
+                                <div class="form-group"><label for="cariDurum">Durum:</label><select id="cariDurum"><option value="aktif">Aktif</option><option value="pasif">Pasif</option></select></div>
+                                <div class="form-group"><label for="cariTipi">Cari Tipi:</label><select id="cariTipi"><option value="sut_ve_yem">Süt ve Yem</option><option value="sadece_sut">Sadece Süt</option><option value="sadece_yem">Sadece Yem</option></select></div>
+                                <div class="form-group" style="grid-column: span 2;"><label>Cari Grubu:</label><div class="checkbox-group" style="padding-top:10px;"><label for="grupUretici"><input type="checkbox" id="grupUretici" value="üretici"> Üretici</label><label for="grupTedarikci"><input type="checkbox" id="grupTedarikci" value="tedarikçi"> Tedarikçi</label><label for="grupSutAlici"><input type="checkbox" id="grupSutAlici" value="süt alıcı"> Süt Alıcı</label></div></div>
+                            </div>
+                        </fieldset>
 
-            <fieldset>
-                <legend>İletişim Bilgileri</legend>
-                <div class="form-grid">
-                    <div class="form-group"><label for="cariTelefon">Telefon:</label><input type="tel" id="cariTelefon"></div>
-                    <div class="form-group"><label for="cariEposta">E-posta:</label><input type="email" id="cariEposta"></div>
-                    <div class="form-group" style="grid-column: span 2;"><label for="cariAdres">Adres:</label><textarea id="cariAdres" rows="3"></textarea></div>
-                </div>
-            </fieldset>
-        </div>
+                        <fieldset>
+                            <legend>İletişim Bilgileri</legend>
+                            <div class="form-grid">
+                                <div class="form-group"><label for="cariTelefon">Telefon:</label><input type="tel" id="cariTelefon"></div>
+                                <div class="form-group"><label for="cariEposta">E-posta:</label><input type="email" id="cariEposta"></div>
+                                <div class="form-group" style="grid-column: span 2;"><label for="cariAdres">Adres:</label><textarea id="cariAdres" rows="3"></textarea></div>
+                            </div>
+                        </fieldset>
+                    </div>
 
-        <div class="form-column">
-            <fieldset>
-                <legend>Finansal Bilgiler</legend>
-                <div class="form-grid">
-                    <div class="form-group"><label for="cariAcilisBakiye">Açılış Bakiyesi:</label><input type="number" id="cariAcilisBakiye" placeholder="Örn: 500" step="0.01"></div>
-                    <div class="form-group"><label for="cariAcilisBakiyeTuru">Bakiye Türü:</label><select id="cariAcilisBakiyeTuru"><option value="yok">Yok</option><option value="borc">Cari Borçlu</option><option value="alacak">Cari Alacaklı</option></select></div>
-                    <div class="form-group"><label for="cariBankaAdi">Banka Adı:</label><input type="text" id="cariBankaAdi"></div>
-                    <div class="form-group"><label for="cariIban">IBAN:</label><input type="text" id="cariIban"></div>
-                    <div class="form-group"><label for="cariVergiDairesi">Vergi Dairesi:</label><input type="text" id="cariVergiDairesi"></div>
-                    <div class="form-group"><label for="cariVergiNo">Vergi No / T.C.:</label><input type="text" id="cariVergiNo"></div>
-                </div>
-            </fieldset>
+                    <div class="form-column">
+                        <fieldset>
+                            <legend>Finansal Bilgiler</legend>
+                            <div class="form-grid">
+                                <div class="form-group"><label for="cariAcilisBakiye">Açılış Bakiyesi:</label><input type="number" id="cariAcilisBakiye" placeholder="Örn: 500" step="0.01"></div>
+                                <div class="form-group"><label for="cariAcilisBakiyeTuru">Bakiye Türü:</label><select id="cariAcilisBakiyeTuru"><option value="yok">Yok</option><option value="borc">Cari Borçlu</option><option value="alacak">Cari Alacaklı</option></select></div>
+                                <div class="form-group"><label for="cariBankaAdi">Banka Adı:</label><input type="text" id="cariBankaAdi"></div>
+                                <div class="form-group"><label for="cariIban">IBAN:</label><input type="text" id="cariIban"></div>
+                                <div class="form-group"><label for="cariVergiDairesi">Vergi Dairesi:</label><input type="text" id="cariVergiDairesi"></div>
+                                <div class="form-group"><label for="cariVergiNo">Vergi No / T.C.:</label><input type="text" id="cariVergiNo"></div>
+                            </div>
+                        </fieldset>
 
-            <fieldset>
-                <legend>e-Müstahsil Parametreleri</legend>
-                <div class="form-grid">
-                    <div class="form-group"><label for="paramStopajOrani">Stopaj Oranı (%)</label><input type="number" id="paramStopajOrani" value="4" step="0.1" class="form-control"></div>
-                    <div class="form-group"><label for="paramBorsaTescilOrani">Borsa Tescil Oranı (%)</label><input type="number" id="paramBorsaTescilOrani" placeholder="Örn: 0.1" step="0.01" class="form-control"></div>
-                    <div class="form-group" style="grid-column: span 2;"><div class="checkbox-group" style="padding-top: 15px;"><label for="paramBorsaTescili"><input type="checkbox" id="paramBorsaTescili"> Üreticinin Borsa Tescili Var</label><label for="paramSgkKesintisi"><input type="checkbox" id="paramSgkKesintisi" checked> SGK Kesintisi Uygula (%2)</label></div></div>
-                </div>
-            </fieldset>
+                        <fieldset>
+                            <legend>e-Müstahsil Parametreleri</legend>
+                            <div class="form-grid">
+                                <div class="form-group"><label for="paramStopajOrani">Stopaj Oranı (%)</label><input type="number" id="paramStopajOrani" value="4" step="0.1" class="form-control"></div>
+                                <div class="form-group"><label for="paramBorsaTescilOrani">Borsa Tescil Oranı (%)</label><input type="number" id="paramBorsaTescilOrani" placeholder="Örn: 0.1" step="0.01" class="form-control"></div>
+                                <div class="form-group" style="grid-column: span 2;"><div class="checkbox-group" style="padding-top: 15px;"><label for="paramBorsaTescili"><input type="checkbox" id="paramBorsaTescili"> Üreticinin Borsa Tescili Var</label><label for="paramSgkKesintisi"><input type="checkbox" id="paramSgkKesintisi" checked> SGK Kesintisi Uygula (%2)</label></div></div>
+                            </div>
+                        </fieldset>
 
-             <fieldset>
-                <legend>Notlar</legend>
-                <div class="form-group">
-                    <label for="cariNotlar" style="display:none;">Özel Notlar</label>
-                    <textarea id="cariNotlar" rows="3" placeholder="Bu cari ile ilgili özel notlarınızı buraya ekleyebilirsiniz..."></textarea>
+                         <fieldset>
+                            <legend>Notlar</legend>
+                            <div class="form-group">
+                                <label for="cariNotlar" style="display:none;">Özel Notlar</label>
+                                <textarea id="cariNotlar" rows="3" placeholder="Bu cari ile ilgili özel notlarınızı buraya ekleyebilirsiniz..."></textarea>
+                            </div>
+                        </fieldset>
+                    </div>
                 </div>
-            </fieldset>
-        </div>
-    </div>
 
-    <div class="form-buttons-container">
-        <button type="submit" class="btn btn-primary" id="cariKaydetBtn">Kaydet</button>
-        <button type="button" class="btn" id="cariFormTemizleBtn" style="display:none;">Yeni Kayıt Formu</button>
-    </div>
-</form>
+                <div class="form-buttons-container">
+                    <button type="submit" class="btn btn-primary" id="cariKaydetBtn">Kaydet</button>
+                    <button type="button" class="btn" id="cariFormTemizleBtn" style="display:none;">Yeni Kayıt Formu</button>
+                </div>
+            </form>
         </div>
 
         <div id="cari-list-printable-area" class="printable-content format-a4">
@@ -182,14 +182,23 @@
                     </div>
                     <small style="display: block; margin-top: 8px; color: #666; font-size: 12px;">Belirli bir tarih itibarıyla bakiye durumunu görmek için bir tarih seçip 'Raporla' butonuna basın. Boş bırakırsanız güncel durumu gösterir.</small>
                 </div>
+                
                 <div id="cariRotaSirasiUyari" style="display: none;"></div>
+                
                 <h3>Cari Listesi (<span id="raporTarihEtiketi">Güncel Durum</span>)</h3>
+
+                <div class="dont-print" style="margin-bottom: 20px; padding: 10px; background-color: #fffbe6; border: 1px solid #ffe58f; border-radius: 5px; text-align: center;">
+                    <p style="margin-top: 0; margin-bottom: 10px;">Cariler arasında mükerrer rota numarası veya sıralama hatası fark ederseniz bu butonu kullanın.</p>
+                    <button id="resortRoutesBtn" class="btn btn-warning">Tüm Rotaları Yeniden Sırala</button>
+                </div>
+
                 <div class="form-grid dont-print" style="grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; align-items: end; margin-bottom: 20px; border: 1px solid #eee; padding: 15px; border-radius: 8px;">
                     <div class="form-group"><label for="cariSearchInput">Cari Ara:</label><input type="text" id="cariSearchInput" class="form-control" placeholder="Aramak için cari adı veya kodu yazın..." autocomplete="off"></div>
                     <div class="form-group"><label for="cariKategoriFiltre">Kategori:</label><select id="cariKategoriFiltre"><option value="">Tüm Kategoriler</option></select></div>
                     <div class="form-group"><label for="cariGrupFiltre">Grup:</label><select id="cariGrupFiltre"><option value="">Tüm Gruplar</option><option value="üretici">Üretici</option><option value="tedarikçi">Tedarikçi</option><option value="süt alıcı">Süt Alıcı</option></select></div>
                     <div class="form-group"><label for="cariDurumFiltre">Durum:</label><select id="cariDurumFiltre"><option value="">Tüm Durumlar</option><option value="aktif">Aktif</option><option value="pasif">Pasif</option></select></div>
                 </div>
+
                 <table>
                     <thead>
                         <tr>
@@ -214,7 +223,6 @@
         <button type="button" class="btn btn-secondary dont-print" id="cariListesiYazdirBtn" style="margin-top: 20px;">Listeyi Yazdır</button>
     </div>
 </section>
-
         <section id="sut-alimi" class="module-section hidden-section">
     <div class="module-header"><h2>🥛 Günlük Süt Alımı</h2></div>
     <div class="container">
@@ -831,6 +839,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
 <script type="module">
+	import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-functions.js";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut, reauthenticateWithCredential, EmailAuthProvider, updatePassword, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
     import { 
@@ -1094,6 +1103,23 @@ async function uygulamayiBaslat(loggedInSahipId) {
         }
     };
 
+const functions = getFunctions(app, "europe-west1");
+const resequenceCarisGlobally = httpsCallable(functions, 'resequenceCarisGlobally');
+
+document.getElementById('resortRoutesBtn')?.addEventListener('click', async () => {
+    showCustomConfirm("Tüm carilerin rota sıralaması baştan sona yeniden numaralandırılacaktır. Bu işlem, kategori önceliğine (Kınık, Çiftlik, Boğazköy) göre yapılacaktır. Emin misiniz?", async () => {
+        showToast("Sıralama işlemi başlatıldı, lütfen bekleyin...");
+        try {
+            const result = await resequenceCarisGlobally({ sahipId: sahipId });
+            showToast(result.data.message || "İşlem başarılı!");
+            // Listeyi yenileyerek sonucu anında gör
+            await renderCariListesi(); 
+        } catch (error) {
+            console.error("Rota sıralama fonksiyonu çağrılırken hata:", error);
+            showToast("Sıralama sırasında bir hata oluştu: " + error.message, true);
+        }
+    }, "⚠️ Rota Sıralama Onayı");
+});
 
 
     sahipId = loggedInSahipId;
