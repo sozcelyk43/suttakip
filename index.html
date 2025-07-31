@@ -2276,6 +2276,7 @@ async function handleCariKaydet(event) {
                 if (cariDoc.exists()) eskiRotaSirasi = cariDoc.data().rotaSirasi;
             }
             await batch.commit();
+
             await runTransaction(db, async (transaction) => {
                 let cariIdForBakiye;
                 if (editingId) {
@@ -2303,12 +2304,12 @@ async function handleCariKaydet(event) {
                     transaction.set(odemeRef, bakiyeData);
                 }
                 
-               
                 await invalidateMonthlyBalances(cariIdForBakiye, "1990-01");
             });
             
             resetCariForm();
-            await loadAllDataIntoCache(); 
+            // DÜZELTME: Var olmayan fonksiyon yerine doğru fonksiyon çağrıldı.
+            await loadAllCarilerToCache(); 
             await renderCariListesi();
             showToast('Cari başarıyla kaydedildi!');
 
@@ -2317,6 +2318,7 @@ async function handleCariKaydet(event) {
             showToast("Cari kaydedilirken bir hata oluştu: " + error.message, true);
         }
 }
+
 
 async function renderCariListesi() {
 
