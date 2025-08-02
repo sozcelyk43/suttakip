@@ -161,7 +161,7 @@
                     <button id="yemRaporuBtn" class="btn btn-toggle">Yem Raporu</button>
                 </div>
                 <div id="hayvanTakipContainer" style="display: none;">
-    	<table><thead><tr><th>Küpe No</th><th>Irk</th><th>Gebelik Durumu</th><th>Son Tohumlama Tarihi</th><th>Tahmini Doğum Tarihi</th><th>Kalan Gün</th><th>İşlemler</th></tr></thead>
+                    <table><thead><tr><th>Küpe No</th><th>Irk</th><th>Cinsiyet</th><th>Rumuz</th><th>Gebelik Durumu</th><th>Son Tohumlama</th><th>Tahmini Doğum</th><th>Kalan Gün</th><th>İşlemler</th></tr></thead>
         <tbody id="hayvanListesiBody"></tbody>
     </table>
 <div class="load-more-container" style="text-align: center; margin-top: 20px;">
@@ -644,7 +644,7 @@
                     const hayvan = docSnap.data();
                     document.getElementById('edit-hayvan-id').value = docSnap.id;
                     document.getElementById('edit-hayvan-kupe').value = hayvan.kupeNo || '';
-document.getElementById('edit-hayvan-rumuz').value = hayvan.rumuz || '';
+                    document.getElementById('edit-hayvan-rumuz').value = hayvan.rumuz || '';
                     document.getElementById('edit-hayvan-irk').value = hayvan.irk || '';
                     document.getElementById('edit-hayvan-cinsiyet').value = hayvan.cinsiyet || 'Dişi';
                     document.getElementById('edit-hayvan-dogum-tarihi').value = hayvan.dogumTarihi || '';
@@ -656,12 +656,16 @@ document.getElementById('edit-hayvan-rumuz').value = hayvan.rumuz || '';
         }
     }
 
+    // 3. DEĞİŞİKLİK: Hayvan düzenleme fonksiyonu (handleUpdateHayvan) tamamen güncellendi.
     async function handleUpdateHayvan(event) {
         event.preventDefault();
         const hayvanId = document.getElementById('edit-hayvan-id').value;
         const tohumlamaTarihi = document.getElementById('edit-son-tohumlama-tarihi').value;
+        const gebelikDurumu = document.getElementById('edit-hayvan-gebelik-durumu').value;
+
         let tahminiDogumTarihi = null;
-        if (tohumlamaTarihi) {
+        // Sadece durumu 'Gebe' ise ve tarih girilmişse doğum tarihini hesapla
+        if (gebelikDurumu === 'Gebe' && tohumlamaTarihi) {
             const tohumlamaDate = new Date(tohumlamaTarihi);
             const tahminiDogumDate = new Date(tohumlamaDate.setDate(tohumlamaDate.getDate() + 283));
             tahminiDogumTarihi = tahminiDogumDate.toISOString().split('T')[0];
@@ -669,14 +673,15 @@ document.getElementById('edit-hayvan-rumuz').value = hayvan.rumuz || '';
 
         const dataToUpdate = {
             kupeNo: document.getElementById('edit-hayvan-kupe').value,
-rumuz: document.getElementById('edit-hayvan-rumuz').value || null,
+            rumuz: document.getElementById('edit-hayvan-rumuz').value || null,
             irk: document.getElementById('edit-hayvan-irk').value,
             cinsiyet: document.getElementById('edit-hayvan-cinsiyet').value,
             dogumTarihi: document.getElementById('edit-hayvan-dogum-tarihi').value,
-            gebəlikDurumu: document.getElementById('edit-hayvan-gebelik-durumu').value,
-            sonTohumlamaTarihi: tohumlamaTarihi || deleteField(),
-            tahminiDogumTarihi: tahminiDogumTarihi || deleteField(),
-	siralamaOnceligi: gebelikDurumu === 'Gebe' ? 1 : 2
+            gebəlikDurumu: gebelikDurumu,
+            // Durum 'Gebe' değilse veya tarih boşsa bu alanları sil, doluysa güncelle
+            sonTohumlamaTarihi: (gebelikDurumu === 'Gebe' && tohumlamaTarihi) ? tohumlamaTarihi : deleteField(),
+            tahminiDogumTarihi: (gebelikDurumu === 'Gebe' && tahminiDogumTarihi) ? tahminiDogumTarihi : deleteField(),
+            siralamaOnceligi: gebelikDurumu === 'Gebe' ? 1 : 2
         };
 
         try {
@@ -684,9 +689,10 @@ rumuz: document.getElementById('edit-hayvan-rumuz').value || null,
             await updateDoc(docRef, dataToUpdate);
             showPortalMessage("Hayvan bilgileri güncellendi.", "success");
             editModal.style.display = "none";
-            refreshAllData();
+            await refreshAllData(); // Veri listesini yenile
         } catch (error) {
-            showPortalMessage("Güncelleme başarısız.", "error");
+            console.error("Güncelleme hatası:", error);
+            showPortalMessage("Güncelleme başarısız oldu. Hata: " + error.message, "error");
         }
     }
 
@@ -856,8 +862,6 @@ async function fetchHayvanTakipVerileri(isLoadMore = false) {
         const hayvanlarRef = collection(db, 'hayvanlar');
         let q;
 
-        // --- YENİ SIRALAMA MANTIĞI ---
-        // Önce siralamaOnceligi'ne göre, sonra tahminiDogumTarihi'ne göre sırala
         const siralamaKriterleri = [
             orderBy('siralamaOnceligi', 'asc'),
             orderBy('tahminiDogumTarihi', 'asc')
@@ -867,14 +871,14 @@ async function fetchHayvanTakipVerileri(isLoadMore = false) {
             q = query(hayvanlarRef,
                 where('sahipId', '==', userSahipId),
                 where('cariId', '==', userCariId),
-                ...siralamaKriterleri, // Değiştirildi
+                ...siralamaKriterleri,
                 startAfter(lastVisibleDoc),
                 limit(PAGE_SIZE));
         } else {
             q = query(hayvanlarRef,
                 where('sahipId', '==', userSahipId),
                 where('cariId', '==', userCariId),
-                ...siralamaKriterleri, // Değiştirildi
+                ...siralamaKriterleri,
                 limit(PAGE_SIZE));
         }
 
@@ -903,6 +907,7 @@ async function fetchHayvanTakipVerileri(isLoadMore = false) {
                 tahminiDogumTarihiStr = tahminiDogumTarihi.toLocaleDateString('tr-TR');
             }
             
+            // 1. DEĞİŞİKLİK: Tablo satırları (tr) güncellendi, Cinsiyet ve Rumuz eklendi
             rows += `<tr>
                 <td data-label="Küpe No"><strong>${hayvan.kupeNo}</strong></td>
                 <td data-label="Irk">${hayvan.irk || '-'}</td>
