@@ -439,7 +439,7 @@
     toast: true,
     position: 'top-end',
     showConfirmButton: false,
-    timer: 10000, // 3000'den 10000'e değiştirildi (10 saniye)
+    timer: 10000, 
     timerProgressBar: true,
     didOpen: (toast) => {
         toast.addEventListener('mouseenter', Swal.stopTimer);
@@ -599,11 +599,11 @@
 
         await addDoc(hayvanlarRef, yeniHayvanVerisi);
         showPortalMessage("Hayvan başarıyla kaydedildi.", "success");
-        event.target.reset(); // Formu temizle
-        document.getElementById('yeni-hayvan-tohumlama-tarihi-container').style.display = 'none'; // Ek alanı gizle
-        await refreshAllData(); // Verileri yenile
-        showSection(raporlarSection); // Raporlar bölümünü göster
-        document.getElementById('hayvanTakipBtn').click(); // Hayvan Takip Raporu sekmesini aktif et
+        event.target.reset(); 
+        document.getElementById('yeni-hayvan-tohumlama-tarihi-container').style.display = 'none'; 
+        await refreshAllData();
+        showSection(raporlarSection); 
+        document.getElementById('hayvanTakipBtn').click(); 
 
     } catch (error) {
         console.error("Hayvan kaydedilirken hata:", error);
@@ -656,7 +656,6 @@
         }
     }
 
-    // 3. DEĞİŞİKLİK: Hayvan düzenleme fonksiyonu (handleUpdateHayvan) tamamen güncellendi.
     async function handleUpdateHayvan(event) {
         event.preventDefault();
         const hayvanId = document.getElementById('edit-hayvan-id').value;
@@ -664,7 +663,6 @@
         const gebelikDurumu = document.getElementById('edit-hayvan-gebelik-durumu').value;
 
         let tahminiDogumTarihi = null;
-        // Sadece durumu 'Gebe' ise ve tarih girilmişse doğum tarihini hesapla
         if (gebelikDurumu === 'Gebe' && tohumlamaTarihi) {
             const tohumlamaDate = new Date(tohumlamaTarihi);
             const tahminiDogumDate = new Date(tohumlamaDate.setDate(tohumlamaDate.getDate() + 283));
@@ -678,7 +676,6 @@
             cinsiyet: document.getElementById('edit-hayvan-cinsiyet').value,
             dogumTarihi: document.getElementById('edit-hayvan-dogum-tarihi').value,
             gebəlikDurumu: gebelikDurumu,
-            // Durum 'Gebe' değilse veya tarih boşsa bu alanları sil, doluysa güncelle
             sonTohumlamaTarihi: (gebelikDurumu === 'Gebe' && tohumlamaTarihi) ? tohumlamaTarihi : deleteField(),
             tahminiDogumTarihi: (gebelikDurumu === 'Gebe' && tahminiDogumTarihi) ? tahminiDogumTarihi : deleteField(),
             siralamaOnceligi: gebelikDurumu === 'Gebe' ? 1 : 2
@@ -689,7 +686,7 @@
             await updateDoc(docRef, dataToUpdate);
             showPortalMessage("Hayvan bilgileri güncellendi.", "success");
             editModal.style.display = "none";
-            await refreshAllData(); // Veri listesini yenile
+            await refreshAllData(); 
         } catch (error) {
             console.error("Güncelleme hatası:", error);
             showPortalMessage("Güncelleme başarısız oldu. Hata: " + error.message, "error");
@@ -861,10 +858,9 @@ async function fetchHayvanTakipVerileri(isLoadMore = false) {
     try {
         const hayvanlarRef = collection(db, 'hayvanlar');
         let q;
-
-        const siralamaKriterleri = [
-            orderBy('siralamaOnceligi', 'asc'),
-            orderBy('tahminiDogumTarihi', 'asc')
+            const siralamaKriterleri = [
+            orderBy('siralamaOnceligi', 'asc'), 
+            orderBy('kupeNo', 'asc')            
         ];
 
         if (isLoadMore && lastVisibleDoc) {
@@ -907,7 +903,6 @@ async function fetchHayvanTakipVerileri(isLoadMore = false) {
                 tahminiDogumTarihiStr = tahminiDogumTarihi.toLocaleDateString('tr-TR');
             }
             
-            // 1. DEĞİŞİKLİK: Tablo satırları (tr) güncellendi, Cinsiyet ve Rumuz eklendi
             rows += `<tr>
                 <td data-label="Küpe No"><strong>${hayvan.kupeNo}</strong></td>
                 <td data-label="Irk">${hayvan.irk || '-'}</td>
@@ -935,7 +930,7 @@ async function fetchHayvanTakipVerileri(isLoadMore = false) {
 
     } catch (error) {
         console.error("Hayvan verileri yüklenirken hata:", error);
-        listBody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:red;">Veriler yüklenemedi.</td></tr>`;
+        listBody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:red;">Veriler yüklenemedi. Lütfen tekrar deneyin.</td></tr>`;
     }
 }
 
