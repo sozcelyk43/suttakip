@@ -161,7 +161,7 @@
                     <button id="yemRaporuBtn" class="btn btn-toggle">Yem Raporu</button>
                 </div>
                 <div id="hayvanTakipContainer" style="display: none;">
-                    <table><thead><tr><th>Küpe No</th><th>Irk</th><th>Cinsiyet</th><th>Rumuz</th><th>Gebelik Durumu</th><th>Son Tohumlama</th><th>Tahmini Doğum</th><th>Kalan Gün</th><th>İşlemler</th></tr></thead>
+                    <table><thead><tr><th>Küpe No</th><th>Irk</th><th>Cinsiyet</th><th>Rumuz</th><th>Doğum Tarihi</th><th>Gebelik Durumu</th><th>Son Tohumlama</th><th>Tahmini Doğum</th><th>Kalan Gün</th><th>İşlemler</th></tr></thead>
         <tbody id="hayvanListesiBody"></tbody>
     </table>
 <div class="load-more-container" style="text-align: center; margin-top: 20px;">
@@ -218,7 +218,7 @@
             <input type="date" id="yeni-hayvan-dogum-tarihi" class="form-control" required>
         </div>
 
-        <div class="form-group">
+        <div id="yeni-hayvan-gebelik-grup" class="form-group">
             <label for="yeni-hayvan-gebelik-durumu">Gebelik Durumu</label>
             <select id="yeni-hayvan-gebelik-durumu" class="form-control">
                 <option value="Boş" selected>Boş</option>
@@ -337,17 +337,17 @@
                     <label for="edit-hayvan-dogum-tarihi">Doğum Tarihi</label>
                     <input type="date" id="edit-hayvan-dogum-tarihi" class="form-control" required>
                 </div>
-                <div class="form-group">
-                    <label for="edit-hayvan-gebelik-durumu">Gebelik Durumu</label>
-                    <select id="edit-hayvan-gebelik-durumu" class="form-control">
-                        <option value="Boş">Boş</option>
-                        <option value="Gebe">Gebe</option>
-                    </select>
-                </div>
-                 <div class="form-group">
-                    <label for="edit-son-tohumlama-tarihi">Son Tohumlama Tarihi (Gebe ise)</label>
-                    <input type="date" id="edit-son-tohumlama-tarihi" class="form-control">
-                </div>
+                <div id="edit-gebelik-grup" class="form-group">
+    <label for="edit-hayvan-gebelik-durumu">Gebelik Durumu</label>
+    <select id="edit-hayvan-gebelik-durumu" class="form-control">
+        <option value="Boş">Boş</option>
+        <option value="Gebe">Gebe</option>
+    </select>
+</div>
+                 <div id="edit-tohumlama-grup" class="form-group">
+    <label for="edit-son-tohumlama-tarihi">Son Tohumlama Tarihi (Gebe ise)</label>
+    <input type="date" id="edit-son-tohumlama-tarihi" class="form-control">
+</div>
                 <button type="submit" class="btn">Değişiklikleri Kaydet</button>
             </form>
         </div>
@@ -468,7 +468,28 @@
         document.getElementById('yeniHayvanBtn').addEventListener('click', () => showSection(yeniHayvanSection));
         document.getElementById('yeniTohumlamaBtn').addEventListener('click', () => showSection(yeniTohumlamaSection));
         document.getElementById('yeniDogumBtn').addEventListener('click', () => showSection(yeniDogumSection));
-        document.getElementById('yeni-hayvan-gebelik-durumu').addEventListener('change', function() {
+       document.getElementById('yeni-hayvan-cinsiyet').addEventListener('change', function() {
+            const gebelikGrubu = document.getElementById('yeni-hayvan-gebelik-grup');
+            const tohumlamaTarihiContainer = document.getElementById('yeni-hayvan-tohumlama-tarihi-container');
+            const gebelikDurumuSelect = document.getElementById('yeni-hayvan-gebelik-durumu');
+
+            if (this.value === 'Erkek') {
+                gebelikGrubu.style.display = 'none';
+                tohumlamaTarihiContainer.style.display = 'none';
+                gebelikDurumuSelect.value = 'Boş';
+            } else {
+                gebelikGrubu.style.display = 'block';
+                if (gebelikDurumuSelect.value === 'Gebe') {
+                    tohumlamaTarihiContainer.style.display = 'block';
+                } else {
+                    tohumlamaTarihiContainer.style.display = 'none';
+                }
+            }
+        });
+
+
+
+	 document.getElementById('yeni-hayvan-gebelik-durumu').addEventListener('change', function() {
     const tohumlamaTarihiContainer = document.getElementById('yeni-hayvan-tohumlama-tarihi-container');
     if (this.value === 'Gebe') {
         tohumlamaTarihiContainer.style.display = 'block';
@@ -642,6 +663,24 @@
             getDoc(docRef).then(docSnap => {
                 if (docSnap.exists()) {
                     const hayvan = docSnap.data();
+                    
+                    // --- YENİ EKLENEN MANTIK BAŞLANGICI ---
+                    const gebelikGrubu = document.getElementById('edit-gebelik-grup');
+                    const tohumlamaGrubu = document.getElementById('edit-tohumlama-grup');
+
+                    // Cinsiyete göre alanları göster/gizle
+                    if (hayvan.cinsiyet && hayvan.cinsiyet.toLowerCase() === 'erkek') {
+                        // Hayvan ERKEK ise gebelik alanlarını GİZLE
+                        gebelikGrubu.style.display = 'none';
+                        tohumlamaGrubu.style.display = 'none';
+                    } else {
+                        // Hayvan DİŞİ ise gebelik alanlarını GÖSTER
+                        gebelikGrubu.style.display = 'block';
+                        tohumlamaGrubu.style.display = 'block';
+                    }
+                    // --- YENİ EKLENEN MANTIK BİTİŞİ ---
+
+                    // Form alanlarını hayvanın verileriyle doldur
                     document.getElementById('edit-hayvan-id').value = docSnap.id;
                     document.getElementById('edit-hayvan-kupe').value = hayvan.kupeNo || '';
                     document.getElementById('edit-hayvan-rumuz').value = hayvan.rumuz || '';
@@ -650,6 +689,7 @@
                     document.getElementById('edit-hayvan-dogum-tarihi').value = hayvan.dogumTarihi || '';
                     document.getElementById('edit-hayvan-gebelik-durumu').value = hayvan.gebəlikDurumu || 'Boş';
                     document.getElementById('edit-son-tohumlama-tarihi').value = hayvan.sonTohumlamaTarihi || '';
+                    
                     editModal.style.display = 'block';
                 }
             });
@@ -852,15 +892,16 @@ async function fetchHayvanTakipVerileri(isLoadMore = false) {
 
     if (!isLoadMore) {
         lastVisibleDoc = null;
-        listBody.innerHTML = `<tr><td colspan="9" style="text-align:center;">Hayvan verileri yükleniyor...</td></tr>`;
+        listBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">Hayvan verileri yükleniyor...</td></tr>`;
     }
 
     try {
         const hayvanlarRef = collection(db, 'hayvanlar');
         let q;
-            const siralamaKriterleri = [
-            orderBy('siralamaOnceligi', 'asc'), 
-            orderBy('kupeNo', 'asc')            
+
+        const siralamaKriterleri = [
+            orderBy('siralamaOnceligi', 'asc'),
+            orderBy('kupeNo', 'asc')
         ];
 
         if (isLoadMore && lastVisibleDoc) {
@@ -881,7 +922,7 @@ async function fetchHayvanTakipVerileri(isLoadMore = false) {
         const querySnapshot = await getDocs(q);
 
         if (querySnapshot.empty && !isLoadMore) {
-            listBody.innerHTML = `<tr><td colspan="9" style="text-align:center;">Kayıtlı hayvan bulunmuyor.</td></tr>`;
+            listBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">Kayıtlı hayvan bulunmuyor.</td></tr>`;
             loadMoreBtn.style.display = 'none';
             return;
         }
@@ -893,25 +934,47 @@ async function fetchHayvanTakipVerileri(isLoadMore = false) {
         let rows = '';
         querySnapshot.forEach(doc => {
             const hayvan = doc.data();
-            let kalanGun = '-';
-            let tahminiDogumTarihiStr = '-';
-            const sonTohumlamaTarihiStr = hayvan.sonTohumlamaTarihi ? new Date(hayvan.sonTohumlamaTarihi + 'T00:00:00').toLocaleDateString('tr-TR') : '-';
-            
-            if (hayvan.gebəlikDurumu === 'Gebe' && hayvan.tahminiDogumTarihi) {
-                const tahminiDogumTarihi = new Date(hayvan.tahminiDogumTarihi);
-                kalanGun = Math.ceil((tahminiDogumTarihi - new Date()) / (1000 * 60 * 60 * 24));
-                tahminiDogumTarihiStr = tahminiDogumTarihi.toLocaleDateString('tr-TR');
+
+            // --- YENİ MANTIK BAŞLANGICI ---
+
+            // YENİ EKLENEN: Doğum tarihini her zaman gösterilecek şekilde hazırla
+            const dogumTarihiDisplay = hayvan.dogumTarihi ? new Date(hayvan.dogumTarihi + 'T00:00:00').toLocaleDateString('tr-TR') : '-';
+
+            // KOŞULLU HTML OLUŞTURMA: Gebelikle ilgili satırları sadece dişi hayvanlar için oluştur
+            let gebelikAlanlariHtml = ''; // Varsayılan olarak boş
+
+            if (hayvan.cinsiyet && hayvan.cinsiyet.toLowerCase() !== 'erkek') {
+                // Hayvan DİŞİ ise, gebelik alanlarını doldur
+                let gebelikDurumuDisplay = hayvan.gebəlikDurumu || '-';
+                let sonTohumlamaDisplay = hayvan.sonTohumlamaTarihi ? new Date(hayvan.sonTohumlamaTarihi + 'T00:00:00').toLocaleDateString('tr-TR') : '-';
+                let tahminiDogumDisplay = '-';
+                let kalanGunDisplay = '-';
+
+                if (hayvan.gebəlikDurumu === 'Gebe' && hayvan.tahminiDogumTarihi) {
+                    const tahminiDogumTarihi = new Date(hayvan.tahminiDogumTarihi);
+                    kalanGunDisplay = Math.ceil((tahminiDogumTarihi - new Date()) / (1000 * 60 * 60 * 24));
+                    tahminiDogumDisplay = tahminiDogumTarihi.toLocaleDateString('tr-TR');
+                }
+
+                // Gebelik alanlarının HTML'ini oluştur
+                gebelikAlanlariHtml = `
+                    <td data-label="Gebelik Durumu">${gebelikDurumuDisplay}</td>
+                    <td data-label="Son Tohumlama">${sonTohumlamaDisplay}</td>
+                    <td data-label="Tahmini Doğum">${tahminiDogumDisplay}</td>
+                    <td data-label="Kalan Gün">${kalanGunDisplay}</td>
+                `;
             }
-            
+
+            // --- YENİ MANTIK BİTİŞİ ---
+
+            // Ana tablo satırını oluştur
             rows += `<tr>
                 <td data-label="Küpe No"><strong>${hayvan.kupeNo}</strong></td>
                 <td data-label="Irk">${hayvan.irk || '-'}</td>
                 <td data-label="Cinsiyet">${hayvan.cinsiyet || '-'}</td>
                 <td data-label="Rumuz">${hayvan.rumuz || '-'}</td>
-                <td data-label="Gebelik Durumu">${hayvan.gebəlikDurumu || '-'}</td>
-                <td data-label="Son Tohumlama">${sonTohumlamaTarihiStr}</td>
-                <td data-label="Tahmini Doğum">${tahminiDogumTarihiStr}</td>
-                <td data-label="Kalan Gün">${kalanGun}</td>
+                <td data-label="Doğum Tarihi">${dogumTarihiDisplay}</td>
+                ${gebelikAlanlariHtml} 
                 <td data-label="İşlemler">
                     <button class="btn btn-secondary btn-small btn-edit" data-id="${doc.id}">Düzenle</button>
                     <button class="btn btn-danger btn-small btn-delete" data-id="${doc.id}">Sil</button>
@@ -929,10 +992,11 @@ async function fetchHayvanTakipVerileri(isLoadMore = false) {
         }
 
     } catch (error) {
-        console.error("Hayvan verileri yüklenirken hata:", error);
-        listBody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:red;">Veriler yüklenemedi. Lütfen tekrar deneyin.</td></tr>`;
+        console.error("Hayvan verileri yüklenirken detaylı hata:", error);
+        listBody.innerHTML = `<tr><td colspan="10" style="text-align:center; color:red;">Veriler yüklenemedi. Lütfen tekrar deneyin.</td></tr>`;
     }
 }
+
 
 async function checkUpcomingBirths() {
     try {
