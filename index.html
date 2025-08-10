@@ -192,12 +192,21 @@
                     <button id="resortRoutesBtn" class="btn btn-warning">Tüm Rotaları Yeniden Sırala</button>
                 </div>
 
-                <div class="form-grid dont-print" style="grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; align-items: end; margin-bottom: 20px; border: 1px solid #eee; padding: 15px; border-radius: 8px;">
-                    <div class="form-group"><label for="cariSearchInput">Cari Ara:</label><input type="text" id="cariSearchInput" class="form-control" placeholder="Aramak için cari adı veya kodu yazın..." autocomplete="off"></div>
-                    <div class="form-group"><label for="cariKategoriFiltre">Kategori:</label><select id="cariKategoriFiltre"><option value="">Tüm Kategoriler</option></select></div>
-                    <div class="form-group"><label for="cariGrupFiltre">Grup:</label><select id="cariGrupFiltre"><option value="">Tüm Gruplar</option><option value="üretici">Üretici</option><option value="tedarikçi">Tedarikçi</option><option value="süt alıcı">Süt Alıcı</option></select></div>
-                    <div class="form-group"><label for="cariDurumFiltre">Durum:</label><select id="cariDurumFiltre"><option value="">Tüm Durumlar</option><option value="aktif">Aktif</option><option value="pasif">Pasif</option></select></div>
-                </div>
+               <div class="form-grid dont-print" style="grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 10px; align-items: end; margin-bottom: 20px; border: 1px solid #eee; padding: 15px; border-radius: 8px;">
+    <div class="form-group"><label for="cariSearchInput">Cari Ara:</label><input type="text" id="cariSearchInput" class="form-control" placeholder="Aramak için cari adı veya kodu yazın..." autocomplete="off"></div>
+    <div class="form-group"><label for="cariKategoriFiltre">Kategori:</label><select id="cariKategoriFiltre"><option value="">Tüm Kategoriler</option></select></div>
+    <div class="form-group"><label for="cariGrupFiltre">Grup:</label><select id="cariGrupFiltre"><option value="">Tüm Gruplar</option><option value="üretici">Üretici</option><option value="tedarikçi">Tedarikçi</option><option value="süt alıcı">Süt Alıcı</option></select></div>
+    <div class="form-group"><label for="cariDurumFiltre">Durum:</label><select id="cariDurumFiltre"><option value="">Tüm Durumlar</option><option value="aktif">Aktif</option><option value="pasif">Pasif</option></select></div>
+    <div class="form-group">
+        <label for="cariBakiyeFiltre">Bakiye Durumu:</label>
+        <select id="cariBakiyeFiltre" class="form-control">
+            <option value="">Tümü</option>
+            <option value="alacakli">Alacaklı Olanlar</option>
+            <option value="borclu">Borçlu Olanlar</option>
+            <option value="sifir">Bakiyesi Sıfır</option>
+        </select>
+    </div>
+</div>
 
                 <table>
                     <thead>
@@ -1142,6 +1151,7 @@ document.getElementById('resortRoutesBtn')?.addEventListener('click', async () =
     const yemSatisFiltreInput = document.getElementById('yemSatisFiltreCariAramaInput');
     const yemSatisFiltreSuggestions = document.getElementById('yemSatisFiltreCariSuggestions');
     const yemSatisFiltreHiddenId = document.getElementById('yemSatisFiltreCariId');
+document.getElementById('cariBakiyeFiltre')?.addEventListener('change', renderCariListesi);
 
 if (yemSatisFiltreInput) {
     yemSatisFiltreInput.addEventListener('input', function() {
@@ -2385,104 +2395,101 @@ async function handleCariKaydet(event) {
 }
 
 async function renderCariListesi() {
-
-if (fullHistoryPromise) {
+    if (fullHistoryPromise) {
         showToast("Tüm carilerin bakiyeleri hesaplanıyor, lütfen bekleyin...");
         await fullHistoryPromise;
         showToast("Hesaplama tamamlandı.", false, 2000);
     }
 
-
-    const cariListesiBody     = document.getElementById('cariListesiBody');
-    const cariListesiFooter   = document.getElementById('cariListesiFooter');
-    const tarihFiltresiEl     = document.getElementById('cariTarihFiltresi');
-    const searchTermEl        = document.getElementById('cariSearchInput');
-    const kategoriEl          = document.getElementById('cariKategoriFiltre');
-    const durumEl             = document.getElementById('cariDurumFiltre');
-    const grupEl              = document.getElementById('cariGrupFiltre');
+    const cariListesiBody = document.getElementById('cariListesiBody');
+    const cariListesiFooter = document.getElementById('cariListesiFooter');
+    const tarihFiltresiEl = document.getElementById('cariTarihFiltresi');
+    const searchTermEl = document.getElementById('cariSearchInput');
+    const kategoriEl = document.getElementById('cariKategoriFiltre');
+    const durumEl = document.getElementById('cariDurumFiltre');
+    const grupEl = document.getElementById('cariGrupFiltre');
+    const bakiyeFiltreEl = document.getElementById('cariBakiyeFiltre'); // YENİ
     const raporTarihEtiketiEl = document.getElementById('raporTarihEtiketi');
+
     const tarihFiltresi = tarihFiltresiEl ? tarihFiltresiEl.value : '';
-    const searchTerm    = searchTermEl    ? searchTermEl.value.toLowerCase() : '';
-    const kategori      = kategoriEl      ? kategoriEl.value : '';
-    const durum         = durumEl         ? durumEl.value : '';
-    const grup          = grupEl          ? grupEl.value : '';
+    const searchTerm = searchTermEl ? searchTermEl.value.toLowerCase() : '';
+    const kategori = kategoriEl ? kategoriEl.value : '';
+    const durum = durumEl ? durumEl.value : '';
+    const grup = grupEl ? grupEl.value : '';
+    const bakiyeFiltre = bakiyeFiltreEl ? bakiyeFiltreEl.value : ''; // YENİ
 
     if (raporTarihEtiketiEl) {
-        raporTarihEtiketiEl.textContent = tarihFiltresi
-            ? `${formatDate(tarihFiltresi)} Tarihi İtibarıyla`
-            : 'Güncel Durum';
+        raporTarihEtiketiEl.textContent = tarihFiltresi ?
+            `${formatDate(tarihFiltresi)} Tarihi İtibarıyla` :
+            'Güncel Durum';
     }
 
-    if (cariListesiBody) {
-        cariListesiBody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Veriler yükleniyor ve hesaplanıyor...</td></tr>';
-    }
-    if (cariListesiFooter) {
-        cariListesiFooter.innerHTML = '';
-    }
+    if (cariListesiBody) cariListesiBody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Veriler yükleniyor ve hesaplanıyor...</td></tr>';
+    if (cariListesiFooter) cariListesiFooter.innerHTML = '';
 
     try {
-        const cariConstraints = [ where('sahipId', '==', sahipId) ];
-        if (kategori) cariConstraints.push(where('kategori','==',kategori));
-        if (durum)    cariConstraints.push(where('durum','==',durum));
-        if (grup)     cariConstraints.push(where('cariGrup','array-contains',grup));
-        const carilerQuery = query(collection(db, 'cariler'),...cariConstraints,orderBy('rotaSirasi','asc'),limit(200));
+        let cariler = Array.from(window.cariDataMap.entries());
 
-        const hareketConstraints = [ where('sahipId','==',sahipId) ];
-        if (tarihFiltresi) hareketConstraints.push(where('tarih','<=',tarihFiltresi));
-        const sutQuery      = query(collection(db,'sut_alimlari'),       ...hareketConstraints);
-        const yemSatisQuery = query(collection(db,'yem_satislari'),      ...hareketConstraints);
-        const odemeQuery    = query(collection(db,'odemeVeTahsilatlar'), ...hareketConstraints);
-        const yemAlimQuery  = query(collection(db,'yem_alimlari'),       ...hareketConstraints);
+        // Diğer filtrelere göre ön filtreleme
+        cariler = cariler.filter(([id, c]) => {
+            if (kategori && c.kategori !== kategori) return false;
+            if (durum && c.durum !== durum) return false;
+            if (grup && (!c.cariGrup || !c.cariGrup.includes(grup))) return false;
+            if (searchTerm && !c.kodu?.toLowerCase().includes(searchTerm) && !c.adiSoyadi?.toLowerCase().includes(searchTerm)) return false;
+            return true;
+        });
+        
+        const cariIds = cariler.map(([id, data]) => id);
+        if (cariIds.length === 0) {
+            cariListesiBody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Filtreye uygun cari bulunmuyor.</td></tr>';
+            return;
+        }
 
-        const [ carilerSnapshot, sutSnapshot, yemSatisSnapshot, odemeSnapshot, yemAlimSnapshot ] = await Promise.all([
-            getDocs(carilerQuery), getDocs(sutQuery), getDocs(yemSatisQuery), getDocs(odemeQuery), getDocs(yemAlimQuery)
-        ]);
+        // Sadece filtrelenmiş carilerin hareketlerini çek
+        const getTransactionsForCari = async (collectionName, cariId) => {
+            const constraints = [where('sahipId', '==', sahipId), where('cariId', '==', cariId)];
+            if (tarihFiltresi) constraints.push(where('tarih', '<=', tarihFiltresi));
+            const q = query(collection(db, collectionName), ...constraints);
+            return await getDocs(q);
+        };
 
-        const bakiyeMap = new Map();
-        carilerSnapshot.forEach(docSnap => {
-            bakiyeMap.set(docSnap.id, { data: docSnap.data(), borc: 0, alacak: 0 });
+        const bakiyePromises = cariler.map(async ([id, c]) => {
+            let alacak = 0, borc = 0;
+            const [sutSnapshot, yemSatisSnapshot, odemeSnapshot, yemAlimSnapshot] = await Promise.all([
+                getTransactionsForCari('sut_alimlari', id),
+                getTransactionsForCari('yem_satislari', id),
+                getTransactionsForCari('odemeVeTahsilatlar', id),
+                getTransactionsForCari('yem_alimlari', id)
+            ]);
+            sutSnapshot.forEach(d => alacak += d.data().toplamTutar || 0);
+            yemAlimSnapshot.forEach(d => alacak += d.data().toplamTutar || 0);
+            yemSatisSnapshot.forEach(d => borc += d.data().toplamTutar || 0);
+            odemeSnapshot.forEach(d => {
+                const v = d.data();
+                if (v.islemTuru === 'tahsilat' || v.islemTuru === 'alacak') alacak += v.tutar || 0;
+                else if (v.islemTuru === 'odeme' || v.islemTuru === 'borc') borc += v.tutar || 0;
+            });
+            return { id, data: c, alacak, borc };
         });
 
-        sutSnapshot.forEach(d => {
-            const v = d.data();
-            if (bakiyeMap.has(v.cariId)) bakiyeMap.get(v.cariId).alacak += v.toplamTutar || 0;
-        });
-        yemAlimSnapshot.forEach(d => {
-            const v = d.data();
-            if (bakiyeMap.has(v.cariId)) bakiyeMap.get(v.cariId).alacak += v.toplamTutar || 0;
-        });
-        yemSatisSnapshot.forEach(d => {
-            const v = d.data();
-            if (bakiyeMap.has(v.cariId)) bakiyeMap.get(v.cariId).borc += v.toplamTutar || 0;
-        });
-        odemeSnapshot.forEach(d => {
-            const v = d.data();
-            if (bakiyeMap.has(v.cariId)) {
-                const entry = bakiyeMap.get(v.cariId);
-                if (v.islemTuru === 'tahsilat' || v.islemTuru === 'alacak') entry.alacak += v.tutar || 0;
-                else if (v.islemTuru === 'odeme' || v.islemTuru === 'borc') entry.borc += v.tutar || 0;
-            }
-        });
-
-        let cariler = Array.from(bakiyeMap.entries());
-        if (searchTerm) {
-            cariler = cariler.filter(([id,item]) => {
-                const c = item.data;
-                return c.kodu?.toLowerCase().includes(searchTerm)
-                    || c.adiSoyadi?.toLowerCase().includes(searchTerm);
+        let carilerWithBakiye = await Promise.all(bakiyePromises);
+        
+        // --- YENİ BAKİYE FİLTRELEME MANTIĞI ---
+        if (bakiyeFiltre) {
+            carilerWithBakiye = carilerWithBakiye.filter(item => {
+                const bakiye = item.alacak - item.borc;
+                if (bakiyeFiltre === 'alacakli') return bakiye > 0;
+                if (bakiyeFiltre === 'borclu') return bakiye < 0;
+                if (bakiyeFiltre === 'sifir') return bakiye === 0;
+                return true;
             });
         }
-        cariler.sort((a,b) => {
-            const ra = a[1].data.rotaSirasi || 9999;
-            const rb = b[1].data.rotaSirasi || 9999;
-            if (ra !== rb) return ra - rb;
-            return (a[1].data.adiSoyadi||'').localeCompare(b[1].data.adiSoyadi||'', 'tr');
-        });
-
-        if (cariler.length === 0) {
-            if (cariListesiBody) {
-                cariListesiBody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Filtreye uygun cari bulunmuyor.</td></tr>';
-            }
+        // --- FİLTRELEME SONU ---
+        
+        carilerWithBakiye.sort((a, b) => (a.data.rotaSirasi || 9999) - (b.data.rotaSirasi || 9999));
+        
+        if (carilerWithBakiye.length === 0) {
+            cariListesiBody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Filtreye uygun cari bulunmuyor.</td></tr>';
             return;
         }
 
@@ -2490,77 +2497,68 @@ if (fullHistoryPromise) {
         let toplamBorc = 0, toplamAlacak = 0;
         let detayAlacak = 0, detayBorc = 0;
 
-        cariler.forEach(([id,item]) => {
-            const c = item.data;
-            const borc   = item.borc;
-            const alacak = item.alacak;
+        carilerWithBakiye.forEach(item => {
+            const { id, data: c, alacak, borc } = item;
             const bakiye = alacak - borc;
-
-            toplamBorc   += borc;
+            toplamBorc += borc;
             toplamAlacak += alacak;
             if (bakiye >= 0) detayAlacak += bakiye;
             else detayBorc += Math.abs(bakiye);
 
-            const durumStyle  = c.durum === 'aktif' ? 'color:green;' : 'color:red;';
-            const bakiyeStyle = bakiye >= 0      ? 'color:green;' : 'color:red;';
-            const bakiyeText  = `${formatCurrency(bakiye)} ${bakiye>=0? '(A)':'(B)'}`;
+            const durumStyle = c.durum === 'aktif' ? 'color:green;' : 'color:red;';
+            const bakiyeStyle = bakiye >= 0 ? 'color:green;' : 'color:red;';
+            const bakiyeText = `${formatCurrency(bakiye)} ${bakiye >= 0 ? '(A)' : '(B)'}`;
 
             rowsHTML += `
               <tr>
-                <td>${c.kodu       ?? ''}</td>
-                <td>${c.adiSoyadi  ?? ''}</td>
-                <td>${c.kategori   ?? ''}</td>
-                <td>${c.cariGrup? c.cariGrup.join(', '): '—'}</td>
+                <td>${c.kodu ?? ''}</td>
+                <td>${c.adiSoyadi ?? ''}</td>
+                <td>${c.kategori ?? ''}</td>
+                <td>${c.cariGrup ? c.cariGrup.join(', ') : '—'}</td>
                 <td>${c.rotaSirasi ?? ''}</td>
-                <td style="${durumStyle}">${c.durum==='aktif'?'Aktif':'Pasif'}</td>
-                <td>${c.telefon    ?? ''}</td>
+                <td style="${durumStyle}">${c.durum === 'aktif' ? 'Aktif' : 'Pasif'}</td>
+                <td>${c.telefon ?? ''}</td>
                 <td>${formatCurrency(borc)}</td>
                 <td>${formatCurrency(alacak)}</td>
                 <td style="${bakiyeStyle}">${bakiyeText}</td>
                 <td class="dont-print" style="white-space:nowrap;">
-                  <button class="btn btn-edit btn-sm"   onclick="editCari('${id}')">Düzenle</button>
+                  <button class="btn btn-edit btn-sm" onclick="editCari('${id}')">Düzenle</button>
                   <button class="btn btn-delete btn-sm" onclick="deleteCari('${id}')">Sil</button>
                 </td>
               </tr>`;
         });
-
+        
         const netBakiye = toplamAlacak - toplamBorc;
-        const netStyle  = netBakiye >= 0 ? 'color:green;' : 'color:red;';
-
+        const netStyle = netBakiye >= 0 ? 'color:green;' : 'color:red;';
         const footerHTML = `
           <tr style="background:#f8f9fa;font-weight:bold;">
-            <td colspan="7">GENEL TOPLAM</td>
+            <td colspan="7">FİLTRE TOPLAMI</td>
             <td>${formatCurrency(toplamBorc)}</td>
             <td>${formatCurrency(toplamAlacak)}</td>
             <td style="${netStyle}">${formatCurrency(netBakiye)}</td>
             <td class="dont-print"></td>
           </tr>
           <tr style="background:#f8f9fa;">
-            <td colspan="9" style="text-align:right;"><strong>Bakiye (Alacaklı Müşteriler):</strong></td>
+            <td colspan="9" style="text-align:right;"><strong>Alacaklı Bakiye Toplamı:</strong></td>
             <td style="color:green;font-weight:bold;">${formatCurrency(detayAlacak)}</td>
             <td class="dont-print"></td>
           </tr>
           <tr style="background:#f8f9fa;">
-            <td colspan="9" style="text-align:right;"><strong>Bakiye (Borçlu Müşteriler):</strong></td>
+            <td colspan="9" style="text-align:right;"><strong>Borçlu Bakiye Toplamı:</strong></td>
             <td style="color:red;font-weight:bold;">${formatCurrency(detayBorc)}</td>
             <td class="dont-print"></td>
           </tr>`;
 
-
-        if (cariListesiBody)   cariListesiBody.innerHTML   = rowsHTML;
+        if (cariListesiBody) cariListesiBody.innerHTML = rowsHTML;
         if (cariListesiFooter) cariListesiFooter.innerHTML = footerHTML;
 
     } catch (error) {
         console.error("Cariler listelenirken hata:", error);
         if (cariListesiBody) {
-            cariListesiBody.innerHTML =
-              `<tr><td colspan="11" style="color:red; text-align:center;">
-                 Liste yüklenirken hata oluştu: ${error.message}
-               </td></tr>`;
+            cariListesiBody.innerHTML = `<tr><td colspan="11" style="color:red; text-align:center;">Liste yüklenirken hata oluştu: ${error.message}</td></tr>`;
         }
     }
 }
-
 async function updateSayimForm() {
         const yemId = document.getElementById('sayimYemSecimi').value;
         const mevcutStokInput = document.getElementById('sayimMevcutStok');
